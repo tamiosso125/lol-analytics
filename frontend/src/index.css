@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Paleta validada (skill dataviz — references/palette.md):
+   séries categóricas em ordem fixa, superfícies e tintas por modo. */
+:root {
+  --background: #f9f9f7;
+  --card: #fcfcfb;
+  --foreground: #0b0b0b;
+  --secondary-ink: #52514e;
+  --muted-ink: #898781;
+  --border: rgba(11, 11, 11, 0.1);
+  --grid: #e1e0d9;
+  --baseline: #c3c2b7;
+
+  --chart-1: #2a78d6; /* azul — série 1 / sequencial */
+  --chart-2: #1baf7a; /* aqua — série 2 */
+  --chart-3: #6f56c5; /* roxo — série 3 */
+  --chart-4: #c77118; /* laranja — série 4 */
+  --chart-red: #e34948; /* vermelho — série 6 / polo negativo */
+  --accent: #2a78d6;
+
+  /* acentos "hextech" (dourado LoL) — só para chrome/títulos, nunca em séries de dados */
+  --gold: #8a6d3b;
+  --gold-bright: #6b5429;
+}
+
+.dark {
+  --background: #0d0d0d;
+  --card: #1a1a19;
+  --foreground: #ffffff;
+  --secondary-ink: #c3c2b7;
+  --muted-ink: #898781;
+  --border: rgba(255, 255, 255, 0.1);
+  --grid: #2c2c2a;
+  --baseline: #383835;
+
+  --chart-1: #3987e5;
+  --chart-2: #199e70;
+  --chart-3: #8b72e0;
+  --chart-4: #e0912f;
+  --chart-red: #e66767;
+  --accent: #3987e5;
+
+  --gold: #c8aa6e;
+  --gold-bright: #f0e6d2;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-secondary-ink: var(--secondary-ink);
+  --color-muted-ink: var(--muted-ink);
+  --color-border: var(--border);
+  --color-grid: var(--grid);
+  --color-baseline: var(--baseline);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-red: var(--chart-red);
+  --color-accent: var(--accent);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  @apply bg-background text-foreground font-sans antialiased;
+}
+
+/* título estilo hextech (LoL): serifado, caixa alta, espaçado */
+.hextech-title {
+  font-family: Georgia, "Palatino Linotype", "Times New Roman", serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
