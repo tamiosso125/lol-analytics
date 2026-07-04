@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { ChampionDetail } from "@/pages/ChampionDetail";
 import { Champions } from "@/pages/Champions";
+import { Competitivo } from "@/pages/Competitivo";
 import { Dashboard } from "@/pages/Dashboard";
 import { Explain } from "@/pages/Explain";
 import { Home } from "@/pages/Home";
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="campeoes/:name" element={<ChampionDetail />} />
         <Route path="partidas" element={<Matches />} />
         <Route path="partidas/:id" element={<MatchDetail />} />
+        <Route path="competitivo" element={<Competitivo />} />
         <Route path="consulta" element={<Nlq />} />
         <Route path="predicao" element={<Predict />} />
         <Route path="montar" element={<TeamBuilder />} />

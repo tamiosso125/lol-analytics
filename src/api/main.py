@@ -29,7 +29,7 @@ FEATURES_CSV = "data/features.csv"
 ITEMS_PATH = "data/items.json"
 POSITIONS = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"]
 
-app = FastAPI(title="Hextech Lab", version="0.3.0")
+app = FastAPI(title="Bellestraiko", version="0.3.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -593,8 +593,10 @@ def match_analysis(match_id: str):
                 {
                     "minute": minute,
                     "blue_win_probability": round(float(model.predict_proba(X)[0, 1]), 4),
-                    "gold_diff": feats["gold_diff"],
                     "model_cutoff": cutoff,
+                    # estado completo do minuto — semente do modo "e se" no
+                    # front (editar o estado real e ver o delta via /predict)
+                    **{f: feats[f] for f in FEATURES},
                 }
             )
 
@@ -947,6 +949,123 @@ def compose(comp: Composition):
         },
         "state_analysis": state_analysis,
     }
+
+
+# ---------------- competitivo (pro play, Oracle's Elixir) ----------------
+
+@app.get("/stats/pro/overview")
+def pro_overview():
+    """Visão geral do dataset competitivo: jogos, ligas, viés de lado e
+    duração — os números que ancoram a comparação solo queue × pro."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT COUNT(DISTINCT game_id) FROM pro_games")
+        games = cur.fetchone()[0]
+        if games == 0:
+            raise HTTPException(
+                status_code=503,
+                detail="Sem dados competitivos — rode: python -m src.etl.load_pro (ver docs/scripts.md).",
+            )
+        cur.execute("SELECT AVG(win::int) FROM pro_games WHERE side = 'Blue'")
+        blue_wr = cur.fetchone()[0]
+        cur.execute("SELECT AVG(game_length_s) / 60.0 FROM pro_games")
+        avg_min = cur.fetchone()[0]
+        cur.execute(
+            """SELECT league, COUNT(DISTINCT game_id) AS games,
+                      AVG(CASE WHEN side = 'Blue' THEN win::int END) AS blue_wr
+               FROM pro_games GROUP BY league
+               ORDER BY games DESC LIMIT 12"""
+        )
+        leagues = [
+            {"league": r[0], "games": r[1], "blue_win_rate": round(float(r[2]), 4)}
+            for r in cur.fetchall()
+        ]
+    return {
+        "games": games,
+        "blue_win_rate": round(float(blue_wr), 4),
+        "avg_game_min": round(float(avg_min), 1),
+        "leagues": leagues,
+    }
+
+
+@app.get("/stats/pro/gold15")
+def pro_gold15():
+    """Win rate do lado azul por faixa de diferença de ouro aos 15 min no
+    COMPETITIVO — mesmas faixas do /stats/gold15 (solo queue) para
+    comparação direta. Usa as linhas do lado azul (diff na perspectiva
+    do azul, como nas features de solo queue)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """SELECT width_bucket(LEAST(GREATEST(gold_diff_at15, -7999), 7999),
+                                   -8000, 8000, 8) AS bucket,
+                      AVG(win::int) AS wr, COUNT(*) AS n
+               FROM pro_games
+               WHERE side = 'Blue' AND gold_diff_at15 IS NOT NULL
+               GROUP BY bucket ORDER BY bucket"""
+        )
+        rows = {r[0]: (float(r[1]), r[2]) for r in cur.fetchall()}
+    out = []
+    for b in range(1, 9):
+        left = -8000 + (b - 1) * 2000
+        mid = left + 1000
+        wr, n = rows.get(b, (None, 0))
+        out.append(
+            {
+                "gold_diff_mid": mid,
+                "label": f"{left // 1000:+d}k a {(left + 2000) // 1000:+d}k",
+                "blue_win_rate": round(wr, 4) if wr is not None else None,
+                "matches": n,
+            }
+        )
+    return out
+
+
+@app.get("/stats/pro/champions")
+def pro_champions(limit: int = 15):
+    """Campeões mais presentes no competitivo, com o win rate deles no
+    NOSSO solo queue ao lado (quando os nomes casam — o Oracle's Elixir
+    usa nome de exibição, a Riot API usa nome interno; normalizamos
+    removendo não-letras + mapeando os casos especiais)."""
+    limit = max(1, min(limit, 50))
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """WITH pro AS (
+                   SELECT champion, COUNT(*) AS games, AVG(win::int) AS wr,
+                          lower(regexp_replace(
+                              CASE champion
+                                  WHEN 'Wukong' THEN 'MonkeyKing'
+                                  WHEN 'Renata Glasc' THEN 'Renata'
+                                  WHEN 'Nunu & Willump' THEN 'Nunu'
+                                  ELSE champion
+                              END, '[^a-zA-Z]', '', 'g')) AS norm
+                   FROM pro_players GROUP BY champion
+               ),
+               solo AS (
+                   SELECT lower(champion_name) AS norm, MIN(champion_id) AS champion_id,
+                          COUNT(*) AS games, AVG(win::int) AS wr
+                   FROM participants GROUP BY lower(champion_name)
+               ),
+               total AS (SELECT COUNT(DISTINCT game_id)::float AS n FROM pro_games)
+               SELECT p.champion, p.games, p.wr,
+                      p.games / t.n AS presence,
+                      s.champion_id, s.games, s.wr
+               FROM pro p CROSS JOIN total t
+               LEFT JOIN solo s ON s.norm = p.norm
+               ORDER BY p.games DESC LIMIT %s""",
+            (limit,),
+        )
+        rows = cur.fetchall()
+    return [
+        {
+            "champion": r[0],
+            "pro_games": r[1],
+            "pro_win_rate": round(float(r[2]), 4),
+            "presence": round(float(r[3]), 4),
+            "champion_id": r[4],
+            "solo_games": r[5],
+            "solo_win_rate": round(float(r[6]), 4) if r[6] is not None else None,
+        }
+        for r in rows
+    ]
 
 
 # ---------------- linguagem natural ----------------

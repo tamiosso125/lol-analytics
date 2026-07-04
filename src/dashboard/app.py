@@ -15,8 +15,8 @@ import streamlit as st
 
 from src.db import get_conn
 
-st.set_page_config(page_title="Hextech Lab", layout="wide")
-st.title("Hextech Lab — Análise de Dados Competitivos")
+st.set_page_config(page_title="Bellestraiko", layout="wide")
+st.title("Bellestraiko — Análise de Dados Competitivos")
 
 
 @st.cache_data(ttl=300)

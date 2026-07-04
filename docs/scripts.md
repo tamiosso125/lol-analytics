@@ -90,6 +90,26 @@ rodado várias vezes para ampliar a coleta.
 via ON CONFLICT DO NOTHING). Durante a coleta normal, `load_one` já é
 chamado automaticamente por `collect_matches.py`.
 
+### `src/collect/collect_pro.py`
+Baixa os CSVs anuais de partidas COMPETITIVAS (pro play) do Oracle's
+Elixir (fonte padrão em trabalhos acadêmicos de LoL; 12 linhas por jogo
+— 10 jogadores + 2 times — com gold/xp/cs diff aos 15 min). Os arquivos
+ficam num Google Drive público com QUOTA diária: quando estourada, o
+script avisa e o fallback é baixar manualmente em
+oracleselixir.com/tools/downloads para `data/pro/`.
+
+**Uso:** `python -m src.collect.collect_pro --year 2026`
+**Escreve:** `data/pro/{ano}_LoL_esports_match_data_from_OraclesElixir.csv`
+
+### `src/etl/load_pro.py`
+Carrega os CSVs de `data/pro/` nas tabelas `pro_games` (linhas de time)
+e `pro_players` (linhas de jogador). Idempotente por ano (DELETE do ano
+antes de inserir). Linhas sem game_id são descartadas; ligas que não
+reportam os cortes de 15 min ficam com essas colunas NULL.
+
+**Uso:** `python -m src.etl.load_pro [--year 2026]`
+**Lê:** `data/pro/*.csv`. **Escreve:** `pro_games`, `pro_players`.
+
 ### `src/etl/load_items.py`
 Extrai as compras/vendas de itens dos eventos ITEM_* das timelines para
 a tabela `item_events` (~2,4M linhas em 10k partidas). Os `ITEM_UNDO`
@@ -282,7 +302,10 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
 - `GET /matches/{id}/analysis` — análise completa de uma partida: curva
   de probabilidade de vitória minuto a minuto (roda o modelo da fase
   correspondente sobre o estado real de cada minuto da timeline), curva
-  de ouro, stats por jogador e objetivos;
+  de ouro, stats por jogador e objetivos. Cada ponto da curva carrega o
+  ESTADO completo do minuto (os 5 diffs) — semente do modo "e se" no
+  front (card em `/partidas/:id` que edita o estado real e mostra o
+  delta de probabilidade via `/predict`);
 - `GET /stats/highlights` — destaques para a página inicial (melhor
   jogador, melhor campeão, matchup mais desequilibrado, mais banido,
   viés de lado), com os números que fundamentam cada insight;
@@ -305,7 +328,14 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   (`logit(combinado) = logit(ML) + logit(composição)` — o termo ML já
   carrega a taxa-base/viés de lado; a composição entra como evidência
   extra centrada em 50%);
-- `POST /ask` — pergunta em linguagem natural via `nl_to_sql.ask`;
+- `GET /stats/pro/overview`, `/stats/pro/gold15`, `/stats/pro/champions`
+  — dataset competitivo (pro_games/pro_players, Oracle's Elixir) para a
+  página `/competitivo`: visão geral + ligas, win rate azul por faixa de
+  ouro aos 15 min (mesmas faixas do /stats/gold15 para comparação
+  direta) e campeões do meta pro com o win rate de solo queue ao lado
+  (match de nomes normalizado; Wukong/Renata/Nunu têm CASE especial);
+- `POST /ask` — pergunta em linguagem natural via `nl_to_sql.ask`
+  (OBS: as tabelas pro_* ainda NÃO estão no schema_context do NLQ);
 - `POST /predict` — probabilidade de vitória do time azul a partir do
   estado da partida + contribuições SHAP; aceita `minute` (10|15|20|25)
   para escolher o modelo da fase (exige `data/models_phases.joblib`, ver

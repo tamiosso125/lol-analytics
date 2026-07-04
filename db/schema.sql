@@ -89,6 +89,53 @@ CREATE INDEX IF NOT EXISTS idx_item_events_match     ON item_events(match_id);
 CREATE INDEX IF NOT EXISTS idx_item_events_item      ON item_events(item_id);
 CREATE INDEX IF NOT EXISTS idx_item_events_puuid     ON item_events(puuid);
 
+-- Partidas COMPETITIVAS (pro play) do Oracle's Elixir — fonte separada
+-- do pipeline de solo queue (Riot API). Duas tabelas espelhando o CSV:
+-- linhas de TIME (pro_games, 2 por jogo) e de JOGADOR (pro_players,
+-- 10 por jogo). Ver src/collect/collect_pro.py + src/etl/load_pro.py.
+CREATE TABLE IF NOT EXISTS pro_games (
+    game_id        VARCHAR(64),
+    league         VARCHAR(32),
+    year           INT,
+    split          VARCHAR(24),
+    playoffs       BOOLEAN,
+    game_date      TIMESTAMPTZ,
+    patch          VARCHAR(8),
+    side           VARCHAR(8),        -- Blue | Red
+    team_name      VARCHAR(80),
+    win            BOOLEAN,
+    game_length_s  INT,
+    kills          INT,
+    deaths         INT,
+    dragons        INT,
+    barons         INT,
+    heralds        INT,
+    towers         INT,
+    inhibitors     INT,
+    gold_diff_at15 INT,
+    xp_diff_at15   INT,
+    cs_diff_at15   INT,
+    PRIMARY KEY (game_id, side)
+);
+
+CREATE TABLE IF NOT EXISTS pro_players (
+    game_id     VARCHAR(64),
+    side        VARCHAR(8),
+    position    VARCHAR(12),          -- top/jng/mid/bot/sup (padrão OE)
+    player_name VARCHAR(80),
+    team_name   VARCHAR(80),
+    champion    VARCHAR(32),
+    kills       INT,
+    deaths      INT,
+    assists     INT,
+    win         BOOLEAN,
+    PRIMARY KEY (game_id, side, position)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pro_games_league   ON pro_games(league);
+CREATE INDEX IF NOT EXISTS idx_pro_players_champ  ON pro_players(champion);
+CREATE INDEX IF NOT EXISTS idx_pro_players_player ON pro_players(player_name);
+
 CREATE INDEX IF NOT EXISTS idx_bans_champion         ON bans(champion_id);
 CREATE INDEX IF NOT EXISTS idx_participants_champion ON participants(champion_id);
 CREATE INDEX IF NOT EXISTS idx_participants_puuid    ON participants(puuid);

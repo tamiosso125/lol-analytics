@@ -221,7 +221,7 @@ export function Home() {
         <div className="relative px-8 py-10">
           <p className="hextech-title text-xs text-gold">Plataforma de análise — TCC</p>
           <h1 className="hextech-title mt-2 text-4xl font-semibold text-gold-bright">
-            Hextech Lab
+            Bellestraiko
           </h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-secondary-ink">
             {h.total_matches.toLocaleString("pt-BR")} partidas ranqueadas de Challenger e

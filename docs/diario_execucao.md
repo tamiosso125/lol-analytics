@@ -1312,11 +1312,155 @@ links; resumo dos achados e o plano em camadas:
 (retomável; requer chave Riot renovada — expira a cada 24h). Após a
 coleta: rerodar `load_items`, `build_features` e `export_model`.
 
+## 2026-07-03 — "E se" entregue, renome 2 (Bellestraiko) e pipeline competitivo
+
+Três pedidos do usuário:
+
+**1. Renome de novo: "Hextech Lab" → "Bellestraiko".** O usuário
+encontrou um canal do YouTube já chamado Hextech Lab
+(youtube.com/@HextechLab) e escolheu "Bellestraiko". Trocado nos mesmos
+lugares do renome anterior (sidebar, hero, `<title>`, FastAPI,
+Streamlit, README, handoff). Verificado via Playwright (título da aba =
+"Bellestraiko").
+
+**2. Modo "e se" na análise da partida (Camada 1 do contrafactual —
+entregue).**
+- Backend: os pontos da curva de probabilidade
+  (`GET /matches/{id}/analysis`) agora carregam o ESTADO completo de
+  cada minuto (os 5 diffs — já eram computados no loop, só não iam na
+  resposta). Compatível com o front antigo (gold_diff continua no
+  mesmo lugar).
+- Front: card "E se, aos X minutos…" no `/partidas/:id`, sincronizado
+  com o slider do mapa de calor. Sliders semeados com o estado REAL do
+  minuto (valores editados ficam dourados, com o real ao lado), chamada
+  debounced ao `/predict` com o modelo da fase certa, e display
+  Real × E se com o delta em pontos percentuais. Ranges por fase
+  (compartilhados de `matchState.ts`), esticados quando o valor real
+  da partida passa do percentil 99. Botão "voltar ao estado real".
+- Honestidade metodológica no próprio card: isto responde "e se o
+  ESTADO fosse outro", não "e se o jogador tivesse feito a jogada Y" —
+  ações específicas exigiriam dados de replay que a API da Riot não
+  fornece (ver pesquisa da entrada anterior). A distinção importa para
+  a banca: intervenção sobre estado agregado, não inferência causal
+  sobre decisões.
+- Verificação: Playwright — semente aos 14 min bate com a curva
+  (65,7%); ouro editado para +5000 → 92,1% (+26,4pp); mudar o slider
+  de minuto re-semeia o card; zero erros de console.
+
+**3. Coleta competitiva (pro play) — pipeline pronto, download
+bloqueado por quota.** Fonte escolhida: os CSVs anuais públicos do
+Oracle's Elixir (padrão em trabalhos acadêmicos; LCK/LPL/LEC/LTA/CBLOL
+etc., com gold/xp/cs diff aos 15 min — conversa direto com as nossas
+features de solo queue).
+- `src/collect/collect_pro.py`: baixa o CSV do ano da pasta pública do
+  Google Drive do OE (ids dos arquivos 2023-2026 extraídos da listagem
+  da pasta). O Drive tem quota diária de download por arquivo — hoje
+  estava estourada ("Quota exceeded"), então o script detecta isso e
+  instrui o fallback manual (baixar em oracleselixir.com/tools/downloads
+  para `data/pro/`). Re-rodar mais tarde resolve.
+- Tabelas novas `pro_games` (2 linhas/jogo — time) e `pro_players`
+  (10 linhas/jogo) no schema; `src/etl/load_pro.py` carrega qualquer
+  CSV em `data/pro/` (idempotente por ano). Pipeline testado até onde a
+  quota permite; a carga real fica para quando o download passar.
+- Integração com a UI/NLQ fica para depois de ter os dados de verdade
+  — decisão consciente de não construir telas sobre tabela vazia.
+
+**Adendo — "não dá pra pegar o competitivo direto da API da Riot?"**
+(pergunta do usuário): não pela API que já usamos. As partidas
+profissionais são jogadas em *tournament realms* — servidores isolados
+que o match-v5 público não enxerga (nossa chave só vê os shards ao vivo,
+tipo BR1). O que existe: (a) a **API do lolesports.com**
+(esports-api.lolesports.com, chave pública conhecida — testada hoje,
+responde) com calendário/resultados e um feed de livestats com frames a
+cada ~10s dos jogos transmitidos — não documentada, sem garantia, e
+exige raspar jogo a jogo; (b) **GRID/Bayes**, os parceiros oficiais de
+dados da Riot para esports — acesso mediante aplicação/contrato;
+(c) **Leaguepedia** (API Cargo) para picks/bans/resultados. O Oracle's
+Elixir agrega tudo isso em CSVs limpos — é exatamente por isso que é o
+padrão acadêmico e a nossa escolha. A API do lolesports fica anotada
+como complemento futuro para a meta de tempo real (jogos ao vivo têm
+feed de livestats).
+
+## 2026-07-04 — Dados competitivos carregados (+ achado: o viés de lado INVERTE)
+
+O usuário baixou manualmente o CSV 2026 do Oracle's Elixir (a quota do
+Drive seguia bloqueada) e salvou em `data/pro/`. Carga via
+`python -m src.etl.load_pro --year 2026`:
+
+- **6.026 jogos profissionais** (72.312 linhas do CSV → 12.052 de time
+  + 60.260 de jogador), cobrindo LPL (453), LCK (349), LCKC, LJL, EM,
+  AL, LEC (246), LAS, LCP, LIT e mais. 92% das linhas de time têm os
+  cortes de 15 min (gold/xp/cs diff) — compatível com nossas features
+  de solo queue.
+- Sanidade: campeões mais jogados no pro (Xin Zhao 1.663, Ezreal 1.593,
+  Ryze 1.590) são plausíveis para o meta competitivo do ano, com win
+  rates ~50% como esperado em picks de alta frequência.
+
+**Achado imediato (primeira consulta na tabela): o viés de lado
+INVERTE entre solo queue e competitivo.** No nosso dataset BR
+Challenger/GM, o azul vence 43,7% (vermelho dominante, 56,3%); no
+competitivo 2026 mundial, o AZUL vence 53,1%. Isso fecha o quebra-cabeça
+da entrada de 2026-07-03 sobre o viés de lado: a literatura geral
+("azul ~50,6-53%") descreve bem o PRO PLAY — quem destoa é o nosso
+recorte de solo queue de elo altíssimo. A hipótese registrada
+(counter-pick garantido do vermelho pesa mais no solo queue, onde não
+há draft coordenado de 5 pessoas; no competitivo, o azul tem prioridade
+de primeiro pick, que os times valorizam a ponto de escolher o lado em
+playoffs) agora tem dado dos dois lados para sustentar a comparação.
+**Material forte para o TCC**: mesma métrica, dois contextos, sinais
+opostos — e a plataforma tem os dois datasets para mostrar isso.
+
+## 2026-07-04 — Página "Competitivo" (solo queue × pro)
+
+Decisão do usuário: página própria (não seção do Dashboard). Entregue
+em `/competitivo` (nav com ícone de troféu), com 3 endpoints novos:
+
+- `GET /stats/pro/overview` — jogos, viés de lado, duração média e
+  jogos+win rate azul por liga (503 com instrução se `pro_games` estiver
+  vazia);
+- `GET /stats/pro/gold15` — win rate azul por faixa de ouro aos 15 min
+  no competitivo, MESMAS faixas do `/stats/gold15` de solo queue
+  (comparação direta); usa as linhas do lado azul (diff na perspectiva
+  do azul, como nas nossas features);
+- `GET /stats/pro/champions` — campeões mais presentes no pro com o win
+  rate deles no NOSSO solo queue ao lado. O match de nomes normaliza
+  (OE usa nome de exibição, a Riot API nome interno): remove não-letras
+  + CASE para os casos especiais (Wukong→MonkeyKing, Renata Glasc→
+  Renata, Nunu & Willump→Nunu). Campeão sem match mostra "—".
+
+A página conta a história em 4 blocos: KPIs (6.026 jogos, 31,6 min de
+duração média vs 27,3 do solo queue), o card do **viés de lado
+invertido** (barras espelhadas dos dois contextos + leitura com a
+hipótese), o gráfico **ouro aos 15 × vitória nos dois contextos**
+(faixas idênticas, duas séries) e a dupla **jogos por liga** + **meta
+profissional × solo queue**.
+
+**Segundo achado quantitativo da comparação: o pro converte vantagem
+melhor.** Com +2k a +4k de ouro aos 15, o azul vence 84,0% no
+competitivo (877 jogos — conferido contra SQL direto, bate exato)
+contra ~68% no solo queue; com +4k a +6k, ~95% vs ~81%. É o argumento
+quantitativo para "macro ganha jogo": a MESMA vantagem material vale
+mais nas mãos de um time coordenado. Junto com o viés de lado
+invertido, a página já entrega duas comparações com valor de tese.
+
+Notas de verificação: o match de nomes funcionou nos casos difíceis
+visíveis (Wukong e K'Sante com WR de solo queue ao lado); a coleta
+adicional do usuário estava RODANDO durante a verificação (solo queue
+passou de 10,4k para 11,8k partidas ao longo da sessão), então os
+números da página mudam conforme a coleta avança — esperado, não é
+bug. Playwright nos dois temas, zero erros de console; o gráfico de
+comparação exigiu o cuidado já documentado (sem fullPage, esperar
+`.recharts-bar-rectangle path` — a animação do Recharts em screenshots
+fullPage é a mesma pegadinha registrada em 2026-07-02).
+
 ## Próximos registros pendentes
 
-- **Modo "e se" na análise da partida** (Camada 1 do contrafactual):
-  escolher um minuto na curva, editar o estado, ver o delta de
-  probabilidade — não exige dado novo nem modelo novo.
+- NLQ ainda não conhece as tabelas pro_games/pro_players — adicionar ao
+  schema_context (e RE-RODAR o evaluate_nlq, regra da casa) quando
+  quisermos perguntas em linguagem natural sobre o competitivo.
+- Quando a coleta adicional de solo queue terminar: rerodar
+  `load_items`, `build_features`, `export_model` e atualizar as tabelas
+  de métricas.
 - Team builder — próximos incrementos da visão original: jogadores na
   análise e champion select competitivo (o mapa de calor da partida já
   foi entregue na análise de partidas).

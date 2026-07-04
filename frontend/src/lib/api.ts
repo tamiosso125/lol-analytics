@@ -235,6 +235,30 @@ export interface ObjectiveStat {
   heralds: number;
 }
 
+export interface ProOverview {
+  games: number;
+  blue_win_rate: number;
+  avg_game_min: number;
+  leagues: { league: string; games: number; blue_win_rate: number }[];
+}
+
+export interface ProGold15Bucket {
+  gold_diff_mid: number;
+  label: string;
+  blue_win_rate: number | null;
+  matches: number;
+}
+
+export interface ProChampion {
+  champion: string;
+  pro_games: number;
+  pro_win_rate: number;
+  presence: number;
+  champion_id: number | null;
+  solo_games: number | null;
+  solo_win_rate: number | null;
+}
+
 export interface AskResult {
   sql: string;
   columns: string[];
@@ -268,8 +292,13 @@ export interface Prediction {
 export interface ProbPoint {
   minute: number;
   blue_win_probability: number;
-  gold_diff: number;
   model_cutoff: number;
+  /** estado completo do minuto — semente do modo "e se" */
+  gold_diff: number;
+  xp_diff: number;
+  kill_diff: number;
+  tower_diff: number;
+  dragon_diff: number;
 }
 
 export interface MatchTeam {
@@ -407,6 +436,9 @@ export const api = {
   matchPositions: (matchId: string) =>
     request<MatchPositions>(`/matches/${encodeURIComponent(matchId)}/positions`),
   objectives: () => request<ObjectiveStat[]>("/stats/objectives"),
+  proOverview: () => request<ProOverview>("/stats/pro/overview"),
+  proGold15: () => request<ProGold15Bucket[]>("/stats/pro/gold15"),
+  proChampions: (limit = 15) => request<ProChampion[]>(`/stats/pro/champions?limit=${limit}`),
   ask: (question: string, history: HistoryTurn[] = []) =>
     request<AskResult>("/ask", { method: "POST", body: JSON.stringify({ question, history }) }),
   explain: (question: string, result: AskResult) =>

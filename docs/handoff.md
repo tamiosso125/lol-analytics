@@ -1,6 +1,7 @@
-# Handoff — Hextech Lab (TCC II)
+# Handoff — Bellestraiko (TCC II)
 
-> Renomeado de "LoL Analytics" em 2026-07-03 (colidia com lolalytics.com).
+> Renomeado 2× em 2026-07-03: "LoL Analytics" colidia com lolalytics.com,
+> "Hextech Lab" com um canal do YouTube. Nome atual: Bellestraiko.
 
 Documento para quem retomar o projeto "a frio" (você mesmo depois de um tempo,
 ou outra pessoa) — resume o que existe, por que existe, o que falta e onde

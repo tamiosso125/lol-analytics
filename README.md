@@ -1,7 +1,8 @@
-# Hextech Lab — Plataforma de Análise de Dados de Esports (TCC)
+# Bellestraiko — Plataforma de Análise de Dados de Esports (TCC)
 
-> Renomeado de "LoL Analytics" em 2026-07-03 — o nome colidia com o site
-> já existente lolalytics.com. O diretório do repositório continua se
+> Renomeado 2×: "LoL Analytics" colidia com lolalytics.com e "Hextech
+> Lab" colidia com um canal do YouTube já existente. Nome atual:
+> **Bellestraiko** (2026-07-03). O diretório do repositório continua se
 > chamando `lol-analytics` (não renomeado, para não quebrar caminhos).
 
 Scaffold inicial da plataforma proposta no TCC 1: coleta via Riot Games API,

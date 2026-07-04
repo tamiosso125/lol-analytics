@@ -1,4 +1,4 @@
-import { BarChart3, Gamepad2, Home, MessageSquareText, Moon, ScanEye, Sun, Swords, Target, Users } from "lucide-react";
+import { BarChart3, Gamepad2, Home, MessageSquareText, Moon, ScanEye, Sun, Swords, Target, Trophy, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 
@@ -9,6 +9,7 @@ const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: BarChart3 },
   { to: "/campeoes", label: "Campeões", icon: Users },
   { to: "/partidas", label: "Partidas", icon: Swords },
+  { to: "/competitivo", label: "Competitivo", icon: Trophy },
   { to: "/consulta", label: "Consulta NL", icon: MessageSquareText },
   { to: "/predicao", label: "Predição", icon: Target },
   { to: "/montar", label: "Montar partida", icon: Gamepad2 },
@@ -40,7 +41,7 @@ export function Layout() {
       <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-card px-3 py-5">
         <div className="mb-6 px-2">
           <span className="hextech-title text-base font-semibold text-gold-bright">
-            Hextech <span className="text-gold">Lab</span>
+            Belles<span className="text-gold">traiko</span>
           </span>
           <p className="text-xs text-muted-ink">Plataforma de análise — TCC</p>
         </div>
