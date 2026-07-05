@@ -11,21 +11,37 @@ import { cn } from "@/lib/utils";
 
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
-/** Busca de campeão estilo op.gg: filtra no cliente e navega no clique. */
-function ChampionSearch() {
+/** Busca unificada estilo op.gg: campeões (filtro no cliente) +
+ * jogadores de solo queue e profissionais (busca no servidor). */
+function UnifiedSearch() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const needle = q.trim();
   const champions = useQuery({
     queryKey: ["champions-all"],
     queryFn: () => api.champions({ minGames: 1, limit: 300 }),
   });
-  const matches = useMemo(() => {
-    if (q.trim().length < 2 || !champions.data) return [];
-    const needle = q.trim().toLowerCase();
+  const champMatches = useMemo(() => {
+    if (needle.length < 2 || !champions.data) return [];
+    const n = needle.toLowerCase();
     return champions.data
-      .filter((c) => championDisplayName(c.champion).toLowerCase().includes(needle))
-      .slice(0, 6);
-  }, [q, champions.data]);
+      .filter((c) => championDisplayName(c.champion).toLowerCase().includes(n))
+      .slice(0, 4);
+  }, [needle, champions.data]);
+  const players = useQuery({
+    queryKey: ["players-search", needle],
+    queryFn: () => api.playersSearch(needle),
+    enabled: needle.length >= 3,
+  });
+  const solo = players.data?.solo ?? [];
+  const pro = players.data?.pro ?? [];
+  const open = champMatches.length > 0 || solo.length > 0 || pro.length > 0;
+
+  const Section = ({ label }: { label: string }) => (
+    <p className="hextech-title border-t border-border px-3.5 pb-1 pt-2 text-[10px] font-medium text-gold first:border-t-0">
+      {label}
+    </p>
+  );
 
   return (
     <div className="relative max-w-sm">
@@ -34,14 +50,15 @@ function ChampionSearch() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && matches[0]) navigate(`/campeoes/${matches[0].champion}`);
+          if (e.key === "Enter" && champMatches[0]) navigate(`/campeoes/${champMatches[0].champion}`);
         }}
-        placeholder="Buscar um campeão… (ex.: Ahri)"
+        placeholder="Buscar campeão ou jogador… (ex.: Ahri, Faker)"
         className="w-full rounded-full border border-gold/40 bg-background/70 py-2.5 pl-10 pr-4 text-sm backdrop-blur placeholder:text-muted-ink focus:outline-none focus:ring-2 focus:ring-gold/40"
       />
-      {matches.length > 0 && (
-        <div className="absolute inset-x-0 top-full z-10 mt-1.5 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
-          {matches.map((c) => (
+      {open && (
+        <div className="absolute inset-x-0 top-full z-10 mt-1.5 max-h-96 overflow-y-auto rounded-xl border border-border bg-card pb-1 shadow-lg">
+          {champMatches.length > 0 && <Section label="Campeões" />}
+          {champMatches.map((c) => (
             <button
               key={c.champion}
               onClick={() => navigate(`/campeoes/${c.champion}`)}
@@ -51,6 +68,35 @@ function ChampionSearch() {
               <span className="flex-1">{championDisplayName(c.champion)}</span>
               <span className="text-xs text-muted-ink tabular-nums">
                 {pct(c.win_rate)} WR · {c.games.toLocaleString("pt-BR")} jogos
+              </span>
+            </button>
+          ))}
+          {solo.length > 0 && <Section label="Jogadores — solo queue" />}
+          {solo.map((p) => (
+            <button
+              key={p.puuid}
+              onClick={() => navigate(`/jogadores/${p.puuid}`)}
+              className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm hover:bg-foreground/5"
+            >
+              <span className="min-w-0 flex-1 truncate">
+                {p.name}
+                <span className="text-muted-ink">#{p.tag}</span>
+              </span>
+              <span className="text-xs text-muted-ink tabular-nums">
+                {p.tier ?? ""} · {pct(p.win_rate)} em {p.games} jogos
+              </span>
+            </button>
+          ))}
+          {pro.length > 0 && <Section label="Jogadores — profissional" />}
+          {pro.map((p) => (
+            <button
+              key={p.name}
+              onClick={() => navigate(`/competitivo/jogadores/${encodeURIComponent(p.name)}`)}
+              className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm hover:bg-foreground/5"
+            >
+              <span className="min-w-0 flex-1 truncate">{p.name}</span>
+              <span className="text-xs text-muted-ink tabular-nums">
+                {p.team ?? "—"} · {p.games.toLocaleString("pt-BR")} jogos
               </span>
             </button>
           ))}
@@ -240,7 +286,7 @@ export function Home() {
             .
           </p>
           <div className="mt-4">
-            <ChampionSearch />
+            <UnifiedSearch />
           </div>
           {o && (
             <div className="mt-5 flex flex-wrap gap-x-6 gap-y-1 text-sm text-secondary-ink">
@@ -301,6 +347,7 @@ export function Home() {
             why={`Maior taxa de vitória entre jogadores com pelo menos 20 partidas coletadas — ${Math.round(
               h.best_player.win_rate * h.best_player.games,
             )} vitórias em ${h.best_player.games} jogos é consistência, não sorte de poucas partidas.`}
+            to={`/jogadores/${h.best_player.puuid}`}
           />
         )}
         {h.best_champion && (

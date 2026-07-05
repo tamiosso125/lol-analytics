@@ -23,7 +23,10 @@ import psycopg2
 from src.db import get_conn
 from src.nlq.schema_context import SCHEMA_DESCRIPTION
 
-ALLOWED_TABLES = {"matches", "teams", "participants", "players", "bans"}
+ALLOWED_TABLES = {
+    "matches", "teams", "participants", "players", "bans",
+    "pro_games", "pro_players",
+}
 FORBIDDEN = re.compile(
     r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|copy)\b",
     re.IGNORECASE,
@@ -126,10 +129,12 @@ def explain_result(question: str, sql: str, columns: list[str], rows: list[tuple
         f"Primeiras linhas do resultado:\n{preview or '(nenhuma linha)'}\n\n"
         "Convenções do banco — use para não errar a leitura dos números (não "
         "repita estas frases na resposta): team_id 100 é sempre o time AZUL e "
-        "team_id 200 é sempre o time VERMELHO (nunca o contrário); colunas de "
-        "win rate/taxa já vêm como fração entre 0 e 1 (0.58 = 58%); estatísticas "
-        "de participantes (kills, gold_earned etc.) e a duração da partida são "
-        "totais FINAIS de fim de jogo, nunca um instante específico.\n\n"
+        "team_id 200 é sempre o time VERMELHO (nunca o contrário); nas tabelas "
+        "de jogos PROFISSIONAIS (pro_games/pro_players), o lado já vem como "
+        "texto 'Blue'/'Red'; colunas de win rate/taxa já vêm como fração entre "
+        "0 e 1 (0.58 = 58%); estatísticas de participantes (kills, gold_earned "
+        "etc.) e a duração da partida são totais FINAIS de fim de jogo, nunca "
+        "um instante específico.\n\n"
         "Explique em português, em texto corrido simples (sem markdown — nada de "
         "#, ** ou listas) e sem jargão de SQL (não use termos como SELECT, GROUP "
         "BY, JOIN etc.), como chegamos nesse resultado a partir dos dados de "

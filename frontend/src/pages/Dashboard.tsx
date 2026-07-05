@@ -15,6 +15,7 @@ import {
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
@@ -58,6 +59,7 @@ export function Dashboard() {
   const durations = useQuery({ queryKey: ["durations"], queryFn: api.durations });
   const objectives = useQuery({ queryKey: ["objectives"], queryFn: api.objectives });
   const patches = useQuery({ queryKey: ["patches"], queryFn: api.patches });
+  const regions = useQuery({ queryKey: ["regions"], queryFn: api.regions });
 
   const objData = objectives.data
     ? (["dragons", "barons", "towers", "heralds"] as const).map((k) => ({
@@ -82,6 +84,11 @@ export function Dashboard() {
     patches.data[0],
   );
   const totalPatchGames = patches.data?.reduce((s, p) => s + p.matches, 0) ?? 0;
+  const regionSpread =
+    regions.data && regions.data.length > 1
+      ? Math.max(...regions.data.map((r) => r.red_win_rate)) -
+        Math.min(...regions.data.map((r) => r.red_win_rate))
+      : null;
 
   return (
     <div className="space-y-5">
@@ -358,6 +365,71 @@ export function Dashboard() {
           </Card>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Viés de lado por região</CardTitle>
+          <p className="mt-0.5 text-xs text-muted-ink">
+            Win rate do time vermelho por plataforma (planejamento v2, sprint 5) — o viés
+            documentado no BR é do solo queue de elo alto em geral, ou específico daqui?
+          </p>
+        </CardHeader>
+        <CardContent>
+          {regions.isPending ? (
+            <Skeleton className="h-24" />
+          ) : regions.isError ? (
+            <ErrorNote message={regions.error.message} />
+          ) : (
+            <div className="space-y-2">
+              {regions.data.map((r) => (
+                <div key={r.platform} className="flex items-center gap-3 text-sm">
+                  <span className="w-14 shrink-0 font-medium uppercase">{r.platform}</span>
+                  <div className="h-4 flex-1 overflow-hidden rounded-full bg-chart-1/25">
+                    <div
+                      className="h-full bg-chart-red"
+                      style={{ width: `${r.red_win_rate * 100}%` }}
+                    />
+                  </div>
+                  <span
+                    className={cn(
+                      "w-16 text-right font-medium tabular-nums",
+                      r.red_win_rate >= 0.5 ? "text-chart-red" : "text-chart-1",
+                    )}
+                  >
+                    {pct(r.red_win_rate)}
+                  </span>
+                  <span className="w-20 text-right text-xs text-muted-ink tabular-nums">
+                    {r.matches.toLocaleString("pt-BR")} partidas
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+        {regions.data && (
+          <CardContent className="pt-0">
+            <Takeaway>
+              {regions.data.length === 1 ? (
+                <>
+                  só {regions.data[0].platform.toUpperCase()} coletado até agora ({pct(
+                    regions.data[0].red_win_rate,
+                  )}{" "}
+                  de vitória do vermelho) — coleta multi-região iniciada (sprint 5 do
+                  planejamento v2); esta seção ganha mais linhas conforme KR/EUW1/NA1
+                  acumulam partidas, sem precisar mudar código.
+                </>
+              ) : (
+                <>
+                  variação de {pct(regionSpread ?? 0)} entre regiões no viés de lado — se
+                  todas ficarem próximas de {pct(regions.data[0].red_win_rate)}, o viés é do
+                  solo queue de elo alto em geral; se divergirem bastante, é mais específico
+                  de cada região/cultura de jogo.
+                </>
+              )}
+            </Takeaway>
+          </CardContent>
+        )}
+      </Card>
     </div>
   );
 }

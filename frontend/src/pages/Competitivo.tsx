@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   Bar,
   BarChart,
@@ -53,11 +54,22 @@ function SideBar({ label, blueWr }: { label: string; blueWr: number }) {
 }
 
 export function Competitivo() {
-  const pro = useQuery({ queryKey: ["pro-overview"], queryFn: api.proOverview });
+  const [year, setYear] = useState<number | undefined>(undefined); // undefined = mais recente
+  const years = useQuery({ queryKey: ["pro-years"], queryFn: api.proYears });
+  const pro = useQuery({
+    queryKey: ["pro-overview", year],
+    queryFn: () => api.proOverview(year),
+  });
   const solo = useQuery({ queryKey: ["overview"], queryFn: api.overview });
-  const proGold = useQuery({ queryKey: ["pro-gold15"], queryFn: api.proGold15 });
+  const proGold = useQuery({
+    queryKey: ["pro-gold15", year],
+    queryFn: () => api.proGold15(year),
+  });
   const soloGold = useQuery({ queryKey: ["gold15"], queryFn: api.gold15 });
-  const champs = useQuery({ queryKey: ["pro-champions"], queryFn: () => api.proChampions(15) });
+  const champs = useQuery({
+    queryKey: ["pro-champions", year],
+    queryFn: () => api.proChampions(15, year),
+  });
 
   if (pro.isPending) return <Skeleton className="h-96" />;
   if (pro.isError) return <ErrorNote message={pro.error.message} />;
@@ -78,12 +90,29 @@ export function Competitivo() {
 
   return (
     <div className="space-y-5">
-      <PageHeader eyebrow="Pro play" title="Competitivo">
-        {p.games.toLocaleString("pt-BR")} jogos profissionais de 2026 (LPL, LCK, LEC e mais —
-        dados do Oracle's Elixir), lado a lado com as{" "}
-        {s ? s.matches.toLocaleString("pt-BR") : "…"} partidas de solo queue Challenger/GM BR
-        da plataforma. Mesmas métricas, dois contextos — e nem sempre a mesma conclusão.
-      </PageHeader>
+      <div className="flex items-end justify-between gap-4">
+        <PageHeader eyebrow="Pro play" title="Competitivo">
+          {p.games.toLocaleString("pt-BR")} jogos profissionais de {p.year} (LPL, LCK, LEC e
+          mais — dados do Oracle's Elixir; o acervo completo cobre 2014-2026), lado a lado
+          com as {s ? s.matches.toLocaleString("pt-BR") : "…"} partidas de solo queue
+          Challenger/GM BR da plataforma. Mesmas métricas, dois contextos — e nem sempre a
+          mesma conclusão.
+        </PageHeader>
+        <label className="flex shrink-0 items-center gap-2 pb-1 text-xs text-muted-ink">
+          Ano
+          <select
+            value={year ?? p.year}
+            onChange={(e) => setYear(Number(e.target.value))}
+            className="rounded-lg border border-border bg-card px-2 py-1.5 text-sm text-foreground"
+          >
+            {(years.data ?? [{ year: p.year, games: p.games }]).map((y) => (
+              <option key={y.year} value={y.year}>
+                {y.year} ({y.games.toLocaleString("pt-BR")})
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       <div className="grid grid-cols-3 gap-4">
         <Card>

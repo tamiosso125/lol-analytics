@@ -28,6 +28,33 @@ players(puuid, game_name, tag_line, tier, division, league_points, platform, upd
   -- (CHALLENGER, GRANDMASTER, MASTER, DIAMOND...); compare com
   -- UPPER(tier) = UPPER('...') para ser robusto a diferenças de caixa.
 
+pro_games(game_id, league, year, split, playoffs, game_date, patch, side,
+          team_name, win, game_length_s, kills, deaths, dragons, barons,
+          heralds, towers, inhibitors, gold_diff_at15, xp_diff_at15, cs_diff_at15)
+  -- partidas PROFISSIONAIS/competitivas (Oracle's Elixir, 2014-2026),
+  -- duas linhas por jogo (uma por time). ATENÇÃO: aqui "side" é texto
+  -- 'Blue'/'Red' (NÃO team_id 100/200 — isso é só nas tabelas de solo
+  -- queue). league é a sigla da liga ('LCK', 'LPL', 'LEC'...).
+  -- gold_diff_at15 é na perspectiva DAQUELA linha/time. Jogos =
+  -- COUNT(DISTINCT game_id). SEMPRE filtre por year quando a pergunta
+  -- indicar um ano (sem filtro, 13 anos de metas diferentes se misturam
+  -- — se a pergunta não citar ano, use year = 2026, o mais recente).
+
+pro_players(game_id, side, position, player_name, team_name, champion,
+            kills, deaths, assists, win)
+  -- dez linhas por jogo profissional; position em: top, jng, mid, bot,
+  -- sup (minúsculas — padrão diferente do solo queue!). champion é o
+  -- NOME DE EXIBIÇÃO com espaços ('Xin Zhao', 'Renata Glasc' — não o
+  -- nome interno de participants). NÃO tem coluna year: para filtrar
+  -- por ano, junte com pro_games POR (game_id, side) — junte pelas
+  -- DUAS colunas, senão cada linha duplica. Exemplo — campeões mais
+  -- jogados no competitivo em 2026:
+  -- SELECT pp.champion, COUNT(*) AS jogos
+  -- FROM pro_players pp
+  -- JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side
+  -- WHERE pg.year = 2026
+  -- GROUP BY pp.champion ORDER BY jogos DESC LIMIT 5;
+
 bans(match_id, team_id, pick_turn, champion_id)
   -- banimentos do champion select (até 5 por time por partida); NÃO tem
   -- champion_name. NUNCA junte "bans" direto com "participants" por

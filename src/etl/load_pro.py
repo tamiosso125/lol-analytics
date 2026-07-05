@@ -51,6 +51,10 @@ def load_csv(path: str) -> None:
                 r.gamelength, r.kills, r.deaths,
                 r.dragons, r.barons, r.heralds, r.towers, r.inhibitors,
                 r.golddiffat15, r.xpdiffat15, r.csdiffat15,
+                # kill diff aos 15 na perspectiva do time da linha
+                (r.killsat15 - r.opp_killsat15)
+                if not (pd.isna(r.killsat15) or pd.isna(r.opp_killsat15))
+                else None,
             )
         )
         for r in teams.itertuples()
@@ -77,7 +81,8 @@ def load_csv(path: str) -> None:
             """INSERT INTO pro_games
                (game_id, league, year, split, playoffs, game_date, patch, side,
                 team_name, win, game_length_s, kills, deaths, dragons, barons,
-                heralds, towers, inhibitors, gold_diff_at15, xp_diff_at15, cs_diff_at15)
+                heralds, towers, inhibitors, gold_diff_at15, xp_diff_at15,
+                cs_diff_at15, kill_diff_at15)
                VALUES %s ON CONFLICT DO NOTHING""",
             game_rows,
             page_size=2000,

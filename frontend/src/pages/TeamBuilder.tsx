@@ -3,7 +3,7 @@ import { Swords, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button, Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
-import { api, type ComposeSynergy, type MatchState } from "@/lib/api";
+import { api, type ComposeLane, type ComposeSynergy, type MatchState } from "@/lib/api";
 import { championDisplayName, championIcon, POSITION_LABELS } from "@/lib/ddragon";
 import { INITIAL_STATE, PHASES, RANGES, SLIDER_KEYS, SLIDER_LABELS, withMinute } from "@/lib/matchState";
 import { cn } from "@/lib/utils";
@@ -173,6 +173,142 @@ function ChampionCombobox({
   );
 }
 
+/** Campo de jogador com busca no servidor (Riot ID) — mesmo estilo do
+ * ChampionCombobox, mas os resultados vêm de /stats/players/search em
+ * vez de um catálogo local. Guarda o puuid; o rótulo (name#tag) é
+ * repassado pra quem chama exibir sem precisar buscar de novo. */
+function PlayerCombobox({
+  value,
+  displayName,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  displayName: string;
+  onChange: (puuid: string, label: string) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
+  const blurTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const needle = query.trim();
+
+  const search = useQuery({
+    queryKey: ["player-search-tb", needle],
+    queryFn: () => api.playersSearch(needle),
+    enabled: needle.length >= 3,
+  });
+  const matches = search.data?.solo ?? [];
+  const displayValue = open ? query : value ? displayName : "";
+
+  useEffect(() => {
+    if (!open) return;
+    function onClickOutside(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setQuery("");
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative flex-1">
+      <input
+        value={displayValue}
+        disabled={disabled}
+        onFocus={() => {
+          clearTimeout(blurTimeout.current);
+          setOpen(true);
+          setQuery("");
+        }}
+        onChange={(e) => setQuery(e.target.value)}
+        onBlur={() => {
+          blurTimeout.current = setTimeout(() => setOpen(false), 100);
+        }}
+        placeholder={disabled ? "escolha o campeão primeiro" : "Riot ID (opcional)…"}
+        className={cn(
+          "w-full rounded-lg border border-border bg-card px-2 py-1.5 text-xs disabled:opacity-50",
+          !value && "text-muted-ink",
+          value && !open && "pr-6",
+        )}
+      />
+      {value && !open && (
+        <button
+          type="button"
+          aria-label="Limpar jogador"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => onChange("", "")}
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-ink hover:text-foreground"
+        >
+          <X size={11} />
+        </button>
+      )}
+      {open && needle.length >= 3 && (
+        <div className="absolute inset-x-0 top-full z-20 mt-1 max-h-48 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
+          {search.isPending ? (
+            <p className="px-3 py-2 text-xs text-muted-ink">Buscando…</p>
+          ) : matches.length === 0 ? (
+            <p className="px-3 py-2 text-xs text-muted-ink">Nenhum jogador encontrado.</p>
+          ) : (
+            matches.map((p) => (
+              <button
+                key={p.puuid}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onChange(p.puuid, `${p.name}#${p.tag}`);
+                  setOpen(false);
+                  setQuery("");
+                }}
+                className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-xs hover:bg-foreground/5"
+              >
+                <span className="min-w-0 flex-1 truncate">
+                  {p.name}#{p.tag}
+                </span>
+                <span className="text-muted-ink tabular-nums">
+                  {p.games}j · {pct(p.win_rate)}
+                </span>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Nota do ajuste de jogador numa lane, quando há pelo menos um lado
+ * com jogador selecionado — mostra o cálculo de shrinkage por trás do
+ * número, para não virar caixa-preta. */
+function PlayerAdjustmentNote({ lane }: { lane: ComposeLane }) {
+  if (!lane.blue_player && !lane.red_player) return null;
+  const parts: string[] = [];
+  if (lane.blue_player) {
+    const bp = lane.blue_player;
+    parts.push(
+      `${bp.name} (azul): ${bp.games_on_champion} jogos${
+        bp.raw_win_rate != null ? `, ${pct(bp.raw_win_rate)} bruto` : ""
+      } → ${pct(bp.shrunk_win_rate)} após shrinkage`,
+    );
+  }
+  if (lane.red_player) {
+    const rp = lane.red_player;
+    parts.push(
+      `${rp.name} (vermelho): ${rp.games_on_champion} jogos${
+        rp.raw_win_rate != null ? `, ${pct(rp.raw_win_rate)} bruto` : ""
+      } → ${pct(rp.shrunk_win_rate)} após shrinkage`,
+    );
+  }
+  return (
+    <p className="pl-16 text-xs text-muted-ink">
+      {parts.join(" · ")} — sem jogador, a lane seria {pct(lane.composition_win_rate)}.
+    </p>
+  );
+}
+
 function SynergyList({ title, synergies }: { title: string; synergies: ComposeSynergy[] }) {
   return (
     <Card>
@@ -219,6 +355,11 @@ export function TeamBuilder() {
   const [red, setRed] = useState<Team>({});
   const [withState, setWithState] = useState(false);
   const [state, setState] = useState<MatchState>(INITIAL_STATE);
+  const [withPlayers, setWithPlayers] = useState(false);
+  const [bluePlayers, setBluePlayers] = useState<Team>({}); // posição -> puuid
+  const [redPlayers, setRedPlayers] = useState<Team>({});
+  const [bluePlayerNames, setBluePlayerNames] = useState<Team>({}); // posição -> "nome#tag"
+  const [redPlayerNames, setRedPlayerNames] = useState<Team>({});
 
   const champions = useQuery({
     queryKey: ["champions-all"],
@@ -241,7 +382,14 @@ export function TeamBuilder() {
     options.filter((o) => o.name === current || !picked.has(o.name));
 
   const analyze = useMutation({
-    mutationFn: () => api.compose(blue, red, withState ? state : undefined),
+    mutationFn: () =>
+      api.compose(
+        blue,
+        red,
+        withState ? state : undefined,
+        withPlayers ? bluePlayers : undefined,
+        withPlayers ? redPlayers : undefined,
+      ),
   });
   const lanesFilled = POSITIONS.filter((p) => blue[p] && red[p]).length;
   const result = analyze.data;
@@ -301,6 +449,10 @@ export function TeamBuilder() {
                     setBlue({});
                     setRed({});
                     setState(INITIAL_STATE);
+                    setBluePlayers({});
+                    setRedPlayers({});
+                    setBluePlayerNames({});
+                    setRedPlayerNames({});
                     analyze.reset();
                   }}
                   className="text-xs text-muted-ink underline-offset-2 hover:underline"
@@ -314,6 +466,57 @@ export function TeamBuilder() {
             </div>
           )}
         </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Jogadores (opcional)</CardTitle>
+            <p className="mt-0.5 text-xs text-muted-ink">
+              Ajusta cada lane pelo desempenho do jogador NAQUELE campeão — com shrinkage
+              bayesiano: poucos jogos pesam pouco (perto da média do campeão), muitos jogos
+              aproximam do desempenho real observado. Só solo queue.
+            </p>
+          </div>
+          <label className="flex shrink-0 items-center gap-2 text-sm text-secondary-ink">
+            <input
+              type="checkbox"
+              checked={withPlayers}
+              onChange={(e) => setWithPlayers(e.target.checked)}
+              className="accent-accent"
+            />
+            Incluir
+          </label>
+        </CardHeader>
+        {withPlayers && (
+          <CardContent className="space-y-2 pt-2">
+            {POSITIONS.map((pos) => (
+              <div key={pos} className="grid grid-cols-[1fr_90px_1fr] items-center gap-3">
+                <PlayerCombobox
+                  value={bluePlayers[pos] ?? ""}
+                  displayName={bluePlayerNames[pos] ?? ""}
+                  disabled={!blue[pos]}
+                  onChange={(puuid, label) => {
+                    setBluePlayers((t) => ({ ...t, [pos]: puuid }));
+                    setBluePlayerNames((t) => ({ ...t, [pos]: label }));
+                  }}
+                />
+                <span className="text-center text-xs font-medium text-muted-ink">
+                  {POSITION_LABELS[pos]}
+                </span>
+                <PlayerCombobox
+                  value={redPlayers[pos] ?? ""}
+                  displayName={redPlayerNames[pos] ?? ""}
+                  disabled={!red[pos]}
+                  onChange={(puuid, label) => {
+                    setRedPlayers((t) => ({ ...t, [pos]: puuid }));
+                    setRedPlayerNames((t) => ({ ...t, [pos]: label }));
+                  }}
+                />
+              </div>
+            ))}
+          </CardContent>
+        )}
       </Card>
 
       <Card>
@@ -457,30 +660,33 @@ export function TeamBuilder() {
             <CardHeader>
               <CardTitle>Matchup por lane (chance do campeão azul)</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-1">
               {result.lanes.map((l) => (
-                <div key={l.position} className="flex items-center gap-3 text-sm">
-                  <span className="w-16 text-xs text-muted-ink">
-                    {POSITION_LABELS[l.position] ?? l.position}
-                  </span>
-                  <img src={championIcon(l.blue_id)} alt="" className="size-7 rounded" />
-                  <span className="w-28 truncate">{championDisplayName(l.blue)}</span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-chart-red/30">
-                    <div
-                      className="h-full bg-chart-1"
-                      style={{ width: `${l.blue_lane_win_rate * 100}%` }}
-                    />
+                <div key={l.position} className="space-y-0.5">
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="w-16 text-xs text-muted-ink">
+                      {POSITION_LABELS[l.position] ?? l.position}
+                    </span>
+                    <img src={championIcon(l.blue_id)} alt="" className="size-7 rounded" />
+                    <span className="w-28 truncate">{championDisplayName(l.blue)}</span>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-chart-red/30">
+                      <div
+                        className="h-full bg-chart-1"
+                        style={{ width: `${l.blue_lane_win_rate * 100}%` }}
+                      />
+                    </div>
+                    <span className="w-14 text-right font-medium tabular-nums">
+                      {pct(l.blue_lane_win_rate)}
+                    </span>
+                    <span className="w-28 truncate text-right">{championDisplayName(l.red)}</span>
+                    <img src={championIcon(l.red_id)} alt="" className="size-7 rounded" />
+                    <span className="w-24 text-right text-xs text-muted-ink tabular-nums">
+                      {l.source === "matchup"
+                        ? `${l.matchup_games} jogos diretos`
+                        : "perfil geral*"}
+                    </span>
                   </div>
-                  <span className="w-14 text-right font-medium tabular-nums">
-                    {pct(l.blue_lane_win_rate)}
-                  </span>
-                  <span className="w-28 truncate text-right">{championDisplayName(l.red)}</span>
-                  <img src={championIcon(l.red_id)} alt="" className="size-7 rounded" />
-                  <span className="w-24 text-right text-xs text-muted-ink tabular-nums">
-                    {l.source === "matchup"
-                      ? `${l.matchup_games} jogos diretos`
-                      : "perfil geral*"}
-                  </span>
+                  <PlayerAdjustmentNote lane={l} />
                 </div>
               ))}
               <p className="border-t border-border pt-2 text-xs text-muted-ink">

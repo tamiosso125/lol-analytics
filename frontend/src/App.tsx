@@ -10,7 +10,9 @@ import { Home } from "@/pages/Home";
 import { MatchDetail } from "@/pages/MatchDetail";
 import { Matches } from "@/pages/Matches";
 import { Nlq } from "@/pages/Nlq";
+import { PlayerProfile } from "@/pages/PlayerProfile";
 import { Predict } from "@/pages/Predict";
+import { ProPlayerProfile } from "@/pages/ProPlayerProfile";
 import { TeamBuilder } from "@/pages/TeamBuilder";
 
 export default function App() {
@@ -24,6 +26,8 @@ export default function App() {
         <Route path="partidas" element={<Matches />} />
         <Route path="partidas/:id" element={<MatchDetail />} />
         <Route path="competitivo" element={<Competitivo />} />
+        <Route path="competitivo/jogadores/:name" element={<ProPlayerProfile />} />
+        <Route path="jogadores/:puuid" element={<PlayerProfile />} />
         <Route path="consulta" element={<Nlq />} />
         <Route path="predicao" element={<Predict />} />
         <Route path="montar" element={<TeamBuilder />} />

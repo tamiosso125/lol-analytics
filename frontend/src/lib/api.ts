@@ -72,6 +72,14 @@ export interface PatchStat {
   blue_win_rate: number;
 }
 
+export interface ComposePlayerEffect {
+  name: string;
+  games_on_champion: number;
+  raw_win_rate: number | null;
+  shrunk_win_rate: number;
+  logit_delta: number;
+}
+
 export interface ComposeLane {
   position: string;
   blue: string;
@@ -80,7 +88,11 @@ export interface ComposeLane {
   red_id: number;
   matchup_games: number;
   blue_lane_win_rate: number;
+  /** win rate só pela composição, antes do ajuste de jogador (quando há) */
+  composition_win_rate: number;
   source: "matchup" | "perfil";
+  blue_player: ComposePlayerEffect | null;
+  red_player: ComposePlayerEffect | null;
 }
 
 export interface ComposeSynergy {
@@ -196,6 +208,15 @@ export interface ChampionItems {
   items: ChampionItemStat[];
 }
 
+export interface ChampionPro {
+  champion: string;
+  year: number;
+  games: number;
+  win_rate: number | null;
+  presence: number;
+  leagues: { league: string; games: number; win_rate: number }[];
+}
+
 export interface DurationBucket {
   range: string;
   matches: number;
@@ -236,10 +257,16 @@ export interface ObjectiveStat {
 }
 
 export interface ProOverview {
+  year: number;
   games: number;
   blue_win_rate: number;
   avg_game_min: number;
   leagues: { league: string; games: number; blue_win_rate: number }[];
+}
+
+export interface ProYear {
+  year: number;
+  games: number;
 }
 
 export interface ProGold15Bucket {
@@ -257,6 +284,71 @@ export interface ProChampion {
   champion_id: number | null;
   solo_games: number | null;
   solo_win_rate: number | null;
+}
+
+export interface PlayerSearchResult {
+  solo: {
+    puuid: string;
+    name: string;
+    tag: string;
+    tier: string | null;
+    games: number;
+    win_rate: number;
+  }[];
+  pro: { name: string; games: number; team: string | null }[];
+}
+
+export interface PlayerProfile {
+  puuid: string;
+  name: string | null;
+  tag: string | null;
+  tier: string | null;
+  division: string | null;
+  league_points: number | null;
+  games: number;
+  win_rate: number;
+  main_position: string | null;
+  champion_pool: {
+    champion: string;
+    champion_id: number;
+    games: number;
+    win_rate: number;
+    kda: number | null;
+  }[];
+  recent_games: {
+    match_id: string;
+    date: string;
+    duration_min: number;
+    champion: string;
+    champion_id: number;
+    position: string;
+    kills: number;
+    deaths: number;
+    assists: number;
+    win: boolean;
+  }[];
+}
+
+export interface ProPlayerProfile {
+  name: string;
+  games: number;
+  win_rate: number;
+  main_position: string | null;
+  current_team: string | null;
+  seasons: { year: number; team: string; league: string; games: number; win_rate: number }[];
+  champion_pool: {
+    champion: string;
+    games: number;
+    win_rate: number;
+    champion_id: number | null;
+  }[];
+}
+
+export interface RegionStat {
+  platform: string;
+  matches: number;
+  red_win_rate: number;
+  avg_duration_min: number;
 }
 
 export interface AskResult {
@@ -421,6 +513,8 @@ export const api = {
     request<ChampionDetail>(`/stats/champion/${encodeURIComponent(name)}`),
   championItems: (name: string) =>
     request<ChampionItems>(`/stats/champion/${encodeURIComponent(name)}/items`),
+  championPro: (name: string) =>
+    request<ChampionPro>(`/stats/champion/${encodeURIComponent(name)}/pro`),
   durations: () => request<DurationBucket[]>("/stats/durations"),
   gold15: () => request<Gold15Bucket[]>("/stats/gold15"),
   recentMatches: (limit = 15) => request<RecentMatch[]>(`/matches/recent?limit=${limit}`),
@@ -428,17 +522,42 @@ export const api = {
     request<MatchAnalysis>(`/matches/${encodeURIComponent(matchId)}/analysis`),
   highlights: () => request<Highlights>("/stats/highlights"),
   patches: () => request<PatchStat[]>("/stats/patches"),
-  compose: (blue: Record<string, string>, red: Record<string, string>, state?: MatchState) =>
+  regions: () => request<RegionStat[]>("/stats/regions"),
+  compose: (
+    blue: Record<string, string>,
+    red: Record<string, string>,
+    state?: MatchState,
+    bluePlayers?: Record<string, string>,
+    redPlayers?: Record<string, string>,
+  ) =>
     request<ComposeResult>("/compose", {
       method: "POST",
-      body: JSON.stringify({ blue, red, state: state ?? null }),
+      body: JSON.stringify({
+        blue,
+        red,
+        state: state ?? null,
+        blue_players: bluePlayers ?? {},
+        red_players: redPlayers ?? {},
+      }),
     }),
   matchPositions: (matchId: string) =>
     request<MatchPositions>(`/matches/${encodeURIComponent(matchId)}/positions`),
   objectives: () => request<ObjectiveStat[]>("/stats/objectives"),
-  proOverview: () => request<ProOverview>("/stats/pro/overview"),
-  proGold15: () => request<ProGold15Bucket[]>("/stats/pro/gold15"),
-  proChampions: (limit = 15) => request<ProChampion[]>(`/stats/pro/champions?limit=${limit}`),
+  playersSearch: (q: string) =>
+    request<PlayerSearchResult>(`/stats/players/search?q=${encodeURIComponent(q)}`),
+  playerProfile: (puuid: string) =>
+    request<PlayerProfile>(`/stats/player/${encodeURIComponent(puuid)}`),
+  proPlayerProfile: (name: string) =>
+    request<ProPlayerProfile>(`/stats/pro/player/${encodeURIComponent(name)}`),
+  proYears: () => request<ProYear[]>("/stats/pro/years"),
+  proOverview: (year?: number) =>
+    request<ProOverview>(`/stats/pro/overview${year ? `?year=${year}` : ""}`),
+  proGold15: (year?: number) =>
+    request<ProGold15Bucket[]>(`/stats/pro/gold15${year ? `?year=${year}` : ""}`),
+  proChampions: (limit = 15, year?: number) =>
+    request<ProChampion[]>(
+      `/stats/pro/champions?limit=${limit}${year ? `&year=${year}` : ""}`,
+    ),
   ask: (question: string, history: HistoryTurn[] = []) =>
     request<AskResult>("/ask", { method: "POST", body: JSON.stringify({ question, history }) }),
   explain: (question: string, result: AskResult) =>

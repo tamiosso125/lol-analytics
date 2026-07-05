@@ -115,8 +115,13 @@ CREATE TABLE IF NOT EXISTS pro_games (
     gold_diff_at15 INT,
     xp_diff_at15   INT,
     cs_diff_at15   INT,
+    kill_diff_at15 INT,
     PRIMARY KEY (game_id, side)
 );
+
+-- coluna adicionada depois da criação original (2026-07-05, para o
+-- modelo pro com features comparáveis ao solo queue)
+ALTER TABLE pro_games ADD COLUMN IF NOT EXISTS kill_diff_at15 INT;
 
 CREATE TABLE IF NOT EXISTS pro_players (
     game_id     VARCHAR(64),

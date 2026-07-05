@@ -86,6 +86,92 @@ function ItemsCard({ championName }: { championName: string }) {
   );
 }
 
+/** Presença e desempenho do campeão no COMPETITIVO (Oracle's Elixir),
+ * ao lado das estatísticas de solo queue da página. */
+function ProCard({ championName }: { championName: string }) {
+  const pro = useQuery({
+    queryKey: ["champion-pro", championName],
+    queryFn: () => api.championPro(championName),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>No competitivo{pro.data ? ` (${pro.data.year})` : ""}</CardTitle>
+        <p className="mt-0.5 text-xs text-muted-ink">
+          Jogos profissionais (Oracle's Elixir) — presença, win rate e ligas onde aparece.
+        </p>
+      </CardHeader>
+      <CardContent>
+        {pro.isPending ? (
+          <Skeleton className="h-40" />
+        ) : pro.isError ? (
+          <ErrorNote message={pro.error.message} />
+        ) : pro.data.games === 0 ? (
+          <p className="text-sm text-muted-ink">
+            Não apareceu no competitivo em {pro.data.year} — pode ser um pick de solo queue
+            que os times profissionais não priorizam (ou o inverso do hype).
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <p className="text-xs text-muted-ink">Presença</p>
+                <p className="mt-0.5 text-xl font-semibold tabular-nums">
+                  {pct(pro.data.presence)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-ink">Jogos</p>
+                <p className="mt-0.5 text-xl font-semibold tabular-nums">
+                  {pro.data.games.toLocaleString("pt-BR")}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-ink">Win rate pro</p>
+                <p
+                  className={cn(
+                    "mt-0.5 text-xl font-semibold tabular-nums",
+                    (pro.data.win_rate ?? 0) >= 0.5 ? "text-chart-1" : "text-chart-red",
+                  )}
+                >
+                  {pro.data.win_rate != null ? pct(pro.data.win_rate) : "—"}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 space-y-1.5 border-t border-border pt-3">
+              {pro.data.leagues.map((l) => (
+                <div key={l.league} className="flex items-center gap-2 text-sm">
+                  <span className="w-14 shrink-0 font-medium">{l.league}</span>
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10">
+                    <div
+                      className="h-full rounded-full bg-chart-1"
+                      style={{
+                        width: `${(l.games / pro.data.leagues[0].games) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="w-14 text-right text-xs text-muted-ink tabular-nums">
+                    {l.games} jogos
+                  </span>
+                  <span
+                    className={cn(
+                      "w-12 text-right text-xs font-medium tabular-nums",
+                      l.win_rate >= 0.5 ? "text-chart-1" : "text-chart-red",
+                    )}
+                  >
+                    {pct(l.win_rate)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function MatchupList({ title, matchups }: { title: string; matchups: ChampionMatchup[] }) {
   return (
     <Card>
@@ -238,7 +324,14 @@ export function ChampionDetail() {
         <MatchupList title="Piores matchups (win rate contra)" matchups={worst} />
       </div>
 
-      <ItemsCard championName={d.champion} />
+      <div className="grid grid-cols-5 gap-4">
+        <div className="col-span-3">
+          <ItemsCard championName={d.champion} />
+        </div>
+        <div className="col-span-2">
+          <ProCard championName={d.champion} />
+        </div>
+      </div>
     </div>
   );
 }

@@ -1453,11 +1453,265 @@ comparação exigiu o cuidado já documentado (sem fullPage, esperar
 `.recharts-bar-rectangle path` — a animação do Recharts em screenshots
 fullPage é a mesma pegadinha registrada em 2026-07-02).
 
+## 2026-07-05 — 13 anos de pro carregados, seletor de ano e o Planejamento v2
+
+Três coisas nesta rodada:
+
+**1. Acervo competitivo completo: 99.259 jogos (2014-2026).** O usuário
+baixou os 13 CSVs anuais do Oracle's Elixir para `data/pro/` e o
+`load_pro` carregou tudo (~199k linhas de time, ~992k de jogador). Isso
+transformou um problema em feature: a página Competitivo dizia "de
+2026" mas passaria a agregar eras completamente diferentes misturadas.
+Correção imediata (que também era o item 1 do planejamento): os três
+endpoints pro ganharam `year` (padrão = ano mais recente, resolvido no
+banco), novo `GET /stats/pro/years`, e a página ganhou o seletor de
+ano no cabeçalho. Verificado: trocar 2026→2018 atualiza KPIs (6.026 →
+6.581 jogos) e o texto acompanha. Nota: o `year` vem da COLUNA do CSV,
+não do nome do arquivo — o arquivo de 2018 tem 6.736 jogos mas 6.581
+com year=2018 (jogos da virada do ano ficam no ano certo).
+Curiosidade que já saiu de graça: o azul vence >53% no pro em 2018
+TAMBÉM — o viés azul do competitivo é estável através dos anos, o que
+fortalece o contraste com o nosso solo queue.
+
+**2. Validação externa da metodologia (achado do usuário):** o próprio
+Oracle's Elixir publica uma "Early-Game Win Probability Calculator" —
+split + lado do mapa + diferença de ouro aos 15:00 + diferença de
+dragões ELEMENTAIS → probabilidade estimada. É a mesma estrutura da
+nossa página de Predição (estado aos 15 → WP), praticada pela fonte
+dos dados competitivos. Duas ideias que ela sugere e entraram no
+planejamento: lado do mapa como entrada explícita do modelo e TIPOS de
+dragão como feature (nossas timelines têm o subtipo em
+ELITE_MONSTER_KILL; hoje usamos só o agregado).
+
+**3. Planejamento v2 criado** (`docs/planejamento_v2.md`) — os 4
+objetivos definidos pelo usuário, destrinchados com o que já temos,
+entregas ordenadas, riscos e esforço: (1) competitivo em tudo (NLQ,
+campeão, modelo pro, tipos de dragão), (2) perfis de jogadores +
+jogadores no Montar Partida com shrinkage, (3) mais regiões e elos
+(pedir a Personal API Key JÁ — aprovação demora e destrava tudo),
+(4) tempo real em 3 estágios (MVP replay-ao-vivo sem dependência
+externa → pro ao vivo via feed do lolesports → companion local).
+Ordem sugerida em 8 sprints com o corte TCC × pós-TCC.
+
+## 2026-07-05 — Sprint 1 do planejamento v2 concluído
+
+Handoff (`docs/handoff.md`) reescrito para o estado atual (dois
+datasets, todos os achados, pipeline completo) e o Sprint 1 executado:
+
+**1. NLQ conhece o competitivo.** `pro_games`/`pro_players` no
+`schema_context` (com as pegadinhas explícitas: side é texto
+'Blue'/'Red' e não team_id; pro_players NÃO tem year — junta com
+pro_games POR game_id E side, com exemplo copiável; nomes são de
+exibição com espaços; sempre filtrar por ano, padrão 2026) e na
+whitelist de validação. Benchmark ampliado de 22 para 26 perguntas
+(4 competitivas: contagem por ano, win rate do azul, campeões mais
+jogados — que exige o join duplo — e liga com mais jogos).
+**Resultado: 23/26 = 88%, com as 4 perguntas pro passando DE
+PRIMEIRA** (o exemplo copiável no schema pagou de novo). As 3 falhas
+são todas a mesma família benigna já documentada (coluna COUNT extra
+quando a pergunta menciona "pelo menos N jogos") — diagnóstico rodado,
+zero regressão causada pelas tabelas novas; a família de falha flutua
+entre 1-3 ocorrências por execução (na régua antiga de 22 perguntas,
+esta rodada teria dado 19-20/22). Faixa honesta para o TCC: 85-95%.
+
+**2. Seção "No competitivo" no detalhe do campeão.**
+`GET /stats/champion/{nome}/pro` (ano padrão = mais recente): jogos,
+win rate, presença sobre os jogos do ano e quebra por liga (top 6).
+O match de nome interno ↔ exibição reusa a normalização do
+/stats/pro/champions (validado: KSante → 1.315 jogos e MonkeyKing →
+1.163, idênticos aos números da página Competitivo). Card `ProCard` no
+detalhe do campeão, num grid com o card de itens. Caso o campeão não
+apareça no pro do ano, mensagem explicativa em vez de tabela vazia.
+Exemplo que a seção já entrega: Jayce tem 53,8% de win rate no nosso
+solo queue mas 49,9% no competitivo com 13,2% de presença — pick
+respeitado no pro, mas sem converter em vitória como no solo queue.
+
+Verificação: typecheck limpo, endpoint cross-checado contra os números
+já validados, Playwright no detalhe do campeão (795 jogos/13,2%
+visíveis), zero erros de console.
+
+## 2026-07-05 — Sprint 2: modelo pro, o achado da reconciliação, e dragões por tipo
+
+**1. Modelo pro aos 15 min + comparação formal (`src/models/train_pro.py`,
+script permanente).** Adicionado `kill_diff_at15` ao pipeline pro
+(killsat15 − opp_killsat15 do CSV; ALTER TABLE IF NOT EXISTS no schema;
+13 anos recarregados) para ter um conjunto de features COMPARTILHADO
+com o solo queue aos 15 min: gold/xp/kill diff. Mesmo XGBoost tunado,
+CV 5-fold estratificada:
+
+| dataset (features compartilhadas) | n | acc | AUC |
+|---|---|---|---|
+| solo queue Challenger/GM BR | 10.295 | 0,7444 | 0,8255 |
+| competitivo (todos os anos) | 86.058 | 0,7459 | 0,8283 |
+| competitivo (2023+) | 31.980 | 0,7422 | 0,8241 |
+
+**Achado (o melhor do sprint): empate técnico em previsibilidade — e a
+reconciliação com o achado da conversão.** O pro converte vantagens
+grandes muito melhor (84% vs 68% na faixa +2k..4k), então esperava-se
+AUC maior; mas o pro também chega MENOS vezes a estados extremos aos
+15 min (desvio-padrão do gold_diff: 2.991 no pro vs 4.199 no solo
+queue; |diff| médio 2.311 vs 3.326 — medido nos dois datasets). Melhor
+conversão × distribuição mais apertada se cancelam no agregado.
+Narrativa completa para o TCC: dois achados aparentemente
+contraditórios, reconciliados por uma terceira medição — e a frase
+que resume: "profissionais convertem melhor, mas também permitem
+menos". Bônus de engenharia: `data/model_pro.joblib` salvo com as 3
+features compartilhadas — que são EXATAMENTE as que o feed de
+livestats do lolesports fornece, ou seja, o modelo do futuro "pro ao
+vivo" (planejamento v2, passo 4.2) já está treinado.
+
+**2. Dragões por tipo como feature (ideia da calculadora do OE) —
+testado, 7º experimento negativo.** Extraído o `monsterSubType` dos
+ELITE_MONSTER_KILL das 11k timelines (6 subtipos vistos; Elder nunca
+aparece até os 25 min, como esperado pelos timers). Substituir
+`dragon_diff` agregado por 6 diffs por elemento: AUC LEVEMENTE PIOR em
+todos os cortes (15min: 0,8319→0,8295; 20: 0,8661→0,8651; 25:
+0,9013→0,8999). Interpretação: até os 25 min importa QUANTOS dragões
+(tempo/prioridade de mapa), não QUAIS — o efeito de alma/estaqueamento
+só apareceria mais tarde; e fatiar uma feature informativa em 6
+esparsas dilui o sinal para árvores com 10k amostras. A calculadora do
+OE usa tipos porque modela o jogo INTEIRO (não um corte aos 15) e com
+590k+ jogos. Registrado como negativo com explicação — a série de
+experimentos (agora 7) é seção pronta de limitações/discussão.
+
+## 2026-07-05 — Sprint 3: perfis de jogador e busca unificada
+
+Pessoas, não só campeões — três endpoints e duas páginas novas:
+
+- **`GET /stats/player/{puuid}`** + página `/jogadores/:puuid` (perfil
+  solo queue): Riot ID, tier/PDL, win rate geral, forma recente
+  (últimas 10), campeão mais jogado, pool de campeões (jogos/WR/KDA,
+  linkando para a página do campeão) e últimas partidas (linkando para
+  a análise da partida). O card "melhor jogador" da Home agora navega
+  para o perfil.
+- **`GET /stats/pro/player/{nome}`** + página
+  `/competitivo/jogadores/:nome` (perfil profissional): temporadas
+  (ano/time/liga com jogos e WR), pool de campeões da carreira (ícones
+  via match de nomes com o solo queue) e totais. Ex.: Faker — 1.485
+  jogos no acervo, 66,5% de carreira, T1, meio (conferido contra SQL
+  direto: 1.485/66,53%, exato).
+- **`GET /stats/players/search?q=`** + busca UNIFICADA na Home: o campo
+  agora busca campeões (filtro local), jogadores de solo queue (por
+  Riot ID) e profissionais (pro_players), em seções separadas no
+  dropdown, cada um navegando para a página certa.
+
+Verificação: typecheck limpo; Faker cross-checado contra SQL; Playwright
+navegou busca → dropdown com seções, perfil pro (temporadas 2014-2026
+renderizando) e card da Home → perfil solo (CBrayanB#BR2, 87,5% em 40
+partidas — bate com o highlight já validado em sessões anteriores);
+zero erros de console. Nota de operação: o dev server do Vite tinha
+caído entre sessões — subiu de novo com `npm run dev` (os dois
+processos, API e Vite, não sobrevivem a reboot; ver comandos no
+README/handoff).
+
+O que ficou de fora do sprint (consciente): jogadores no MONTAR PARTIDA
+com shrinkage é o sprint 4 (o próximo); ligação automática solo↔pro de
+um mesmo jogador ficou registrada no planejamento como "não forçar sem
+match confiável".
+
+## 2026-07-05 — Sprint 4: jogadores no Montar Partida, com shrinkage
+
+O sprint mais delicado estatisticamente do planejamento v2 — fecha a
+pendência antiga que motivou o caso Nocturne+Orianna: um jogador com
+poucos jogos não pode empurrar a estimativa para o extremo.
+
+**Mecânica (shrinkage bayesiano)**: para cada lane com jogador
+selecionado, `shrunk_wr = (jogos×wr_jogador + k×wr_campeão) / (jogos+k)`
+com `k=15` (jogos "equivalentes" do prior). Poucos jogos → shrunk fica
+perto da taxa geral do campeão (efeito ≈ 0); muitos jogos → shrunk se
+aproxima do desempenho real observado. O efeito entra na lane em
+log-odds: `logit(lane_final) = logit(lane_composição) + logit(shrunk_azul)
+- logit(wr_campeão_azul) - [mesmo termo do vermelho]` — mesmo padrão de
+combinação em log-odds já usado para estado da partida.
+
+**Backend**: `Composition` ganhou `blue_players`/`red_players`
+(posição→puuid, opcional). Cada lane agora retorna `composition_win_rate`
+(estimativa sem jogador, preservada para comparação), `blue_player`/
+`red_player` (nome, jogos no campeão, wr bruto, wr após shrinkage,
+delta em log-odds) quando informados. Testado com um caso real
+(Krastyel#mel, 18 jogos de Ahri, 66,7% bruto): shrunk → 60,1%, elevando
+a lane Ahri×Zed de 55,3% (só composição) para 63,1%.
+
+**Frontend**: novo card "Jogadores (opcional)" no Montar Partida
+(mesmo padrão do card de estado — toggle "Incluir"), com um
+`PlayerCombobox` por posição/lado (busca por Riot ID no servidor,
+desabilitado até o campeão daquela posição ser escolhido). Cada lane
+na tabela de resultado ganhou uma linha de explicação — a matemática do
+shrinkage é visível, não uma caixa-preta: "Krastyel#mel (azul): 18
+jogos, 66,7% bruto → 60,1% após shrinkage — sem jogador, a lane seria
+55,3%."
+
+**Bug pego na própria verificação**: renomeei o campo do backend
+(`champion_only_win_rate` → `composition_win_rate`, nome mais preciso)
+mas esqueci de reiniciar a API depois — o servidor continuou servindo
+o nome antigo, e o front (já esperando o nome novo) mostrou "NaN%" no
+texto explicativo. Pego pelo teste Playwright de ponta a ponta, não
+por inspeção de código; reiniciada a API, número correto (55,3%)
+apareceu. Lição de novo: mudança de contrato de API SEMPRE exige
+restart, mesmo mudanças "só de nome".
+
+Verificação: typecheck limpo; curl comparado com Playwright (mesmo
+resultado, 60,1%/63,1%/55,3%); fluxo completo testado (toggle → busca
+→ seleção → análise → nota de shrinkage renderizada); zero erros de
+console.
+
+## 2026-07-05 — Sprint 5 (em andamento): multi-região
+
+Diferente do esperado no planejamento, a chave de DESENVOLVEDOR seguia
+válida — não foi preciso esperar a Personal API Key pra começar. Testei
+(`challenger_league()` numa instância nova) e ainda respondia, então
+parametrizei o pipeline e já disparei um piloto real.
+
+**Parametrização (schema não mudou nada — já tinha `platform_id`/
+`platform` prontos desde o início):**
+- `src/riot/client.py`: `RiotClient` agora recebe `platform`/`region`
+  por instância (antes eram só as constantes globais do `.env`).
+  `PLATFORM_TO_REGION` mapeia plataforma → região de roteamento do
+  match-v5 (br1/la1/la2/na1→americas, kr/jp1→asia,
+  euw1/eun1/tr1/ru→europe, oc1 e as 5 SEA→sea). Novo `master_league()`.
+  Nota registrada no código: a janela de rate limit é por instância —
+  duas plataformas que roteiam pra mesma região (br1+na1, por exemplo)
+  têm, na prática, o mesmo limite real da Riot; coletar sequencial (como
+  já fazemos) evita estourar isso, paralelo não.
+- `src/collect/seed_players.py`: `--platforms` (várias) × `--tiers`
+  (CHALLENGER/GRANDMASTER/MASTER). Rodado para kr/euw1/na1 challenger+
+  grandmaster: 3.111 jogadores novos (1.000/1.081/1.030).
+- `src/collect/collect_matches.py`: agrupa jogadores por `platform`
+  (coluna já existe), um `RiotClient` por grupo, sequencial entre
+  plataformas.
+
+**Piloto real disparado** (`--platforms kr euw1 na1 --players 20
+--matches-per-player 8`, rodando em background): coleta de verdade, não
+simulação. Nos primeiros minutos já chegou dado: **EUW1 com 131
+partidas, vermelho vencendo 43,7%** — o OPOSTO do BR (56,3%)! Sinal
+inicial forte de que o viés vermelho é específico do BR (ou da
+combinação BR+elo altíssimo), não do solo queue de elo alto em geral —
+exatamente a pergunta de tese que o sprint queria responder. Número
+ainda preliminar (amostra pequena), mas a direção já é informativa.
+
+**Endpoint + seção no Dashboard**: `GET /stats/regions` (win rate do
+vermelho + duração média por `platform_id`, mesmo ângulo do
+`/stats/highlights`). Card novo "Viés de lado por região" na seção
+"Cobertura do dataset" do Dashboard — barras espelhadas por
+plataforma, e a leitura já reage ao número de regiões: com 1 só, avisa
+que é preliminar; com 2+, compara a variação entre elas. Verificado:
+BR1 56,3%/11.936 partidas, EUW1 43,7%/87 partidas (no momento do
+screenshot) renderizando corretamente, zero erros de console.
+
+**Ainda em andamento**: a coleta do piloto (KR/EUW1/NA1) continua
+rodando; ao terminar, atualizar os números deste registro e considerar
+rerodar `build_features`/`export_model` incluindo as novas regiões (ou
+manter o modelo BR-only e tratar as demais regiões só como dado
+analítico/comparativo por enquanto — decisão a tomar quando o volume
+por região for suficiente).
+
 ## Próximos registros pendentes
 
-- NLQ ainda não conhece as tabelas pro_games/pro_players — adicionar ao
-  schema_context (e RE-RODAR o evaluate_nlq, regra da casa) quando
-  quisermos perguntas em linguagem natural sobre o competitivo.
+- **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
+  da Riot mesmo assim (a chave de dev expira em 24h e tem limite bem
+  menor — não escala pra coleta grande multi-região).
+- Fechar o piloto multi-região (ver acima) e decidir o próximo tamanho
+  de amostra por região.
 - Quando a coleta adicional de solo queue terminar: rerodar
   `load_items`, `build_features`, `export_model` e atualizar as tabelas
   de métricas.

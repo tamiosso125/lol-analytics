@@ -118,6 +118,29 @@ BENCHMARK: list[tuple[str, str]] = [
            GROUP BY pt.champion_name HAVING COUNT(*) >= 10
            ORDER BY wr DESC LIMIT 1""",
     ),
+    # ---- competitivo (pro play, Oracle's Elixir) ----
+    (
+        "Quantos jogos profissionais de 2026 existem no banco?",
+        "SELECT COUNT(DISTINCT game_id) FROM pro_games WHERE year = 2026",
+    ),
+    (
+        "Qual o win rate do lado azul no competitivo em 2026?",
+        "SELECT AVG(win::int) FROM pro_games WHERE side = 'Blue' AND year = 2026",
+    ),
+    (
+        "Quais os 5 campeões mais jogados no competitivo em 2026?",
+        """SELECT pp.champion, COUNT(*) AS jogos
+           FROM pro_players pp
+           JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side
+           WHERE pg.year = 2026
+           GROUP BY pp.champion ORDER BY jogos DESC LIMIT 5""",
+    ),
+    (
+        "Qual liga teve mais jogos profissionais em 2026?",
+        """SELECT league, COUNT(DISTINCT game_id) AS jogos
+           FROM pro_games WHERE year = 2026
+           GROUP BY league ORDER BY jogos DESC LIMIT 1""",
+    ),
 ]
 
 

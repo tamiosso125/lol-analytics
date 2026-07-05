@@ -1,213 +1,160 @@
 # Handoff — Bellestraiko (TCC II)
 
-> Renomeado 2× em 2026-07-03: "LoL Analytics" colidia com lolalytics.com,
-> "Hextech Lab" com um canal do YouTube. Nome atual: Bellestraiko.
+Documento para quem retomar o projeto "a frio" — resume o que existe,
+por que existe, o que falta e onde olhar. Não repete o histórico
+cronológico (`docs/diario_execucao.md`), a referência de scripts
+(`docs/scripts.md`) nem o plano de próximos passos
+(`docs/planejamento_v2.md`) — é o mapa que aponta para os três.
 
-Documento para quem retomar o projeto "a frio" (você mesmo depois de um tempo,
-ou outra pessoa) — resume o que existe, por que existe, o que falta e onde
-olhar para mais detalhes. Não repete o histórico passo a passo (isso está em
-`docs/diario_execucao.md`) nem a referência de cada script (`docs/scripts.md`)
-— este documento é o mapa de alto nível que aponta para os dois.
+> Nome: renomeado 2× em 2026-07-03 — "LoL Analytics" colidia com
+> lolalytics.com e "Hextech Lab" com um canal do YouTube. Nome atual:
+> **Bellestraiko**. O diretório do repo continua `lol-analytics`.
 
 ## O que é o projeto
 
-TCC II (CS, Unisinos): plataforma de análise de esports de League of Legends.
-Coleta partidas ranqueadas (fila solo, queue 420) de Challenger/Grandmaster do
-Brasil via Riot API, guarda em PostgreSQL, treina modelos de predição de
-vitória "em jogo" (estado da partida em um corte de tempo — não pré-jogo por
-composição), expõe tudo via API FastAPI e um front end React, e tem uma
-interface de perguntas em linguagem natural (text-to-SQL) sobre os dados.
+TCC II (CS, Unisinos): plataforma de análise de esports de League of
+Legends com DOIS datasets complementares:
 
-**Estado atual**: as 6 etapas do roadmap original estão concluídas com dados
-reais. Dataset: **10.402 partidas**, 10.537 jogadores, 11 patches (16.10 a
-16.13), 96.696 banimentos. Front end React é a interface principal; o
-Streamlit (`src/dashboard/app.py`) segue existindo como alternativa mais
-simples (consulta o banco direto, não passa pela API).
+1. **Solo queue** (Riot API): partidas ranqueadas Challenger/GM BR
+   (fila 420) — ~11,8k partidas e crescendo (coleta retomável), com
+   JSON bruto + timelines guardados para reprocessamento.
+2. **Competitivo** (Oracle's Elixir): 99.259 jogos profissionais de
+   2014-2026 (LCK/LPL/LEC/LTA/CBLOL etc.), carregados de CSVs anuais.
+
+Sobre eles: modelos de predição de vitória "em jogo" por fase
+(10/15/20/25 min), interface de perguntas em linguagem natural
+(text-to-SQL com validação), e um front React com análises que sempre
+carregam o "porquê" junto do número.
 
 ## Arquitetura (visão rápida)
 
 ```
-Riot API → coletor (rate-limited) → raw_matches/raw_timelines (JSONB)
-                                          │ ETL (src/etl/load_matches.py)
-                                          ▼
-                 matches / teams / participants / players / bans (normalizadas)
-                                          │
-              ┌───────────────────────────┼───────────────────────────┐
-              ▼                           ▼                           ▼
-   features por fase (10/15/20/25   modelos RF/XGB/MLP          API FastAPI
-   min, build_features.py)          por fase (export_model.py)  (src/api/main.py)
-                                                                       │
-                                                          ┌────────────┴────────────┐
-                                                          ▼                         ▼
-                                                  frontend/ (React,           Streamlit
-                                                  interface principal)        (alternativa)
+Riot API → coletor rate-limited → raw_matches/raw_timelines (JSONB)
+                                        │ ETLs
+                                        ▼
+        matches/teams/participants/players/bans/item_events
+                                        │
+Oracle's Elixir CSVs → data/pro/ → pro_games/pro_players
+                                        │
+          ┌─────────────────────────────┼──────────────────────┐
+          ▼                             ▼                      ▼
+  features por fase             modelos XGBoost         API FastAPI (main.py)
+  (build_features.py)           por fase                       │
+                                (export_model.py)              ▼
+                                                    frontend/ React (principal)
+                                                    + Streamlit (alternativa)
 ```
 
-Decisão central do escopo de predição: **estado em jogo, não pré-jogo por
-composição** (metodologia de Hodge et al., 2021) — features são diffs
-azul−vermelho (ouro, XP, abates, torres, dragões) extraídos das timelines em
-4 cortes de tempo, nunca totais finais da partida (isso seria vazamento de
-dados). Ver o aviso no topo de `src/features/build_features.py`.
-
-Um segundo modelo, **não-ML**, existe para composições: `/compose` (usado
-pela página "Montar Partida") é uma heurística de win rates históricos de
-matchup por lane e sinergia de dupla — deliberadamente separado do modelo ML
-e sem o viés de lado embutido. A UI é explícita sobre essa distinção porque a
-banca tende a perguntar sobre ela.
+Decisões centrais: predição usa SÓ estado pré-corte da timeline (nunca
+totais finais — vazamento de dados; aviso em `build_features.py`); o
+`/compose` do Montar Partida é heurística de win rates históricos,
+deliberadamente separada do modelo ML e sinalizada como tal na UI.
 
 ## Onde estão as coisas
 
-- **Schema**: `db/schema.sql` — `players`, `raw_matches`/`raw_timelines`
-  (JSONB bruto para reprocessamento), `matches`, `teams`, `participants`,
-  `bans`.
-- **Coleta**: `src/collect/` (`seed_players.py`, `collect_matches.py`,
-  `backfill_names.py`) — rate limit de 100 req/2min (chave de
-  desenvolvedor), expira a cada 24h.
-- **ETL**: `src/etl/load_matches.py` — popula as tabelas normalizadas a
-  partir do JSON bruto; idempotente (pode reprocessar).
-- **Features**: `src/features/build_features.py` — `CUTOFFS = [10, 15, 20,
-  25]`; gera `data/features_phases.csv` (todas as fases) e
-  `data/features.csv` (só o corte de 15 min, compat. com scripts antigos).
-- **Modelos**: `src/models/` — `train_baseline.py` (RF/XGB/MLP sem tuning),
-  `tune_models.py` (GridSearchCV + calibração), `export_model.py` (treina e
-  exporta um modelo POR FASE para produção, mais importância SHAP),
-  `explain_shap.py` (gráficos para o capítulo de explicabilidade).
-- **API**: `src/api/main.py` — FastAPI, todos os endpoints de
-  estatísticas/predição/composição/NLQ. Ver `docs/scripts.md` para a lista
-  completa de rotas.
-- **NLQ**: `src/nlq/` — `nl_to_sql.py` (geração + validação de segurança +
-  execução), `schema_context.py` (prompt de sistema com o schema e as
-  regras), `evaluate_nlq.py` (benchmark de 22 perguntas, execution accuracy).
-- **Front end**: `frontend/` — Vite + React 19 + TypeScript + Tailwind v4 +
-  Recharts + TanStack Query + React Router. Consome só a API (nunca o
-  banco). Páginas: Início, Dashboard, Campeões (+ detalhe), Partidas (+
-  análise com mapa de calor), Consulta NL, Predição, Montar Partida,
-  Explicabilidade.
-- **Streamlit**: `src/dashboard/app.py` — alternativa mais simples, consulta
-  o banco direto. Único script do projeto que não roda via `python -m`
-  (insere `sys.path` manualmente no topo).
-- **Documentação**: `docs/diario_execucao.md` (histórico cronológico de
-  decisões e resultados — a fonte para escrever os capítulos do TCC),
-  `docs/scripts.md` (referência de cada script/endpoint/página).
-- **Memória do assistente**: se você está retomando isso com o Claude Code,
-  o histórico de contexto (preferências, feedback, estado do projeto) está
-  em `C:\Users\Home\.claude\projects\...\memory\` — não precisa
-  reconstruir isso na mão, ele lê sozinho.
+- **Schema**: `db/schema.sql` — solo queue (`players`, `raw_*`,
+  `matches`, `teams`, `participants`, `bans`, `item_events`) +
+  competitivo (`pro_games`, `pro_players`).
+- **Coleta**: `src/collect/` — `seed_players`/`collect_matches`
+  (Riot API, chave dev expira em 24h), `backfill_names`, `collect_pro`
+  (Oracle's Elixir; o Drive público tem quota diária — fallback é
+  baixar manualmente para `data/pro/`).
+- **ETLs**: `src/etl/` — `load_matches` (normalização match-v5),
+  `load_items` (compras/vendas com ITEM_UNDO aplicado; TRUNCATE+rebuild;
+  rodar após coleta nova), `load_pro` (CSVs do OE; idempotente por ano).
+- **Features/modelos**: `src/features/build_features.py` (CUTOFFS
+  10/15/20/25), `src/models/` (train_baseline, tune_models,
+  export_model, explain_shap). Produção: XGBoost n=500/lr=0.01/depth=3
+  por fase em `data/models_phases.joblib`.
+- **API**: `src/api/main.py` — todos os endpoints (stats solo queue,
+  `/stats/pro/*` com `?year=` padrão mais-recente, análise de partida
+  com estado por minuto, heat map/posições, itens por campeão,
+  `/compose`, `/predict`, NLQ). Lista completa em `docs/scripts.md`.
+- **NLQ**: `src/nlq/` — `nl_to_sql.py`, `schema_context.py` (⚠️ regra:
+  qualquer mudança aqui exige re-rodar `evaluate_nlq` — já regrediu
+  silenciosamente 2×), `evaluate_nlq.py` (benchmark, exigência da
+  banca).
+- **Front**: `frontend/` — páginas: Início, Dashboard, Campeões
+  (+detalhe com itens), Partidas (+análise com heat map, objetivos por
+  minuto e modo "e se"), Competitivo (seletor de ano), Consulta NL
+  (Explicação como aba padrão), Predição, Montar Partida (combobox de
+  busca, estado opcional combinado ao ML), Explicabilidade.
+- **Testes**: `tests/smoke_test.py` (roda em tempdir — NÃO toca dados
+  reais) e `tests/validate_predictions.py` (bateria comportamental do
+  modelo de produção).
+- **Docs**: `diario_execucao.md` (fonte primária para escrever o TCC),
+  `scripts.md` (referência), `planejamento_v2.md` (próxima fase, 8
+  sprints).
+- **Memória do assistente** (Claude Code): contexto persistente em
+  `C:\Users\Home\.claude\projects\...\memory\` — lido automaticamente.
 
 ## Números que importam (para o texto do TCC)
 
-Modelos tunados no dataset completo (10.295 partidas com features aos 15
-min; ver `reports/tune_models_10k.log` e a entrada de 2026-07-03 no diário):
+Modelos tunados, solo queue 10k+ (logs em `reports/*_10k.log`):
 
-| Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
-|---|---|---|---|---|---|
-| MLP | 0,7522 | 0,7268 | 0,6919 | 0,7089 | **0,8325** |
-| XGBoost | 0,7501 | 0,7212 | 0,6959 | 0,7083 | 0,8319 |
-| RandomForest | 0,7507 | 0,7186 | 0,7039 | 0,7111 | 0,8305 |
+| Modelo | Acurácia | AUC-ROC |
+|---|---|---|
+| MLP | 0,7522 | 0,8325 |
+| XGBoost (produção) | 0,7501 | 0,8319 |
+| RandomForest | 0,7507 | 0,8305 |
 
-XGBoost tunado usado em produção (por fase): `n_estimators=500,
-learning_rate=0.01, max_depth=3`.
+NLQ: **91-95% execution accuracy** (flutua entre execuções; 22
+perguntas; citar a faixa, não um número cravado; re-medir ao escrever).
 
-Interface NL: **20/22 = 91% execution accuracy** (não 95% — esse número
-antigo ficou defasado quando o prompt cresceu; ver "Limitações conhecidas"
-abaixo). Re-medir com `python -m src.nlq.evaluate_nlq` sempre que
-`schema_context.py` mudar.
-
-Achado de tese (inversão do consenso da literatura): a literatura geral
-aponta leve vantagem do lado azul no solo queue (~50,6–53%), mas neste
-recorte (Challenger/GM BR) o **lado vermelho vence 56,3%** das partidas —
-estável em todos os 11 patches. Hipótese registrada no diário: counter-pick
-garantido pesa mais no elo onde todos punem draft, somado ao acesso ao pit
-do dragão.
-
-Importância SHAP por fase: `tower_diff` sai de quase irrelevante aos 10-15
-min (as placas de torre só caem aos 14 min) para um fator relevante no late
-game — a razão exata está no gráfico de evolução da página Explicabilidade,
-calculada dinamicamente do JSON (não cite um multiplicador fixo no texto do
-TCC, ele muda a cada retreino).
+**Achados de tese (os dois lados do viés de lado):**
+- Solo queue Challenger/GM BR: **vermelho vence 56,3%** (estável entre
+  patches) — contraria a literatura.
+- Competitivo (99k jogos): **azul vence ~53%**, estável ATRAVÉS DOS
+  ANOS — a literatura descreve o pro; nosso solo queue é o outlier.
+  Hipótese documentada: counter-pick garantido (solo queue) vs
+  prioridade de primeiro pick (pro).
+- Conversão de vantagem: com +2k a +4k de ouro aos 15, o pro vence
+  84,0% vs ~68% no solo queue — "macro ganha jogo", quantificado.
+- SHAP por fase: torres saem de ~0 (10-15 min) para dezenas de vezes
+  mais importância aos 25 (as placas caem aos 14) — razão de existir
+  um modelo por fase.
+- **6 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
+  dispersão de time, tuning por fase, calibração extra, ouro em itens,
+  split def/off): a abordagem atual está no teto do que features
+  agregadas de estado permitem — material para a seção de limitações.
+- Validação externa: o próprio Oracle's Elixir publica uma calculadora
+  de win probability early-game com a mesma estrutura da nossa
+  Predição.
 
 ## Como rodar
 
-Ver `README.md` para o passo a passo completo. Resumo:
-
 ```bash
-# backend
-uvicorn src.api.main:app --reload          # API em :8000
-
-# frontend
-cd frontend && npm install && npm run dev  # Vite em :5173 (precisa da API rodando)
-
-# alternativa mais simples
-streamlit run src/dashboard/app.py
+# API (terminal 1)           # front (terminal 2)
+uvicorn src.api.main:app     cd frontend && npm run dev
+  --reload --port 8000       # http://localhost:5173
 ```
 
-Pré-requisitos: PostgreSQL com o schema aplicado (`python -m src.db`),
-`.env` preenchido (`RIOT_API_KEY` — expira em 24h — `DATABASE_URL`,
-`ANTHROPIC_API_KEY` para o NLQ).
+Pré-requisitos: Postgres com schema (`python -m src.db`), `.env`
+(RIOT_API_KEY 24h, DATABASE_URL, ANTHROPIC_API_KEY). Ordem completa de
+pipeline no README. Após coleta nova: `load_items` + `build_features` +
+`export_model` + restart da API.
 
-## Limitações conhecidas (documentar no texto, não "resolver às pressas")
+## Limitações conhecidas (documentar, não "consertar às pressas")
 
-- **Amostras pequenas em matchups/sinergias específicos**: perguntas do
-  tipo "campeão X + campeão Y" no NLQ ou no `/compose` podem ter n < 20 e
-  o resultado varia muito por acaso. O `/compose` já corta em ≥10
-  (matchup) / ≥20 (sinergia) jogos e sinaliza a fonte; o NLQ (desde a
-  revisão de 2026-07-03) avisa explicitamente quando a amostra é pequena e
-  separa "leitura de jogo" (conhecimento do LLM sobre o jogo, rotulado
-  como tal) da leitura estatística. Correção formal (shrinkage/intervalo
-  de confiança) é um incremento futuro, não implementado.
-- **NLQ benchmark tem 2 falhas conhecidas e aceitas**: uma pergunta gera
-  uma coluna extra de contagem quando a pergunta menciona um limiar de
-  jogos; outra responde com o nome do time ("Vermelho") em vez do
-  team_id numérico quando a própria pergunta usa esse nome — ambas
-  corretas para um humano, mas o benchmark faz exact-match contra o SQL
-  de referência. Deliberadamente não "consertadas" para não fazer
-  overfitting do prompt ao benchmark.
-- **Cobertura por patch é desigual**: o patch 16.13 concentra ~50% do
-  dataset; métricas de meta (win/ban rate por campeão) refletem sobretudo
-  essa versão. Isso está exposto no Dashboard (gráfico de cobertura), não
-  escondido.
-- **Team builder (Montar Partida) não modela jogadores nem itens/nível
-  explícitos** — só campeões e um estado agregado opcional (ouro/XP/
-  abates/objetivos por diff, combinado ao modelo ML em log-odds). Ver
-  pendências abaixo.
-- **Chave de API de desenvolvedor** expira a cada 24h e tem rate limit de
-  100 req/2min — coleta adicional precisa ser rodada em sessões, ou trocar
-  por uma Personal API Key (sem expiração diária) se for coletar mais.
+- Amostras pequenas em matchups/sinergias específicos — NLQ avisa e
+  rotula "Leitura de jogo"; shrinkage formal é o sprint 4 do plano.
+- Benchmark NLQ tem 1-2 falhas benignas aceitas (formatação, não erro)
+  — deliberadamente não superajustado.
+- Cobertura por patch desigual no solo queue (16.13 domina) — exposto
+  no Dashboard.
+- Wave/micro state não existe em nenhuma API da Riot — caminhos reais
+  (replays .rofl, CV no minimapa) pesquisados e documentados no diário
+  como trabalhos futuros; o modo "e se" responde contrafactuais de
+  ESTADO, não de ação.
+- Monotonicidade isolada de kill/tower_diff imperfeita (fatores
+  redundantes/raros) — característica documentada na bateria de
+  validação, `monotone_constraints` é opção se a banca cobrar.
 
-## Pendências / próximos passos
+## Próximos passos
 
-Em ordem aproximada de valor para o TCC:
-
-1. **Escrever os capítulos do TCC II** usando `docs/diario_execucao.md`
-   como fonte primária — é onde cada decisão, número e achado já está
-   registrado com contexto e data. Não é preciso reconstruir nada, é
-   compilar.
-2. **Team builder — incrementos da visão original**: jogadores na análise
-   de composição (hoje só campeões) e champion select competitivo. Ver
-   `[[project-team-builder]]` na memória do assistente para o contexto
-   completo do que já foi decidido.
-3. **Correção estatística de amostra pequena** (shrinkage/IC) para
-   sinergias/matchups específicos, tanto no `/compose` quanto nas respostas
-   do NLQ.
-4. **Meta de predição em tempo real** (jogo ao vivo) — é uma direção
-   futura explicitamente adiada; não foi bloqueada arquiteturalmente (o
-   `/predict` já aceita qualquer minuto/estado), mas nada foi feito ainda.
-5. Coleta adicional se quiser diversificar a cobertura de patches (hoje
-   desbalanceada para o 16.13).
-
-## Regras/convenções que valem a pena lembrar
-
-- Todo script roda via `python -m src.xxx` (exceto o Streamlit, que precisa
-  do `sys.path` manual — comentado no topo do arquivo).
-- Nunca usar estado pós-corte ou totais finais como feature de predição em
-  jogo — é vazamento de dados. O schema do NLQ também avisa o LLM sobre
-  isso explicitamente (perguntas tipo "quanto de ouro tinha aos 21 min" não
-  são respondíveis pelo schema relacional, só pela timeline bruta).
-- Ícones de campeão vêm do CDN CommunityDragon por `champion_id` (evita
-  divergência de nome entre o match-v5 da Riot e o Data Dragon).
-- Ao mexer em schema ou features, atualizar o README (regra do projeto).
-- Ao mexer no `schema_context.py` do NLQ, **rodar `evaluate_nlq.py` de
-  novo** — já regrediu uma vez silenciosamente (95% → 77%) sem essa
-  disciplina.
-- Testes (`tests/smoke_test.py`) rodam em diretório temporário desde a
-  revisão de 2026-07-03 — não devem mais tocar em `data/features.csv` real.
+Seguir `docs/planejamento_v2.md` (8 sprints): sprint 0 = pedir a
+Personal API Key da Riot (aprovação demora); sprint 1 = competitivo em
+tudo (NLQ, campeão); sprint 2 = modelo pro + tipos de dragão; sprints
+3-4 = perfis de jogador + Montar Partida com shrinkage; sprint 5 =
+multi-região; sprint 6 = MVP tempo real (replay-ao-vivo); 7+ pós-TCC.
+Em paralelo: escrever os capítulos do TCC a partir do diário.

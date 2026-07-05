@@ -40,11 +40,16 @@ deslizante de 95 req/2min, abaixo do limite real de 100) e retry em
 `match_ids_by_puuid`, `match`, `timeline`. Não é executável diretamente.
 
 ### `src/collect/seed_players.py`
-Busca os ladders Challenger e Grandmaster (fila 420) na Riot API e faz
-upsert na tabela `players` (puuid, tier, liga, pontos).
+Busca os ladders Challenger/Grandmaster/Master (fila 420) na Riot API e
+faz upsert na tabela `players` (puuid, tier, liga, pontos, platform).
+Multi-região (sprint 5 do planejamento v2): `--platforms` aceita várias
+plataformas na mesma chamada, cada uma com seu próprio `RiotClient`
+(rate limit por instância).
 
 **Uso:** `python -m src.collect.seed_players`
-**Lê:** Riot API (`challengerleagues`, `grandmasterleagues`).
+(padrão: só a plataforma do `.env`) ou
+`python -m src.collect.seed_players --platforms br1 kr euw1 na1 --tiers CHALLENGER GRANDMASTER MASTER`
+**Lê:** Riot API (`challengerleagues`/`grandmasterleagues`/`masterleagues`).
 **Escreve:** tabela `players`.
 
 ### `src/collect/backfill_names.py`
@@ -57,15 +62,21 @@ respeitando o rate limit; processa só quem ainda está sem nome.
 **Escreve:** colunas `game_name`/`tag_line` de `players`.
 
 ### `src/collect/collect_matches.py`
-Para os N jogadores com mais LP em `players`, busca os últimos
-match_ids (fila 420) e baixa match + timeline de cada um que ainda não
-está no banco. JSON bruto vai para `raw_matches`/`raw_timelines`; cada
-partida é normalizada na hora via `load_one` (ETL).
+Para os N jogadores com mais LP em `players` (por plataforma), busca os
+últimos match_ids (fila 420) e baixa match + timeline de cada um que
+ainda não está no banco. JSON bruto vai para `raw_matches`/
+`raw_timelines`; cada partida é normalizada na hora via `load_one`
+(ETL). Multi-região (sprint 5): agrupa os jogadores selecionados por
+`platform` e usa um `RiotClient` roteado pra região certa por grupo,
+sequencial entre plataformas (nunca paralelo — mesmo quando duas
+plataformas roteiam pra mesma região, ex. br1+na1→americas).
 
 **Uso:** `python -m src.collect.collect_matches --players 730 --matches-per-player 40`
-(flags: `--players` N de jogadores a considerar, `--matches-per-player`
-quantos match_ids recentes buscar por jogador, `--no-timeline` para pular
-o download da timeline).
+(todas as plataformas em `players`) ou
+`python -m src.collect.collect_matches --platforms kr euw1 na1 --players 20 --matches-per-player 8`
+(flags: `--platforms` filtra plataformas, `--players` N por plataforma,
+`--matches-per-player` quantos match_ids recentes buscar por jogador,
+`--no-timeline` para pular o download da timeline).
 **Lê:** tabela `players`; Riot API (match-v5 ids/match/timeline).
 **Escreve:** `raw_matches`, `raw_timelines`, e (via ETL) `matches`,
 `teams`, `participants`.
@@ -186,6 +197,23 @@ pela API no startup), `data/model.joblib` (corte de 15, compat.),
 `reports/shap_importance_phases.json` e `reports/shap_importance.json`.
 **Observação:** rodar de novo sempre que as features forem regeneradas.
 
+### `src/models/train_pro.py`
+Comparação formal solo queue × competitivo (sprint 2 do planejamento
+v2): o mesmo XGBoost tunado de produção, avaliado por CV 5-fold, sobre
+as features COMPARTILHADAS aos 15 min (gold/xp/kill diff — existem nos
+dois datasets) e sobre o conjunto completo de cada um. Também treina e
+salva `data/model_pro.joblib` (3 features compartilhadas, todos os anos
+do pro) — insumo do futuro "pro ao vivo" (o feed de livestats fornece
+exatamente ouro/XP/abates). Resultado de 2026-07-05: AUC praticamente
+idêntica (solo 0,8255 × pro 0,8283 nas mesmas features) — o pro
+converte vantagens grandes melhor, mas chega menos vezes a vantagens
+extremas (desvio do gold_diff aos 15: 2.991 pro × 4.199 solo), e os
+efeitos se cancelam no agregado. Ver diário do mesmo dia.
+
+**Uso:** `python -m src.models.train_pro`
+**Lê:** `pro_games` (banco), `data/features.csv`.
+**Escreve:** `data/model_pro.joblib`, stdout (tabela comparativa).
+
 ### `src/models/explain_shap.py`
 Treina um XGBoost (hiperparâmetros vindos do `tune_models.py`) e gera
 gráficos SHAP (importância global em barras + beeswarm) para o capítulo
@@ -266,9 +294,13 @@ explicitamente rotulado como conhecimento do jogo (não dos dados) e
 apontando se concorda ou discorda dos números.
 
 ### `src/nlq/evaluate_nlq.py`
-Validação metodológica da interface NL exigida pela banca: 22 perguntas
-de referência com SQL "gold", comparando o RESULTADO (não o texto) da
-query gerada com o da query de referência. Métrica: execution accuracy.
+Validação metodológica da interface NL exigida pela banca: 26 perguntas
+de referência com SQL "gold" (22 de solo queue + 4 do competitivo,
+incluindo o join duplo pro_players↔pro_games), comparando o RESULTADO
+(não o texto) da query gerada com o da query de referência. Métrica:
+execution accuracy — faixa medida: 85-95% (as falhas flutuantes são
+todas a família benigna "coluna COUNT extra em perguntas com limiar de
+jogos", documentada no diário).
 
 **Uso:** `python -m src.nlq.evaluate_nlq`
 **Requer:** `ANTHROPIC_API_KEY`.
@@ -288,6 +320,10 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   `min_games`, `limit`, `sort` (whitelist), `role` (posição) e `search`;
 - `GET /stats/champion/{nome}` — detalhe de um campeão: stats gerais,
   por posição, matchups na mesma lane (>= 15 jogos) e últimas partidas;
+- `GET /stats/champion/{nome}/pro` — presença/win rate do campeão no
+  COMPETITIVO (jogos, presença sobre o ano, quebra por liga; `?year=`
+  padrão mais recente; match de nome interno↔exibição igual ao
+  /stats/pro/champions);
 - `GET /stats/champion/{nome}/items` — itens finalizados mais
   construídos pelo campeão (>= 20 jogos com o item): jogos, % dos jogos
   do campeão, win rate e minuto médio da PRIMEIRA compra do item na
@@ -327,13 +363,34 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   zerado) e a estimativa combinada em log-odds
   (`logit(combinado) = logit(ML) + logit(composição)` — o termo ML já
   carrega a taxa-base/viés de lado; a composição entra como evidência
-  extra centrada em 50%);
-- `GET /stats/pro/overview`, `/stats/pro/gold15`, `/stats/pro/champions`
-  — dataset competitivo (pro_games/pro_players, Oracle's Elixir) para a
-  página `/competitivo`: visão geral + ligas, win rate azul por faixa de
-  ouro aos 15 min (mesmas faixas do /stats/gold15 para comparação
-  direta) e campeões do meta pro com o win rate de solo queue ao lado
-  (match de nomes normalizado; Wukong/Renata/Nunu têm CASE especial);
+  extra centrada em 50%). Aceita `blue_players`/`red_players` opcionais
+  (posição→puuid): ajusta cada lane pelo desempenho do jogador NAQUELE
+  campeão com shrinkage bayesiano (`k=15` jogos equivalentes de prior —
+  `shrunk = (jogos*wr_jogador + k*wr_campeão) / (jogos+k)`, aplicado em
+  log-odds sobre a lane); a resposta de cada lane traz
+  `composition_win_rate` (sem jogador) e `blue_player`/`red_player`
+  (nome, jogos, wr bruto e após shrinkage) para a UI mostrar o cálculo,
+  não só o resultado;
+- `GET /stats/regions` — cobertura e viés de lado (win rate do
+  vermelho) por `platform_id` — a mesma pergunta do viés de lado BR,
+  agora comparável entre plataformas (sprint 5 do planejamento v2);
+- `GET /stats/players/search?q=` — busca de jogadores nos DOIS datasets
+  (solo queue por game_name/Riot ID; competitivo por player_name) para
+  a busca unificada da Home (mínimo 3 caracteres);
+- `GET /stats/player/{puuid}` — perfil de jogador de solo queue:
+  identidade/tier, totais, pool de campeões, últimas partidas;
+- `GET /stats/pro/player/{nome}` — perfil de jogador profissional:
+  temporadas (ano/time/liga), pool de campeões da carreira (ícones via
+  match de nomes), totais; nome casado case-insensitive;
+- `GET /stats/pro/overview`, `/stats/pro/gold15`, `/stats/pro/champions`,
+  `/stats/pro/years` — dataset competitivo (pro_games/pro_players,
+  Oracle's Elixir, 13 anos/99k jogos) para a página `/competitivo`:
+  visão geral + ligas, win rate azul por faixa de ouro aos 15 min
+  (mesmas faixas do /stats/gold15 para comparação direta), campeões do
+  meta pro com o win rate de solo queue ao lado (match de nomes
+  normalizado; Wukong/Renata/Nunu têm CASE especial) e anos
+  disponíveis. Todos aceitam `?year=` (padrão: ano mais recente — sem o
+  filtro, as análises misturariam metas de eras diferentes);
 - `POST /ask` — pergunta em linguagem natural via `nl_to_sql.ask`
   (OBS: as tabelas pro_* ainda NÃO estão no schema_context do NLQ);
 - `POST /predict` — probabilidade de vitória do time azul a partir do
