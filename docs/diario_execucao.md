@@ -1806,16 +1806,161 @@ via AST + runtime e os 4 endpoints reescritos (`/stats/champions`,
 mais `/compose` e `/stats/highlights` (que usam `OPPONENT_JOIN_SQL`)
 testados contra o banco real via `TestClient` — todos OK.
 
+**Verificação E2E (pós-commit):** typecheck/build/TestClient provam
+que o código compila e a query roda, não que a página renderiza igual
+pro usuário — rodei API (uvicorn) + front (Vite) de verdade e dirigi
+via Playwright (Chromium, headless) contra as 11 rotas afetadas.
+- As 11 páginas carregaram sem nenhum erro de console/página.
+- `RecentGameRow` e `StatCard` renderizam igual ao antes (conferido
+  visualmente em ChampionDetail e PlayerProfile).
+- Cliquei os botões de fase em Explicabilidade (10/20/25/10 min) — o
+  `PHASES` compartilhado (antes duplicado) troca a fase ativa e o
+  gráfico corretamente a cada clique.
+- Cliquei uma linha de "última partida" em ChampionDetail (agora é
+  link, antes era só `<div>` — mesma UX que PlayerProfile já tinha) —
+  navegou certo para `/partidas/:id`.
+- Arrastei o slider "e se" de ouro no MatchDetail para os extremos —
+  `deltaColor` pinta azul (`text-chart-1`) no positivo e vermelho
+  (`text-chart-red`) no negativo, como esperado.
+- Testei o campeão inexistente (`/campeoes/NaoExiste123`) — cai limpo
+  no `ErrorNote`, sem quebrar layout.
+- Achado (não é bug, é comportamento pré-existente): a cor de
+  vitória/derrota (`winColor`) é por RESULTADO, não por lado do mapa —
+  quando o vermelho vence, o título "Time vermelho — Vitória" fica
+  AZUL (cor de vitória), não vermelho. Confunde à primeira vista numa
+  página que também usa azul/vermelho como identidade de lado (mapa de
+  calor, gráfico de diferença de ouro). Já existia antes da
+  consolidação (só movi a ternária pra `winColor()`); registrado aqui
+  para não reabrir como "bug" no futuro sem contexto.
+
+## 2026-07-06 — Experimento 7 (negativo): item_gold_diff
+
+Candidato apontado como "mais promissor" na entrada anterior: valor em
+ouro dos itens FINALIZADOS (mesmo filtro `_completed_item_ids` da API:
+não é componente de nada, comprável, custo >= 1100, não é
+consumível/trinket, mapa 11) que cada time ainda possui no corte de
+tempo — líquido de vendas, com `ITEM_UNDO` desfazendo a ação mais
+recente (mesma lógica do ETL `load_items.py`, mas calculado direto da
+timeline por `participantId`, sem precisar de `item_events`/join).
+Script isolado: `src/models/experiment_item_gold.py` (não mexe em
+`build_features.py`/`features.csv`/modelo em produção — só mede o
+ganho antes de decidir integrar).
+
+Hipótese: dois times com o mesmo `gold_diff` podem estar em estágios
+de build muito diferentes (componentes espalhados vs. item completo) —
+`item_gold_diff` capturaria isso. Resultado (XGBoost, CV 5-fold,
+52.589 linhas match×corte, 10.351-7.575 partidas por corte):
+
+| Corte | AUC baseline | AUC +item_gold_diff | Δ AUC |
+|---|---|---|---|
+| 10 min | 0.7375 | 0.7378 | +0.0003 |
+| 15 min | 0.8214 | 0.8224 | +0.0010 |
+| 20 min | 0.8574 | 0.8569 | -0.0005 |
+| 25 min | 0.8935 | 0.8933 | -0.0002 |
+
+Todos os deltas dentro do ruído entre folds — **não integrado** ao
+pipeline de produção. Motivo provável: `gold_diff` já captura quase
+toda a informação, já que ouro gasto em itens acompanha de perto o
+ouro total ganho — `item_gold_diff` é altamente redundante com uma
+feature que já existe. Sétimo experimento de feature engineering sem
+ganho (depois de barão/arauto, dispersão de time, tuning por fase e
+calibração).
+
+## 2026-07-06 — Experimento 8 (negativo): visão (ward_diff / ward_kill_diff)
+
+Último candidato de dado novo pendente da timeline. Duas features,
+mesma convenção dos diffs existentes (positivo = vantagem azul):
+`ward_diff` (wards colocadas azul − vermelho até o corte) e
+`ward_kill_diff` (wards inimigas destruídas azul − vermelho até o
+corte) — de `WARD_PLACED`/`WARD_KILL`, filtrando `creatorId`/`killerId
+== 0` (evento de sistema). Script: `src/models/experiment_vision.py`
+(mesmo formato do experimento de itens — isolado, não mexe em
+produção). Testadas isoladas e juntas, XGBoost, CV 5-fold,
+~55.757 linhas match×corte:
+
+| Corte | baseline | +ward_diff | +ward_kill_diff | +ambas |
+|---|---|---|---|---|
+| 10 min | 0.7375 | 0.7374 (−0.0001) | 0.7400 (+0.0025) | 0.7378 (+0.0003) |
+| 15 min | 0.8214 | 0.8216 (+0.0002) | 0.8218 (+0.0005) | 0.8215 (+0.0001) |
+| 20 min | 0.8574 | 0.8568 (−0.0006) | 0.8590 (+0.0016) | 0.8579 (+0.0005) |
+| 25 min | 0.8935 | 0.8939 (+0.0004) | 0.8938 (+0.0003) | 0.8941 (+0.0006) |
+
+Maior delta observado em qualquer experimento até agora
+(`ward_kill_diff` aos 10 min, +0.0025), mas ainda pequeno demais pra
+justificar a complexidade extra sem quantificar o desvio-padrão entre
+folds — **não integrado**. Oitavo experimento de feature engineering
+sem ganho prático. Fecha a lista de candidatos de dado novo já
+presentes na timeline (kills/torres/dragões/ouro/xp/itens/visão já
+testados); um ganho futuro provavelmente exige um tipo de dado que a
+timeline não tem (draft, posição espacial contínua, etc.) — não
+prioridade atual.
+
+## 2026-07-06 — Retreino com coleta adicional (BR1+EUW1+KR+NA1)
+
+Coleta em background desde as sessões anteriores rendeu volume real
+pela primeira vez fora do BR1: matches 12.247→15.739 (raw_timelines
+14.943→16.104), e o mais importante, EUW1/KR/NA1 saíram de amostras
+piloto (45-266 jogos) pra **1.307-1.367 jogos cada** — grande o
+suficiente pra tirar conclusão, não só hipótese.
+
+Pipeline completo rerodado (nesta ordem):
+1. `load_items` — `item_events` reprocessado: 2.360.777 → **3.601.107**
+   eventos (15.816 timelines, o join com `matches` exclui remakes).
+2. `build_features` — `features_phases.csv`/`features.csv`
+   regenerados: 10.295 → **15.785** partidas no corte de 15 min (todos
+   os 4 cortes: 15.853/15.785/14.119/11.419 para 10/15/20/25 min).
+3. `train_baseline` antes × depois (XGBoost, CV 5-fold):
+
+   | | antes (10.295) | depois (15.785) | Δ |
+   |---|---|---|---|
+   | AUC-ROC | 0.8214 | **0.8289** | +0.0075 |
+   | Acurácia | 0.7435 | **0.7489** | +0.0054 |
+
+   RandomForest (AUC 0.8078→0.8114) e MLP (0.8206→0.8295) também
+   melhoraram — ganho real, não ruído (compare com os deltas de
+   ±0.001-0.003 dos experimentos de feature, todos descartados como
+   ruído). **Confirma a conclusão já registrada: a alavanca que
+   funciona é volume de partidas, não novas features.**
+4. `export_model` — `data/models_phases.joblib` + `data/model.joblib`
+   (corte 15) + `reports/shap_importance*.json` atualizados com os
+   dados novos. Modelo em produção agora reflete as 15.785 partidas.
+
+**Viés de lado por região, revisitado com amostra de verdade:**
+
+| Região | Partidas | Win rate vermelho |
+|---|---|---|
+| BR1 | 11.936 | 56.3% |
+| EUW1 | 1.307 | 53.5% |
+| NA1 | 1.367 | 52.2% |
+| KR | 1.308 | 50.6% |
+
+**Isso muda a leitura anterior.** A hipótese do piloto (sprint 5,
+amostras de 45-266) era "viés é específico do BR, não do elo alto em
+geral" — com amostra 5-10× maior, as 4 regiões pendem pro vermelho
+(50.6%-56.3%), não só BR. Leitura atualizada: parece um padrão de elo
+altíssimo em geral (Challenger/GM, sem coordenação de draft de 5
+pessoas — mesma explicação de antes, contra-pick garantido do
+vermelho), com BR como caso mais extremo e KR o mais próximo do
+equilíbrio. Ainda não é conclusivo (KR/EUW1/NA1 seguem bem menores que
+BR1) mas já é amostra grande o bastante pra citar como achado, não só
+hipótese. **Atualizar o texto do TCC com esta tabela quando o material
+do professor chegar** — a narrativa "viés é só do BR" não se sustenta
+mais como estava escrita.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
-  da Riot (a chave de dev expira em 24h e já expirou no meio do piloto
-  multi-região — não escala pra coleta grande).
-- Ampliar a amostra por região (KR/EUW1/NA1) quando houver chave que
-  escale, para o achado do viés de lado por região virar conclusão.
-- Quando a coleta adicional de solo queue terminar: rerodar
-  `load_items`, `build_features`, `export_model` e atualizar as tabelas
-  de métricas.
+  da Riot (a chave de dev expira em 24h) — a coleta em background
+  seguiu rodando com a chave dev de qualquer forma (ver 2026-07-06:
+  EUW1/KR/NA1 saíram de 45-266 para 1.307-1.367 partidas cada).
+- Ampliar ainda mais a amostra por região (KR/EUW1/NA1 seguem bem
+  menores que BR1) pra deixar o achado do viés de lado (2026-07-06:
+  todas as 4 regiões pendem pro vermelho, não só BR) mais conclusivo.
+- ~~Quando a coleta adicional de solo queue terminar: rerodar
+  `load_items`, `build_features`, `export_model`~~ — **feito em
+  2026-07-06** (ver entrada acima: AUC 0.8214→0.8289). Collection
+  segue rodando em background — repetir este pipeline periodicamente
+  conforme o volume crescer.
 - Team builder — próximos incrementos da visão original: jogadores na
   análise e champion select competitivo (o mapa de calor da partida já
   foi entregue na análise de partidas).
@@ -1829,10 +1974,11 @@ testados contra o banco real via `TestClient` — todos OK.
 - Considerar `monotone_constraints` no XGBoost se a banca cobrar
   monotonicidade formal por fator isolado (ver bateria de validação
   acima) — mudança de modelagem, não prioridade atual.
-- Extração de itens (ITEM_PURCHASED/SOLD) — candidato mais promissor
-  pra realmente melhorar o modelo (não testado ainda; barão/arauto,
-  dispersão de time, tuning por fase e calibração já testados hoje e
-  não renderam ganho — ver acima). Mapa de calor de visão
-  (WARD_PLACED/KILL) segue como incremento de dados viável separado.
+- ~~Extração de itens (ITEM_PURCHASED/SOLD)~~ e ~~visão
+  (WARD_PLACED/KILL)~~ — **ambos testados em 2026-07-06, negativos**
+  (ver entradas abaixo). Não há mais candidato de dado novo óbvio na
+  timeline não testado; próximo ganho de modelo provavelmente exige
+  dado que a timeline não tem (ex.: draft/pick-ban order, posição em
+  tempo real para features espaciais).
 - Competitivo/pro-play: adiado (ver acima); se retomado, opções já
   levantadas em `project_scope_decisions.md`.
