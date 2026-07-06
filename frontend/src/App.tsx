@@ -7,6 +7,7 @@ import { Competitivo } from "@/pages/Competitivo";
 import { Dashboard } from "@/pages/Dashboard";
 import { Explain } from "@/pages/Explain";
 import { Home } from "@/pages/Home";
+import { LiveReplay } from "@/pages/LiveReplay";
 import { MatchDetail } from "@/pages/MatchDetail";
 import { Matches } from "@/pages/Matches";
 import { Nlq } from "@/pages/Nlq";
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="jogadores/:puuid" element={<PlayerProfile />} />
         <Route path="consulta" element={<Nlq />} />
         <Route path="predicao" element={<Predict />} />
+        <Route path="aovivo" element={<LiveReplay />} />
         <Route path="montar" element={<TeamBuilder />} />
         <Route path="explicabilidade" element={<Explain />} />
       </Route>

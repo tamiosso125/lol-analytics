@@ -23,6 +23,25 @@ export function humanizeColumn(name: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** Formata uma fração (0-1) como percentual pt-BR — usado em todas as
+ * páginas que mostram win rate/taxas. */
+export function formatPct(v: number): string {
+  return `${(v * 100).toFixed(1)}%`;
+}
+
+/** Classe de cor para uma taxa/resultado: verde a partir de 50% (ou vitória),
+ * vermelho abaixo — convenção visual repetida em todas as páginas de stats. */
+export function winColor(v: number | boolean): string {
+  const isWin = typeof v === "boolean" ? v : v >= 0.5;
+  return isWin ? "text-chart-1" : "text-chart-red";
+}
+
+/** Classe de cor para um delta (diferença que pode ser negativa): verde
+ * quando >= 0, vermelho quando < 0 — distinto de winColor (limiar 0, não 0.5). */
+export function deltaColor(v: number): string {
+  return v >= 0 ? "text-chart-1" : "text-chart-red";
+}
+
 const RATE_COLUMN = /(rate|_pct|percent)/i;
 
 export function formatCell(value: string | number | boolean | null, column: string): string {

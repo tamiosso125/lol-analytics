@@ -14,21 +14,11 @@ import {
 
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
+import { Takeaway } from "@/components/ui";
 import { api } from "@/lib/api";
 import { championIcon } from "@/lib/ddragon";
+import { formatPct as pct, winColor } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
-
-/** Frase de conclusão sob o gráfico (mesmo padrão do Dashboard). */
-function Takeaway({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="mt-2 border-t border-border pt-2 text-xs leading-relaxed text-secondary-ink">
-      <span className="font-medium text-gold">Leitura: </span>
-      {children}
-    </p>
-  );
-}
 
 /** Barra dupla azul/vermelho de um contexto (solo queue ou pro). */
 function SideBar({ label, blueWr }: { label: string; blueWr: number }) {
@@ -297,12 +287,12 @@ export function Competitivo() {
                           {pct(c.presence)}
                           <span className="ml-1 text-xs text-muted-ink">({c.pro_games})</span>
                         </td>
-                        <td className={cn("py-1.5 font-medium", c.pro_win_rate >= 0.5 ? "text-chart-1" : "text-chart-red")}>
+                        <td className={cn("py-1.5 font-medium", winColor(c.pro_win_rate))}>
                           {pct(c.pro_win_rate)}
                         </td>
                         <td className="py-1.5">
                           {c.solo_win_rate != null ? (
-                            <span className={cn("font-medium", c.solo_win_rate >= 0.5 ? "text-chart-1" : "text-chart-red")}>
+                            <span className={cn("font-medium", winColor(c.solo_win_rate))}>
                               {pct(c.solo_win_rate)}
                               <span className="ml-1 text-xs font-normal text-muted-ink">
                                 ({c.solo_games})

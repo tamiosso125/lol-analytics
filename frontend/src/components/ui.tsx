@@ -106,6 +106,73 @@ const ERROR_KIND = {
   },
 } as const;
 
+/** Cabeçalho de seção dentro de uma página (menor que PageHeader) —
+ * eyebrow dourado + título, com descrição opcional. */
+export function SectionTitle({
+  eyebrow,
+  title,
+  desc,
+}: {
+  eyebrow: string;
+  title: string;
+  desc?: string;
+}) {
+  return (
+    <div className="pt-2">
+      <p className="hextech-title text-[11px] font-medium text-gold">{eyebrow}</p>
+      <h2 className="mt-0.5 text-lg font-semibold tracking-tight">{title}</h2>
+      {desc && <p className="mt-0.5 text-sm text-secondary-ink">{desc}</p>}
+    </div>
+  );
+}
+
+/** Frase de conclusão sob um gráfico/tabela — mesmo padrão em todas as
+ * páginas de stats (Dashboard, Competitivo). */
+export function Takeaway({ children }: { children: ReactNode }) {
+  return (
+    <p className="mt-2 border-t border-border pt-2 text-xs leading-relaxed text-secondary-ink">
+      <span className="font-medium text-gold">Leitura: </span>
+      {children}
+    </p>
+  );
+}
+
+/** Cartão de KPI/estatística: rótulo + número grande + dica opcional.
+ * `size="sm"` é a variante compacta (borda simples, sem Card/CardHeader)
+ * usada em grades densas de várias métricas lado a lado. */
+export function StatCard({
+  label,
+  value,
+  hint,
+  size = "lg",
+}: {
+  label: string;
+  value: string | number;
+  hint?: string;
+  size?: "sm" | "lg";
+}) {
+  if (size === "sm") {
+    return (
+      <div className="rounded-lg border border-border bg-card px-4 py-3">
+        <p className="text-xs text-muted-ink">{label}</p>
+        <p className="mt-0.5 text-xl font-semibold tabular-nums tracking-tight">{value}</p>
+        {hint && <p className="mt-0.5 text-xs text-muted-ink">{hint}</p>}
+      </div>
+    );
+  }
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{label}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <span className="text-3xl font-semibold tabular-nums tracking-tight">{value}</span>
+        {hint && <p className="mt-1 text-xs text-muted-ink">{hint}</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
 export function ErrorNote({
   message,
   kind = "server",

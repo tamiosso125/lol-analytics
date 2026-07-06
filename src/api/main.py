@@ -29,6 +29,26 @@ FEATURES_CSV = "data/features.csv"
 ITEMS_PATH = "data/items.json"
 POSITIONS = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"]
 
+# normaliza pp.champion (nome de exibição do Oracle's Elixir) para o nome
+# interno da Riot, casando com participants.champion_name — usado em todo
+# lugar que cruza dados pro (pro_players) com solo queue (participants).
+CHAMPION_NORM_SQL = """lower(regexp_replace(
+                            CASE pp.champion
+                                WHEN 'Wukong' THEN 'MonkeyKing'
+                                WHEN 'Renata Glasc' THEN 'Renata'
+                                WHEN 'Nunu & Willump' THEN 'Nunu'
+                                ELSE pp.champion
+                            END, '[^a-zA-Z]', '', 'g'))"""
+
+# KDA agregado (kills+assists por deaths, deaths=0 tratado como NULL, não
+# divisão por zero) — mesma fórmula em toda query que agrega participants.
+KDA_SQL = "(SUM(kills) + SUM(assists))::float / NULLIF(SUM(deaths), 0)"
+
+# junta um participante ao seu adversário direto (mesmo lane, time oposto,
+# mesma partida) — base de todo cálculo de matchup/contra-pick.
+OPPONENT_JOIN_SQL = """JOIN participants p2 ON p2.match_id = p1.match_id
+                AND p2.team_id != p1.team_id AND p2.team_position = p1.team_position"""
+
 app = FastAPI(title="Bellestraiko", version="0.3.0")
 
 app.add_middleware(
@@ -268,6 +288,7 @@ def champions(
     order_col = CHAMPION_SORTS.get(sort)
     if order_col is None:
         raise HTTPException(status_code=400, detail=f"sort deve ser um de: {list(CHAMPION_SORTS)}")
+    limit = max(1, min(limit, 200))
     role = role.upper()
     if role and role not in POSITIONS:
         raise HTTPException(status_code=400, detail=f"role deve ser um de: {POSITIONS}")
@@ -281,7 +302,7 @@ def champions(
                    MIN(champion_id) AS champion_id,
                    COUNT(*) AS games,
                    AVG(win::int) AS win_rate,
-                   (SUM(kills) + SUM(assists))::float / NULLIF(SUM(deaths), 0) AS kda,
+                   {KDA_SQL} AS kda,
                    AVG(cs_total) AS avg_cs,
                    AVG(gold_earned) AS avg_gold,
                    AVG(dmg_to_champions) AS avg_dmg,
@@ -333,8 +354,8 @@ def champions(
 def champion_detail(champion_name: str):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
-            """SELECT MIN(champion_id), COUNT(*), AVG(win::int),
-                      (SUM(kills)+SUM(assists))::float / NULLIF(SUM(deaths),0),
+            f"""SELECT MIN(champion_id), COUNT(*), AVG(win::int),
+                      {KDA_SQL},
                       AVG(cs_total), AVG(gold_earned), AVG(dmg_to_champions),
                       (SELECT COUNT(*)::float FROM matches)
                FROM participants WHERE champion_name = %s""",
@@ -351,8 +372,8 @@ def champion_detail(champion_name: str):
         banned = cur.fetchone()[0]
 
         cur.execute(
-            """SELECT team_position, COUNT(*), AVG(win::int),
-                      (SUM(kills)+SUM(assists))::float / NULLIF(SUM(deaths),0)
+            f"""SELECT team_position, COUNT(*), AVG(win::int),
+                      {KDA_SQL}
                FROM participants
                WHERE champion_name = %s AND team_position != ''
                GROUP BY team_position ORDER BY COUNT(*) DESC""",
@@ -365,10 +386,9 @@ def champion_detail(champion_name: str):
         ]
 
         cur.execute(
-            """SELECT p2.champion_name, MIN(p2.champion_id), COUNT(*), AVG(p1.win::int)
+            f"""SELECT p2.champion_name, MIN(p2.champion_id), COUNT(*), AVG(p1.win::int)
                FROM participants p1
-               JOIN participants p2 ON p2.match_id = p1.match_id
-                AND p2.team_id != p1.team_id AND p2.team_position = p1.team_position
+               {OPPONENT_JOIN_SQL}
                WHERE p1.champion_name = %s AND p1.team_position != ''
                GROUP BY p2.champion_name
                HAVING COUNT(*) >= 15
@@ -488,18 +508,12 @@ def champion_pro(champion_name: str, year: int | None = None):
     with get_conn() as conn, conn.cursor() as cur:
         year = _pro_year(cur, year)
         cur.execute(
-            """WITH picks AS (
+            f"""WITH picks AS (
                    SELECT pg.league, pp.win
                    FROM pro_players pp
                    JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side
                    WHERE pg.year = %s
-                     AND lower(regexp_replace(
-                             CASE pp.champion
-                                 WHEN 'Wukong' THEN 'MonkeyKing'
-                                 WHEN 'Renata Glasc' THEN 'Renata'
-                                 WHEN 'Nunu & Willump' THEN 'Nunu'
-                                 ELSE pp.champion
-                             END, '[^a-zA-Z]', '', 'g')) = %s
+                     AND {CHAMPION_NORM_SQL} = %s
                ),
                total AS (
                    SELECT COUNT(DISTINCT game_id)::float AS n
@@ -514,17 +528,11 @@ def champion_pro(champion_name: str, year: int | None = None):
         leagues = []
         if games:
             cur.execute(
-                """SELECT pg.league, COUNT(*) AS games, AVG(pp.win::int) AS wr
+                f"""SELECT pg.league, COUNT(*) AS games, AVG(pp.win::int) AS wr
                    FROM pro_players pp
                    JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side
                    WHERE pg.year = %s
-                     AND lower(regexp_replace(
-                             CASE pp.champion
-                                 WHEN 'Wukong' THEN 'MonkeyKing'
-                                 WHEN 'Renata Glasc' THEN 'Renata'
-                                 WHEN 'Nunu & Willump' THEN 'Nunu'
-                                 ELSE pp.champion
-                             END, '[^a-zA-Z]', '', 'g')) = %s
+                     AND {CHAMPION_NORM_SQL} = %s
                    GROUP BY pg.league ORDER BY games DESC LIMIT 6""",
                 (year, norm),
             )
@@ -603,8 +611,8 @@ def player_profile(puuid: str):
         if not games:
             raise HTTPException(status_code=404, detail="Jogador sem partidas no dataset.")
         cur.execute(
-            """SELECT champion_name, MIN(champion_id), COUNT(*), AVG(win::int),
-                      (SUM(kills)+SUM(assists))::float / NULLIF(SUM(deaths),0)
+            f"""SELECT champion_name, MIN(champion_id), COUNT(*), AVG(win::int),
+                      {KDA_SQL}
                FROM participants WHERE puuid = %s
                GROUP BY champion_name ORDER BY COUNT(*) DESC LIMIT 10""",
             (puuid,),
@@ -684,15 +692,9 @@ def pro_player_profile(player_name: str):
             for r in cur.fetchall()
         ]
         cur.execute(
-            """WITH pool AS (
+            f"""WITH pool AS (
                    SELECT pp.champion, COUNT(*) AS games, AVG(pp.win::int) AS wr,
-                          lower(regexp_replace(
-                              CASE pp.champion
-                                  WHEN 'Wukong' THEN 'MonkeyKing'
-                                  WHEN 'Renata Glasc' THEN 'Renata'
-                                  WHEN 'Nunu & Willump' THEN 'Nunu'
-                                  ELSE pp.champion
-                              END, '[^a-zA-Z]', '', 'g')) AS norm
+                          {CHAMPION_NORM_SQL} AS norm
                    FROM pro_players pp
                    WHERE lower(pp.player_name) = lower(%s)
                    GROUP BY pp.champion
@@ -782,6 +784,24 @@ def gold15():
             }
         )
     return out
+
+
+@app.get("/matches/random")
+def random_match():
+    """Um match_id aleatório que TENHA timeline — semente do replay "ao
+    vivo" (planejamento v2, sprint 6). Prefere partidas com pelo menos
+    ~20 min (curva mais interessante para reproduzir)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """SELECT m.match_id FROM matches m
+               JOIN raw_timelines t ON t.match_id = m.match_id
+               WHERE m.game_duration_s >= 1200
+               ORDER BY random() LIMIT 1"""
+        )
+        row = cur.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Nenhuma partida com timeline disponível.")
+    return {"match_id": row[0]}
 
 
 @app.get("/matches/recent")
@@ -1020,12 +1040,11 @@ def highlights():
         )
         bc = cur.fetchone()
         cur.execute(
-            """SELECT p1.champion_name, MIN(p1.champion_id) AS c1_id,
+            f"""SELECT p1.champion_name, MIN(p1.champion_id) AS c1_id,
                       p2.champion_name, MIN(p2.champion_id) AS c2_id,
                       COUNT(*), AVG(p1.win::int) AS wr
                FROM participants p1
-               JOIN participants p2 ON p2.match_id = p1.match_id
-                AND p2.team_id != p1.team_id AND p2.team_position = p1.team_position
+               {OPPONENT_JOIN_SQL}
                WHERE p1.team_position != ''
                GROUP BY p1.champion_name, p2.champion_name
                HAVING COUNT(*) >= 30 ORDER BY AVG(p1.win::int) DESC LIMIT 1"""
@@ -1151,10 +1170,9 @@ def compose(comp: Composition):
         for pos in positions:
             b, r = comp.blue[pos], comp.red[pos]
             cur.execute(
-                """SELECT COUNT(*), AVG(p1.win::int)
+                f"""SELECT COUNT(*), AVG(p1.win::int)
                    FROM participants p1
-                   JOIN participants p2 ON p2.match_id = p1.match_id
-                    AND p2.team_id != p1.team_id AND p2.team_position = p1.team_position
+                   {OPPONENT_JOIN_SQL}
                    WHERE p1.champion_name = %s AND p2.champion_name = %s
                      AND p1.team_position = %s""",
                 (b, r, pos),
@@ -1397,18 +1415,12 @@ def pro_champions(limit: int = 15, year: int | None = None):
     with get_conn() as conn, conn.cursor() as cur:
         year = _pro_year(cur, year)
         cur.execute(
-            """WITH year_games AS (
+            f"""WITH year_games AS (
                    SELECT DISTINCT game_id FROM pro_games WHERE year = %s
                ),
                pro AS (
                    SELECT pp.champion, COUNT(*) AS games, AVG(pp.win::int) AS wr,
-                          lower(regexp_replace(
-                              CASE pp.champion
-                                  WHEN 'Wukong' THEN 'MonkeyKing'
-                                  WHEN 'Renata Glasc' THEN 'Renata'
-                                  WHEN 'Nunu & Willump' THEN 'Nunu'
-                                  ELSE pp.champion
-                              END, '[^a-zA-Z]', '', 'g')) AS norm
+                          {CHAMPION_NORM_SQL} AS norm
                    FROM pro_players pp JOIN year_games yg ON yg.game_id = pp.game_id
                    GROUP BY pp.champion
                ),

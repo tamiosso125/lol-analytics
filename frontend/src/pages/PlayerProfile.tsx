@@ -2,12 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
+import { RecentGameRow } from "@/components/RecentGameRow";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { championDisplayName, championIcon, POSITION_LABELS } from "@/lib/ddragon";
+import { formatPct as pct, winColor } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
 export function PlayerProfile() {
   const { puuid = "" } = useParams();
@@ -50,7 +50,7 @@ export function PlayerProfile() {
             <span
               className={cn(
                 "text-3xl font-semibold tabular-nums tracking-tight",
-                p.win_rate >= 0.5 ? "text-chart-1" : "text-chart-red",
+                winColor(p.win_rate),
               )}
             >
               {pct(p.win_rate)}
@@ -66,7 +66,7 @@ export function PlayerProfile() {
             <span
               className={cn(
                 "text-3xl font-semibold tabular-nums tracking-tight",
-                (recentWr ?? 0) >= 0.5 ? "text-chart-1" : "text-chart-red",
+                winColor(recentWr ?? 0),
               )}
             >
               {recentWr != null ? pct(recentWr) : "—"}
@@ -133,7 +133,7 @@ export function PlayerProfile() {
                     <td
                       className={cn(
                         "py-1.5 font-medium",
-                        c.win_rate >= 0.5 ? "text-chart-1" : "text-chart-red",
+                        winColor(c.win_rate),
                       )}
                     >
                       {pct(c.win_rate)}
@@ -152,28 +152,18 @@ export function PlayerProfile() {
           </CardHeader>
           <CardContent className="space-y-1.5">
             {p.recent_games.map((g) => (
-              <Link
+              <RecentGameRow
                 key={g.match_id}
-                to={`/partidas/${g.match_id}`}
-                className={cn(
-                  "flex items-center gap-3 rounded-md border-l-2 bg-foreground/5 px-3 py-1.5 text-xs hover:bg-foreground/10",
-                  g.win ? "border-chart-1" : "border-chart-red",
-                )}
-              >
-                <img src={championIcon(g.champion_id)} alt="" className="size-6 rounded" />
-                <span className={cn("w-12 font-medium", g.win ? "text-chart-1" : "text-chart-red")}>
-                  {g.win ? "Vitória" : "Derrota"}
-                </span>
-                <span className="w-14 text-secondary-ink">
-                  {POSITION_LABELS[g.position] ?? g.position}
-                </span>
-                <span className="tabular-nums">
-                  {g.kills}/{g.deaths}/{g.assists}
-                </span>
-                <span className="ml-auto text-muted-ink tabular-nums">
-                  {g.duration_min} min · {new Date(g.date).toLocaleDateString("pt-BR")}
-                </span>
-              </Link>
+                matchId={g.match_id}
+                championId={g.champion_id}
+                win={g.win}
+                positionLabel={POSITION_LABELS[g.position] ?? g.position}
+                kills={g.kills}
+                deaths={g.deaths}
+                assists={g.assists}
+                durationMin={g.duration_min}
+                date={g.date}
+              />
             ))}
           </CardContent>
         </Card>

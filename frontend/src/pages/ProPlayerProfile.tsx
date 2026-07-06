@@ -5,9 +5,8 @@ import { Link, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { championIcon } from "@/lib/ddragon";
+import { formatPct as pct, winColor } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
 const PRO_POSITIONS: Record<string, string> = {
   top: "Topo",
@@ -70,7 +69,7 @@ export function ProPlayerProfile() {
                     <td
                       className={cn(
                         "py-1.5 font-medium",
-                        s.win_rate >= 0.5 ? "text-chart-1" : "text-chart-red",
+                        winColor(s.win_rate),
                       )}
                     >
                       {pct(s.win_rate)}
@@ -99,7 +98,7 @@ export function ProPlayerProfile() {
                 <span
                   className={cn(
                     "w-14 text-right font-medium tabular-nums",
-                    c.win_rate >= 0.5 ? "text-chart-1" : "text-chart-red",
+                    winColor(c.win_rate),
                   )}
                 >
                   {pct(c.win_rate)}

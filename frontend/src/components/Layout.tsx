@@ -1,4 +1,4 @@
-import { BarChart3, Gamepad2, Home, MessageSquareText, Moon, ScanEye, Sun, Swords, Target, Trophy, Users } from "lucide-react";
+import { BarChart3, Gamepad2, Home, MessageSquareText, Moon, Radio, ScanEye, Sun, Swords, Target, Trophy, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 
@@ -12,6 +12,7 @@ const NAV = [
   { to: "/competitivo", label: "Competitivo", icon: Trophy },
   { to: "/consulta", label: "Consulta NL", icon: MessageSquareText },
   { to: "/predicao", label: "Predição", icon: Target },
+  { to: "/aovivo", label: "Ao vivo", icon: Radio },
   { to: "/montar", label: "Montar partida", icon: Gamepad2 },
   { to: "/explicabilidade", label: "Explicabilidade", icon: ScanEye },
 ];

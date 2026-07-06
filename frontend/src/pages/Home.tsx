@@ -4,12 +4,11 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { ComponentType } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle, ErrorNote, Skeleton } from "@/components/ui";
+import { Card, CardContent, CardHeader, CardTitle, ErrorNote, SectionTitle, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { championDisplayName, championIcon, championSplash } from "@/lib/ddragon";
+import { formatPct as pct } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
 /** Busca unificada estilo op.gg: campeões (filtro no cliente) +
  * jogadores de solo queue e profissionais (busca no servidor). */
@@ -205,15 +204,6 @@ function InsightCard({
     </Card>
   );
   return to ? <Link to={to}>{body}</Link> : body;
-}
-
-function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return (
-    <div className="pt-2">
-      <p className="hextech-title text-[11px] font-medium text-gold">{eyebrow}</p>
-      <h2 className="mt-0.5 text-lg font-semibold tracking-tight">{title}</h2>
-    </div>
-  );
 }
 
 export function Home() {

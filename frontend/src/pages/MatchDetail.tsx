@@ -18,10 +18,9 @@ import { MapHeatmap } from "@/components/MapHeatmap";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
 import { api, type MatchParticipantFull, type MatchState, type MatchTeam, type ProbPoint } from "@/lib/api";
 import { championDisplayName, championIcon, POSITION_LABELS } from "@/lib/ddragon";
+import { deltaColor, formatPct as pct, winColor } from "@/lib/format";
 import { RANGES, SLIDER_KEYS, SLIDER_LABELS } from "@/lib/matchState";
 import { cn } from "@/lib/utils";
-
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
 /** Linha de objetivo com barras espelhadas a partir do centro
  * (estilo op.gg): azul cresce para a esquerda, vermelho para a direita. */
@@ -209,7 +208,7 @@ function WhatIfCard({ curve, minute }: { curve: ProbPoint[]; minute: number }) {
             <p
               className={cn(
                 "mt-3 text-sm font-medium tabular-nums",
-                delta >= 0 ? "text-chart-1" : "text-chart-red",
+                deltaColor(delta),
               )}
             >
               {delta >= 0 ? "+" : ""}
@@ -233,7 +232,7 @@ function TeamTable({ players, label, won }: { players: MatchParticipantFull[]; l
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className={won ? "text-chart-1" : "text-chart-red"}>
+        <CardTitle className={winColor(won)}>
           {label} — {won ? "Vitória" : "Derrota"}
         </CardTitle>
       </CardHeader>
@@ -309,7 +308,7 @@ export function MatchDetail() {
       <PageHeader eyebrow="Análise" title="Análise da partida">
         <span className="tabular-nums">
           {new Date(m.date).toLocaleString("pt-BR")} · {m.duration_min} min · patch {m.patch} ·{" "}
-          <span className={blueTeam?.win ? "text-chart-1" : "text-chart-red"}>
+          <span className={winColor(!!blueTeam?.win)}>
             {blueTeam?.win ? "vitória do time azul" : "vitória do time vermelho"}
           </span>
         </span>

@@ -374,6 +374,8 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
 - `GET /stats/regions` — cobertura e viés de lado (win rate do
   vermelho) por `platform_id` — a mesma pergunta do viés de lado BR,
   agora comparável entre plataformas (sprint 5 do planejamento v2);
+- `GET /matches/random` — um match_id aleatório com timeline e >= 20
+  min — semente do replay "ao vivo" (`/aovivo`, sprint 6);
 - `GET /stats/players/search?q=` — busca de jogadores nos DOIS datasets
   (solo queue por game_name/Riot ID; competitivo por player_name) para
   a busca unificada da Home (mínimo 3 caracteres);
@@ -438,7 +440,12 @@ filtra, navegação por teclado, botão de limpar — não é mais um
 sinergias, e estado da partida opcional que combina a composição com o
 modelo ML) e
 Explicabilidade (importância SHAP por fase em barras + gráfico de
-evolução da importância ao longo das fases, uma linha por fator) —
+evolução da importância ao longo das fases, uma linha por fator),
+Competitivo (`/competitivo` — solo queue × pro, seletor de ano),
+perfis de jogador (`/jogadores/:puuid` solo queue,
+`/competitivo/jogadores/:nome` pro) e Ao vivo (`/aovivo` — replay de
+partida coletada com a curva de probabilidade avançando minuto a minuto,
+play/pausa/velocidade; MVP da análise em tempo real) —
 todas consumindo a API FastAPI (nunca o banco diretamente).
 Identidade visual hextech unificada: componente `PageHeader` (rótulo
 dourado + título serifado + linha de brilho) em todas as páginas;

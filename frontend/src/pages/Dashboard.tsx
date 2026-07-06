@@ -13,45 +13,21 @@ import {
 } from "recharts";
 
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
-import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  ErrorNote,
+  PageHeader,
+  SectionTitle,
+  Skeleton,
+  StatCard,
+  Takeaway,
+} from "@/components/ui";
 import { api } from "@/lib/api";
+import { formatPct as pct } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
-
-function SectionTitle({ eyebrow, title, desc }: { eyebrow: string; title: string; desc?: string }) {
-  return (
-    <div className="pt-2">
-      <p className="hextech-title text-[11px] font-medium text-gold">{eyebrow}</p>
-      <h2 className="mt-0.5 text-lg font-semibold tracking-tight">{title}</h2>
-      {desc && <p className="mt-0.5 text-sm text-secondary-ink">{desc}</p>}
-    </div>
-  );
-}
-
-/** Uma frase de conclusão sob o gráfico — o que o leitor deve levar dele. */
-function Takeaway({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="mt-2 border-t border-border pt-2 text-xs leading-relaxed text-secondary-ink">
-      <span className="font-medium text-gold">Leitura: </span>
-      {children}
-    </p>
-  );
-}
-
-function KpiCard({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{label}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <span className="text-3xl font-semibold tabular-nums tracking-tight">{value}</span>
-        {hint && <p className="mt-1 text-xs text-muted-ink">{hint}</p>}
-      </CardContent>
-    </Card>
-  );
-}
 
 export function Dashboard() {
   const overview = useQuery({ queryKey: ["overview"], queryFn: api.overview });
@@ -290,17 +266,17 @@ export function Dashboard() {
           </Card>
         </div>
         <div className="flex flex-col gap-4">
-          <KpiCard
+          <StatCard
             label="Abates por partida"
             value={o?.avg_kills ?? "…"}
             hint="média dos dois times somados — meta agressivo"
           />
-          <KpiCard
+          <StatCard
             label="Chegam ao late game"
             value={o ? pct(o.late_game_rate) : "…"}
             hint="partidas com 25+ minutos"
           />
-          <KpiCard
+          <StatCard
             label="Duração média"
             value={o ? `${o.avg_duration_min} min` : "…"}
           />
@@ -316,9 +292,9 @@ export function Dashboard() {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col gap-4">
-          <KpiCard label="Partidas" value={o?.matches.toLocaleString("pt-BR") ?? "…"} />
-          <KpiCard label="Jogadores únicos" value={o?.players.toLocaleString("pt-BR") ?? "…"} />
-          <KpiCard
+          <StatCard label="Partidas" value={o?.matches.toLocaleString("pt-BR") ?? "…"} />
+          <StatCard label="Jogadores únicos" value={o?.players.toLocaleString("pt-BR") ?? "…"} />
+          <StatCard
             label="Patches cobertos"
             value={o?.patches ?? "…"}
             hint="versões completas do cliente; o gráfico agrupa por patch de balanceamento (16.x)"

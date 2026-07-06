@@ -1705,13 +1705,114 @@ manter o modelo BR-only e tratar as demais regiões só como dado
 analítico/comparativo por enquanto — decisão a tomar quando o volume
 por região for suficiente).
 
+## 2026-07-05 — Piloto multi-região encerrado + Sprint 6 (replay ao vivo)
+
+**Piloto multi-região — encerrado, com o achado se firmando.** A coleta
+KR/EUW1/NA1 rodou até a chave de DEV expirar no meio (401 Unauthorized
+nos últimos jogadores de NA1 — na prática NA1 não coletou nada, e
+KR/EUW1 ficaram menores que o alvo). Confirma na prática o que já estava
+documentado: chave de dev não escala. Estado final por região (viés de
+lado = win rate do vermelho):
+
+| região | partidas | vitória vermelho |
+|---|---|---|
+| BR1  | 11.936 | 56,3% |
+| EUW1 |   138  | 50,0% |
+| KR   |    45  | 71,1% (amostra pequena) |
+
+EUW1 em 50% (equilíbrio) e KR com amostra minúscula — ainda não é
+conclusivo, mas **BR segue como o mais desviado para o vermelho**, o
+que mantém a hipótese "viés vermelho é do BR (ou BR+elo altíssimo), não
+do solo queue de elo alto em geral". Precisa de mais volume por região
+(depende da Personal API Key) para virar afirmação de tese; por
+enquanto é um sinal registrado com a ressalva de amostra.
+
+**Sprint 6 do planejamento v2: MVP "replay ao vivo" (entregue).** A
+primeira camada da meta de tempo real, e a de menor risco: zero
+dependência de API externa.
+- `GET /matches/random` (novo, pequeno): sorteia um match_id que TENHA
+  timeline e >= 20 min (curva mais interessante).
+- Página `/aovivo` (`LiveReplay`, nav "Ao vivo" com ícone de rádio):
+  reproduz uma partida coletada minuto a minuto como se fosse ao vivo.
+  A curva de probabilidade cresce em tempo real (um minuto de jogo por
+  segundo real × velocidade 1/2/4×), com play/pausa/reiniciar. Painel
+  lateral com o estado do minuto atual (os 5 diffs + qual modelo de
+  fase está ativo), times embaixo, e ao chegar no fim revela o
+  resultado real + se o modelo apontava o vencedor no último minuto
+  (com a ressalva de que cada ponto só vê o estado até aquele minuto,
+  não o futuro). Link para a análise completa da partida.
+- Por que isso importa pro TCC: valida toda a arquitetura de streaming
+  incremental de UI sem depender de haver jogo no ar — e é demonstrável
+  ao vivo para a banca a qualquer momento. O MESMO motor
+  (`features_from_timeline` → modelo da fase → curva) rodaria sobre um
+  feed real; aqui o "feed" é uma partida do banco.
+- Verificação: typecheck limpo; Playwright confirmou a curva avançando
+  (45,1% no minuto 1 → 48,1% conforme roda), pausar/reiniciar voltando
+  ao início, zero erros de console.
+
+Estágios 2-3 do passo 4 (pro ao vivo via feed do lolesports; companion
+local da Live Client API) ficam como trabalhos futuros — o modelo pro
+já treinado (`model_pro.joblib`, sprint 2) é o insumo do estágio 2
+quando/se for retomado.
+
+## 2026-07-05 — Auditoria de duplicação e consolidação (front + back)
+
+Com 13 páginas e ~1,5k linhas de API acumuladas pelos sprints do
+planejamento v2, pedido explícito de revisão: achar duplicação real
+(não achismo) e consolidar. Duas explorações paralelas (backend
+`main.py`, frontend `pages/` + `api.ts`) confirmaram achados concretos
+antes de qualquer mudança.
+
+**Frontend:**
+- `formatPct`, `winColor`, `deltaColor` centralizados em `lib/format.ts`
+  — eliminam `const pct = ...` reimplementado em 10 páginas e a
+  ternária `>= 0.5 ? "text-chart-1" : "text-chart-red"` repetida 13x
+  (mais `deltaColor` para os casos de delta em torno de 0, não 0.5 —
+  são semânticas diferentes, não a mesma função).
+- `Takeaway` e `SectionTitle` (duplicados verbatim/quase-verbatim em
+  Dashboard e Competitivo/Home) movidos para `components/ui.tsx`.
+- `StatTile`/`KpiCard`/cards inline unificados em um único `StatCard`
+  (`components/ui.tsx`) com variante `size="sm"|"lg"`.
+- `RecentGameRow` (`components/RecentGameRow.tsx`) extraído de
+  ChampionDetail e PlayerProfile — mesma linha de "última partida"
+  (resultado, posição, KDA, duração/data), agora sempre como link para
+  a partida (antes só PlayerProfile linkava).
+- `Explain.tsx` tinha um `fetch` cru duplicando a lógica de base URL já
+  centralizada em `api.ts`, e um `PHASES` local redundante com
+  `lib/matchState.ts` — trocado por `api.shapImportancePhases()` (novo
+  método) e o `PHASES` compartilhado.
+- Não mexido: `PlayerProfile`/`ProPlayerProfile` e suas "pool de
+  campeões" (uma é tabela, a outra é lista de linhas com ícone maior —
+  layouts genuinamente diferentes, forçar um componente comum juntaria
+  coisas que não deveriam ser iguais).
+
+**Backend (`src/api/main.py`):**
+- `CHAMPION_NORM_SQL`: o `CASE pp.champion WHEN 'Wukong'...END` que
+  casa nome de exibição do Oracle's Elixir com nome interno da Riot
+  estava copiado 4x (`champion_pro`, `pro_player_profile`,
+  `pro_champions`). Agora é uma constante interpolada por f-string.
+- `KDA_SQL` e `OPPONENT_JOIN_SQL` (self-join de participants por
+  adversário direto de lane) extraídos da mesma forma — 4x e 3x.
+- `champions()` não tinha clamp de `limit` (as demais rotas paginadas
+  já clampavam) — alinhado com `max(1, min(limit, 200))`.
+- Não mexido: uma divergência de formatação de rótulo negativo entre
+  `gold15` (pandas, `int(x/1000)`) e `pro_gold15` (SQL, `x // 1000`) —
+  investigado e não é bug ativo (os bins são sempre múltiplos exatos de
+  1000 nos dois casos), só um estilo diferente; deixado como está.
+
+Verificação: `tsc --noEmit` e `npm run build` limpos; backend importado
+via AST + runtime e os 4 endpoints reescritos (`/stats/champions`,
+`/stats/champion/{x}`, `/stats/champion/{x}/pro`, `/stats/pro/champions`)
+mais `/compose` e `/stats/highlights` (que usam `OPPONENT_JOIN_SQL`)
+testados contra o banco real via `TestClient` — todos OK.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
-  da Riot mesmo assim (a chave de dev expira em 24h e tem limite bem
-  menor — não escala pra coleta grande multi-região).
-- Fechar o piloto multi-região (ver acima) e decidir o próximo tamanho
-  de amostra por região.
+  da Riot (a chave de dev expira em 24h e já expirou no meio do piloto
+  multi-região — não escala pra coleta grande).
+- Ampliar a amostra por região (KR/EUW1/NA1) quando houver chave que
+  escale, para o achado do viés de lado por região virar conclusão.
 - Quando a coleta adicional de solo queue terminar: rerodar
   `load_items`, `build_features`, `export_model` e atualizar as tabelas
   de métricas.

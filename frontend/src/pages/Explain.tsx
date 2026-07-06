@@ -17,6 +17,7 @@ import {
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
+import { PHASES } from "@/lib/matchState";
 import { cn } from "@/lib/utils";
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -36,23 +37,11 @@ const FEATURE_COLORS: Record<string, string> = {
   dragon_diff: "var(--chart-red)",
 };
 
-const PHASES = [
-  { key: "10", label: "10 min", desc: "Fase de rotas" },
-  { key: "15", label: "15 min", desc: "Fim das rotas" },
-  { key: "20", label: "20 min", desc: "Mid game" },
-  { key: "25", label: "25 min", desc: "Late game" },
-];
-
 export function Explain() {
   const [phase, setPhase] = useState("15");
   const importance = useQuery({
     queryKey: ["shap-importance-phases"],
-    queryFn: () =>
-      fetch(`${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/reports/shap_importance_phases.json`)
-        .then((r) => {
-          if (!r.ok) throw new Error("Importância por fase não gerada — rode export_model.");
-          return r.json() as Promise<Record<string, Record<string, number>>>;
-        }),
+    queryFn: api.shapImportancePhases,
   });
 
   const data = importance.data?.[phase]
@@ -63,7 +52,7 @@ export function Explain() {
 
   // evolução da importância: uma linha por feature, X = corte de tempo
   const evolution = importance.data
-    ? PHASES.map((p) => ({ minute: `${p.label}`, ...importance.data[p.key] }))
+    ? PHASES.map((p) => ({ minute: p.label, ...importance.data[String(p.minute)] }))
     : [];
   const towerRatio =
     importance.data?.["25"]?.tower_diff && importance.data?.["15"]?.tower_diff
@@ -90,12 +79,14 @@ export function Explain() {
           <div className="inline-flex shrink-0 rounded-lg border border-border p-0.5 text-xs">
             {PHASES.map((p) => (
               <button
-                key={p.key}
-                onClick={() => setPhase(p.key)}
+                key={p.minute}
+                onClick={() => setPhase(String(p.minute))}
                 title={p.desc}
                 className={cn(
                   "rounded-md px-2.5 py-1 font-medium transition-colors",
-                  phase === p.key ? "bg-accent/10 text-accent" : "text-muted-ink hover:text-foreground",
+                  phase === String(p.minute)
+                    ? "bg-accent/10 text-accent"
+                    : "text-muted-ink hover:text-foreground",
                 )}
               >
                 {p.label}

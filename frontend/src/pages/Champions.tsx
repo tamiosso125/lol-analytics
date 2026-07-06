@@ -6,9 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { Card, ErrorNote, Input, PageHeader, Skeleton } from "@/components/ui";
 import { api, type ChampionSort } from "@/lib/api";
 import { championDisplayName, championIcon, POSITION_LABELS } from "@/lib/ddragon";
+import { formatPct as pct } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
 /** Micro-barra inline de tabela (estilo op.gg/leagueofgraphs): a barra
  * codifica magnitude relativa a `max`, o valor exato fica no texto. */

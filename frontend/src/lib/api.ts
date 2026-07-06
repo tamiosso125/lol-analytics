@@ -518,6 +518,7 @@ export const api = {
   durations: () => request<DurationBucket[]>("/stats/durations"),
   gold15: () => request<Gold15Bucket[]>("/stats/gold15"),
   recentMatches: (limit = 15) => request<RecentMatch[]>(`/matches/recent?limit=${limit}`),
+  randomMatch: () => request<{ match_id: string }>("/matches/random"),
   matchAnalysis: (matchId: string) =>
     request<MatchAnalysis>(`/matches/${encodeURIComponent(matchId)}/analysis`),
   highlights: () => request<Highlights>("/stats/highlights"),
@@ -567,7 +568,7 @@ export const api = {
     }),
   predict: (state: MatchState) =>
     request<Prediction>("/predict", { method: "POST", body: JSON.stringify(state) }),
-  shapImportance: () =>
-    request<Record<string, number>>("/reports/shap_importance.json"),
+  shapImportancePhases: () =>
+    request<Record<string, Record<string, number>>>("/reports/shap_importance_phases.json"),
   reportImage: (name: string) => `${API_URL}/reports/${name}`,
 };

@@ -2,21 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
-import { Card, CardContent, CardHeader, CardTitle, ErrorNote, Skeleton } from "@/components/ui";
+import { RecentGameRow } from "@/components/RecentGameRow";
+import { Card, CardContent, CardHeader, CardTitle, ErrorNote, Skeleton, StatCard } from "@/components/ui";
 import { api, type ChampionMatchup } from "@/lib/api";
 import { championDisplayName, championIcon, itemIcon, POSITION_LABELS } from "@/lib/ddragon";
+import { formatPct as pct, winColor } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
-
-function StatTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-card px-4 py-3">
-      <p className="text-xs text-muted-ink">{label}</p>
-      <p className="mt-0.5 text-xl font-semibold tabular-nums tracking-tight">{value}</p>
-    </div>
-  );
-}
 
 /** Itens finalizados mais construídos pelo campeão, com win rate e
  * minuto médio da compra — dos eventos reais das timelines. */
@@ -70,7 +61,7 @@ function ItemsCard({ championName }: { championName: string }) {
                   <td
                     className={cn(
                       "py-1.5 font-medium",
-                      it.win_rate >= 0.5 ? "text-chart-1" : "text-chart-red",
+                      winColor(it.win_rate),
                     )}
                   >
                     {pct(it.win_rate)}
@@ -132,7 +123,7 @@ function ProCard({ championName }: { championName: string }) {
                 <p
                   className={cn(
                     "mt-0.5 text-xl font-semibold tabular-nums",
-                    (pro.data.win_rate ?? 0) >= 0.5 ? "text-chart-1" : "text-chart-red",
+                    winColor(pro.data.win_rate ?? 0),
                   )}
                 >
                   {pro.data.win_rate != null ? pct(pro.data.win_rate) : "—"}
@@ -157,7 +148,7 @@ function ProCard({ championName }: { championName: string }) {
                   <span
                     className={cn(
                       "w-12 text-right text-xs font-medium tabular-nums",
-                      l.win_rate >= 0.5 ? "text-chart-1" : "text-chart-red",
+                      winColor(l.win_rate),
                     )}
                   >
                     {pct(l.win_rate)}
@@ -196,7 +187,7 @@ function MatchupList({ title, matchups }: { title: string; matchups: ChampionMat
               <span
                 className={cn(
                   "w-14 text-right text-sm font-medium tabular-nums",
-                  m.win_rate >= 0.5 ? "text-chart-1" : "text-chart-red",
+                  winColor(m.win_rate),
                 )}
               >
                 {pct(m.win_rate)}
@@ -248,12 +239,12 @@ export function ChampionDetail() {
       </div>
 
       <div className="grid grid-cols-3 gap-3 lg:grid-cols-6">
-        <StatTile label="Win rate" value={pct(d.win_rate)} />
-        <StatTile label="Pick rate" value={pct(d.pick_rate)} />
-        <StatTile label="Ban rate" value={pct(d.ban_rate)} />
-        <StatTile label="KDA" value={d.kda != null ? String(d.kda) : "—"} />
-        <StatTile label="CS médio" value={d.avg_cs.toLocaleString("pt-BR")} />
-        <StatTile label="Ouro médio" value={d.avg_gold.toLocaleString("pt-BR")} />
+        <StatCard size="sm" label="Win rate" value={pct(d.win_rate)} />
+        <StatCard size="sm" label="Pick rate" value={pct(d.pick_rate)} />
+        <StatCard size="sm" label="Ban rate" value={pct(d.ban_rate)} />
+        <StatCard size="sm" label="KDA" value={d.kda != null ? String(d.kda) : "—"} />
+        <StatCard size="sm" label="CS médio" value={d.avg_cs.toLocaleString("pt-BR")} />
+        <StatCard size="sm" label="Ouro médio" value={d.avg_gold.toLocaleString("pt-BR")} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -276,7 +267,7 @@ export function ChampionDetail() {
                   <tr key={p.position} className="border-b border-border/50 last:border-0">
                     <td className="py-2">{POSITION_LABELS[p.position] ?? p.position}</td>
                     <td className="py-2">{p.games.toLocaleString("pt-BR")}</td>
-                    <td className={cn("py-2 font-medium", p.win_rate >= 0.5 ? "text-chart-1" : "text-chart-red")}>
+                    <td className={cn("py-2 font-medium", winColor(p.win_rate))}>
                       {pct(p.win_rate)}
                     </td>
                     <td className="py-2">{p.kda ?? "—"}</td>
@@ -293,27 +284,18 @@ export function ChampionDetail() {
           </CardHeader>
           <CardContent className="space-y-1.5">
             {d.recent_games.map((g) => (
-              <div
+              <RecentGameRow
                 key={g.match_id}
-                className={cn(
-                  "flex items-center gap-3 rounded-md border-l-2 bg-foreground/5 px-3 py-1.5 text-xs",
-                  g.win ? "border-chart-1" : "border-chart-red",
-                )}
-              >
-                <span className={cn("w-14 font-medium", g.win ? "text-chart-1" : "text-chart-red")}>
-                  {g.win ? "Vitória" : "Derrota"}
-                </span>
-                <span className="w-16 text-secondary-ink">
-                  {POSITION_LABELS[g.position] ?? g.position}
-                </span>
-                <span className="tabular-nums">
-                  {g.kills}/{g.deaths}/{g.assists}
-                </span>
-                <span className="ml-auto text-muted-ink tabular-nums">
-                  {g.duration_min} min · patch {g.patch} ·{" "}
-                  {new Date(g.date).toLocaleDateString("pt-BR")}
-                </span>
-              </div>
+                matchId={g.match_id}
+                win={g.win}
+                positionLabel={POSITION_LABELS[g.position] ?? g.position}
+                kills={g.kills}
+                deaths={g.deaths}
+                assists={g.assists}
+                durationMin={g.duration_min}
+                date={g.date}
+                extra={`patch ${g.patch}`}
+              />
             ))}
           </CardContent>
         </Card>

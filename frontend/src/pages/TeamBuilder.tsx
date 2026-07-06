@@ -5,10 +5,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
 import { api, type ComposeLane, type ComposeSynergy, type MatchState } from "@/lib/api";
 import { championDisplayName, championIcon, POSITION_LABELS } from "@/lib/ddragon";
+import { deltaColor, formatPct as pct } from "@/lib/format";
 import { INITIAL_STATE, PHASES, RANGES, SLIDER_KEYS, SLIDER_LABELS, withMinute } from "@/lib/matchState";
 import { cn } from "@/lib/utils";
-
-const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 const POSITIONS = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"] as const;
 
 type Team = Record<string, string>;
@@ -332,7 +331,7 @@ function SynergyList({ title, synergies }: { title: string; synergies: ComposeSy
               <span
                 className={cn(
                   "w-16 text-right font-medium tabular-nums",
-                  s.delta >= 0 ? "text-chart-1" : "text-chart-red",
+                  deltaColor(s.delta),
                 )}
               >
                 {s.delta >= 0 ? "+" : ""}
