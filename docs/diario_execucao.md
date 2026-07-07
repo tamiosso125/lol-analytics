@@ -1947,6 +1947,67 @@ hipótese. **Atualizar o texto do TCC com esta tabela quando o material
 do professor chegar** — a narrativa "viés é só do BR" não se sustenta
 mais como estava escrita.
 
+## 2026-07-06 — Segunda rodada de coleta multi-região + retreino
+
+Reseed do ladder (`seed_players --platforms euw1 kr na1 --tiers
+CHALLENGER GRANDMASTER MASTER`, 33.110 jogadores inseridos/atualizados)
+seguido de `collect_matches --platforms kr euw1 na1 --players 100
+--matches-per-player 20`. Rendimento baixo (103 partidas novas no
+total, não os milhares esperados) — **achado sobre a mecânica do
+script**: `collect_matches` sempre seleciona os top-N jogadores por
+`league_points DESC` (`src/collect/collect_matches.py:79-84`); como o
+topo do ladder Challenger/GM quase não muda entre coletas, reseedar
+sem aumentar bastante o `--players` traz essencialmente os mesmos
+jogadores de antes, só capturando os jogos novos que eles jogaram no
+meio tempo. **Pra crescer de verdade EUW1/KR/NA1, `--players` precisa
+ser bem maior (500-1000+)** pra alcançar jogadores mais abaixo no
+ladder que ainda não foram coletados.
+
+Crescimento real desta rodada: EUW1 1.307→1.378, KR 1.308→1.354, NA1
+1.367→1.446 (matches totais 15.918→16.114). Pipeline rerodado de novo
+(`load_items` → `build_features` → `export_model`): item_events
+3.601.107→3.668.806 eventos (16.114 timelines), features.csv (corte 15
+min) 15.785→**15.979** partidas, `data/model.joblib`/
+`models_phases.joblib` reexportados. Ganho de dados pequeno desta vez
+(~1,2%) — não justificou medir antes/depois de novo (o ganho de AUC
+do retreino anterior, +0,0075, já veio de +54% de dados; este
+incremento é ordens de grandeza menor).
+
+## 2026-07-06 — Coleta ampliada (500 jogadores/região) + retreino final
+
+Usando o achado anterior (collect_matches sempre pega top-N por
+league_points, 100 já era insuficiente), rodou com `--platforms kr
+euw1 na1 --players 500 --matches-per-player 20`. **Resultado
+excelente**: EUW1 +3.902 partidas (1.378→5.280), KR +3.117 (1.354→4.471),
+NA1 praticamente parado (+0, 1.446→1.446 — parece que o script não
+chegou a processar NA1 no tempo da coleta ou process timeout ocorreu).
+Total: 16.114→23.133 partidas (**+6.979, +43,3%**).
+
+Pipeline completo rerodado:
+- `load_items`: 3.668.806 → **5.279.586** eventos (23.133 timelines,
+  +1,6M eventos)
+- `build_features`: 15.979 → **22.973** partidas no corte de 15min
+  (todos os 4 cortes: 23.053/22.973/20.254/16.179)
+- `train_baseline` (CV 5-fold, XGBoost):
+
+  | Métrica | anterior (15.979) | agora (22.973) | Δ |
+  |---|---|---|---|
+  | AUC-ROC | 0.8289 | **0.8393** | **+0.0104** |
+  | Acurácia | 0.7489 | **0.7573** | **+0.0084** |
+
+  RandomForest e MLP também melhoraram (RF: 0.8114→0.8219, MLP:
+  0.8295→0.8385). **Ganho real e consistente** — volume trabalha, não
+  ruído como os 8 experimentos de feature descartados.
+- `export_model`: `data/model.joblib`/`models_phases.joblib` +
+  `reports/shap_importance*.json` reexportados. Modelo em produção
+  agora reflete 23.133 partidas (45% do volume acumulado).
+
+**Observação operacional:** taxa de vitória azul sobre a amostra toda
+aumentou (43,7% em 15.979 → 45,6% em 22.973) — a coleta em regiões
+não-BR1 parece estar trazendo mais jogos onde azul vence, ou o viés de
+lado varia regionalmente como já documentado (BR1 56.3%, EUW1 53.5%,
+NA1 52.2%, KR 50.6%). Não é motivo de preocupação — é dado real.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
@@ -1956,6 +2017,9 @@ mais como estava escrita.
 - Ampliar ainda mais a amostra por região (KR/EUW1/NA1 seguem bem
   menores que BR1) pra deixar o achado do viés de lado (2026-07-06:
   todas as 4 regiões pendem pro vermelho, não só BR) mais conclusivo.
+  **Usar `--players` bem maior (500-1000+)** — 100 só pega o topo do
+  ladder, que já foi coletado (ver entrada 2026-07-06 acima: 100
+  rendeu só 103 partidas novas de 3 regiões).
 - ~~Quando a coleta adicional de solo queue terminar: rerodar
   `load_items`, `build_features`, `export_model`~~ — **feito em
   2026-07-06** (ver entrada acima: AUC 0.8214→0.8289). Collection
