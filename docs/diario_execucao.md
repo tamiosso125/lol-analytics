@@ -2254,6 +2254,121 @@ Verificado: `npm run lint` (0 erros) / `npm run test` (31/31) / `npm
 run build` / Playwright real no Simulador (aba Composição, IC visível,
 legenda de shrinkage visível, dupla de 9 jogos aparecendo em cinza).
 
+## 2026-07-08 — Revisão geral de dados/resultados + achado: viés de lado enfraquece com o tempo
+
+Pedido do usuário: "análise e revisão dos nossos dados e resultados".
+Levantamento fresco (nada reaproveitado de execuções antigas): 23.133
+partidas / 24.999 jogadores / 173 campeões / 96.716 jogos profissionais.
+AUC por fase, medida agora com os hiperparâmetros de produção (500
+árvores, lr=0,01, profundidade 3): **10min 0,767 / 15min 0,842 / 20min
+0,872 / 25min 0,907** — monotônico, amostra caindo de 23.053 para
+16.179 conforme o corte avança (nem toda partida chega ao late game).
+Nota de higiene: `raw_matches` (23.571) e `matches` normalizado
+(23.133) divergem em 438 linhas — `load_matches` provavelmente não
+rodou no último lote da coleta ampliada; não afeta os números deste
+relatório mas vale rerodar antes do próximo retreino.
+
+**Achado novo, investigado com 3 testes independentes: o viés de lado
+não é constante entre fases.** Consultando `/predict` com estado
+zerado (empate total) em cada corte: 10min 47,8% azul → 15min 46,3%
+(o mais vermelho) → 20min 49,1% (quase neutro) → 25min 51,1% (azul no
+ponto). Isso contradiz o texto atual (Dashboard, Explicabilidade,
+Simulador) que trata "vermelho favorecido" como constante.
+
+Investigação (pedida pelo usuário: "investigue" antes de aceitar o
+achado como está):
+1. **É real, não artefato do modelo?** Taxa de vitória BRUTA (sem
+   modelo) entre partidas genuinamente empatadas (`|gold_diff|<500`)
+   em `features_phases.csv`: 46,1%→46,4%→47,3%→48,6% azul do corte 10
+   ao 25. Confirma a tendência nos dados brutos — o modelo extrapola
+   um pouco além disso (51,1% vs 48,6%), mas a direção é real.
+2. **É mistura regional (EUW1/KR crescendo)?** Refeito só dentro do
+   BR1 (o mais vermelho-enviesado): 45,3%→44,6%→47,2%→51,1% — o
+   padrão fica MAIS forte dentro de uma única região, não mais fraco.
+   **Hipótese de mistura regional descartada.**
+3. **É que "jogos longos são um tipo diferente de jogo"?** Win rate
+   azul incondicional (sem filtro de empate) por faixa de duração
+   total da partida: plana em ~44-47% em toda faixa, dentro e fora do
+   BR1. **Descartado** — o efeito é específico de estar empatado
+   NAQUELE minuto, não de a partida ser longa.
+4. **Solidez estatística:** IC95% de Wilson do ponto BR1 aos 25min
+   (51,1%, n=458) = [46,5%–55,6%] — inclui 50% E valores ainda
+   vermelho-favorecidos. Aos 10min (45,3%, n=2.194) o IC é
+   [43,2%–47,3%], exclui 50% com folga. **A tendência de queda é
+   sólida (4 pontos monotônicos, 2 testes independentes); a alegação
+   específica de "inverte completamente pro azul aos 25min" não é —
+   amostra de empates tardios ainda é pequena.**
+
+Explicação mais provável (não testada formalmente, hipótese pra
+próxima investigação se for atrás): sobrevivência do ESTADO de
+empate, não da partida — um empate aos 15min tende a ser instável
+(muitas dessas partidas estão prestes a desequilibrar); um empate que
+se sustenta até os 25min reflete jogo mais equilibrado/de desgaste,
+onde o contra-pick garantido do vermelho parece já ter sido absorvido
+pela própria partida.
+
+**Recomendação pro texto do TCC:** trocar "vermelho favorecido"
+(implicitamente constante) por "vermelho favorecido no early/mid,
+enfraquecendo até ficar estatisticamente indistinguível de neutro no
+late game" — pode ser afirmativo nesse ponto (mistura regional e
+"jogos longos" já descartados como explicação alternativa), só evitar
+alegar inversão completa aos 25min.
+
+Relatório completo publicado como Artifact (dados + investigação +
+recomendações, com IC e os 3 testes) — ver histórico de conversação
+2026-07-08 se precisar do link.
+
+## 2026-07-08 — Camada 1 do plano "conhecimento geral + predição": orientação estratégica
+
+Depois da discussão sobre até onde "conhecimento geral de LoL" pode
+melhorar os modelos (conclusão: não entra como feature — o modelo de
+vitória nem sabe qual campeão está sendo jogado, e o efeito de coisas
+como controle de wave já colapsa em `gold_diff`/`xp_diff`, é por isso
+que os 9 experimentos de feature deram negativo), desenhado um plano
+de 4 camadas por custo/risco crescente:
+1. **Diagnóstico narrado** — LLM traduz estado+SHAP já calculados em
+   orientação estratégica. Baixo risco, reaproveita tudo que já existe.
+2. **Consciente de composição** — modelo de estado + `/compose` juntos,
+   recomendação por campeão. Esforço médio, modelagem nova.
+3. **Ação concreta** (wave/posição) — exige dado que a API da Riot não
+   tem (replay `.rofl` ou visão computacional sobre o minimapa).
+   "Reconstruir do zero" de verdade.
+4. **Verificação causal** — correlação vira causalidade verificada.
+   Pesquisa, não feature; viés de confusão em dado observacional.
+
+Camadas 3-4 ficam registradas como trabalhos futuros no texto do TCC,
+não como algo a construir agora.
+
+**Camada 1 implementada nesta sessão.** Endpoint novo `POST /coach`
+(`src/coach/advice.py` + `src/api/main.py`): recebe o `state` +
+`blue_win_probability` + `shap_contributions` que o `/predict` já
+calculou (não recalcula nada) e devolve uma orientação estratégica em
+texto (Claude Haiku, temperatura 0,4, 4-6 frases). Mesma convenção de
+honestidade já estabelecida no NLQ ("Leitura de jogo:") e no
+`WhatIfCard` ("leitura honesta"): o prompt força a resposta a terminar
+deixando explícito que é leitura geral aplicada ao estado, não
+verificada pelos dados desta partida — o modelo não vê itens, posição
+de jogador nem wave.
+
+Frontend: componente compartilhado `CoachCard`
+(`frontend/src/components/CoachCard.tsx`), botão "Gerar orientação"
+sob demanda (não automático — custaria uma chamada de LLM a cada
+arrasto de slider). Integrado em dois lugares que já tinham
+estado+predição prontos:
+- Aba Estado do Simulador (`StatePanel`, `Predict.tsx`) — cenário livre.
+- Card "E se..." do `MatchDetail` (`WhatIfCard`) — precisou virar
+  Fragment (`<>...</>`) pra retornar o Card original + o CoachCard como
+  irmão, não aninhado (Card dentro de CardContent ficava com borda
+  dupla, corrigido antes de photografar).
+
+Testado ponta a ponta: `curl` direto no `/coach` com um cenário de time
+azul muito atrás (gold_diff −3500) devolveu orientação coerente
+(evitar luta, farm seguro, ceder objetivos secundários, escalar pro
+late) terminando com o aviso de honestidade. Playwright confirmou os
+dois pontos de integração funcionando no navegador, sem erro de
+console. `npm run lint` (0 erros) / `npm run test` (31/31) / `npm run
+build`: todos verdes.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

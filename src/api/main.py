@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from src.coach.advice import generate_advice
 from src.db import get_conn
 from src.features.build_features import CUTOFFS, features_from_timeline
 from src.nlq.nl_to_sql import SqlExecutionError, ask, explain_result
@@ -161,6 +162,14 @@ class MatchState(BaseModel):
     tower_diff: float
     dragon_diff: float
     minute: int = 15  # corte: 10 (rotas), 15, 20 (mid), 25 (late)
+
+
+class CoachRequest(BaseModel):
+    """Estado + o que o /predict já devolveu — não recalcula nada, só
+    pede a leitura estratégica em cima dos números já computados."""
+    state: MatchState
+    blue_win_probability: float
+    shap_contributions: dict[str, float]
 
 
 class Composition(BaseModel):
@@ -1591,3 +1600,17 @@ def predict(state: MatchState):
         "shap_contributions": contributions,
         "minute": state.minute,
     }
+
+
+@app.post("/coach")
+def coach(req: CoachRequest):
+    """Orientação estratégica em cima do estado + predição já calculados
+    pelo /predict (não recalcula nada) — camada de conhecimento geral de
+    League of Legends aplicada aos números, ver src/coach/advice.py."""
+    try:
+        narrative = generate_advice(
+            req.state.model_dump(), req.blue_win_probability, req.shap_contributions
+        )
+    except Exception as exc:
+        raise _external_call_error(exc)
+    return {"narrative": narrative}

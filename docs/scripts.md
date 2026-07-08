@@ -411,6 +411,15 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   estado da partida + contribuições SHAP; aceita `minute` (10|15|20|25)
   para escolher o modelo da fase (exige `data/models_phases.joblib`, ver
   `export_model.py`; sem ele retorna 503);
+- `POST /coach` (2026-07-08, `src/coach/advice.py`) — orientação
+  estratégica em texto a partir do `state`+`blue_win_probability`+
+  `shap_contributions` que o `/predict` já calculou (não recalcula
+  nada). Camada 1 do plano "conhecimento geral aplicado à predição" —
+  usa o conhecimento geral de League of Legends da LLM pra traduzir os
+  números em "o que fazer agora", sempre terminando com aviso de que
+  não é verificado pelos dados da partida (modelo não vê itens/posição/
+  wave). Consumido pelo `CoachCard` (frontend), integrado no card "E
+  se..." do `MatchDetail` e na aba Estado do Simulador.
 - `/reports/*` — serve os PNGs/JSON de `reports/` (explicabilidade).
 
 CORS liberado para `http://localhost:5173` (dev server do Vite).

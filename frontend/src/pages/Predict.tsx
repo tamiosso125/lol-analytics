@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
+import { CoachCard } from "@/components/CoachCard";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote } from "@/components/ui";
 import { api, type MatchState } from "@/lib/api";
 import {
@@ -189,6 +190,8 @@ export function StatePanel() {
           </Card>
         </div>
       </div>
+
+      {predict.data && <CoachCard state={state} prediction={predict.data} />}
     </div>
   );
 }

@@ -389,6 +389,10 @@ export interface Prediction {
   minute: number;
 }
 
+export interface CoachAdvice {
+  narrative: string;
+}
+
 export interface ProbPoint {
   minute: number;
   blue_win_probability: number;
@@ -589,6 +593,15 @@ export const api = {
     }),
   predict: (state: MatchState) =>
     request<Prediction>("/predict", { method: "POST", body: JSON.stringify(state) }),
+  coach: (state: MatchState, prediction: Prediction) =>
+    request<CoachAdvice>("/coach", {
+      method: "POST",
+      body: JSON.stringify({
+        state,
+        blue_win_probability: prediction.blue_win_probability,
+        shap_contributions: prediction.shap_contributions,
+      }),
+    }),
   shapImportancePhases: () =>
     request<Record<string, Record<string, number>>>("/reports/shap_importance_phases.json"),
   reportImage: (name: string) => `${API_URL}/reports/${name}`,

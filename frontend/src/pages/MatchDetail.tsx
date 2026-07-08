@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
+import { CoachCard } from "@/components/CoachCard";
 import { MapHeatmap } from "@/components/MapHeatmap";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
 import { api, type MatchParticipantFull, type MatchState, type MatchTeam, type ProbPoint, type WardEvent } from "@/lib/api";
@@ -328,6 +329,7 @@ function WhatIfCard({ curve, minute }: { curve: ProbPoint[]; minute: number }) {
   const baseRanges = RANGES[point.model_cutoff];
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -436,6 +438,8 @@ function WhatIfCard({ curve, minute }: { curve: ProbPoint[]; minute: number }) {
         </div>
       </CardContent>
     </Card>
+    {predict.data && <CoachCard state={state} prediction={predict.data} />}
+    </>
   );
 }
 
