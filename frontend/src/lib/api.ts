@@ -414,6 +414,10 @@ export interface CoachContext {
   lanes?: CoachLane[];
   blueSynergies?: CoachSynergyItem[];
   redSynergies?: CoachSynergyItem[];
+  /** partida real: o servidor busca itens no minuto + posição/agrupamento
+   * da timeline (gameMinute é o minuto de jogo, não o corte do modelo) */
+  matchId?: string;
+  gameMinute?: number;
 }
 
 export interface ProbPoint {
@@ -628,6 +632,8 @@ export const api = {
         lanes: ctx.lanes ?? [],
         blue_synergies: ctx.blueSynergies ?? [],
         red_synergies: ctx.redSynergies ?? [],
+        match_id: ctx.matchId ?? null,
+        game_minute: ctx.gameMinute ?? null,
       }),
     }),
   shapImportancePhases: () =>

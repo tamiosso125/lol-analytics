@@ -19,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from src.coach.advice import generate_advice
+from src.coach.tactics import tactical_context
 from src.db import get_conn
 from src.features.build_features import CUTOFFS, features_from_timeline
 from src.nlq.nl_to_sql import SqlExecutionError, ask, explain_result
@@ -196,6 +197,11 @@ class CoachRequest(BaseModel):
     lanes: list[CoachLane] = []
     blue_synergies: list[CoachSynergyItem] = []
     red_synergies: list[CoachSynergyItem] = []
+    # Camada 2/3: quando é uma partida REAL, o servidor busca itens no
+    # minuto + posição/agrupamento da timeline (game_minute é o minuto de
+    # jogo mostrado, distinto do corte do modelo em state.minute)
+    match_id: str | None = None
+    game_minute: int | None = None
 
 
 class Composition(BaseModel):
@@ -1634,6 +1640,14 @@ def coach(req: CoachRequest):
     pelo /predict (não recalcula nada) — camada de conhecimento geral de
     League of Legends aplicada aos números, ver src/coach/advice.py.
     Campos de composição (Camada 2) são opcionais."""
+    tactical = None
+    if req.match_id and req.game_minute is not None and _completed_item_ids:
+        try:
+            tactical = tactical_context(
+                req.match_id, req.game_minute, _items, set(_completed_item_ids)
+            )
+        except Exception:
+            tactical = None  # contexto tático é opcional — nunca derruba o /coach
     try:
         narrative = generate_advice(
             req.state.model_dump(),
@@ -1644,6 +1658,7 @@ def coach(req: CoachRequest):
             lanes=[l.model_dump() for l in req.lanes],
             blue_synergies=[s.model_dump() for s in req.blue_synergies],
             red_synergies=[s.model_dump() for s in req.red_synergies],
+            tactical=tactical,
         )
     except Exception as exc:
         raise _external_call_error(exc)

@@ -292,11 +292,13 @@ function ProbabilityCard({
 function WhatIfCard({
   curve,
   minute,
+  matchId,
   blueChampions,
   redChampions,
 }: {
   curve: ProbPoint[];
   minute: number;
+  matchId: string;
   blueChampions: Record<string, string>;
   redChampions: Record<string, string>;
 }) {
@@ -452,7 +454,12 @@ function WhatIfCard({
       <CoachCard
         state={state}
         prediction={predict.data}
-        context={{ blueChampions, redChampions }}
+        context={{
+          blueChampions,
+          redChampions,
+          matchId,
+          gameMinute: point.minute,
+        }}
       />
     )}
     </>
@@ -766,6 +773,7 @@ export function MatchDetail() {
         <WhatIfCard
           curve={m.prob_curve}
           minute={minute}
+          matchId={id}
           blueChampions={blueChampions}
           redChampions={redChampions}
         />

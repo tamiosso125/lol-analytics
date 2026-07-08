@@ -2401,9 +2401,57 @@ excelente gank setup pra explorar lanes inimigas"). Verificado via
 sem erro de console. `npm run lint` (0 erros) / `npm run test`
 (31/31) / `npm run build`: todos verdes.
 
-**Camada 2 fecha o plano de 4 camadas por ora** — camadas 3 (ação
-concreta) e 4 (verificação causal) seguem como trabalho futuro no
-texto do TCC, não como próximo passo de implementação.
+## 2026-07-08 — Camada 2 (itens/posição) + INÍCIO da Camada 3 (sinais táticos)
+
+O aviso de honestidade do coach dizia "não vê itens, posicionamento
+real dos jogadores ou controle de wave" — o usuário perguntou se pra
+resolver isso precisaria das próximas camadas. Análise: **itens e
+posição a Riot GRAVA** (item_events; participantFrames com x/y por
+minuto, já usados no MapHeatmap) — dá pra alcançar estendendo a Camada
+2, sem reconstruir nada; só **controle de wave/minion** exige Camada 3
+de verdade (não existe em nenhuma versão da match-v5, só replay .rofl
+ou visão computacional). Feito nesta sessão:
+
+**Novo módulo `src/coach/tactics.py`** — `tactical_context(match_id,
+minute, items_catalog, completed_ids)` deriva da timeline REAL:
+- **Itens finalizados possuídos por cada campeão NAQUELE minuto**
+  (item_events com `ts_ms <= minute*60000`, compra menos venda, filtra
+  finalizados, resolve nome via items.json) — dado exato da partida.
+- **Sinais espaciais (início da Camada 3)** a partir do frame do
+  minuto: agrupamento (spread normalizado dos 5 em torno do centroide:
+  agrupados / parcialmente / espalhados), overextensão (jogadores além
+  do rio — anti-diagonal nx+ny=1 — na metade inimiga, com flag de "bem
+  fundo"), e tempo de selva (jungleMinionsKilled azul − vermelho).
+
+`/coach` ganhou `match_id` + `game_minute` opcionais (game_minute é o
+minuto de JOGO mostrado, distinto do corte do modelo em state.minute);
+quando presentes numa partida real, o servidor chama tactical_context
+e passa pro prompt (advice.py), em blocos rotulados "DADO REAL desta
+partida". O aviso final do prompt vira condicional: com contexto
+tático, diz que itens/posição são reais mas a posição é aproximada (1
+amostra/minuto) e que wave/minion não é observável — mais honesto que
+o aviso genérico anterior. Frontend: `CoachContext` ganhou
+`matchId`/`gameMinute`, o `WhatIfCard` (MatchDetail) passa o id da
+partida + `point.minute`, e o subtítulo do card reflete "com itens e
+posição reais desta partida (posição aproximada)". O Simulador NÃO
+passa match_id (é composição hipotética, sem partida real) — continua
+composição-only.
+
+Verificado ponta a ponta: `curl` no `/coach` com match_id real aos 20
+min citou os itens reais de cada campeão (Khazix/Glaive Sombria,
+Singed/Rylai) + "Darius e Camille espalhados na metade inimiga"; no
+navegador (aos 14 min) citou Youmuu/Glaive Sombria, "Camille avançada
+não carrega teamfight sozinha", "4 camps de vantagem na selva",
+fechando com o aviso de wave/minion. `npm run lint` (0 erros) / `npm
+run test` (31/31) / `npm run build`: verdes.
+
+**Estado do plano de 4 camadas:** Camada 1 e 2 completas; Camada 3
+**iniciada** — a fatia de sinais espaciais/táticos DERIVÁVEIS do dado
+que temos (agrupamento, overextensão, tempo de selva) está no ar. O
+que falta da Camada 3 é o estado de wave/minion e micro de verdade,
+que continua bloqueado por falta de dado (replay .rofl / visão
+computacional — trabalho futuro no texto do TCC). Camada 4
+(verificação causal) segue como limitação/futuro.
 
 ## Próximos registros pendentes
 

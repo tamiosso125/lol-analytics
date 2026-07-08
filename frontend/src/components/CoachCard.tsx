@@ -37,8 +37,9 @@ export function CoachCard({
           </CardTitle>
           <p className="mt-0.5 text-xs text-muted-ink">
             Conhecimento geral de League of Legends aplicado a este estado
-            {context?.lanes?.length ? " e à composição" : ""} — não é verificado pelos
-            dados desta partida.
+            {context?.lanes?.length ? " e à composição" : ""}
+            {context?.matchId ? ", com itens e posição reais desta partida (posição aproximada)" : ""}. O
+            estado de wave/minion não é observável.
           </p>
         </div>
         <Button onClick={() => advice.mutate()} disabled={advice.isPending} className="shrink-0">

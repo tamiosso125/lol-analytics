@@ -40,6 +40,7 @@ def generate_advice(
     lanes: list[dict] | None = None,
     blue_synergies: list[dict] | None = None,
     red_synergies: list[dict] | None = None,
+    tactical: dict | None = None,
 ) -> str:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
@@ -110,6 +111,42 @@ def generate_advice(
             f"confiança):\n{syn_lines.strip()}"
         )
 
+    # Camada 2 (itens) + início da Camada 3 (posições) — dado REAL da
+    # timeline desta partida, no minuto analisado (ver src/coach/tactics.py)
+    has_tactical = bool(tactical and (tactical.get("items") or tactical.get("spatial")))
+    if tactical and tactical.get("items"):
+        item_lines = "\n".join(
+            f"- {champ}: {', '.join(its)}" for champ, its in tactical["items"].items()
+        )
+        sections.append(
+            f"Itens finalizados que cada campeão JÁ possuía aos "
+            f"{tactical['minute']} minutos — DADO REAL desta partida:\n{item_lines}"
+        )
+    if tactical and tactical.get("spatial"):
+        sp = tactical["spatial"]
+        spatial_bits = []
+        for team, label in (("blue", "Time azul"), ("red", "Time vermelho")):
+            s = sp.get(team)
+            if not s:
+                continue
+            bit = f"{label}: {s['grouping']}"
+            if s["overextended"]:
+                bit += f", {s['overextended']} jogador(es) avançado(s) na metade inimiga"
+                if s["deep_overextended"]:
+                    bit += f" ({s['deep_overextended']} bem fundo, arriscado)"
+            spatial_bits.append(bit)
+        jd = tactical.get("jungle_diff", 0)
+        jungle_txt = (
+            f"\nTempo de selva (camps neutros farmados, azul − vermelho): {jd:+d}"
+            if jd else ""
+        )
+        sections.append(
+            f"Posição aproximada dos times aos {tactical['minute']} minutos "
+            f"(1 amostra por minuto — dá pra ler agrupamento e quem está "
+            f"avançado, NÃO o estado de wave/minion):\n"
+            + "\n".join(spatial_bits) + jungle_txt
+        )
+
     instructions = (
         "\n\nCom base nisso, escreva uma orientação estratégica curta (4-6 "
         "frases, português do Brasil, texto corrido, sem markdown) para o "
@@ -126,14 +163,30 @@ def generate_advice(
             "só falar em 'time azul'/'time vermelho' — mas só cite número de "
             "matchup/sinergia se ele foi listado acima; não invente estatística."
         )
+    if has_tactical:
+        instructions += (
+            " Aproveite os itens e a leitura de posição/agrupamento acima na "
+            "orientação (ex.: quem já tem item-chave, quem está avançado demais "
+            "sem visão) — mas trate a posição como aproximada (1 amostra/minuto)."
+        )
     instructions += (
         " Use conhecimento geral de macro/estratégia de League of Legends "
         "pra tudo que não for dado explícito acima.\n\n"
-        "Termine com uma frase curta deixando claro que isso é leitura "
-        "estratégica geral aplicada a este estado — não uma recomendação "
-        "verificada pelos dados desta partida específica, já que o modelo "
-        "não vê itens, posição dos jogadores nem controle de wave."
     )
+    if has_tactical:
+        instructions += (
+            "Termine com uma frase curta deixando claro que itens e posição "
+            "são dado real desta partida mas a posição é aproximada (1 amostra "
+            "por minuto), e que o estado de wave/minion não é observável — a "
+            "leitura tática fina depende disso."
+        )
+    else:
+        instructions += (
+            "Termine com uma frase curta deixando claro que isso é leitura "
+            "estratégica geral aplicada a este estado — não uma recomendação "
+            "verificada pelos dados desta partida específica, já que o modelo "
+            "não vê itens, posição dos jogadores nem controle de wave."
+        )
 
     prompt = "\n\n".join(sections) + instructions
 

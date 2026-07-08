@@ -423,10 +423,17 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   `blue_synergies`/`red_synergies` — os mesmos números que o
   `/compose` já calcula (shrinkage+IC), nunca invenção da LLM; o
   prompt distingue "dado real" de "conhecimento geral" e só cita
-  estatística fornecida. Consumido pelo `CoachCard` (frontend),
-  integrado no card "E se..." do `MatchDetail` (só campeões, da
-  partida real) e na aba Composição do Simulador (contexto completo,
-  quando "Estado da partida" está incluído).
+  estatística fornecida. **Camada 2 (itens/posição) + início da Camada
+  3** (mesma data): com `match_id`+`game_minute` opcionais, o servidor
+  chama `src/coach/tactics.py` (`tactical_context`) e injeta DADO REAL
+  da timeline no minuto — itens finalizados que cada campeão já possuía
+  + sinais espaciais derivados (agrupamento dos 5, overextensão além do
+  rio, tempo de selva). O aviso do prompt vira condicional (itens/
+  posição reais mas posição aproximada a 1 amostra/min; wave/minion não
+  observável). Consumido pelo `CoachCard` (frontend): card "E se..." do
+  `MatchDetail` passa match_id → contexto tático completo; aba
+  Composição do Simulador é composição hipotética → só campeões/
+  matchups/sinergias, sem match_id.
 - `/reports/*` — serve os PNGs/JSON de `reports/` (explicabilidade).
 
 CORS liberado para `http://localhost:5173` (dev server do Vite).
