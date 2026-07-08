@@ -2369,6 +2369,42 @@ dois pontos de integração funcionando no navegador, sem erro de
 console. `npm run lint` (0 erros) / `npm run test` (31/31) / `npm run
 build`: todos verdes.
 
+## 2026-07-08 — Camada 2: orientação consciente de composição
+
+`POST /coach` ganhou campos opcionais: `blue_champions`/`red_champions`
+(por posição), `lanes` (matchups) e `blue_synergies`/`red_synergies`
+(sinergias) — os MESMOS números que o `/compose` já calcula do
+histórico real (shrinkage + IC, ver entrada de sinergia de dupla
+acima), nunca invenção da LLM. O prompt (`src/coach/advice.py`)
+distingue explicitamente "dado real" (matchup/sinergia) de
+"conhecimento geral" (o resto), e só cita estatística que foi de fato
+fornecida — instrução explícita pra não alucinar número.
+
+Dois pontos de integração, cada um com o contexto que já tinha
+disponível:
+- **`WhatIfCard` (MatchDetail)**: passa os campeões da partida REAL
+  (de `m.participants`, por posição) — não tem matchup/sinergia
+  (seria preciso uma chamada extra a `/compose`, fora de escopo por
+  ora), mas já cita campeão específico em vez de só "time azul".
+- **`CompositionPanel` (Simulador)**: contexto completo — campeões +
+  `result.lanes` + `result.synergies` do `/compose` já calculado.
+  Só aparece quando "Estado da partida" está incluído (precisa de um
+  estado real pra narrar, não só a heurística de composição pura).
+
+Testado com um cenário completo (Singed/Hecarim/Lissandra/Caitlyn/Bard
+vs Darius/Warwick/Viktor/Ashe/Camille, estado zerado aos 15min): a
+orientação citou Lissandra 58% vs Viktor, Singed 55% vs Darius, Bard
+49% vs Camille — matchups reais, não genéricos — tecidos em conselho
+específico ("vermelho deve evitar lutas frontais... Warwick tem
+excelente gank setup pra explorar lanes inimigas"). Verificado via
+`curl` (backend isolado) e Playwright nos dois pontos de integração,
+sem erro de console. `npm run lint` (0 erros) / `npm run test`
+(31/31) / `npm run build`: todos verdes.
+
+**Camada 2 fecha o plano de 4 camadas por ora** — camadas 3 (ação
+concreta) e 4 (verificação causal) seguem como trabalho futuro no
+texto do TCC, não como próximo passo de implementação.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

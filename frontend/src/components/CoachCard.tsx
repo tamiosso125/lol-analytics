@@ -2,16 +2,29 @@ import { useMutation } from "@tanstack/react-query";
 import { Compass } from "lucide-react";
 
 import { Button, Card, CardContent, CardHeader, CardTitle, ErrorNote } from "@/components/ui";
-import { api, type MatchState, type Prediction } from "@/lib/api";
+import { api, type CoachContext, type MatchState, type Prediction } from "@/lib/api";
 
 /** Orientação estratégica gerada por LLM em cima do estado + predição já
  * calculados pelo /predict (não recalcula nada) — camada 1 do plano
  * "conhecimento geral aplicado à predição" (ver docs/diario_execucao.md
  * 2026-07-08). Compartilhado entre o card "E se..." (MatchDetail) e a
- * aba Estado do Simulador — os dois já têm state+prediction prontos. */
-export function CoachCard({ state, prediction }: { state: MatchState; prediction: Prediction }) {
+ * aba Estado do Simulador — os dois já têm state+prediction prontos.
+ *
+ * Camada 2 (opcional, via `context`): quando quem chama já tem campeões
+ * e/ou matchups/sinergias calculados (MatchDetail sabe os campeões da
+ * partida real; o Simulador tem tudo isso do /compose), a orientação
+ * cita campeão específico em vez de só "time azul"/"time vermelho". */
+export function CoachCard({
+  state,
+  prediction,
+  context,
+}: {
+  state: MatchState;
+  prediction: Prediction;
+  context?: CoachContext;
+}) {
   const advice = useMutation({
-    mutationFn: () => api.coach(state, prediction),
+    mutationFn: () => api.coach(state, prediction, context),
   });
 
   return (
@@ -23,8 +36,9 @@ export function CoachCard({ state, prediction }: { state: MatchState; prediction
             Orientação estratégica
           </CardTitle>
           <p className="mt-0.5 text-xs text-muted-ink">
-            Conhecimento geral de League of Legends aplicado a este estado — não é
-            verificado pelos dados desta partida.
+            Conhecimento geral de League of Legends aplicado a este estado
+            {context?.lanes?.length ? " e à composição" : ""} — não é verificado pelos
+            dados desta partida.
           </p>
         </div>
         <Button onClick={() => advice.mutate()} disabled={advice.isPending} className="shrink-0">

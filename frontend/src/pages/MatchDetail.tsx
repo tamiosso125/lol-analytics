@@ -289,7 +289,17 @@ function ProbabilityCard({
  * estado ("e se aos 14 min o time azul tivesse +1k de ouro?"). É uma
  * intervenção sobre o ESTADO agregado, não sobre uma ação específica —
  * a distinção fica no texto do card. */
-function WhatIfCard({ curve, minute }: { curve: ProbPoint[]; minute: number }) {
+function WhatIfCard({
+  curve,
+  minute,
+  blueChampions,
+  redChampions,
+}: {
+  curve: ProbPoint[];
+  minute: number;
+  blueChampions: Record<string, string>;
+  redChampions: Record<string, string>;
+}) {
   const point = useMemo(
     () => curve.find((p) => p.minute === minute) ?? curve[curve.length - 1],
     [curve, minute],
@@ -438,7 +448,13 @@ function WhatIfCard({ curve, minute }: { curve: ProbPoint[]; minute: number }) {
         </div>
       </CardContent>
     </Card>
-    {predict.data && <CoachCard state={state} prediction={predict.data} />}
+    {predict.data && (
+      <CoachCard
+        state={state}
+        prediction={predict.data}
+        context={{ blueChampions, redChampions }}
+      />
+    )}
     </>
   );
 }
@@ -621,6 +637,10 @@ export function MatchDetail() {
   const red = m.participants.filter((p) => p.team_id === 200);
   const blueTeam = m.teams.find((t) => t.team_id === 100);
   const redTeam = m.teams.find((t) => t.team_id === 200);
+  // campeões da partida real por posição — dá pro CoachCard citar
+  // campeão específico em vez de só "time azul"/"time vermelho"
+  const blueChampions = Object.fromEntries(blue.map((p) => [p.position, p.champion]));
+  const redChampions = Object.fromEntries(red.map((p) => [p.position, p.champion]));
 
   return (
     <div className="space-y-5">
@@ -742,7 +762,14 @@ export function MatchDetail() {
         </div>
       </div>
 
-      {m.prob_curve.length > 0 && <WhatIfCard curve={m.prob_curve} minute={minute} />}
+      {m.prob_curve.length > 0 && (
+        <WhatIfCard
+          curve={m.prob_curve}
+          minute={minute}
+          blueChampions={blueChampions}
+          redChampions={redChampions}
+        />
+      )}
 
       {positions.data && positions.data.wards.length > 0 && (
         <VisionCard wards={positions.data.wards} maxMinute={positions.data.frames.length - 1} />

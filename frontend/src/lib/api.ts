@@ -393,6 +393,29 @@ export interface CoachAdvice {
   narrative: string;
 }
 
+/** Subconjunto de ComposeLane/ComposeSynergy que o /coach usa (Camada 2)
+ * — mesmos números que o /compose já calculou, não opinião da LLM. */
+export interface CoachLane {
+  position: string;
+  blue: string;
+  red: string;
+  blue_lane_win_rate: number;
+  matchup_games: number;
+}
+export interface CoachSynergyItem {
+  a: string;
+  b: string;
+  delta: number;
+  significant: boolean;
+}
+export interface CoachContext {
+  blueChampions?: Record<string, string>;
+  redChampions?: Record<string, string>;
+  lanes?: CoachLane[];
+  blueSynergies?: CoachSynergyItem[];
+  redSynergies?: CoachSynergyItem[];
+}
+
 export interface ProbPoint {
   minute: number;
   blue_win_probability: number;
@@ -593,13 +616,18 @@ export const api = {
     }),
   predict: (state: MatchState) =>
     request<Prediction>("/predict", { method: "POST", body: JSON.stringify(state) }),
-  coach: (state: MatchState, prediction: Prediction) =>
+  coach: (state: MatchState, prediction: Prediction, ctx: CoachContext = {}) =>
     request<CoachAdvice>("/coach", {
       method: "POST",
       body: JSON.stringify({
         state,
         blue_win_probability: prediction.blue_win_probability,
         shap_contributions: prediction.shap_contributions,
+        blue_champions: ctx.blueChampions ?? {},
+        red_champions: ctx.redChampions ?? {},
+        lanes: ctx.lanes ?? [],
+        blue_synergies: ctx.blueSynergies ?? [],
+        red_synergies: ctx.redSynergies ?? [],
       }),
     }),
   shapImportancePhases: () =>

@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Swords, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { CoachCard } from "@/components/CoachCard";
 import { Button, Card, CardContent, CardHeader, CardTitle, ErrorNote, Skeleton } from "@/components/ui";
 import { api, type ComposeLane, type ComposeSynergy, type MatchState } from "@/lib/api";
 import { championDisplayName, championIcon, POSITION_LABELS } from "@/lib/ddragon";
@@ -703,6 +704,24 @@ export function CompositionPanel() {
             <SynergyList title="Sinergias — time azul" synergies={result.synergies.blue} />
             <SynergyList title="Sinergias — time vermelho" synergies={result.synergies.red} />
           </div>
+
+          {result.state_analysis && (
+            <CoachCard
+              state={state}
+              prediction={{
+                blue_win_probability: result.state_analysis.combined_probability,
+                shap_contributions: {},
+                minute: result.state_analysis.minute,
+              }}
+              context={{
+                blueChampions: blue,
+                redChampions: red,
+                lanes: result.lanes,
+                blueSynergies: result.synergies.blue,
+                redSynergies: result.synergies.red,
+              }}
+            />
+          )}
         </>
       )}
     </div>

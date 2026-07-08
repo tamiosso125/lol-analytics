@@ -418,8 +418,15 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   usa o conhecimento geral de League of Legends da LLM pra traduzir os
   números em "o que fazer agora", sempre terminando com aviso de que
   não é verificado pelos dados da partida (modelo não vê itens/posição/
-  wave). Consumido pelo `CoachCard` (frontend), integrado no card "E
-  se..." do `MatchDetail` e na aba Estado do Simulador.
+  wave). **Camada 2** (mesma data): campos opcionais
+  `blue_champions`/`red_champions` (por posição), `lanes` e
+  `blue_synergies`/`red_synergies` — os mesmos números que o
+  `/compose` já calcula (shrinkage+IC), nunca invenção da LLM; o
+  prompt distingue "dado real" de "conhecimento geral" e só cita
+  estatística fornecida. Consumido pelo `CoachCard` (frontend),
+  integrado no card "E se..." do `MatchDetail` (só campeões, da
+  partida real) e na aba Composição do Simulador (contexto completo,
+  quando "Estado da partida" está incluído).
 - `/reports/*` — serve os PNGs/JSON de `reports/` (explicabilidade).
 
 CORS liberado para `http://localhost:5173` (dev server do Vite).

@@ -164,12 +164,38 @@ class MatchState(BaseModel):
     minute: int = 15  # corte: 10 (rotas), 15, 20 (mid), 25 (late)
 
 
+class CoachLane(BaseModel):
+    """Subconjunto de ComposeLane — só o que o prompt do coach usa."""
+    position: str
+    blue: str
+    red: str
+    blue_lane_win_rate: float
+    matchup_games: int
+
+
+class CoachSynergyItem(BaseModel):
+    """Subconjunto de ComposeSynergy — idem."""
+    a: str
+    b: str
+    delta: float
+    significant: bool
+
+
 class CoachRequest(BaseModel):
     """Estado + o que o /predict já devolveu — não recalcula nada, só
-    pede a leitura estratégica em cima dos números já computados."""
+    pede a leitura estratégica em cima dos números já computados.
+    Campos de composição são opcionais (Camada 2): quando presentes, o
+    prompt cita campeão/matchup/sinergia específicos em vez de só
+    "time azul"/"time vermelho" — sempre com os mesmos números que o
+    /compose já calculou, nunca invenção da LLM."""
     state: MatchState
     blue_win_probability: float
-    shap_contributions: dict[str, float]
+    shap_contributions: dict[str, float] = {}
+    blue_champions: dict[str, str] = {}
+    red_champions: dict[str, str] = {}
+    lanes: list[CoachLane] = []
+    blue_synergies: list[CoachSynergyItem] = []
+    red_synergies: list[CoachSynergyItem] = []
 
 
 class Composition(BaseModel):
@@ -1606,10 +1632,18 @@ def predict(state: MatchState):
 def coach(req: CoachRequest):
     """Orientação estratégica em cima do estado + predição já calculados
     pelo /predict (não recalcula nada) — camada de conhecimento geral de
-    League of Legends aplicada aos números, ver src/coach/advice.py."""
+    League of Legends aplicada aos números, ver src/coach/advice.py.
+    Campos de composição (Camada 2) são opcionais."""
     try:
         narrative = generate_advice(
-            req.state.model_dump(), req.blue_win_probability, req.shap_contributions
+            req.state.model_dump(),
+            req.blue_win_probability,
+            req.shap_contributions,
+            blue_champions=req.blue_champions,
+            red_champions=req.red_champions,
+            lanes=[l.model_dump() for l in req.lanes],
+            blue_synergies=[s.model_dump() for s in req.blue_synergies],
+            red_synergies=[s.model_dump() for s in req.red_synergies],
         )
     except Exception as exc:
         raise _external_call_error(exc)
