@@ -416,6 +416,8 @@ export interface MatchParticipantFull {
   vision: number;
   dmg: number;
   win: boolean;
+  /** 7 slots finais (item6 é o trinket); 0 = vazio */
+  items: number[];
 }
 
 export interface FramePlayer {
@@ -445,11 +447,22 @@ export interface ObjectiveEvent {
   team_id: number;
 }
 
+export interface WardEvent {
+  minute: number;
+  team_id: number;
+  /** posição do jogador que colocou/destruiu a ward NAQUELE minuto —
+   * proxy aproximado, a Riot não grava a posição real da ward */
+  x: number;
+  y: number;
+  kind: "placed" | "destroyed";
+}
+
 export interface MatchPositions {
   match_id: string;
   frames: PositionFrame[];
   kills: KillEvent[];
   objectives: ObjectiveEvent[];
+  wards: WardEvent[];
   bounds: { min: number; max_x: number; max_y: number };
 }
 

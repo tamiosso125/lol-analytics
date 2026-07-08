@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentType } from "react"
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   ReferenceLine,
@@ -16,8 +17,8 @@ import {
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
 import { MapHeatmap } from "@/components/MapHeatmap";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
-import { api, type MatchParticipantFull, type MatchState, type MatchTeam, type ProbPoint } from "@/lib/api";
-import { championDisplayName, championIcon, POSITION_LABELS } from "@/lib/ddragon";
+import { api, type MatchParticipantFull, type MatchState, type MatchTeam, type ProbPoint, type WardEvent } from "@/lib/api";
+import { championDisplayName, championIcon, itemIcon, POSITION_LABELS } from "@/lib/ddragon";
 import { deltaColor, formatPct as pct, winColor } from "@/lib/format";
 import { RANGES, SLIDER_KEYS, SLIDER_LABELS } from "@/lib/matchState";
 import { cn } from "@/lib/utils";
@@ -438,6 +439,82 @@ function WhatIfCard({ curve, minute }: { curve: ProbPoint[]; minute: number }) {
   );
 }
 
+/** Controle de visão ao longo do jogo: diferença acumulada (azul −
+ * vermelho) de wards colocadas e destruídas, minuto a minuto — mesma
+ * convenção "_diff" dos outros gráficos (ouro, abates). Ao contrário do
+ * mapa de calor, aqui não há aproximação nenhuma: é só contagem de
+ * evento por time, a Riot não precisa da posição da ward pra isso. */
+function VisionCard({ wards, maxMinute }: { wards: WardEvent[]; maxMinute: number }) {
+  const series = useMemo(() => {
+    const out: { minute: number; ward_diff: number; ward_kill_diff: number }[] = [];
+    let placedDiff = 0;
+    let destroyedDiff = 0;
+    for (let m = 0; m <= maxMinute; m++) {
+      for (const w of wards) {
+        if (w.minute !== m) continue;
+        const sign = w.team_id === 100 ? 1 : -1;
+        if (w.kind === "placed") placedDiff += sign;
+        else destroyedDiff += sign;
+      }
+      out.push({ minute: m, ward_diff: placedDiff, ward_kill_diff: destroyedDiff });
+    }
+    return out;
+  }, [wards, maxMinute]);
+
+  if (wards.length === 0) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Controle de visão (azul − vermelho, acumulado)</CardTitle>
+        <p className="mt-0.5 text-xs text-muted-ink">
+          Wards colocadas e wards inimigas destruídas por time, ao longo do jogo — só
+          contagem de evento (sem aproximação de posição, diferente do mapa de calor).
+        </p>
+      </CardHeader>
+      <CardContent className="h-56">
+        <ResponsiveContainer>
+          <LineChart data={series} margin={{ right: 16 }}>
+            <CartesianGrid vertical={false} {...GRID} />
+            <XAxis
+              dataKey="minute"
+              tick={AXIS_TICK}
+              stroke="var(--baseline)"
+              tickFormatter={(v: number) => `${v}'`}
+            />
+            <YAxis tick={AXIS_TICK} stroke="var(--baseline)" />
+            <ReferenceLine y={0} stroke="var(--baseline)" />
+            <Tooltip content={<ChartTooltip format={(v) => v.toLocaleString("pt-BR")} />} />
+            <Legend
+              wrapperStyle={{ fontSize: 12 }}
+              formatter={(value: string) => <span style={{ color: "var(--secondary-ink)" }}>{value}</span>}
+            />
+            {/* cores neutras (chart-2/chart-4), não chart-1/chart-red — as
+                duas linhas JÁ são diffs azul-menos-vermelho; usar as cores
+                de time aqui sugeriria (errado) "linha do time azul" */}
+            <Line
+              type="monotone"
+              dataKey="ward_diff"
+              name="Wards colocadas (azul − vermelho)"
+              stroke="var(--chart-2)"
+              strokeWidth={2}
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="ward_kill_diff"
+              name="Wards destruídas (azul − vermelho)"
+              stroke="var(--chart-4)"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+}
+
 function TeamTable({ players, label, won }: { players: MatchParticipantFull[]; label: string; won: boolean }) {
   return (
     <Card>
@@ -456,6 +533,7 @@ function TeamTable({ players, label, won }: { players: MatchParticipantFull[]; l
               <th className="py-2 font-medium">CS</th>
               <th className="py-2 font-medium">Dano</th>
               <th className="py-2 font-medium">Visão</th>
+              <th className="py-2 font-medium">Itens</th>
             </tr>
           </thead>
           <tbody className="tabular-nums">
@@ -477,6 +555,34 @@ function TeamTable({ players, label, won }: { players: MatchParticipantFull[]; l
                 <td className="py-1.5">{p.cs}</td>
                 <td className="py-1.5">{p.dmg.toLocaleString("pt-BR")}</td>
                 <td className="py-1.5">{p.vision}</td>
+                <td className="py-1.5">
+                  <div className="flex gap-0.5">
+                    {p.items.slice(0, 6).map((itemId, i) =>
+                      itemId ? (
+                        <img
+                          key={i}
+                          src={itemIcon(itemId)}
+                          alt=""
+                          className="size-6 rounded border border-border/50"
+                        />
+                      ) : (
+                        <div key={i} className="size-6 rounded border border-dashed border-border/50" />
+                      ),
+                    )}
+                    <div className="ml-1 border-l border-border pl-1">
+                      {p.items[6] ? (
+                        <img
+                          src={itemIcon(p.items[6])}
+                          alt=""
+                          title="Trinket"
+                          className="size-6 rounded-full border border-gold/50"
+                        />
+                      ) : (
+                        <div className="size-6 rounded-full border border-dashed border-border/50" />
+                      )}
+                    </div>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -633,6 +739,10 @@ export function MatchDetail() {
       </div>
 
       {m.prob_curve.length > 0 && <WhatIfCard curve={m.prob_curve} minute={minute} />}
+
+      {positions.data && positions.data.wards.length > 0 && (
+        <VisionCard wards={positions.data.wards} maxMinute={positions.data.frames.length - 1} />
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <TeamTable players={blue} label="Time azul" won={blueTeam?.win ?? false} />

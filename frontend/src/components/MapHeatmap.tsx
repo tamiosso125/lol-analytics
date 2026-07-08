@@ -27,6 +27,7 @@ export function MapHeatmap({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const maxMinute = Math.max(1, data.frames.length - 1);
   const [showKills, setShowKills] = useState(true);
+  const [showWards, setShowWards] = useState(false);
 
   const { min, max_x, max_y } = data.bounds;
   // normaliza para [0,1]; y invertido (origem do jogo é o canto inferior esquerdo)
@@ -36,6 +37,7 @@ export function MapHeatmap({
   const from = Math.max(1, minute - WINDOW);
   const frame = data.frames[Math.min(minute, maxMinute)];
   const kills = data.kills.filter((k) => k.minute >= from && k.minute <= minute);
+  const wards = data.wards.filter((w) => w.minute >= from && w.minute <= minute);
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
@@ -90,6 +92,22 @@ export function MapHeatmap({
               ✕
             </span>
           ))}
+        {showWards &&
+          wards.map((w, i) => (
+            <span
+              key={i}
+              title={`Ward ${w.kind === "placed" ? "colocada" : "destruída"} aos ${w.minute} min (posição aproximada)`}
+              className={cn(
+                "absolute -translate-x-1/2 -translate-y-1/2 rounded-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]",
+                w.kind === "placed"
+                  ? "size-2 border border-white/70"
+                  : "size-2.5 border-2 bg-transparent",
+                w.team_id === 100 ? "border-[#7db8f5] bg-[#7db8f5]" : "border-[#f5a3a3] bg-[#f5a3a3]",
+                w.kind === "destroyed" && "bg-transparent",
+              )}
+              style={{ left: `${nx(w.x) * 100}%`, top: `${ny(w.y) * 100}%` }}
+            />
+          ))}
         {frame?.players.map((p) => (
           <img
             key={`${p.team_id}-${p.champion_id}`}
@@ -127,12 +145,29 @@ export function MapHeatmap({
           />
           Abates
         </label>
+        <label className="flex items-center gap-1.5 text-xs text-secondary-ink">
+          <input
+            type="checkbox"
+            checked={showWards}
+            onChange={(e) => setShowWards(e.target.checked)}
+            className="accent-accent"
+          />
+          Wards (aproximado)
+        </label>
       </div>
       <p className="text-xs leading-relaxed text-muted-ink">
         O calor acumula as posições dos últimos {WINDOW + 1} minutos até o selecionado
         (mais recente = mais intenso); os ícones marcam onde cada campeão estava
         exatamente nesse minuto e ✕ os abates da janela. Arraste para ver a partida se
         mover: rotas separadas no early, agrupamentos em objetivos no mid/late.
+        {showWards && (
+          <>
+            {" "}
+            <span className="text-gold">Wards: posição aproximada</span> — a Riot não
+            grava onde a ward caiu, só quem e quando; o ponto mostrado é onde o jogador
+            estava naquele minuto (bola cheia = colocada, anel = destruída).
+          </>
+        )}
       </p>
     </div>
   );

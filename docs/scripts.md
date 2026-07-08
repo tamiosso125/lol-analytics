@@ -341,7 +341,11 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   de ouro, stats por jogador e objetivos. Cada ponto da curva carrega o
   ESTADO completo do minuto (os 5 diffs) — semente do modo "e se" no
   front (card em `/partidas/:id` que edita o estado real e mostra o
-  delta de probabilidade via `/predict`);
+  delta de probabilidade via `/predict`). Cada participante também
+  carrega `items` (2026-07-06: 7 slots finais — item6 é o trinket — lidos
+  de `raw_matches.payload.info.participants[].item0..item6`, que a Riot
+  já grava pronto; não precisa reconstruir do `item_events`, que é pra
+  ORDEM de compra, não pro estado final);
 - `GET /stats/highlights` — destaques para a página inicial (melhor
   jogador, melhor campeão, matchup mais desequilibrado, mais banido,
   viés de lado), com os números que fundamentam cada insight;
@@ -352,7 +356,15 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   eventos de objetivo (torre/dragão/barão/arauto/inibidor com minuto e
   time; em BUILDING_KILL o `teamId` do evento é o DONO da construção,
   então pontua o oposto) — base do mapa de calor e do card de objetivos
-  por minuto; 404 se a partida não tem timeline;
+  por minuto; 404 se a partida não tem timeline. Também retorna `wards`
+  (2026-07-06: `WARD_PLACED`/`WARD_KILL`) — a Riot NÃO grava a posição da
+  ward no evento, só quem/quando, então usa a posição do jogador que
+  agiu naquele minuto como proxy aproximado (filtra `wardType ==
+  UNDEFINED`, artefato do início da partida, e `creatorId`/`killerId ==
+  0`, evento de sistema); o front precisa deixar a aproximação
+  explícita (`MapHeatmap`, toggle "Wards (aproximado)", desligado por
+  padrão, e o card "Controle de visão" que só usa contagem, sem
+  posição);
 - `POST /compose` — análise de composição (montar time): matchups por
   lane (confronto direto >= 10 jogos, senão aproximação por perfil),
   sinergias de dupla (>= 20 jogos, delta vs média individual) e

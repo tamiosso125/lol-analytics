@@ -883,6 +883,16 @@ def match_analysis(match_id: str):
         teams = cur.fetchall()
         cur.execute("SELECT payload FROM raw_timelines WHERE match_id = %s", (match_id,))
         tl = cur.fetchone()
+        cur.execute("SELECT payload FROM raw_matches WHERE match_id = %s", (match_id,))
+        rm = cur.fetchone()
+
+    # slots finais de item (item0..item6, o 6 é o trinket) — a Riot já
+    # grava isso pronto no participant, não precisa reconstruir do
+    # item_events (que é pra ordem/timeline de compra, não pro estado final)
+    items_by_puuid = {}
+    if rm is not None:
+        for p in rm[0].get("info", {}).get("participants", []):
+            items_by_puuid[p.get("puuid")] = [p.get(f"item{i}", 0) for i in range(7)]
 
     prob_curve = []
     if tl is not None and _models:
@@ -925,6 +935,7 @@ def match_analysis(match_id: str):
                 "kills": p[5], "deaths": p[6], "assists": p[7],
                 "gold": p[8], "cs": p[9], "vision": p[10], "dmg": p[11],
                 "win": p[12],
+                "items": items_by_puuid.get(p[4], [0] * 7),
             }
             for p in sorted(players, key=lambda p: (p[0], pos_order.get(p[3], 9)))
         ],
@@ -936,6 +947,10 @@ def match_analysis(match_id: str):
 def match_positions(match_id: str):
     """Posições dos 10 jogadores minuto a minuto (participantFrames da
     timeline) + abates com local — base do mapa de calor da análise.
+    Também retorna `wards` (colocação/destruição de ward): a Riot NÃO
+    grava a posição da própria ward no evento, então usa a posição do
+    jogador que agiu naquele minuto como proxy aproximado — o front
+    precisa deixar isso explícito, não é a posição exata da ward.
 
     Coordenadas no sistema do mapa 11 (Summoner's Rift): x e y crescem
     da base azul (canto inferior esquerdo) para a vermelha; o front
@@ -967,13 +982,18 @@ def match_positions(match_id: str):
     monster_kind = {"DRAGON": "dragons", "BARON_NASHOR": "barons", "RIFTHERALD": "heralds"}
     building_kind = {"TOWER_BUILDING": "towers", "INHIBITOR_BUILDING": "inhibitors"}
 
-    frames, kills, objectives = [], [], []
+    # wardType "UNDEFINED" é artefato do início da partida (evento de
+    # sistema, sem relação com trinket/control/sight de verdade)
+    WARD_TYPES = {"YELLOW_TRINKET", "CONTROL_WARD", "SIGHT_WARD", "BLUE_TRINKET"}
+
+    frames, kills, objectives, wards = [], [], [], []
     for i, fr in enumerate(info.get("frames", [])):
-        players = []
+        players, frame_pos = [], {}
         for pf in fr.get("participantFrames", {}).values():
             pos, meta = pf.get("position"), id_map.get(pf.get("participantId"))
             if pos is None or meta is None:
                 continue
+            frame_pos[pf.get("participantId")] = pos
             players.append(
                 {
                     "team_id": meta[0], "champion": meta[1], "champion_id": meta[2],
@@ -1009,12 +1029,27 @@ def match_positions(match_id: str):
                     objectives.append(
                         {"minute": minute, "kind": kind, "team_id": 300 - e["teamId"]}
                     )
+            elif e.get("type") in ("WARD_PLACED", "WARD_KILL") and e.get("wardType") in WARD_TYPES:
+                # a timeline NÃO registra a posição da ward — usa a posição
+                # do jogador que colocou/destruiu NAQUELE minuto como proxy
+                # aproximado (a ward pode ter sido jogada à distância)
+                pid = e.get("creatorId") if e["type"] == "WARD_PLACED" else e.get("killerId")
+                meta, pos = id_map.get(pid), frame_pos.get(pid)
+                if pid and meta and pos:
+                    wards.append(
+                        {
+                            "minute": minute, "team_id": meta[0],
+                            "x": pos["x"], "y": pos["y"],
+                            "kind": "placed" if e["type"] == "WARD_PLACED" else "destroyed",
+                        }
+                    )
 
     return {
         "match_id": match_id,
         "frames": frames,
         "kills": kills,
         "objectives": objectives,
+        "wards": wards,
         # bounds oficiais do mapa 11 (min -120, max 14870/14980)
         "bounds": {"min": -120, "max_x": 14870, "max_y": 14980},
     }

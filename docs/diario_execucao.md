@@ -2147,6 +2147,58 @@ vazava pro próximo dentro do mesmo arquivo (`getByRole` achava
 elementos duplicados de renders antigos). Corrigido com
 `afterEach(cleanup)` explícito em `src/test/setup.ts`.
 
+## 2026-07-06 — Visão (gráfico + mapa aproximado) e build de itens na Partida
+
+Duas features novas na página de Partida, pedidas pelo usuário depois
+de eu sugerir "mapa de calor de wards" como próxima API. **Correção
+importante durante a investigação**: conferi os eventos reais
+(`WARD_PLACED`/`WARD_KILL` na timeline) e a Riot **não grava a posição
+da ward** — só `creatorId`/`killerId`/`wardType`/`timestamp`, diferente
+de `CHAMPION_KILL` que tem `position`. A sugestão original ("mapa de
+calor igual aos abates") não era literalmente viável; virou duas
+entregas honestas sobre o mesmo dado:
+
+**1. Gráfico "Controle de visão"** (`VisionCard` em `MatchDetail.tsx`):
+diferença acumulada (azul−vermelho) de wards colocadas/destruídas ao
+longo do jogo — mesma convenção `_diff` dos outros gráficos, sem
+nenhuma aproximação (só contagem de evento por time, não precisa de
+posição). **Achado de design pego só na revisão do screenshot, não no
+code review**: as duas linhas inicialmente usavam `chart-1`/`chart-red`
+(as cores de "time azul"/"time vermelho" em toda a plataforma) — mas
+as duas linhas JÁ são diffs azul-menos-vermelho, então usar essas
+cores sugeria (errado) "linha do time azul" vs "linha do time
+vermelho". Corrigido para cores neutras (`chart-2`/`chart-4`) +
+`<Legend>` explícita.
+
+**2. Camada de wards aproximada no `MapHeatmap`** (toggle "Wards
+(aproximado)", desligado por padrão): usa a posição do JOGADOR que
+colocou/destruiu a ward naquele minuto como proxy — texto explícito
+avisando que não é a posição real da ward, no mesmo estilo de
+honestidade do card "E se..." (`WhatIfCard`). Bola cheia = colocada,
+anel = destruída, cor por time.
+
+**3. Build de itens por partida** (coluna "Itens" na `TeamTable`):
+achado que simplificou o plano original — `raw_matches.payload
+.info.participants[].item0..item6` já tem os slots finais de item
+gravados pela própria Riot, não precisa reconstruir do `item_events`
+(que serve pra ORDEM de compra, não pro estado final). 7 ícones por
+jogador (6 itens + trinket separado), via `itemIcon()` já existente.
+
+**Backend:** `/matches/{id}/positions` ganhou campo `wards` (mesmo
+padrão de extração de `kills`/`objectives`, já tinha o loop de frames
+pronto). `/matches/{id}/analysis` ganhou `items` por participante (join
+com `raw_matches`, sem nova query cara). Zero endpoint novo — os dois
+já existentes só cresceram um campo. Verificado direto via `curl`: 198
+wards extraídos numa partida de teste, itens finais batendo com o
+esperado.
+
+Verificado em 3 camadas de novo: `npm run lint` (0 erros), `npm run
+test` (31/31), `npm run build`, e Playwright no navegador real
+(checkbox de wards, aviso de aproximação aparecendo, card de visão
+visível, coluna de itens com 68 ícones renderizados nas duas tabelas).
+Screenshot revisado visualmente — foi isso que pegou o bug de cor do
+item 1 acima, não nenhuma das outras camadas de verificação.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
