@@ -2084,6 +2084,69 @@ Também corrigido o texto desatualizado do Dashboard ("neste recorte
 Challenger/GM BR o vermelho domina" → reflete o dataset multi-região
 atual, aponta pro card de viés regional).
 
+## 2026-07-06 — Consolidação de navegação (10 → 6 abas)
+
+Brainstorm pedido pelo usuário sobre sobreposição entre as 10 abas da
+sidebar, com evidência concreta antes de propor qualquer fusão (não só
+opinião): li `Matches.tsx` (96 linhas, zero filtro/busca/paginação —
+literalmente `api.recentMatches(20)` numa lista) e confirmei que
+`Home.tsx` já mostra o mesmo feed resumido (`api.recentMatches(4)`)
+com link "ver todas" pra essa página — sobreposição real, não
+hipotética. Mesmo padrão pros outros 3 achados. 4 fusões aprovadas
+pelo usuário e aplicadas na mesma sessão:
+
+**1. "Partidas" absorvida pela Início.** `Matches.tsx` deletado. Feed
+da Início foi de 4→8 partidas, ganhou botão "assistir ao vivo"
+(sorteia partida real, navega pra `/partidas/:id?replay=1` — também é
+a nova porta de entrada da funcionalidade do item 4 abaixo).
+
+**2+3. "Predição" + "Explicabilidade" fundidas dentro de "Montar
+partida", que virou "Simulador" com 3 abas.** As duas eram, na
+prática, casos particulares do mesmo modelo/estado
+(`src/lib/matchState.ts`, mesmos sliders/fases 10-25min) pra mesma
+audiência. `TeamBuilder.tsx`/`Predict.tsx`/`Explain.tsx` viraram
+"painéis" (`CompositionPanel`/`StatePanel`/`ExplainPanel` — só tiveram
+o `PageHeader` próprio removido e o export renomeado, lógica interna
+intocada) compostos por `Simulador.tsx`, novo, com tab switcher local.
+
+**4. "Ao vivo" fundida dentro de "Partida" como modo replay.**
+`LiveReplay.tsx` deletado; sua lógica de animação (play/pausa/
+velocidade/reiniciar/revelar resultado) virou o componente
+`ProbabilityCard` dentro de `MatchDetail.tsx`, reaproveitando o
+`prob_curve` **já carregado pela página** (sem fetch duplicado — a
+página antiga sorteava a partida E buscava a análise; agora só o
+sorteio de qual partida abrir acontece separado, na Início). Botão
+"Assistir como replay" alterna entre o gráfico estático (comportamento
+de sempre) e o animado; `?replay=1` na URL autoplaya direto.
+
+**Achado durante a verificação em navegador (não durante o code
+review):** com as 5 rotas antigas removidas do `App.tsx`
+(`/partidas`, `/predicao`, `/aovivo`, `/montar`, `/explicabilidade`)
+sem nenhuma rota `*` de fallback, o React Router v7 renderiza **nada**
+quando nenhuma rota casa — nem o `<Layout>`/sidebar, `#root` fica com
+innerHTML vazio. Não é um crash (zero erro de console/página), mas é
+uma tela branca sem navegação nenhuma pra quem tiver essas URLs
+salvas. Corrigido com `<Navigate replace />`: as 4 rotas específicas
+redirecionam pro destino novo (`/predicao`→`/simulador` etc.) e um
+catch-all `path="*"` manda pra Início.
+
+Sidebar final: Início, Dashboard, Campeões, Competitivo, Consulta NL,
+Simulador — 6 itens, abaixo até da estimativa original de 7 do
+brainstorm (a fusão 1 também remove um item de nav que eu tinha
+contado separado). Verificado em 3 camadas: `npm run lint` (0 erros),
+`npm run test` (31/31 — smoke tests atualizados pro novo conjunto de
+páginas + teste novo clicando nas 3 abas do Simulador), `npm run
+build` (sucesso), e Playwright no navegador real (nav com 6 itens,
+feed de 8 partidas + botão ao vivo, as 3 abas do Simulador renderizando
+e trocando sem crash, `/partidas/:id?replay=1` autoplayando e
+revelando o resultado real ao fim, os 5 redirects de rota antiga
+funcionando). **Bug pego só pelo Vitest, não pelo code review**: sem
+`globals: true` no `vite.config.ts`, o `@testing-library/react` não
+registra `afterEach(cleanup)` automaticamente — o DOM de um teste
+vazava pro próximo dentro do mesmo arquivo (`getByRole` achava
+elementos duplicados de renders antigos). Corrigido com
+`afterEach(cleanup)` explícito em `src/test/setup.ts`.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

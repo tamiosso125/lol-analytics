@@ -13,7 +13,7 @@ import {
 } from "recharts";
 
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
-import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader } from "@/components/ui";
+import { Card, CardContent, CardHeader, CardTitle, ErrorNote } from "@/components/ui";
 import { api, type MatchState } from "@/lib/api";
 import {
   INITIAL_STATE as INITIAL,
@@ -25,7 +25,7 @@ import {
 } from "@/lib/matchState";
 import { cn } from "@/lib/utils";
 
-export function Predict() {
+export function StatePanel() {
   const [state, setState] = useState<MatchState>(INITIAL);
   const predict = useMutation({ mutationFn: api.predict });
   const { mutate } = predict;
@@ -49,12 +49,12 @@ export function Predict() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Modelo ML" title="Predição de vitória">
+      <p className="max-w-3xl text-sm leading-relaxed text-secondary-ink">
         Escolha a fase do jogo e o estado da partida (time azul − time vermelho). Cada fase
         usa um modelo treinado naquele corte de tempo — repare como a importância de cada
         fator muda: torres quase não pesam aos 10-15 min (as placas só caem aos 14), mas
         passam a pesar no late game.
-      </PageHeader>
+      </p>
 
       <div className="inline-flex rounded-lg border border-border p-0.5">
         {PHASES.map((p) => (

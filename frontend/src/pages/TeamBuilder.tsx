@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Swords, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Button, Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, ErrorNote, Skeleton } from "@/components/ui";
 import { api, type ComposeLane, type ComposeSynergy, type MatchState } from "@/lib/api";
 import { championDisplayName, championIcon, POSITION_LABELS } from "@/lib/ddragon";
 import { deltaColor, formatPct as pct } from "@/lib/format";
@@ -349,7 +349,7 @@ function SynergyList({ title, synergies }: { title: string; synergies: ComposeSy
   );
 }
 
-export function TeamBuilder() {
+export function CompositionPanel() {
   const [blue, setBlue] = useState<Team>({});
   const [red, setRed] = useState<Team>({});
   const [withState, setWithState] = useState(false);
@@ -396,13 +396,6 @@ export function TeamBuilder() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Simulador" title="Montar partida">
-        Escolha os campeões dos dois times e receba a análise do confronto: matchup de cada
-        lane, sinergias de dupla e uma estimativa geral — tudo calculado do histórico real
-        de partidas. Opcionalmente, simule também um momento da partida (minuto, ouro,
-        abates e objetivos) para combinar a composição com o modelo ML.
-      </PageHeader>
-
       <Card>
         <CardContent className="pt-4">
           {champions.isPending ? (

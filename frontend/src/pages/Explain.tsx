@@ -15,7 +15,7 @@ import {
 } from "recharts";
 
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
-import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
+import { Card, CardContent, CardHeader, CardTitle, ErrorNote, Skeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { PHASES } from "@/lib/matchState";
 import { cn } from "@/lib/utils";
@@ -37,7 +37,7 @@ const FEATURE_COLORS: Record<string, string> = {
   dragon_diff: "var(--chart-red)",
 };
 
-export function Explain() {
+export function ExplainPanel() {
   const [phase, setPhase] = useState("15");
   const importance = useQuery({
     queryKey: ["shap-importance-phases"],
@@ -61,12 +61,12 @@ export function Explain() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Modelo ML" title="Explicabilidade do modelo">
+      <p className="max-w-3xl text-sm leading-relaxed text-secondary-ink">
         Um modelo que só diz "azul vence com 78%" é uma caixa-preta. Os valores SHAP abrem
         essa caixa: eles decompõem cada predição na contribuição exata de cada fator, o que
         torna o modelo auditável (metodologia de Hodge et al., 2021, com explicabilidade via
         SHAP).
-      </PageHeader>
+      </p>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">

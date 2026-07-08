@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Ban, Crown, Search, Shield, Swords, TrendingUp } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Ban, Crown, Search, Shield, Shuffle, Swords, TrendingUp } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { ComponentType } from "react";
@@ -225,7 +225,12 @@ export function Home() {
   });
   const recent = useQuery({
     queryKey: ["home-recent"],
-    queryFn: () => api.recentMatches(4),
+    queryFn: () => api.recentMatches(8),
+  });
+  const navigate = useNavigate();
+  const shuffle = useMutation({
+    mutationFn: api.randomMatch,
+    onSuccess: ({ match_id }) => navigate(`/partidas/${match_id}?replay=1`),
   });
 
   if (highlights.isPending) {
@@ -267,15 +272,11 @@ export function Home() {
             <Link to="/dashboard" className="text-gold hover:underline">
               dashboard
             </Link>
-            , monte cenários na{" "}
-            <Link to="/predicao" className="text-gold hover:underline">
-              predição
+            , ou monte cenários no{" "}
+            <Link to="/simulador" className="text-gold hover:underline">
+              simulador
             </Link>{" "}
-            ou{" "}
-            <Link to="/montar" className="text-gold hover:underline">
-              simule um confronto 5v5
-            </Link>
-            .
+            (composição 5v5 e estado da partida).
           </p>
           <div className="mt-4">
             <UnifiedSearch />
@@ -388,16 +389,22 @@ export function Home() {
             <CardTitle className="hextech-title text-[11px] font-medium text-gold">
               Partidas recentes
             </CardTitle>
-            <Link
-              to="/partidas"
-              className="inline-flex items-center gap-1 text-xs text-gold underline-offset-2 hover:underline"
+            <button
+              onClick={() => shuffle.mutate()}
+              disabled={shuffle.isPending}
+              className="inline-flex items-center gap-1 text-xs text-gold underline-offset-2 hover:underline disabled:opacity-50"
             >
-              ver todas <ArrowRight size={11} />
-            </Link>
+              <Shuffle size={11} /> {shuffle.isPending ? "sorteando…" : "assistir ao vivo"}
+            </button>
           </CardHeader>
+          {shuffle.isError && (
+            <CardContent className="pt-0">
+              <ErrorNote message={shuffle.error.message} />
+            </CardContent>
+          )}
           <CardContent className="space-y-1.5 pt-1">
             {recent.isPending
-              ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-8" />)
+              ? Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-8" />)
               : (recent.data ?? []).map((m) => (
                   <Link
                     key={m.match_id}

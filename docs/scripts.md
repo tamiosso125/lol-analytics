@@ -409,51 +409,76 @@ CORS liberado para `http://localhost:5173` (dev server do Vite).
 ### `frontend/` (aplicação React)
 Interface principal da plataforma: Vite + React + TypeScript, Tailwind
 CSS v4, Recharts (gráficos), TanStack Query (dados), React Router.
-Páginas: Início (herói hextech com splash art + busca de campeão
-estilo op.gg, faixa de números do dataset, rankings top-5 com
-micro-barras — maior win rate/mais jogados/mais banidos —, insights com
-"porquê" e feed de partidas recentes), Dashboard analítico
-(`/dashboard`, organizado em 3 seções narrativas — o que decide
-partidas / retrato do meta / cobertura do dataset — cada gráfico com
-uma linha "Leitura:" calculada dos próprios dados), Campeões (tabela
-estilo op.gg + detalhe com matchups em `/campeoes/:nome`), Partidas
-(feed em `/partidas` + análise completa em `/partidas/:id` com curva de
-probabilidade, mapa de calor com slider de minuto — componente
-`MapHeatmap`, canvas + ícones + abates sobre o esquema OFICIAL de
-Summoner's Rift (`MINIMAP_URL` em `ddragon.ts`,
-`raw.communitydragon.org/.../maps/info/map11/2dlevelminimap_base_baron1.png`
-— mesmo estilo esquemático que a Riot usa em posts oficiais de mudança
-de mapa, mas servido a partir do patch `latest` de verdade — o
-`map11.png` do Data Dragon trava numa versão congelada, confirmado
-testando 6.8 a 16.13; achado via busca no índice
-`cdragon/files.exported.txt` depois que uma textura realista
-(`grasstint.png`) e depois um SVG próprio desenhado à mão se mostraram
-etapas intermediárias — ver diário de 2026-07-03. PNG com transparência
-real na selva, composto sobre a cor de fundo do próprio container) — e
-objetivos em barras espelhadas SINCRONIZADOS com o minuto do slider,
-com fallback para os totais finais quando não há timeline), Consulta
-NL, Predição
-(seletor de fase 10/15/20/25 min), Montar Partida (`/montar` — team
-builder 5v5 com busca de campeão por nome (`ChampionCombobox`: digita e
-filtra, navegação por teclado, botão de limpar — não é mais um
-`<select>` nativo), sem campeões repetidos, com matchups por lane,
-sinergias, e estado da partida opcional que combina a composição com o
-modelo ML) e
-Explicabilidade (importância SHAP por fase em barras + gráfico de
-evolução da importância ao longo das fases, uma linha por fator),
-Competitivo (`/competitivo` — solo queue × pro, seletor de ano),
-perfis de jogador (`/jogadores/:puuid` solo queue,
-`/competitivo/jogadores/:nome` pro) e Ao vivo (`/aovivo` — replay de
-partida coletada com a curva de probabilidade avançando minuto a minuto,
-play/pausa/velocidade; MVP da análise em tempo real) —
-todas consumindo a API FastAPI (nunca o banco diretamente).
-Identidade visual hextech unificada: componente `PageHeader` (rótulo
-dourado + título serifado + linha de brilho) em todas as páginas;
-ranges/fases dos sliders de estado compartilhados em
-`src/lib/matchState.ts` (usados por Predição e Montar Partida).
-Tema dark/light com toggle persistido em `localStorage`. Ícones de
-campeão via CDN CommunityDragon (por `champion_id`, helper em
-`src/lib/ddragon.ts`).
+
+**Navegação consolidada em 2026-07-06** (10 → 6 itens na sidebar — ver
+diário da data para o brainstorm/justificativa completa): Início,
+Dashboard, Campeões, Competitivo, Consulta NL, Simulador. As páginas
+"Partidas", "Predição", "Ao vivo", "Explicabilidade" e "Montar partida"
+não existem mais como itens de nav — absorvidas nas páginas abaixo.
+Rotas antigas redirecionam (`App.tsx`: `/partidas`→`/`,
+`/predicao`/`/explicabilidade`/`/montar`→`/simulador`,
+`/aovivo`→`/`, qualquer rota desconhecida→`/`).
+
+Páginas:
+- **Início** (`/`): herói hextech com splash art + busca de campeão
+  estilo op.gg, faixa de números do dataset, rankings top-5 com
+  micro-barras (maior win rate/mais jogados/mais banidos), insights com
+  "porquê", e feed de 8 partidas recentes com botão **"assistir ao
+  vivo"** (sorteia uma partida via `/matches/random` e navega para
+  `/partidas/:id?replay=1` — absorve a antiga página "Partidas" que
+  era só esse feed sem nenhum filtro/busca próprio).
+- **Dashboard** (`/dashboard`): 3 seções narrativas — o que decide
+  partidas / retrato do meta / cobertura do dataset — cada gráfico com
+  uma linha "Leitura:" calculada dos próprios dados.
+- **Campeões** (`/campeoes` + detalhe `/campeoes/:nome`): tabela estilo
+  op.gg + matchups.
+- **Partida** (`/partidas/:id`): curva de probabilidade minuto a
+  minuto, mapa de calor com slider (`MapHeatmap`, canvas + ícones +
+  abates sobre o esquema OFICIAL de Summoner's Rift — `MINIMAP_URL` em
+  `ddragon.ts`,
+  `raw.communitydragon.org/.../maps/info/map11/2dlevelminimap_base_baron1.png`,
+  servido do patch `latest` de verdade, ao contrário do `map11.png`
+  congelado do Data Dragon — achado via `cdragon/files.exported.txt`,
+  ver diário de 2026-07-03), objetivos em barras espelhadas
+  sincronizadas com o minuto, e o card "E se…" de contrafactual de
+  estado. **Ganhou modo replay em 2026-07-06** (`ProbabilityCard` em
+  `MatchDetail.tsx`, absorve a antiga página "Ao vivo"): botão
+  "Assistir como replay" anima a MESMA curva já carregada minuto a
+  minuto (play/pausa/velocidade/reiniciar, revela o resultado real ao
+  fim, botão "Outra partida" sorteia outra) — `?replay=1` na URL
+  autoplaya direto (é pra onde o botão da Início navega). Sem fetch
+  duplicado: a página estática e o replay usam o mesmo `prob_curve` já
+  buscado.
+- **Consulta NL** (`/consulta`).
+- **Simulador** (`/simulador`, `Simulador.tsx`): **fusão de 3 páginas
+  em 2026-07-06** (Montar Partida + Predição + Explicabilidade — todas
+  usavam o mesmo modelo/estado `src/lib/matchState.ts` para a mesma
+  audiência). 3 abas internas, cada uma um "painel" sem `PageHeader`
+  próprio (o Simulador supre um só):
+  - **Composição** (`CompositionPanel`, em `TeamBuilder.tsx`): team
+    builder 5v5, busca de campeão por nome (`ChampionCombobox`: digita
+    e filtra, navegação por teclado — não é `<select>` nativo), sem
+    campeões repetidos, matchups por lane, sinergias, jogadores
+    opcionais com shrinkage, estado da partida opcional combinado ao
+    modelo ML.
+  - **Estado** (`StatePanel`, em `Predict.tsx`): sliders de estado
+    (ouro/xp/abates/torres/dragões) por fase 10/15/20/25 min →
+    probabilidade + contribuição SHAP da predição — mesmos
+    componentes/ranges da aba Composição, mas sem precisar escolher
+    campeão nenhum.
+  - **Explicabilidade** (`ExplainPanel`, em `Explain.tsx`): importância
+    SHAP média por fase (barras) + evolução ao longo das fases (linha,
+    uma por fator) + beeswarm + curva de calibração.
+- **Competitivo** (`/competitivo` — solo queue × pro, seletor de ano) e
+  perfis de jogador (`/jogadores/:puuid` solo queue,
+  `/competitivo/jogadores/:nome` pro).
+
+Todas consumindo a API FastAPI (nunca o banco diretamente). Identidade
+visual hextech unificada: componente `PageHeader` (rótulo dourado +
+título serifado + linha de brilho) em toda página de topo (não nos
+painéis do Simulador — só a página-mãe tem um). Tema dark/light com
+toggle persistido em `localStorage`. Ícones de campeão via CDN
+CommunityDragon (por `champion_id`, helper em `src/lib/ddragon.ts`).
 
 **Uso:** `cd frontend && npm install && npm run dev`
 (requer a API rodando em `http://localhost:8000`; a URL é configurável

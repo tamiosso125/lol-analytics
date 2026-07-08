@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Castle, Eye, FlaskConical, Flame, Shield, Skull } from "lucide-react";
-import { useEffect, useMemo, useState, type ComponentType } from "react";
-import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, Castle, Eye, FlaskConical, Flame, Pause, Play, RotateCcw, Shield, Shuffle, Skull } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   CartesianGrid,
   Line,
@@ -72,6 +72,214 @@ const OBJECTIVES: { key: keyof Omit<MatchTeam, "team_id" | "win">; label: string
 ];
 
 const fmtDiff = (v: number) => (v > 0 ? `+${v.toLocaleString("pt-BR")}` : v.toLocaleString("pt-BR"));
+
+const SPEEDS = [1, 2, 4] as const;
+const TICK_MS = 1000; // 1 minuto de jogo por segundo real (× velocidade)
+
+/** Curva de probabilidade — modo estático (linha completa, como sempre
+ * foi) ou "replay" (a mesma curva, mas animada minuto a minuto como se
+ * a partida estivesse ao vivo; era a página /aovivo, fundida aqui
+ * porque é o mesmo dado, só que a busca começa de uma partida aleatória
+ * em vez de uma escolhida — ver docs/diario_execucao.md 2026-07-06). */
+function ProbabilityCard({
+  curve,
+  blueWon,
+  autoplay,
+  onShuffle,
+  shuffling,
+}: {
+  curve: ProbPoint[];
+  blueWon: boolean;
+  autoplay: boolean;
+  onShuffle: () => void;
+  shuffling: boolean;
+}) {
+  const lastIdx = curve.length - 1;
+  const [replaying, setReplaying] = useState(autoplay);
+  const [idx, setIdx] = useState(autoplay ? 0 : lastIdx);
+  const [playing, setPlaying] = useState(autoplay);
+  const [speed, setSpeed] = useState<(typeof SPEEDS)[number]>(1);
+  const [revealed, setRevealed] = useState(!autoplay);
+
+  const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  useEffect(() => {
+    clearInterval(timer.current);
+    if (!playing) return;
+    timer.current = setInterval(() => {
+      setIdx((i) => {
+        if (i >= lastIdx) {
+          setPlaying(false);
+          setRevealed(true);
+          return i;
+        }
+        return i + 1;
+      });
+    }, TICK_MS / speed);
+    return () => clearInterval(timer.current);
+  }, [playing, speed, lastIdx]);
+
+  const point = curve[Math.min(idx, lastIdx)];
+  const shown = replaying ? curve.slice(0, idx + 1) : curve;
+  const modelSaysBlue = point.blue_win_probability >= 0.5;
+  const domain: [number, number] = [curve[0].minute, curve[lastIdx].minute];
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
+        <div>
+          <CardTitle>Probabilidade de vitória do time azul, minuto a minuto</CardTitle>
+          <p className="mt-0.5 text-xs text-muted-ink">
+            {replaying
+              ? "Reproduzindo minuto a minuto, como se a partida estivesse ao vivo."
+              : "Cada ponto usa o modelo da fase correspondente (10/15/20/25 min) sobre o estado real da partida naquele minuto."}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {replaying && (
+            <>
+              <button
+                onClick={onShuffle}
+                disabled={shuffling}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs hover:bg-foreground/5 disabled:opacity-50"
+              >
+                <Shuffle size={13} /> {shuffling ? "Sorteando…" : "Outra partida"}
+              </button>
+              <button
+                onClick={() => {
+                  if (idx >= lastIdx) setIdx(0);
+                  setRevealed(false);
+                  setPlaying((p) => !p);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs hover:bg-foreground/5"
+              >
+                {playing ? <Pause size={13} /> : <Play size={13} />}
+                {playing ? "Pausar" : idx >= lastIdx ? "Rever" : "Continuar"}
+              </button>
+              <button
+                onClick={() => {
+                  setIdx(0);
+                  setRevealed(false);
+                  setPlaying(true);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs hover:bg-foreground/5"
+              >
+                <RotateCcw size={13} /> Reiniciar
+              </button>
+              <div className="inline-flex rounded-lg border border-border p-0.5 text-xs">
+                {SPEEDS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSpeed(s)}
+                    className={cn(
+                      "rounded-md px-2 py-1 font-medium transition-colors",
+                      speed === s ? "bg-accent/10 text-accent" : "text-muted-ink hover:text-foreground",
+                    )}
+                  >
+                    {s}×
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          <button
+            onClick={() => {
+              setReplaying((r) => !r);
+              if (!replaying) {
+                setIdx(0);
+                setPlaying(true);
+                setRevealed(false);
+              } else {
+                setIdx(lastIdx);
+                setPlaying(false);
+                setRevealed(true);
+              }
+            }}
+            className="rounded-lg bg-accent/10 px-2.5 py-1.5 text-xs font-medium text-accent hover:bg-accent/20"
+          >
+            {replaying ? "Ver análise completa" : "▶ Assistir como replay"}
+          </button>
+        </div>
+      </CardHeader>
+      <CardContent className="h-80">
+        {curve.length === 0 ? (
+          <p className="text-sm text-muted-ink">Sem timeline disponível para esta partida.</p>
+        ) : (
+          <>
+            {replaying && (
+              <div className="mb-2 flex items-baseline gap-3">
+                <span
+                  className={cn(
+                    "text-3xl font-semibold tabular-nums tracking-tight transition-colors",
+                    winColor(point.blue_win_probability),
+                  )}
+                >
+                  {pct(point.blue_win_probability)}
+                </span>
+                <span className="text-xs text-muted-ink tabular-nums">
+                  minuto {point.minute}
+                  {idx >= lastIdx ? " · fim" : ""}
+                </span>
+              </div>
+            )}
+            <ResponsiveContainer width="100%" height={replaying ? "85%" : "100%"}>
+              <LineChart data={shown} margin={{ right: 16 }}>
+                <CartesianGrid vertical={false} {...GRID} />
+                <XAxis
+                  dataKey="minute"
+                  type="number"
+                  domain={domain}
+                  tick={AXIS_TICK}
+                  stroke="var(--baseline)"
+                  tickFormatter={(v: number) => `${v}'`}
+                />
+                <YAxis
+                  domain={[0, 1]}
+                  tickFormatter={pct}
+                  tick={AXIS_TICK}
+                  stroke="var(--baseline)"
+                />
+                <ReferenceLine y={0.5} stroke="var(--muted-ink)" strokeDasharray="4 4" />
+                <Tooltip
+                  content={
+                    <ChartTooltip
+                      format={(v, name) =>
+                        name === "Prob. vitória azul" ? pct(v) : v.toLocaleString("pt-BR")
+                      }
+                    />
+                  }
+                />
+                <Line
+                  type="monotone"
+                  dataKey="blue_win_probability"
+                  name="Prob. vitória azul"
+                  stroke="var(--chart-1)"
+                  strokeWidth={2}
+                  dot={false}
+                  isAnimationActive={!replaying}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </>
+        )}
+      </CardContent>
+      {replaying && revealed && curve.length > 0 && (
+        <CardContent className="border-t border-border pt-3">
+          <p className="text-sm font-medium">
+            Resultado real:{" "}
+            <span className={winColor(blueWon)}>vitória do time {blueWon ? "azul" : "vermelho"}</span>
+          </p>
+          <p className="mt-0.5 text-xs text-muted-ink">
+            No último minuto o modelo dava {pct(point.blue_win_probability)} para o azul —{" "}
+            {modelSaysBlue === blueWon
+              ? "apontava o vencedor certo."
+              : "apontava o outro lado (uma reviravolta, ou o modelo errou)."}{" "}
+            Lembre: cada ponto usa só o estado ATÉ aquele minuto, sem ver o futuro.
+          </p>
+        </CardContent>
+      )}
+    </Card>
+  );
+}
 
 /** Modo "e se": pega o estado REAL da partida no minuto escolhido (da
  * própria curva de probabilidade) e deixa editá-lo — o delta entre a
@@ -280,6 +488,8 @@ function TeamTable({ players, label, won }: { players: MatchParticipantFull[]; l
 
 export function MatchDetail() {
   const { id = "" } = useParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [minute, setMinute] = useState(14);
   const analysis = useQuery({
     queryKey: ["match-analysis", id],
@@ -288,6 +498,10 @@ export function MatchDetail() {
   const positions = useQuery({
     queryKey: ["match-positions", id],
     queryFn: () => api.matchPositions(id),
+  });
+  const shuffle = useMutation({
+    mutationFn: api.randomMatch,
+    onSuccess: ({ match_id }) => navigate(`/partidas/${match_id}?replay=1`, { replace: true }),
   });
 
   if (analysis.isPending) return <Skeleton className="h-96" />;
@@ -301,10 +515,10 @@ export function MatchDetail() {
   return (
     <div className="space-y-5">
       <Link
-        to="/partidas"
+        to="/"
         className="inline-flex items-center gap-1.5 text-sm text-secondary-ink hover:text-foreground"
       >
-        <ArrowLeft size={14} /> Partidas
+        <ArrowLeft size={14} /> Início
       </Link>
 
       <PageHeader eyebrow="Análise" title="Análise da partida">
@@ -316,59 +530,13 @@ export function MatchDetail() {
         </span>
       </PageHeader>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Probabilidade de vitória do time azul, minuto a minuto</CardTitle>
-          <p className="mt-0.5 text-xs text-muted-ink">
-            Cada ponto usa o modelo da fase correspondente (10/15/20/25 min) sobre o estado
-            real da partida naquele minuto — é a leitura retrospectiva do que o modelo diria
-            ao vivo.
-          </p>
-        </CardHeader>
-        <CardContent className="h-80">
-          {m.prob_curve.length === 0 ? (
-            <p className="text-sm text-muted-ink">
-              Sem timeline disponível para esta partida.
-            </p>
-          ) : (
-            <ResponsiveContainer>
-              <LineChart data={m.prob_curve} margin={{ right: 16 }}>
-                <CartesianGrid vertical={false} {...GRID} />
-                <XAxis
-                  dataKey="minute"
-                  tick={AXIS_TICK}
-                  stroke="var(--baseline)"
-                  tickFormatter={(v: number) => `${v}'`}
-                />
-                <YAxis
-                  domain={[0, 1]}
-                  tickFormatter={pct}
-                  tick={AXIS_TICK}
-                  stroke="var(--baseline)"
-                />
-                <ReferenceLine y={0.5} stroke="var(--muted-ink)" strokeDasharray="4 4" />
-                <Tooltip
-                  content={
-                    <ChartTooltip
-                      format={(v, name) =>
-                        name === "Prob. vitória azul" ? pct(v) : v.toLocaleString("pt-BR")
-                      }
-                    />
-                  }
-                />
-                <Line
-                  type="monotone"
-                  dataKey="blue_win_probability"
-                  name="Prob. vitória azul"
-                  stroke="var(--chart-1)"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
+      <ProbabilityCard
+        curve={m.prob_curve}
+        blueWon={blueTeam?.win ?? false}
+        autoplay={searchParams.get("replay") === "1" && m.prob_curve.length > 1}
+        onShuffle={() => shuffle.mutate()}
+        shuffling={shuffle.isPending}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <Card>
