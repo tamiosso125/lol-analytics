@@ -84,21 +84,23 @@ function WhatIfCard({ curve, minute }: { curve: ProbPoint[]; minute: number }) {
     () => curve.find((p) => p.minute === minute) ?? curve[curve.length - 1],
     [curve, minute],
   );
+  const [seededFor, setSeededFor] = useState<ProbPoint | undefined>(undefined);
   const [state, setState] = useState<MatchState | null>(null);
 
-  // re-semeia o editor sempre que o minuto (slider compartilhado) muda
-  useEffect(() => {
-    if (point) {
-      setState({
-        gold_diff: point.gold_diff,
-        xp_diff: point.xp_diff,
-        kill_diff: point.kill_diff,
-        tower_diff: point.tower_diff,
-        dragon_diff: point.dragon_diff,
-        minute: point.model_cutoff,
-      });
-    }
-  }, [point]);
+  // re-semeia o editor sempre que o minuto (slider compartilhado) muda —
+  // ajuste durante o render, não em efeito (evita um passo de render
+  // extra): https://react.dev/learn/you-might-not-need-an-effect
+  if (point && point !== seededFor) {
+    setSeededFor(point);
+    setState({
+      gold_diff: point.gold_diff,
+      xp_diff: point.xp_diff,
+      kill_diff: point.kill_diff,
+      tower_diff: point.tower_diff,
+      dragon_diff: point.dragon_diff,
+      minute: point.model_cutoff,
+    });
+  }
 
   const predict = useMutation({ mutationFn: api.predict });
   const { mutate } = predict;

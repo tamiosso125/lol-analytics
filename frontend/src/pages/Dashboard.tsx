@@ -207,10 +207,11 @@ export function Dashboard() {
                 </div>
                 <Takeaway>
                   a literatura aponta leve vantagem azul no solo queue (~50,6-53%), mas neste
-                  recorte (Challenger/GM BR) o vermelho domina — estável em todos os patches.
-                  Hipótese: counter-pick garantido pesa mais no elo em que todos punem draft,
-                  somado ao acesso ao pit do dragão. É por isso que a predição "empatada" não
-                  dá 50%.
+                  dataset (Challenger/GM, múltiplas regiões) o vermelho domina no agregado —
+                  embora o viés varie por região (ver "Viés de lado por região" abaixo): mais
+                  forte no BR, quase neutro no KR. Hipótese: counter-pick garantido pesa mais
+                  no elo em que todos punem draft, somado ao acesso ao pit do dragão. É por
+                  isso que a predição "empatada" não dá 50%.
                 </Takeaway>
               </>
             ) : null}

@@ -1,7 +1,8 @@
 import { BarChart3, Gamepad2, Home, MessageSquareText, Moon, Radio, ScanEye, Sun, Swords, Target, Trophy, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -37,6 +38,7 @@ function ThemeToggle() {
 }
 
 export function Layout() {
+  const location = useLocation();
   return (
     <div className="flex min-h-screen">
       <aside className="flex w-56 shrink-0 flex-col border-r border-border bg-card px-3 py-5">
@@ -72,7 +74,11 @@ export function Layout() {
         </div>
       </aside>
       <main className="min-w-0 flex-1 px-8 py-6">
-        <Outlet />
+        {/* key=pathname: navegar para outra página depois de um erro
+            desmonta o boundary quebrado em vez de continuar preso nele */}
+        <ErrorBoundary key={location.pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   );

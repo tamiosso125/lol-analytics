@@ -61,7 +61,7 @@ export function LiveReplay() {
     },
   });
 
-  const curve = data?.prob_curve ?? [];
+  const curve = useMemo(() => data?.prob_curve ?? [], [data]);
   const lastIdx = curve.length - 1;
 
   // avança um minuto por tick; pausa e revela o resultado ao chegar no fim

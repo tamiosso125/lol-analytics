@@ -92,7 +92,7 @@ export function MapHeatmap({
           ))}
         {frame?.players.map((p) => (
           <img
-            key={p.champion}
+            key={`${p.team_id}-${p.champion_id}`}
             src={championIcon(p.champion_id)}
             alt={championDisplayName(p.champion)}
             title={`${championDisplayName(p.champion)}${p.level ? ` — nível ${p.level}` : ""}`}

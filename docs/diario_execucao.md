@@ -2008,6 +2008,82 @@ não-BR1 parece estar trazendo mais jogos onde azul vence, ou o viés de
 lado varia regionalmente como já documentado (BR1 56.3%, EUW1 53.5%,
 NA1 52.2%, KR 50.6%). Não é motivo de preocupação — é dado real.
 
+## 2026-07-06 — Análise geral do frontend + fechamento de gaps de qualidade
+
+Análise ponto-a-ponto de `frontend/` (24 arquivos, 5.645 linhas): rotas,
+camada de API (`lib/api.ts`), design system (`components/ui.tsx`),
+amostras de página (Dashboard, TeamBuilder, MapHeatmap). Pontos fortes
+confirmados: API client único e tipado, design system consolidado
+(reflexo da refatoração de 2026-07-05), TypeScript estrito, zero
+`console.log`/`TODO` esquecido. Três gaps estruturais identificados e
+fechados na mesma sessão:
+
+**1. Bug real — `MapHeatmap.tsx`:** `key={p.champion}` nos marcadores
+de campeão colidia quando os dois times pegam o mesmo campeão (espelha
+em solo queue). Corrigido para `key={`${p.team_id}-${p.champion_id}`}`.
+
+**2. ESLint instalado pela primeira vez** (`eslint.config.js`, flat
+config: `typescript-eslint` + `eslint-plugin-react-hooks` +
+`eslint-plugin-react-refresh`, script `npm run lint`). Achou **5 bugs
+reais** na primeira rodada:
+- `Home.tsx`: componente `Section` declarado DENTRO do corpo de
+  `UnifiedSearch` — recriado a cada render (identidade nova toda vez,
+  força remount da subárvore). Corrigido: hoisted para módulo como
+  `SearchSection`.
+- `MatchDetail.tsx` (`WhatIfCard`): `setState` síncrono dentro de
+  `useEffect` pra resemear o editor quando o minuto muda — padrão que
+  causa um passo de render extra. Reescrito para o padrão recomendado
+  pelo React ("ajuste durante o render", não em efeito): compara
+  `point !== seededFor` e chama `setState` direto no corpo da função,
+  sem `useEffect`. **Verificado em runtime via Playwright** (não só
+  lint/build): slider de ouro vai de 700→10500 ao mudar o minuto pro
+  máximo, sem erro de console.
+- `Nlq.tsx`: mesmo padrão — o efeito de montagem chamava
+  `showExplanation()` (que faz `setView` + `mutate`), mas `setView`
+  era redundante ali (a view já nasce no valor que ele setava).
+  Simplificado para chamar só `explain.mutate()` no efeito.
+- `LiveReplay.tsx` (warning): `curve = data?.prob_curve ?? []` recriava
+  array a cada render enquanto `data` está undefined — envolvido em
+  `useMemo`.
+- Restam 2 warnings cosméticos em `chart.tsx` (fast-refresh, arquivo
+  mistura export de componente e de constantes) — sem impacto
+  funcional, não corrigido.
+
+**3. Error Boundary — não existia nenhum.** Qualquer exceção de render
+fora de uma query (ex.: acessar propriedade de dado inesperado em
+`Nlq.tsx` renderizando SQL dinâmico) deixava a tela branca sem
+fallback. Criado `src/components/ErrorBoundary.tsx` (class component —
+única forma de implementar a API de error boundary do React),
+envolvendo o `<Outlet />` no `Layout.tsx`, `key`ado por
+`location.pathname` (navegar pra outra página desmonta o boundary
+quebrado em vez de ficar preso nele).
+
+**4. Zero cobertura de teste — não existia nenhuma.** Instalado Vitest
++ Testing Library (`vite.config.ts` ganhou bloco `test`, setup em
+`src/test/setup.ts` com stub de `ResizeObserver` — jsdom não
+implementa, e o Recharts usa internamente em todo gráfico). Dois
+níveis de teste:
+- **19 testes unitários** de `lib/format.ts` e `lib/ddragon.ts`
+  (funções puras: `formatPct`, `winColor`, `deltaColor`, `formatCell`,
+  `isEmptyResult`, `isAdvisory`, `championDisplayName` com os quirks de
+  nome). Achou 1 erro no próprio teste (não no código): `formatPct`
+  usa `.toFixed()` — ponto decimal fixo — enquanto `formatCell` usa
+  `toLocaleString("pt-BR")` — vírgula decimal; são convenções
+  diferentes dentro do mesmo arquivo, documentado no teste agora.
+- **14 smoke tests** (`src/pages/pages.smoke.test.tsx`): renderiza
+  cada página sob os providers reais (`QueryClientProvider` +
+  `MemoryRouter`, harness em `src/test/renderPage.tsx`) com `api`
+  mockado via `vi.mock` + `Proxy` retornando uma Promise que nunca
+  resolve — testa o caminho de mount/params/loading (onde bugs de
+  hook/JSX aparecem), não o de dados renderizados (exigiria fixtures
+  completas pros 30+ endpoints — desproporcional pro objetivo aqui).
+
+Resultado final: `npm run lint` (0 erros, 2 warnings cosméticos),
+`npm run test` (33/33 passando), `npm run build` (sucesso, `tsc` limpo).
+Também corrigido o texto desatualizado do Dashboard ("neste recorte
+Challenger/GM BR o vermelho domina" → reflete o dataset multi-região
+atual, aponta pro card de viés regional).
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

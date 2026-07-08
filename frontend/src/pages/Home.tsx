@@ -10,6 +10,14 @@ import { championDisplayName, championIcon, championSplash } from "@/lib/ddragon
 import { formatPct as pct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
+function SearchSection({ label }: { label: string }) {
+  return (
+    <p className="hextech-title border-t border-border px-3.5 pb-1 pt-2 text-[10px] font-medium text-gold first:border-t-0">
+      {label}
+    </p>
+  );
+}
+
 /** Busca unificada estilo op.gg: campeões (filtro no cliente) +
  * jogadores de solo queue e profissionais (busca no servidor). */
 function UnifiedSearch() {
@@ -36,12 +44,6 @@ function UnifiedSearch() {
   const pro = players.data?.pro ?? [];
   const open = champMatches.length > 0 || solo.length > 0 || pro.length > 0;
 
-  const Section = ({ label }: { label: string }) => (
-    <p className="hextech-title border-t border-border px-3.5 pb-1 pt-2 text-[10px] font-medium text-gold first:border-t-0">
-      {label}
-    </p>
-  );
-
   return (
     <div className="relative max-w-sm">
       <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-ink" />
@@ -56,7 +58,7 @@ function UnifiedSearch() {
       />
       {open && (
         <div className="absolute inset-x-0 top-full z-10 mt-1.5 max-h-96 overflow-y-auto rounded-xl border border-border bg-card pb-1 shadow-lg">
-          {champMatches.length > 0 && <Section label="Campeões" />}
+          {champMatches.length > 0 && <SearchSection label="Campeões" />}
           {champMatches.map((c) => (
             <button
               key={c.champion}
@@ -70,7 +72,7 @@ function UnifiedSearch() {
               </span>
             </button>
           ))}
-          {solo.length > 0 && <Section label="Jogadores — solo queue" />}
+          {solo.length > 0 && <SearchSection label="Jogadores — solo queue" />}
           {solo.map((p) => (
             <button
               key={p.puuid}
@@ -86,7 +88,7 @@ function UnifiedSearch() {
               </span>
             </button>
           ))}
-          {pro.length > 0 && <Section label="Jogadores — profissional" />}
+          {pro.length > 0 && <SearchSection label="Jogadores — profissional" />}
           {pro.map((p) => (
             <button
               key={p.name}

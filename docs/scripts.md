@@ -459,6 +459,20 @@ campeão via CDN CommunityDragon (por `champion_id`, helper em
 (requer a API rodando em `http://localhost:8000`; a URL é configurável
 em `frontend/.env` via `VITE_API_URL`).
 
+**Qualidade (2026-07-06):** `npm run lint` (ESLint flat config —
+`typescript-eslint` + `eslint-plugin-react-hooks` + `react-refresh`,
+pegou 5 bugs reais na primeira rodada: componente recriado a cada
+render em `Home.tsx`, `setState` síncrono dentro de efeito em
+`MatchDetail.tsx`/`Nlq.tsx` — todos corrigidos), `npm run test`
+(Vitest + Testing Library — 19 testes unitários de `lib/format.ts` e
+`lib/ddragon.ts`, 14 smoke tests que renderizam cada página sob os
+providers reais com `api` mockado via `vi.mock` + `Proxy`, ver
+`src/pages/pages.smoke.test.tsx`), `npm run build` (inclui `tsc`).
+`ErrorBoundary` (`src/components/ErrorBoundary.tsx`) envolve o
+`<Outlet />` no `Layout.tsx`, `key`ado pela rota — página que quebra em
+render mostra fallback em vez de tela branca, e navegar para outra
+página a desmonta.
+
 ### `src/dashboard/app.py`
 Dashboard Streamlit: KPIs gerais, gráficos de campeões (win rate e mais
 jogados), objetivos×vitória, e caixa de pergunta em linguagem natural.

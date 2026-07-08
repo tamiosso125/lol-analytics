@@ -130,7 +130,9 @@ function SuccessTurn({ question, result }: { question: string; result: AskResult
   const advisory = isAdvisory(result);
 
   useEffect(() => {
-    if (!advisory) showExplanation();
+    // não usa showExplanation() aqui: view já nasce "explicacao" (o
+    // setView ali dentro seria redundante) — só dispara a busca
+    if (!advisory && !explain.data && !explain.isPending) explain.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
