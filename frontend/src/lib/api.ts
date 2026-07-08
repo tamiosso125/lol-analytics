@@ -102,7 +102,15 @@ export interface ComposeSynergy {
   b_id: number;
   games: number;
   win_rate: number;
+  /** delta JÁ com shrinkage bayesiano (encolhido para 0 quando `games` é
+   * baixo) — não é win_rate bruto menos a expectativa */
   delta: number;
+  /** intervalo de confiança de Wilson (95%) sobre o win_rate bruto */
+  ci_low: number;
+  ci_high: number;
+  /** true quando o IC exclui a expectativa "sem sinergia" — distingue
+   * sinergia real de ruído de amostra pequena */
+  significant: boolean;
 }
 
 export interface ComposeStateAnalysis {

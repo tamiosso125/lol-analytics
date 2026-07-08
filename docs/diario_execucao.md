@@ -2199,6 +2199,61 @@ visível, coluna de itens com 68 ícones renderizados nas duas tabelas).
 Screenshot revisado visualmente — foi isso que pegou o bug de cor do
 item 1 acima, não nenhuma das outras camadas de verificação.
 
+## 2026-07-06 — Sinergia de dupla com shrinkage/IC (NLQ + /compose)
+
+Pendente antigo do diário resolvido: "sinergias de dupla com correção
+de amostra pequena — perguntas tipo 'Nocturne + Orianna' terem
+resposta estatística mais robusta". Duas frentes:
+
+**1. `/compose` (`team_synergies()` em `src/api/main.py`).** Antes: só
+`win_rate` bruto da dupla vs a expectativa (média dos win rates solo),
+cortando qualquer dupla com menos de 20 jogos — "Nocturne + Orianna"
+com poucos jogos simplesmente não aparecia, sem explicação. Agora:
+- `delta` é a versão com shrinkage bayesiano (`SYNERGY_SHRINKAGE_K =
+  20`, mesma ideia já usada no `player_effect()` pra jogador×campeão) —
+  encolhe pra perto de zero quando há poucos jogos, converge pro delta
+  bruto quando há muitos.
+- IC de Wilson (95%) sobre o win_rate bruto (`ci_low`/`ci_high`).
+- `significant`: true quando o IC exclui a expectativa "sem sinergia"
+  — distingue sinal real de ruído.
+- Corte mínimo caiu de 20 para `SYNERGY_MIN_GAMES = 5` — duplas raras
+  agora aparecem, só que com IC largo e delta encolhido em vez de
+  sumirem. Verificado ao vivo: "Darius + Warwick" (9 jogos) aparece com
+  IC 6-55% em cinza (não significativo); duplas com mais jogos mostram
+  cor quando o IC de fato exclui a expectativa.
+- Frontend (`SynergyList` em `TeamBuilder.tsx`, agora `CompositionPanel`
+  dentro do Simulador): mostra a faixa de IC abaixo do delta, delta em
+  cinza quando não significativo, legenda explicando a correção.
+
+**2. NLQ (`schema_context.py`).** Adicionada uma regra específica pra
+perguntas de sinergia de dupla ("X e Y têm sinergia?"), ensinando o
+padrão de SQL com CTE que calcula jogos + win rate bruto + expectativa
+solo + win rate ajustado por shrinkage (mesma fórmula do backend, sem
+IC — a fórmula de Wilson é frágil demais pro LLM reproduzir certo
+numa SQL gerada dinamicamente, shrinkage é só uma média ponderada,
+mais seguro). **Regra da casa seguida**: rodei `evaluate_nlq` depois da
+mudança e achei uma regressão real (não das 3 já conhecidas): "qual
+time derruba mais torres em média" passou a falhar. Investigação:
+tentei 2 hipóteses erradas antes de achar a causa (diluição por
+tamanho do prompt, depois confusão de conteúdo com o exemplo novo) —
+nenhuma resolveu. A causa real: meu método de diagnóstico via CLI
+(`python -m src.nlq.nl_to_sql "pergunta com acento"`) corrompe UTF-8
+no argv do shell do Windows, mandando pro LLM uma pergunta com
+acentuação quebrada — diferente do benchmark real, que lê a pergunta
+direto do código-fonte `.py` (sem passar pelo shell). Confirmado
+rodando `evaluate_nlq` (fonte confiável) 2x seguidas com a mudança:
+**23/26 = 88%, as mesmas 3 falhas antigas, zero regressão nova**. A
+correção de escopo (regra sobre 2 campeões nomeados, não confundir com
+ranking/média por time) e o encurtamento do texto ficaram no arquivo
+de qualquer forma — não pioram nada e deixam a regra mais clara.
+Testado com a pergunta motivadora de verdade: "Nocturne e Orianna têm
+sinergia?" → 49 jogos, 40,8% bruto, ajustado pra 43,1% (expectativa
+solo ~48,8%) — resposta com números, não silêncio.
+
+Verificado: `npm run lint` (0 erros) / `npm run test` (31/31) / `npm
+run build` / Playwright real no Simulador (aba Composição, IC visível,
+legenda de shrinkage visível, dupla de 9 jogos aparecendo em cinza).
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
@@ -2219,9 +2274,8 @@ item 1 acima, não nenhuma das outras camadas de verificação.
 - Team builder — próximos incrementos da visão original: jogadores na
   análise e champion select competitivo (o mapa de calor da partida já
   foi entregue na análise de partidas).
-- Sinergias de dupla com correção de amostra (shrinkage/IC) para
-  perguntas tipo "Nocturne + Orianna" terem resposta estatística mais
-  robusta no NLQ e no /compose.
+- ~~Sinergias de dupla com correção de amostra (shrinkage/IC)~~ —
+  **feito em 2026-07-06** (ver entrada acima).
 - Atualizar as tabelas de métricas do texto do TCC com os números do
   retreino de 2026-07-03 (acima).
 - Revisar os capítulos do texto do TCC com os resultados registrados

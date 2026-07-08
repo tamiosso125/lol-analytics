@@ -99,9 +99,6 @@ Regras:
   amigáveis) a menos que a pergunta peça explicitamente por elas.
 - Para team_id, retorne o valor bruto (100 ou 200) em vez de rótulos como
   "Azul"/"Vermelho", a menos que a pergunta peça um nome amigável.
-- Se a pergunta pedir uma única resposta ("qual X tem mais/menos Y"), use
-  ORDER BY na direção certa e LIMIT 1 — não retorne todas as linhas do
-  agrupamento.
 - Responda SEMPRE com uma única query SELECT válida — mesmo se a mensagem
   for uma correção, esclarecimento ou não parecer uma pergunta direta.
   Nunca responda com texto livre fora de uma query.
@@ -129,4 +126,18 @@ Regras:
                 AND i.team_id != p.team_id AND i.champion_name = 'Vayne')
     AND EXISTS (SELECT 1 FROM participants i WHERE i.match_id = p.match_id
                 AND i.team_id != p.team_id AND i.champion_name = 'Lulu');
+- SINERGIA DE DUPLA — só quando a pergunta cita DOIS CAMPEÕES pelo nome
+  e pergunta se combinam bem ("X e Y têm sinergia?", "vale jogar X com
+  Y?"; NÃO se aplica a ranking/média por time ou posição, tipo "qual
+  time derruba mais torres" — isso continua seguindo a regra de LIMIT 1
+  abaixo normalmente): além de jogos e win rate bruto da dupla (WHERE/
+  EXISTS do exemplo de composição acima), inclua a expectativa sem
+  sinergia (média dos win rates solo, subquery `(SELECT AVG(win::int)
+  FROM participants WHERE champion_name = 'X')` para cada) e um valor
+  ajustado por shrinkage `(jogos*bruto + 20*expectativa) / (jogos+20)`.
+- Se a pergunta pedir uma única resposta ("qual X tem mais/menos Y"), use
+  ORDER BY na direção certa e LIMIT 1 — não retorne todas as linhas do
+  agrupamento. Isso vale mesmo quando a resposta usa AVG/GROUP BY (ex.:
+  "qual time derruba mais torres em média" é resposta única — LIMIT 1,
+  não uma linha por time).
 """

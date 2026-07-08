@@ -185,6 +185,13 @@ class Composition(BaseModel):
 # campeão (evita que 5 jogos 5/5 pareçam 100% de win rate)
 PLAYER_SHRINKAGE_K = 15
 
+# mesma ideia para sinergia de dupla (team_synergies): jogos
+# "equivalentes" da expectativa SEM sinergia (média dos dois win rates
+# solo) — uma dupla com poucos jogos juntos fica perto de "sem
+# sinergia"; só com jogos suficientes o delta observado pesa de verdade
+SYNERGY_SHRINKAGE_K = 20
+SYNERGY_MIN_GAMES = 5  # abaixo disso nem a shrinkage salva — sem dado o bastante
+
 
 # ---------------- estatísticas ----------------
 
@@ -1247,6 +1254,15 @@ def compose(comp: Composition):
             )
 
         def team_synergies(team: dict[str, str]) -> list[dict]:
+            """Sinergia de dupla (mesma lógica de shrinkage do player_effect,
+            mas encolhendo a taxa de vitória da DUPLA para a expectativa
+            "sem sinergia" — média dos dois win rates solo) + intervalo de
+            confiança de Wilson (95%) sobre a taxa BRUTA observada, pra
+            distinguir sinergia real de ruído de amostra pequena. Duplas do
+            tipo "Nocturne + Orianna" com poucos jogos juntos agora aparecem
+            (em vez de sumir com o corte antigo de 20 jogos), só que com
+            delta encolhido perto de zero e IC largo — a incerteza fica
+            explícita, não escondida."""
             names = list(team.values())
             out = []
             for i in range(len(names)):
@@ -1261,16 +1277,32 @@ def compose(comp: Composition):
                         (b, a),
                     )
                     games, wr = cur.fetchone()
-                    if games < 20 or wr is None:
+                    if games < SYNERGY_MIN_GAMES or wr is None:
                         continue
+                    games, wr = int(games), float(wr)
                     expected = (profile[a]["wr"] + profile[b]["wr"]) / 2
+                    shrunk = (games * wr + SYNERGY_SHRINKAGE_K * expected) / (
+                        games + SYNERGY_SHRINKAGE_K
+                    )
+                    # Wilson score interval (95%) — melhor que normal para n
+                    # pequeno, não estoura de [0,1]
+                    z = 1.959964
+                    denom = 1 + z**2 / games
+                    center = (wr + z**2 / (2 * games)) / denom
+                    margin = z * math.sqrt(wr * (1 - wr) / games + z**2 / (4 * games**2)) / denom
+                    ci_low, ci_high = max(0.0, center - margin), min(1.0, center + margin)
                     out.append(
                         {
                             "a": a, "a_id": profile[a]["id"],
                             "b": b, "b_id": profile[b]["id"],
                             "games": games,
-                            "win_rate": round(float(wr), 4),
-                            "delta": round(float(wr) - expected, 4),
+                            "win_rate": round(wr, 4),
+                            "delta": round(shrunk - expected, 4),
+                            "ci_low": round(ci_low, 4),
+                            "ci_high": round(ci_high, 4),
+                            # IC exclui a expectativa "sem sinergia" -> dá pra
+                            # distinguir de ruído, não só uma opinião da amostra
+                            "significant": ci_low > expected or ci_high < expected,
                         }
                     )
             out.sort(key=lambda s: abs(s["delta"]), reverse=True)

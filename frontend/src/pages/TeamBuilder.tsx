@@ -316,9 +316,7 @@ function SynergyList({ title, synergies }: { title: string; synergies: ComposeSy
       </CardHeader>
       <CardContent className="space-y-2">
         {synergies.length === 0 ? (
-          <p className="text-sm text-muted-ink">
-            Sem duplas com amostra suficiente (≥ 20 jogos juntos).
-          </p>
+          <p className="text-sm text-muted-ink">Sem duplas com amostra suficiente (≥ 5 jogos juntos).</p>
         ) : (
           synergies.map((s) => (
             <div key={`${s.a}-${s.b}`} className="flex items-center gap-2 text-sm">
@@ -328,21 +326,34 @@ function SynergyList({ title, synergies }: { title: string; synergies: ComposeSy
                 {championDisplayName(s.a)} + {championDisplayName(s.b)}
               </span>
               <span className="text-xs text-muted-ink tabular-nums">{s.games} jogos</span>
-              <span
-                className={cn(
-                  "w-16 text-right font-medium tabular-nums",
-                  deltaColor(s.delta),
-                )}
-              >
-                {s.delta >= 0 ? "+" : ""}
-                {(s.delta * 100).toFixed(1)}pp
-              </span>
+              <div className="w-24 text-right">
+                <span
+                  className={cn(
+                    "font-medium tabular-nums",
+                    s.significant ? deltaColor(s.delta) : "text-muted-ink",
+                  )}
+                  title={
+                    s.significant
+                      ? "IC 95% exclui a expectativa sem sinergia — diferença real, não só ruído de amostra"
+                      : "IC 95% não exclui a expectativa sem sinergia — pode ser ruído de amostra pequena"
+                  }
+                >
+                  {s.delta >= 0 ? "+" : ""}
+                  {(s.delta * 100).toFixed(1)}pp
+                </span>
+                <p className="text-[10px] tabular-nums text-muted-ink">
+                  {(s.ci_low * 100).toFixed(0)}–{(s.ci_high * 100).toFixed(0)}%
+                </p>
+              </div>
             </div>
           ))
         )}
         <p className="border-t border-border pt-2 text-xs text-muted-ink">
-          Sinergia = win rate da dupla junta vs a média individual dos dois (pontos
-          percentuais).
+          Sinergia = win rate da dupla junta vs a expectativa sem sinergia (média dos dois
+          win rates solo), com correção de amostra pequena (shrinkage bayesiano — poucos
+          jogos juntos encolhem o delta perto de zero). Faixa abaixo do delta = intervalo
+          de confiança de 95% do win rate bruto; delta em cinza = o intervalo não descarta
+          "sem sinergia", ou seja, pode ser só ruído.
         </p>
       </CardContent>
     </Card>
