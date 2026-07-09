@@ -2668,6 +2668,37 @@ implementados na mesma sessão: itens por minutagem, recomendação de
 build condicionada na comp inimiga, leitura de draft (win condition/
 contra-pick), e replay sincronizado estilo broadcast.
 
+## 2026-07-08 — Fechando o gap: matchup/sinergia reais no MatchDetail
+
+Gap que tinha ficado registrado desde a Camada 2 (2026-07-08, mais
+cedo): o `WhatIfCard` e o `DraftAnalysisCard` do `MatchDetail` citavam
+campeão pelo nome mas nunca tinham matchup/sinergia REAL da partida —
+só o `CompositionPanel` do Simulador chamava `/compose` (porque já
+precisava dele pra estimativa heurística). Usuário confirmou fechar.
+
+`MatchDetail` ganhou um `useQuery` novo pro `/compose`, usando os
+campeões da própria partida (`blueChampions`/`redChampions`, já
+calculados). Único cuidado real: hooks do React não podem vir depois
+de um `return` condicional, e o componente já tinha
+`if (analysis.isPending) return <Skeleton />` antes de onde
+`blueChampions`/`redChampions` eram calculados — então essas duas
+constantes subiram pra ANTES do early-return (usando
+`analysis.data?.participants ?? []` como fallback vazio) só pra poder
+alimentar o novo `useQuery` (`enabled: !!analysis.data`), removendo a
+declaração duplicada que existia mais abaixo.
+
+`compose.data?.lanes`/`synergies.{blue,red}` passam pro
+`DraftAnalysisCard` e pro `WhatIfCard` (que já tinha esses parâmetros
+opcionais desde a Camada 2/3, só não recebia valor no `MatchDetail`).
+
+Verificado: a "Leitura de draft" passou a citar "55% no top com Singed
+contra Darius" e "sinergia negativa de -12,1 pontos percentuais entre
+Khazix e Camille"; a "Orientação estratégica" mudou de "aplicado a
+este estado" pra "aplicado a este estado E À COMPOSIÇÃO" (a legenda já
+reflete quando `lanes` está presente) e citou a mesma sinergia
+Khazix+Viktor no texto. `npm run lint` (0 erros) / `npm run test`
+(31/31) / `npm run build`: verdes.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

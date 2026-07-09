@@ -19,7 +19,16 @@ import { CoachCard } from "@/components/CoachCard";
 import { DraftAnalysisCard } from "@/components/DraftAnalysisCard";
 import { MapHeatmap } from "@/components/MapHeatmap";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
-import { api, type MatchParticipantFull, type MatchState, type MatchTeam, type ProbPoint, type WardEvent } from "@/lib/api";
+import {
+  api,
+  type CoachLane,
+  type CoachSynergyItem,
+  type MatchParticipantFull,
+  type MatchState,
+  type MatchTeam,
+  type ProbPoint,
+  type WardEvent,
+} from "@/lib/api";
 import { championDisplayName, championIcon, itemIcon, POSITION_LABELS } from "@/lib/ddragon";
 import { deltaColor, formatPct as pct, winColor } from "@/lib/format";
 import { RANGES, SLIDER_KEYS, SLIDER_LABELS } from "@/lib/matchState";
@@ -307,12 +316,20 @@ function WhatIfCard({
   matchId,
   blueChampions,
   redChampions,
+  lanes,
+  blueSynergies,
+  redSynergies,
 }: {
   curve: ProbPoint[];
   minute: number;
   matchId: string;
   blueChampions: Record<string, string>;
   redChampions: Record<string, string>;
+  /** matchups/sinergias reais da partida (via /compose) — opcionais,
+   * chegam depois do estado/campeões porque exigem uma chamada à parte */
+  lanes?: CoachLane[];
+  blueSynergies?: CoachSynergyItem[];
+  redSynergies?: CoachSynergyItem[];
 }) {
   const point = useMemo(
     () => curve.find((p) => p.minute === minute) ?? curve[curve.length - 1],
@@ -471,6 +488,9 @@ function WhatIfCard({
           redChampions,
           matchId,
           gameMinute: point.minute,
+          lanes,
+          blueSynergies,
+          redSynergies,
         }}
       />
     )}
@@ -684,6 +704,29 @@ export function MatchDetail() {
     mutationFn: api.randomMatch,
     onSuccess: ({ match_id }) => navigate(`/partidas/${match_id}?replay=1`, { replace: true }),
   });
+  // campeões da partida real por posição — calculado antes do
+  // early-return (hooks não podem vir depois de um return condicional)
+  // pra poder alimentar o useQuery do /compose logo abaixo
+  const blueChampions = Object.fromEntries(
+    (analysis.data?.participants.filter((p) => p.team_id === 100) ?? []).map((p) => [
+      p.position,
+      p.champion,
+    ]),
+  );
+  const redChampions = Object.fromEntries(
+    (analysis.data?.participants.filter((p) => p.team_id === 200) ?? []).map((p) => [
+      p.position,
+      p.champion,
+    ]),
+  );
+  // matchups/sinergias REAIS da partida (mesmos dados do /compose usado
+  // no Simulador) — fecha o gap do WhatIfCard/DraftAnalysisCard só
+  // citarem campeão sem número de matchup
+  const compose = useQuery({
+    queryKey: ["match-compose", id],
+    queryFn: () => api.compose(blueChampions, redChampions),
+    enabled: !!analysis.data,
+  });
 
   if (analysis.isPending) return <Skeleton className="h-96" />;
   if (analysis.isError) return <ErrorNote message={analysis.error.message} />;
@@ -692,10 +735,6 @@ export function MatchDetail() {
   const red = m.participants.filter((p) => p.team_id === 200);
   const blueTeam = m.teams.find((t) => t.team_id === 100);
   const redTeam = m.teams.find((t) => t.team_id === 200);
-  // campeões da partida real por posição — dá pro CoachCard citar
-  // campeão específico em vez de só "time azul"/"time vermelho"
-  const blueChampions = Object.fromEntries(blue.map((p) => [p.position, p.champion]));
-  const redChampions = Object.fromEntries(red.map((p) => [p.position, p.champion]));
 
   // itens que cada campeão já tinha NO MINUTO do slider (não os itens
   // finais) — champion_id é chave segura, LoL não permite campeão
@@ -728,7 +767,13 @@ export function MatchDetail() {
         </span>
       </PageHeader>
 
-      <DraftAnalysisCard blueChampions={blueChampions} redChampions={redChampions} />
+      <DraftAnalysisCard
+        blueChampions={blueChampions}
+        redChampions={redChampions}
+        lanes={compose.data?.lanes}
+        blueSynergies={compose.data?.synergies.blue}
+        redSynergies={compose.data?.synergies.red}
+      />
 
       <ProbabilityCard
         curve={m.prob_curve}
@@ -840,6 +885,9 @@ export function MatchDetail() {
           matchId={id}
           blueChampions={blueChampions}
           redChampions={redChampions}
+          lanes={compose.data?.lanes}
+          blueSynergies={compose.data?.synergies.blue}
+          redSynergies={compose.data?.synergies.red}
         />
       )}
 
