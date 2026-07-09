@@ -2548,6 +2548,36 @@ arrastando o slider pro fim (30min), 3 ícones — cabeçalho do card
 atualiza junto. `npm run lint` (0 erros) / `npm run test` (31/31) /
 `npm run build`: verdes.
 
+## 2026-07-08 — Feedback 2/4: recomendação de build condicionada na comp inimiga
+
+Puramente mudança de prompt em `src/coach/advice.py` — zero
+infraestrutura nova, porque itens e campeões dos dois lados já estavam
+no prompt desde a Camada 2/3. Duas instruções novas:
+- Quando há itens reais (`has_tactical`) E campeões dos dois lados:
+  pede recomendação de build de verdade — próximo item ou mudança de
+  prioridade, olhando o que cada time já tem e o equilíbrio squishy/
+  tanque da comp inimiga. Explicitamente rotulado como "leitura de
+  conhecimento geral sobre os campeões, não dado medido" — mesma
+  convenção de honestidade de sempre, e instrução pra não inventar
+  número (% de redução de dano etc.).
+- Quando há só campeões (sem itens reais, ex.: Composição do
+  Simulador): versão mais fraca, só comenta prioridade de tipo de
+  build sem apontar item específico (não tem itens atuais pra
+  raciocinar em cima).
+
+Também subiu o teto de frases (4-6 → 4-8, mais perto de 8 quando tem
+build pra incluir) e `max_tokens` (600→750) pra caber sem cortar.
+
+Testado com um cenário desenhado pra bater com o exemplo do feedback
+(comp azul com bastante dano mágico vs comp vermelha squishy): a
+orientação recomendou "Darius deveria considerar Força da Natureza...
+a composição azul tem muito dano mágico, então resistência mágica é
+mais urgente que Lâmina Fantasma agora" e "Camille pode seguir pra
+Abismo Âncora... contra o poke de Lissandra e Caitlyn" — exatamente o
+tipo de raciocínio "Ludens seria melhor pra Syndra dado o quão squishy
+o time inimigo é" do feedback original. Verificado no navegador sem
+erro de console. Sem mudança de frontend (só prompt).
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

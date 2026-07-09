@@ -173,13 +173,14 @@ def generate_advice(
             )
 
     instructions = (
-        "\n\nCom base nisso, escreva uma orientação estratégica curta (4-6 "
-        "frases, português do Brasil, texto corrido, sem markdown) para o "
-        "time em desvantagem (ou para os dois lados, se a diferença for "
-        "pequena) sobre o que costuma ser prioridade numa situação assim — "
-        "controle de objetivo, prioridade de rota, quando lutar ou evitar "
-        "luta, que tipo de vantagem precisa ser convertida antes que o "
-        "adversário se recupere."
+        "\n\nCom base nisso, escreva uma orientação estratégica curta (4-8 "
+        "frases — mais perto de 8 se houver recomendação de build pra "
+        "incluir, 4-6 caso contrário — português do Brasil, texto corrido, "
+        "sem markdown) para o time em desvantagem (ou para os dois lados, "
+        "se a diferença for pequena) sobre o que costuma ser prioridade "
+        "numa situação assim — controle de objetivo, prioridade de rota, "
+        "quando lutar ou evitar luta, que tipo de vantagem precisa ser "
+        "convertida antes que o adversário se recupere."
     )
     if blue_champions or red_champions:
         instructions += (
@@ -187,6 +188,26 @@ def generate_advice(
             "papel na composição, o matchup/sinergia listado acima) em vez de "
             "só falar em 'time azul'/'time vermelho' — mas só cite número de "
             "matchup/sinergia se ele foi listado acima; não invente estatística."
+        )
+    if has_tactical and (blue_champions or red_champions):
+        instructions += (
+            " Inclua também uma recomendação de build: olhando os itens que "
+            "cada time JÁ tem (listados acima) e o equilíbrio squishy/tanque "
+            "da composição inimiga, sugira o próximo item ou uma mudança de "
+            "prioridade de build pra quem estiver montado errado pro que "
+            "enfrenta (ex.: time inimigo muito squishy pede itens de "
+            "penetração/execução em vez de sobrevivência; time inimigo com "
+            "muito CC/engajamento pede resistência antes de dano puro). Isso "
+            "é leitura de conhecimento geral sobre os campeões, não dado "
+            "medido — não invente porcentagem de redução de dano ou número "
+            "específico."
+        )
+    elif blue_champions or red_champions:
+        instructions += (
+            " Se fizer sentido, comente que tipo de prioridade de build cada "
+            "lado deveria ter dado o equilíbrio squishy/tanque das duas "
+            "composições — leitura de conhecimento geral, não dado medido "
+            "(itens atuais desta partida não estão disponíveis aqui)."
         )
     if has_tactical:
         instructions += (
@@ -220,7 +241,7 @@ def generate_advice(
 
     msg = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=600,
+        max_tokens=750,
         temperature=0.4,
         messages=[{"role": "user", "content": prompt}],
     )
