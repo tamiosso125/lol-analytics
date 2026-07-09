@@ -2626,6 +2626,48 @@ extra). Verificado nos dois pontos de integração via Playwright, sem
 erro de console. `npm run lint` (0 erros) / `npm run test` (31/31) /
 `npm run build`: verdes.
 
+## 2026-07-08 — Feedback 4/4: replay estilo broadcast (fecha o lote de feedback)
+
+Último dos 4: "mas o BGL é visualização das coisas em TODO tempo de
+jogo" — o replay (`?replay=1`) só animava a curva de probabilidade,
+isolada do resto da página.
+
+**Achado que simplificou tudo**: não precisava construir nenhum
+componente novo. O `MapHeatmap`, a `TeamTable` (itens por minuto, item
+1 de hoje) e o `ObjectiveRow` já reagem a um `minute` compartilhado
+(estado do `MatchDetail`, hoje só controlado pelo slider do mapa de
+calor); o replay (`ProbabilityCard`) tinha seu PRÓPRIO `idx`/minuto
+interno, completamente desconectado. Bastava sincronizar os dois.
+
+Mudança: `ProbabilityCard` ganhou prop opcional `onMinuteChange`; um
+`useEffect` que dispara `onMinuteChange(point.minute)` sempre que
+`point.minute` muda ENQUANTO `replaying` é true (fora do replay, não
+mexe — evita o hover do gráfico de probabilidade brigar com o slider
+do mapa de calor). `MatchDetail` passa `onMinuteChange={setMinute}` —
+o mesmo `setMinute` que o slider do mapa de calor já usa. Como
+`MapHeatmap`/`ObjectiveRow`/`TeamTable` já são reativos a `minute`,
+passaram a acompanhar o replay automaticamente, sem tocar nesses três
+componentes. O card "E se..." (`WhatIfCard`) também é alimentado pelo
+mesmo `minute` e passou a re-semear sozinho durante o replay, de
+graça. ~15 linhas de mudança pra um efeito "estilo broadcast" completo.
+
+Legenda do card atualizada pra deixar isso visível: "Reproduzindo
+minuto a minuto — mapa de calor, itens e objetivos abaixo acompanham
+o replay."
+
+Verificado com 2 screenshots (replay em `?replay=1`, ~9s de intervalo
+real): aos 7 min, mapa de calor/objetivos/itens todos mostravam "7
+min"/"até o minuto 7"/"aos 7 min"; 9 segundos depois (minuto 16 no
+replay, avançando ~1 min/seg a 1×), os três já mostravam "16 min" em
+uníssono, com objetivos atualizados (2 torres, 1 dragão) e itens
+diferentes na tabela. `npm run lint` (0 erros) / `npm run test`
+(31/31) / `npm run build`: verdes.
+
+**Fecha o lote de 4 feedbacks de uso real (Danone).** Todos os 4
+implementados na mesma sessão: itens por minutagem, recomendação de
+build condicionada na comp inimiga, leitura de draft (win condition/
+contra-pick), e replay sincronizado estilo broadcast.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

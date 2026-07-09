@@ -90,12 +90,17 @@ function ProbabilityCard({
   autoplay,
   onShuffle,
   shuffling,
+  onMinuteChange,
 }: {
   curve: ProbPoint[];
   blueWon: boolean;
   autoplay: boolean;
   onShuffle: () => void;
   shuffling: boolean;
+  /** durante o replay, propaga o minuto atual pro resto da página (mapa
+   * de calor, itens, objetivos) — "assistir partida" vira estilo
+   * broadcast: tudo evolui junto, não só a linha de probabilidade */
+  onMinuteChange?: (minute: number) => void;
 }) {
   const lastIdx = curve.length - 1;
   const [replaying, setReplaying] = useState(autoplay);
@@ -126,6 +131,12 @@ function ProbabilityCard({
   const modelSaysBlue = point.blue_win_probability >= 0.5;
   const domain: [number, number] = [curve[0].minute, curve[lastIdx].minute];
 
+  // durante o replay, o mapa de calor/itens/objetivos acompanham o
+  // mesmo minuto — sem isso o replay era só uma linha isolada
+  useEffect(() => {
+    if (replaying) onMinuteChange?.(point.minute);
+  }, [replaying, point.minute, onMinuteChange]);
+
   return (
     <Card>
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
@@ -133,7 +144,7 @@ function ProbabilityCard({
           <CardTitle>Probabilidade de vitória do time azul, minuto a minuto</CardTitle>
           <p className="mt-0.5 text-xs text-muted-ink">
             {replaying
-              ? "Reproduzindo minuto a minuto, como se a partida estivesse ao vivo."
+              ? "Reproduzindo minuto a minuto — mapa de calor, itens e objetivos abaixo acompanham o replay."
               : "Cada ponto usa o modelo da fase correspondente (10/15/20/25 min) sobre o estado real da partida naquele minuto."}
           </p>
         </div>
@@ -725,6 +736,7 @@ export function MatchDetail() {
         autoplay={searchParams.get("replay") === "1" && m.prob_curve.length > 1}
         onShuffle={() => shuffle.mutate()}
         shuffling={shuffle.isPending}
+        onMinuteChange={setMinute}
       />
 
       <div className="grid grid-cols-2 gap-4">

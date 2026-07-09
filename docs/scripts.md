@@ -506,7 +506,13 @@ Páginas:
   fim, botão "Outra partida" sorteia outra) — `?replay=1` na URL
   autoplaya direto (é pra onde o botão da Início navega). Sem fetch
   duplicado: a página estática e o replay usam o mesmo `prob_curve` já
-  buscado.
+  buscado. **Estilo broadcast em 2026-07-08**: `ProbabilityCard` ganhou
+  prop `onMinuteChange`, disparada a cada tick do replay — como o mapa
+  de calor/itens/objetivos já eram reativos ao MESMO `minute` do
+  `MatchDetail` (antes só controlado pelo slider), passaram a
+  acompanhar o replay automaticamente, sem mudar esses três
+  componentes. O card "E se..." também acompanha de graça (mesmo
+  `minute`).
 - **Consulta NL** (`/consulta`).
 - **Simulador** (`/simulador`, `Simulador.tsx`): **fusão de 3 páginas
   em 2026-07-06** (Montar Partida + Predição + Explicabilidade — todas
