@@ -2578,6 +2578,54 @@ tipo de raciocínio "Ludens seria melhor pra Syndra dado o quão squishy
 o time inimigo é" do feedback original. Verificado no navegador sem
 erro de console. Sem mudança de frontend (só prompt).
 
+## 2026-07-08 — Feedback 3/4: leitura de draft (win condition, contra-pick)
+
+O feedback mais rico dos 4: o usuário mandou uma leitura de caster de
+verdade sobre uma partida real — "essa comp do azul nunca ganha, a
+única win condition é a Irelia snowballar na side contra o Jayce, mas
+mesmo assim o vermelho tem Poppy pra pickar ela antes dela chegar no
+Ziggs". Isso é análise de win condition + contra-pick + scaling, e não
+depende de NENHUM estado de jogo — só os 10 campeões do draft.
+
+Diferente das camadas 1-2 (que sempre partiam de um `MatchState`),
+essa é uma pergunta estruturalmente diferente ("quem tem vantagem
+estratégica pelo draft" em vez de "quem está ganhando agora"). Nova
+função `generate_draft_analysis()` em `src/coach/advice.py` — não usa
+`MatchState` nem probabilidade do modelo, só campeões por posição +
+opcionalmente `lanes`/`synergies` (mesmos dados reais de sempre).
+Refatorei `_format_lanes()`/`_format_synergies()` como helpers
+compartilhados entre `generate_advice()` e a função nova (estavam
+duplicados inline). Prompt pede explicitamente: win condition de cada
+time, matchups favoráveis/perdidos (dado real quando disponível),
+se o time favorecido tem resposta pra win condition do outro (peel,
+CC, contra-pick), e um veredito direto — "não amacie a leitura por
+educação".
+
+Novo endpoint `POST /coach/draft`. Frontend: componente
+`DraftAnalysisCard` (ícone `Swords`, distinto do `Compass` do
+`CoachCard`), reaproveitando o mesmo padrão visual (botão sob demanda
++ caixa de narrativa). Dois pontos de integração:
+- **`MatchDetail`**: acima da curva de probabilidade (é uma leitura
+  de ANTES do jogo, não amarrada ao slider de minuto) — só campeões
+  da partida real, sem matchup/sinergia (não chama `/compose`; fica
+  registrado como gap, igual o já anotado pro `WhatIfCard`).
+- **`CompositionPanel`** (Simulador): contexto completo (`result.lanes`
+  + `result.synergies`, já calculados) — e ao contrário do `CoachCard`,
+  aparece **mesmo sem "Estado da partida" marcado**, porque não precisa
+  de estado nenhum.
+
+Testado com uma reconstrução do cenário exato do feedback (Irelia vs
+Jayce top, Syndra vs Ziggs mid, Akali vs Yone bot, Poppy no time
+vermelho): a leitura identificou win conditions distintas pra cada
+time, chamou a vantagem de lane do Irelia vs Jayce, e apontou que
+Poppy+Karma dão peel pro carry inimigo — mesma ESTRUTURA de raciocínio
+do feedback (win condition + contra-pick + veredito por janela de
+tempo), mesmo sem replicar a leitura exata do usuário (não dava pra
+saber que o alvo específico da Irelia era o Ziggs sem essa informação
+extra). Verificado nos dois pontos de integração via Playwright, sem
+erro de console. `npm run lint` (0 erros) / `npm run test` (31/31) /
+`npm run build`: verdes.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

@@ -444,6 +444,19 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   se..." do `MatchDetail` passa match_id → contexto tático completo;
   aba Composição do Simulador é composição hipotética → só campeões/
   matchups/sinergias, sem match_id.
+- `POST /coach/draft` (2026-07-08, `generate_draft_analysis` em
+  `src/coach/advice.py`) — leitura de DRAFT: win condition, contra-pick
+  e quem escala melhor, usando só os 10 campeões (sem `MatchState`, sem
+  probabilidade do modelo — pergunta estruturalmente diferente do
+  `/coach`, "quem tem vantagem pelo draft" em vez de "quem está
+  ganhando agora"). `lanes`/`blue_synergies`/`red_synergies` opcionais
+  (mesmos dados reais do `/compose`, quando disponíveis). Consumido
+  pelo `DraftAnalysisCard` (frontend): aparece no topo do `MatchDetail`
+  (antes da curva de probabilidade, só campeões da partida real — não
+  chama `/compose`, fica registrado como possível melhoria futura) e na
+  aba Composição do Simulador (contexto completo, `result.lanes`+
+  `result.synergies` já calculados — ao contrário do `CoachCard`,
+  aparece MESMO sem "Estado da partida" marcado).
 - `/reports/*` — serve os PNGs/JSON de `reports/` (explicabilidade).
 
 CORS liberado para `http://localhost:5173` (dev server do Vite).

@@ -17,7 +17,13 @@ matchups de lane + sinergias — os MESMOS números que o /compose já
 calcula a partir do histórico real (não são opinião da LLM). O prompt
 distingue explicitamente "dado real" de "conhecimento geral" nessas
 seções, pra orientação poder citar campeão específico sem inventar
-estatística que não foi fornecida."""
+estatística que não foi fornecida.
+
+Camada 3 — análise de draft (2026-07-08, feedback de uso real): além
+da orientação em cima de um ESTADO, `generate_draft_analysis()` lê os
+10 campeões ANTES de existir qualquer estado de jogo — win condition,
+contra-pick, quem escala melhor. Não precisa de MatchState nem
+probabilidade do modelo."""
 import os
 
 import anthropic
@@ -29,6 +35,44 @@ FEATURE_LABELS = {
     "tower_diff": "diferença de torres",
     "dragon_diff": "diferença de dragões",
 }
+
+
+def _format_lanes(lanes: list[dict]) -> str:
+    lines = "\n".join(
+        f"- {l['position']}: {l['blue']} vs {l['red']} — "
+        + (
+            f"{l['blue_lane_win_rate'] * 100:.0f}% de vitória do azul em "
+            f"{l['matchup_games']} confrontos diretos reais"
+            if l.get("matchup_games", 0) >= 10
+            else "poucos confrontos diretos no histórico, estimativa aproximada"
+        )
+        for l in lanes
+    )
+    return f"Matchups por lane — DADO REAL do histórico de partidas, não opinião:\n{lines}"
+
+
+def _format_synergies(blue_synergies: list[dict], red_synergies: list[dict]) -> str | None:
+    sig_blue = [s for s in blue_synergies if s.get("significant")]
+    sig_red = [s for s in red_synergies if s.get("significant")]
+    if not sig_blue and not sig_red:
+        return None
+    lines = (
+        "\n".join(
+            f"- {s['a']} + {s['b']} (time azul): {s['delta'] * 100:+.1f} pontos "
+            "percentuais de sinergia (estatisticamente distinguível de ruído)"
+            for s in sig_blue
+        )
+        + "\n"
+        + "\n".join(
+            f"- {s['a']} + {s['b']} (time vermelho): {s['delta'] * 100:+.1f} "
+            "pontos percentuais de sinergia (estatisticamente distinguível de ruído)"
+            for s in sig_red
+        )
+    ).strip()
+    return (
+        "Sinergias de dupla com significância estatística — DADO REAL, já "
+        f"corrigido por amostra pequena (shrinkage + intervalo de confiança):\n{lines}"
+    )
 
 
 def generate_advice(
@@ -78,38 +122,11 @@ def generate_advice(
         sections.append(f"Composição de times por posição:\n{comp_lines}")
 
     if lanes:
-        lane_lines = "\n".join(
-            f"- {l['position']}: {l['blue']} vs {l['red']} — "
-            + (
-                f"{l['blue_lane_win_rate'] * 100:.0f}% de vitória do azul em "
-                f"{l['matchup_games']} confrontos diretos reais"
-                if l.get("matchup_games", 0) >= 10
-                else "poucos confrontos diretos no histórico, estimativa aproximada"
-            )
-            for l in lanes
-        )
-        sections.append(
-            f"Matchups por lane — DADO REAL do histórico de partidas, não "
-            f"opinião:\n{lane_lines}"
-        )
+        sections.append(_format_lanes(lanes))
 
-    sig_blue = [s for s in (blue_synergies or []) if s.get("significant")]
-    sig_red = [s for s in (red_synergies or []) if s.get("significant")]
-    if sig_blue or sig_red:
-        syn_lines = "\n".join(
-            f"- {s['a']} + {s['b']} (time azul): {s['delta'] * 100:+.1f} pontos "
-            "percentuais de sinergia (estatisticamente distinguível de ruído)"
-            for s in sig_blue
-        ) + "\n" + "\n".join(
-            f"- {s['a']} + {s['b']} (time vermelho): {s['delta'] * 100:+.1f} "
-            "pontos percentuais de sinergia (estatisticamente distinguível de ruído)"
-            for s in sig_red
-        )
-        sections.append(
-            f"Sinergias de dupla com significância estatística — DADO REAL, já "
-            f"corrigido por amostra pequena (shrinkage + intervalo de "
-            f"confiança):\n{syn_lines.strip()}"
-        )
+    syn_block = _format_synergies(blue_synergies or [], red_synergies or [])
+    if syn_block:
+        sections.append(syn_block)
 
     # Camada 2 (itens) + Camada 3 (posições/visão/momentum) — dado REAL
     # da timeline desta partida, no minuto analisado (src/coach/tactics.py)
@@ -242,6 +259,79 @@ def generate_advice(
     msg = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=750,
+        temperature=0.4,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return msg.content[0].text.strip()
+
+
+def generate_draft_analysis(
+    blue_champions: dict[str, str],
+    red_champions: dict[str, str],
+    lanes: list[dict] | None = None,
+    blue_synergies: list[dict] | None = None,
+    red_synergies: list[dict] | None = None,
+) -> str:
+    """Leitura de draft — ANTES de existir qualquer estado de jogo
+    observável, só os 10 campeões escolhidos. Não usa MatchState nem
+    probabilidade do modelo (o modelo de ML não recebe campeão como
+    entrada de qualquer forma — isso aqui é uma pergunta diferente:
+    "quem tem vantagem estratégica pelo draft", não "quem está ganhando
+    agora"). Pedido explícito de feedback de uso real: "fala sobre o
+    draft em si — qual a win condition, quem contra-pica quem, o time
+    tem resposta pro win condition do outro" (docs/diario_execucao.md
+    2026-07-08)."""
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+
+    positions = sorted(set(blue_champions) | set(red_champions))
+    comp_lines = "\n".join(
+        f"- {pos}: {blue_champions.get(pos, '?')} (azul) vs "
+        f"{red_champions.get(pos, '?')} (vermelho)"
+        for pos in positions
+    )
+    sections = [
+        "Você é um analista/caster de League of Legends fazendo uma leitura "
+        "de DRAFT — a partida ainda NÃO começou, não há ouro/XP/abates "
+        "observados ainda, só os 10 campeões escolhidos:\n\n"
+        f"Composição de times por posição:\n{comp_lines}"
+    ]
+
+    if lanes:
+        sections.append(_format_lanes(lanes))
+    syn_block = _format_synergies(blue_synergies or [], red_synergies or [])
+    if syn_block:
+        sections.append(syn_block)
+
+    instructions = (
+        "\n\nEscreva uma leitura de draft no estilo de um analista "
+        "comentando antes do jogo começar (8-12 frases, português do "
+        "Brasil, texto corrido, sem markdown), cobrindo:\n"
+        "- Qual é a win condition de cada time — qual jogador/lane precisa "
+        "carregar, baseado no potencial de scaling e no papel dos campeões "
+        "escolhidos (força no early vs no late, engajador vs peeler, dano "
+        "físico vs mágico);\n"
+        "- Onde estão os matchups favoráveis/perdidos — use os dados reais "
+        "de matchup listados acima quando disponíveis; senão, conhecimento "
+        "geral de contra-pick/scaling entre os campeões envolvidos;\n"
+        "- Se o time favorecido tem resposta pra win condition do outro "
+        "(ex.: peel, CC em área, itens que respondem ao snowball de um "
+        "carry específico) — isso muda a leitura de quem realmente tem "
+        "caminho pra vitória;\n"
+        "- Seja direto se um lado claramente não tem caminho razoável pra "
+        "vitória mesmo convertendo sua melhor win condition, ou se o draft "
+        "está equilibrado — não amacie a leitura por educação.\n\n"
+        "Deixe claro o que é dado real (matchup/sinergia listados acima, se "
+        "houver) vs sua leitura de conhecimento geral sobre os campeões "
+        "(kit, scaling, contra-pick, meta) — não invente número que não foi "
+        "te dado. Termine com uma frase resumindo o veredito geral da "
+        "leitura de draft."
+    )
+
+    prompt = "\n\n".join(sections) + instructions
+
+    msg = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=900,
         temperature=0.4,
         messages=[{"role": "user", "content": prompt}],
     )

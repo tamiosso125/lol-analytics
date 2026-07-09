@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from src.coach.advice import generate_advice
+from src.coach.advice import generate_advice, generate_draft_analysis
 from src.coach.tactics import tactical_context
 from src.db import get_conn
 from src.features.build_features import CUTOFFS, features_from_timeline
@@ -202,6 +202,17 @@ class CoachRequest(BaseModel):
     # jogo mostrado, distinto do corte do modelo em state.minute)
     match_id: str | None = None
     game_minute: int | None = None
+
+
+class DraftRequest(BaseModel):
+    """Leitura de draft (Camada 3, 2026-07-08) — só os 10 campeões, sem
+    estado de jogo (a partida ainda não começou). lanes/synergies são
+    opcionais, mesmos números do /compose."""
+    blue_champions: dict[str, str]
+    red_champions: dict[str, str]
+    lanes: list[CoachLane] = []
+    blue_synergies: list[CoachSynergyItem] = []
+    red_synergies: list[CoachSynergyItem] = []
 
 
 class Composition(BaseModel):
@@ -1697,6 +1708,25 @@ def coach(req: CoachRequest):
             blue_synergies=[s.model_dump() for s in req.blue_synergies],
             red_synergies=[s.model_dump() for s in req.red_synergies],
             tactical=tactical,
+        )
+    except Exception as exc:
+        raise _external_call_error(exc)
+    return {"narrative": narrative}
+
+
+@app.post("/coach/draft")
+def coach_draft(req: DraftRequest):
+    """Leitura de draft (Camada 3, 2026-07-08) — win condition/contra-pick/
+    scaling só com os 10 campeões escolhidos, ANTES de existir estado de
+    jogo. Ver src/coach/advice.py::generate_draft_analysis. Pedido
+    explícito de feedback de uso real (ver docs/diario_execucao.md)."""
+    try:
+        narrative = generate_draft_analysis(
+            req.blue_champions,
+            req.red_champions,
+            lanes=[l.model_dump() for l in req.lanes],
+            blue_synergies=[s.model_dump() for s in req.blue_synergies],
+            red_synergies=[s.model_dump() for s in req.red_synergies],
         )
     except Exception as exc:
         raise _external_call_error(exc)

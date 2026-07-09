@@ -639,6 +639,25 @@ export const api = {
         game_minute: ctx.gameMinute ?? null,
       }),
     }),
+  /** Leitura de draft (Camada 3) — win condition/contra-pick só com os
+   * 10 campeões, sem estado de jogo (a partida ainda não começou). */
+  coachDraft: (
+    blueChampions: Record<string, string>,
+    redChampions: Record<string, string>,
+    lanes: CoachLane[] = [],
+    blueSynergies: CoachSynergyItem[] = [],
+    redSynergies: CoachSynergyItem[] = [],
+  ) =>
+    request<CoachAdvice>("/coach/draft", {
+      method: "POST",
+      body: JSON.stringify({
+        blue_champions: blueChampions,
+        red_champions: redChampions,
+        lanes,
+        blue_synergies: blueSynergies,
+        red_synergies: redSynergies,
+      }),
+    }),
   shapImportancePhases: () =>
     request<Record<string, Record<string, number>>>("/reports/shap_importance_phases.json"),
   reportImage: (name: string) => `${API_URL}/reports/${name}`,

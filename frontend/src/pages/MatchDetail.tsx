@@ -16,6 +16,7 @@ import {
 
 import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
 import { CoachCard } from "@/components/CoachCard";
+import { DraftAnalysisCard } from "@/components/DraftAnalysisCard";
 import { MapHeatmap } from "@/components/MapHeatmap";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
 import { api, type MatchParticipantFull, type MatchState, type MatchTeam, type ProbPoint, type WardEvent } from "@/lib/api";
@@ -715,6 +716,8 @@ export function MatchDetail() {
           </span>
         </span>
       </PageHeader>
+
+      <DraftAnalysisCard blueChampions={blueChampions} redChampions={redChampions} />
 
       <ProbabilityCard
         curve={m.prob_curve}
