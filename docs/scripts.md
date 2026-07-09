@@ -122,20 +122,35 @@ reportam os cortes de 15 min ficam com essas colunas NULL.
 **Lê:** `data/pro/*.csv`. **Escreve:** `pro_games`, `pro_players`.
 
 ### `src/etl/load_items.py`
-Extrai as compras/vendas de itens dos eventos ITEM_* das timelines para
-a tabela `item_events` (~2,4M linhas em 10k partidas). Os `ITEM_UNDO`
-são aplicados no ETL (a compra desfeita não entra — a tabela reflete o
-que o jogador manteve, não cada clique na loja); `ITEM_DESTROYED`
-(componente fundido em receita, consumível usado) não é gravado. Só
+Extrai as compras/vendas/consumos de itens dos eventos ITEM_* das
+timelines para a tabela `item_events` (~10,4M linhas em 23k partidas).
+Os `ITEM_UNDO` são aplicados no ETL (a compra desfeita não entra — a
+tabela reflete o que o jogador manteve, não cada clique na loja). Só
 processa timelines cuja partida existe em `matches` (raw_timelines tem
 remakes que o ETL principal pula — sem o filtro, viola a FK). A tabela
 é reconstruída do zero a cada execução (TRUNCATE) — rodar após
 qualquer coleta nova. O catálogo `data/items.json` (nome, custo, tags,
 receitas por item_id) vem do Data Dragon
 (`cdn/16.13.1/data/pt_BR/item.json`, versão fixada em sincronia com o
-helper `itemIcon` do front) — a API o carrega no startup e deriva a
-lista de "itens finalizados" (nada constrói a partir dele, comprável,
-custo >= 1100, não consumível/trinket, válido no mapa 11).
+helper `itemIcon` do front) — a API o carrega no startup e deriva duas
+listas: `_completed_item_ids` ("itens finalizados" — nada constrói a
+partir dele, comprável, custo >= 1100, não consumível/trinket, válido
+no mapa 11 — usada em `champion_items`/coach) e `_trackable_item_ids`
+(2026-07-08, mesma coisa SEM exigir "finalizado" — inclui botas e
+componentes, usada só no build por minuto de `/matches/{id}/positions`).
+
+**`ITEM_DESTROYED` é gravado desde 2026-07-08** (ação `DESTROY`,
+`action` virou `VARCHAR(10)` — cabia só `VARCHAR(4)` antes, migração
+aplicada). Antes era ignorado de propósito ("interessa o que foi
+comprado, não a fusão de componentes") — mas sem isso, reconstruir "o
+que o jogador tinha no inventário no minuto X" deixava componentes
+fantasmas pra sempre depois de virarem item final. Confirmado seguro:
+todo consumidor de `item_events` já trata qualquer ação != BUY como
+remoção, então adicionar DESTROY não quebra nada que já lia a tabela.
+Limite conhecido: ITEM_UNDO só desfaz BUY/SELL (a Riot nunca
+referencia um DESTROY em beforeId/afterId) — desfazer a compra que
+finaliza uma receita deixa os componentes permanentemente "destruídos"
+na reconstrução, caso raro não tratado.
 
 **Uso:** `python -m src.etl.load_items`
 **Lê:** `raw_timelines`, `matches`. **Escreve:** `item_events`.

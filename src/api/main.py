@@ -101,6 +101,21 @@ _completed_item_ids = [
     and not ({"Consumable", "Trinket"} & set(it.get("tags", [])))
     and it.get("maps", {}).get("11")
 ]
+# igual acima, mas SEM exigir "finalizado" — inclui botas e componentes
+# em progresso (Espada Longa, Cristal de Rubi etc.). Usado no build POR
+# MINUTO (/matches/{id}/positions), onde faz sentido mostrar o que o
+# jogador tinha na mochila mesmo sem ter fechado o item ainda (2026-07-08,
+# feedback: "a tabela deveria mostrar todos os itens até os não
+# completos"). Só é seguro porque item_events agora rastreia DESTROY
+# (componente consumido numa receita) — sem isso, o componente ficaria
+# "fantasma" pra sempre depois de virar item final.
+_trackable_item_ids = [
+    int(iid)
+    for iid, it in _items.items()
+    if it.get("purchasable")
+    and not ({"Consumable", "Trinket"} & set(it.get("tags", [])))
+    and it.get("maps", {}).get("11")
+]
 
 # cache do features.csv para o gráfico gold diff aos 15 (recarrega se o
 # arquivo for regenerado pelo build_features)
@@ -165,6 +180,17 @@ class MatchState(BaseModel):
     minute: int = 15  # corte: 10 (rotas), 15, 20 (mid), 25 (late)
 
 
+class CoachPlayerEffect(BaseModel):
+    """Subconjunto de player_effect() — win rate do JOGADOR naquele
+    campeão específico, não só o campeão em abstrato (2026-07-08,
+    feedback: "deveríamos saber quem é o jogador... a análise do draft
+    deveria fazer isso")."""
+    name: str
+    games_on_champion: int
+    raw_win_rate: float | None
+    shrunk_win_rate: float
+
+
 class CoachLane(BaseModel):
     """Subconjunto de ComposeLane — só o que o prompt do coach usa."""
     position: str
@@ -172,6 +198,8 @@ class CoachLane(BaseModel):
     red: str
     blue_lane_win_rate: float
     matchup_games: int
+    blue_player: CoachPlayerEffect | None = None
+    red_player: CoachPlayerEffect | None = None
 
 
 class CoachSynergyItem(BaseModel):
@@ -991,6 +1019,10 @@ def match_analysis(match_id: str):
             {
                 "team_id": p[0], "champion": p[1], "champion_id": p[2],
                 "position": p[3],
+                # puuid do jogador — dá pro front pedir a leitura de draft já
+                # ajustada por jogador (win rate dele no campeão), não só
+                # campeão×campeão (ver /coach/draft, feedback 2026-07-08)
+                "puuid": p[4],
                 "kills": p[5], "deaths": p[6], "assists": p[7],
                 "gold": p[8], "cs": p[9], "vision": p[10], "dmg": p[11],
                 "win": p[12],
@@ -1008,8 +1040,13 @@ def match_positions(match_id: str):
     timeline) + abates com local — base do mapa de calor da análise.
     Cada jogador de cada frame também carrega, TODOS reconstruídos pro
     estado NAQUELE minuto (não os totais finais da partida):
-    - `items` — itens finalizados possuídos (item_events, mesma técnica
-      de dois ponteiros de `gold`/`cs`/`dmg` abaixo);
+    - `items` — itens possuídos NAQUELE momento, finalizados OU em
+      progresso (botas, componentes — 2026-07-08, antes só itens
+      finalizados) via `item_events`, que agora rastreia `DESTROY`
+      (componente consumido numa receita) além de compra/venda — sem
+      isso um componente ficaria "fantasma" pra sempre depois de virar
+      item final; mesma técnica de dois ponteiros de `gold`/`cs`/`dmg`
+      abaixo;
     - `gold`, `cs`, `dmg` — direto do participantFrame (`totalGold`,
       `minionsKilled`+`jungleMinionsKilled`,
       `damageStats.totalDamageDoneToChampions`);
@@ -1042,15 +1079,16 @@ def match_positions(match_id: str):
         )
         by_puuid = {r[0]: (r[1], r[2], r[3]) for r in cur.fetchall()}
 
-        # itens finalizados por puuid, em ORDEM de compra/venda — permite
-        # reconstruir "o que cada um tinha NAQUELE minuto" andando pelos
-        # eventos em paralelo com os frames, sem uma query por minuto
+        # itens por puuid (finalizados OU em progresso — botas, componentes),
+        # em ORDEM de compra/venda/consumo — permite reconstruir "o que cada
+        # um tinha NAQUELE minuto" andando pelos eventos em paralelo com os
+        # frames, sem uma query por minuto
         item_events = []
-        if _completed_item_ids:
+        if _trackable_item_ids:
             cur.execute(
                 """SELECT puuid, item_id, action, ts_ms FROM item_events
                    WHERE match_id = %s AND item_id = ANY(%s) ORDER BY ts_ms""",
-                (match_id, _completed_item_ids),
+                (match_id, _trackable_item_ids),
             )
             item_events = cur.fetchall()
 

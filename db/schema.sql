@@ -72,17 +72,17 @@ CREATE TABLE IF NOT EXISTS bans (
     PRIMARY KEY (match_id, team_id, pick_turn)
 );
 
--- Compras/vendas EFETIVAS de itens, extraídas dos eventos das timelines
--- (src/etl/load_items.py). ITEM_UNDO já é aplicado no ETL: a compra
--- desfeita não entra aqui — a tabela reflete o que o jogador de fato
--- manteve, não cada clique na loja.
+-- Compras/vendas/consumos EFETIVOS de itens, extraídos dos eventos das
+-- timelines (src/etl/load_items.py). ITEM_UNDO já é aplicado no ETL: a
+-- compra desfeita não entra aqui — a tabela reflete o que o jogador de
+-- fato manteve, não cada clique na loja.
 CREATE TABLE IF NOT EXISTS item_events (
     id        BIGSERIAL PRIMARY KEY,
     match_id  VARCHAR(32) REFERENCES matches(match_id),
     puuid     VARCHAR(100),
     ts_ms     BIGINT,               -- timestamp do evento na partida (ms)
     item_id   INT,
-    action    VARCHAR(4)            -- BUY | SELL
+    action    VARCHAR(10)           -- BUY | SELL | DESTROY (componente consumido em receita)
 );
 
 CREATE INDEX IF NOT EXISTS idx_item_events_match     ON item_events(match_id);

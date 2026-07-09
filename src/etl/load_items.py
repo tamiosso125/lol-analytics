@@ -1,12 +1,26 @@
-"""ETL — extrai compras/vendas de itens das timelines para item_events.
+"""ETL — extrai compras/vendas/consumos de itens das timelines para item_events.
 
 Os eventos ITEM_* do match-v5 registram cada clique na loja, incluindo
 os desfeitos. Este ETL aplica os ITEM_UNDO antes de gravar: um UNDO com
 beforeId=X remove a compra mais recente de X (e com afterId=Y, a venda
 mais recente de Y) — a tabela final reflete o que o jogador de fato
-manteve. ITEM_DESTROYED (componente consumido numa receita, consumível
-usado) não é gravado: para análise de build interessa o que foi
-comprado, não a fusão de componentes.
+manteve.
+
+ITEM_DESTROYED (2026-07-08, antes ignorado) É gravado como "DESTROY" —
+cobre tanto componente consumido numa receita quanto consumível usado.
+Sem isso, reconstruir "o que o jogador tinha no inventário no minuto
+X" (usado em /matches/{id}/positions) ficaria com componentes fantasma
+pra sempre depois de virarem item final (o BUY do componente continua
+na tabela, mas nada removia ele de "possuído"). Todo consumidor de
+item_events já trata qualquer ação != BUY como remoção (`CASE WHEN
+action='BUY' THEN 1 ELSE -1 END` ou equivalente em Python) — adicionar
+DESTROY não quebra nada existente, só corrige a contagem.
+LIMITE CONHECIDO: o ITEM_UNDO só desfaz BUY/SELL (bate com o que a
+Riot manda no evento — beforeId/afterId nunca referenciam um DESTROY).
+Se um jogador desfizer a compra de um item que consumiu componentes,
+os componentes ficam permanentemente "destruídos" na nossa
+reconstrução mesmo a compra tendo sido desfeita — caso raro (exige
+desfazer justo a compra que finaliza a receita), não tratado.
 
 A tabela é reconstruída do zero a cada execução (TRUNCATE) — só este
 script escreve nela, e reprocessar tudo leva ~1-2 min.
@@ -38,6 +52,8 @@ def item_rows_from_timeline(match_id: str, payload: dict) -> list[tuple]:
                 events.append(["BUY", ev.get("timestamp", 0), ev.get("itemId")])
             elif t == "ITEM_SOLD":
                 events.append(["SELL", ev.get("timestamp", 0), ev.get("itemId")])
+            elif t == "ITEM_DESTROYED":
+                events.append(["DESTROY", ev.get("timestamp", 0), ev.get("itemId")])
             elif t == "ITEM_UNDO":
                 # desfaz a ação mais recente com aquele item (compra se
                 # beforeId, venda se afterId) — varre de trás pra frente

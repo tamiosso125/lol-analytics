@@ -37,18 +37,42 @@ FEATURE_LABELS = {
 }
 
 
+def _format_player(label: str, pe: dict | None) -> str:
+    """pe = subconjunto de player_effect() (name, games_on_champion,
+    raw_win_rate, shrunk_win_rate) — win rate do JOGADOR naquele
+    campeão específico, já com shrinkage bayesiano pra amostra pequena
+    (não precisa checar tamanho de amostra de novo aqui, o shrunk já
+    resolve isso: poucos jogos = fica perto da média do campeão)."""
+    if not pe or pe.get("games_on_champion", 0) == 0:
+        return ""
+    raw = pe.get("raw_win_rate")
+    raw_txt = f"{raw * 100:.0f}% bruto em {pe['games_on_champion']} jogos, " if raw is not None else ""
+    return (
+        f" {label} = {pe['name']}: {raw_txt}"
+        f"{pe['shrunk_win_rate'] * 100:.0f}% ajustado (shrinkage) NESTE campeão especificamente"
+    )
+
+
 def _format_lanes(lanes: list[dict]) -> str:
-    lines = "\n".join(
-        f"- {l['position']}: {l['blue']} vs {l['red']} — "
-        + (
+    lines = []
+    for l in lanes:
+        bit = f"- {l['position']}: {l['blue']} vs {l['red']} — "
+        bit += (
             f"{l['blue_lane_win_rate'] * 100:.0f}% de vitória do azul em "
             f"{l['matchup_games']} confrontos diretos reais"
             if l.get("matchup_games", 0) >= 10
             else "poucos confrontos diretos no histórico, estimativa aproximada"
         )
-        for l in lanes
+        bit += _format_player("jogador azul", l.get("blue_player"))
+        bit += _format_player("jogador vermelho", l.get("red_player"))
+        lines.append(bit)
+    return (
+        "Matchups por lane — DADO REAL do histórico de partidas, não opinião "
+        "(quando um jogador específico é listado, o win rate dele NAQUELE "
+        "campeão importa tanto quanto o matchup — um jogador muito acima ou "
+        "abaixo da média no campeão pode inverter a leitura do matchup "
+        "puro):\n" + "\n".join(lines)
     )
-    return f"Matchups por lane — DADO REAL do histórico de partidas, não opinião:\n{lines}"
 
 
 def _format_synergies(blue_synergies: list[dict], red_synergies: list[dict]) -> str | None:
@@ -302,6 +326,7 @@ def generate_draft_analysis(
     if syn_block:
         sections.append(syn_block)
 
+    has_player = any(l.get("blue_player") or l.get("red_player") for l in (lanes or []))
     instructions = (
         "\n\nEscreva uma leitura de draft no estilo de um analista "
         "comentando antes do jogo começar (8-12 frases, português do "
@@ -319,12 +344,28 @@ def generate_draft_analysis(
         "caminho pra vitória;\n"
         "- Seja direto se um lado claramente não tem caminho razoável pra "
         "vitória mesmo convertendo sua melhor win condition, ou se o draft "
-        "está equilibrado — não amacie a leitura por educação.\n\n"
-        "Deixe claro o que é dado real (matchup/sinergia listados acima, se "
-        "houver) vs sua leitura de conhecimento geral sobre os campeões "
-        "(kit, scaling, contra-pick, meta) — não invente número que não foi "
-        "te dado. Termine com uma frase resumindo o veredito geral da "
-        "leitura de draft."
+        "está equilibrado — não amacie a leitura por educação.\n"
+    )
+    if has_player:
+        instructions += (
+            "- Quando um jogador específico tem win rate listado NAQUELE "
+            "campeão (acima ou abaixo da média), pondere isso na leitura — "
+            "um jogador muito melhor ou pior que a média no campeão pode "
+            "compensar (ou piorar) uma desvantagem estrutural de matchup; "
+            "diga isso explicitamente quando for o caso, não só analise os "
+            "campeões como se fossem jogados na média.\n"
+        )
+    instructions += (
+        "\nDeixe claro o que é dado real (matchup/sinergia/win rate de "
+        "jogador listados acima, se houver) vs sua leitura de conhecimento "
+        "geral sobre os campeões (kit, scaling, contra-pick, meta) — não "
+        "invente número que não foi te dado. Termine com uma frase "
+        "resumindo o veredito geral da leitura de draft, deixando claro que "
+        "é uma leitura ESTRATÉGICA pré-jogo (quem tem o caminho mais fácil "
+        "pro sucesso no papel) — não uma predição do resultado: um draft "
+        "pior no papel pode vencer por execução, early game agressivo ou "
+        "erro do adversário, então a leitura pode não bater com o "
+        "resultado real da partida."
     )
 
     prompt = "\n\n".join(sections) + instructions

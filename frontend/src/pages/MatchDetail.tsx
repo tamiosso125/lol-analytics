@@ -727,12 +727,28 @@ export function MatchDetail() {
       p.champion,
     ]),
   );
+  // idem, mas puuid — dá pro /compose ajustar a leitura pelo win rate do
+  // JOGADOR naquele campeão (não só o campeão em abstrato); ver
+  // docs/diario_execucao.md 2026-07-08 (feedback: "deveríamos saber quem
+  // é o jogador... a análise do draft deveria fazer isso")
+  const bluePlayers = Object.fromEntries(
+    (analysis.data?.participants.filter((p) => p.team_id === 100) ?? []).map((p) => [
+      p.position,
+      p.puuid,
+    ]),
+  );
+  const redPlayers = Object.fromEntries(
+    (analysis.data?.participants.filter((p) => p.team_id === 200) ?? []).map((p) => [
+      p.position,
+      p.puuid,
+    ]),
+  );
   // matchups/sinergias REAIS da partida (mesmos dados do /compose usado
   // no Simulador) — fecha o gap do WhatIfCard/DraftAnalysisCard só
   // citarem campeão sem número de matchup
   const compose = useQuery({
     queryKey: ["match-compose", id],
-    queryFn: () => api.compose(blueChampions, redChampions),
+    queryFn: () => api.compose(blueChampions, redChampions, undefined, bluePlayers, redPlayers),
     enabled: !!analysis.data,
   });
 

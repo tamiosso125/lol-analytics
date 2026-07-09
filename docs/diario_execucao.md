@@ -2739,6 +2739,94 @@ partida, KDA 1/2/10, ouro 12.208 — visão idêntica nos dois momentos
 (19), confirmando que só ela ficou fixa como esperado. `npm run lint`
 (0 erros) / `npm run test` (31/31) / `npm run build`: verdes.
 
+## 2026-07-08 — 3 feedbacks numa imagem: itens incompletos, viés da leitura de draft, jogador na análise
+
+Usuário mandou 3 comentários sobre uma partida real (Jayce/Ekko/Lux/
+Draven/Nautilus azul vitorioso vs KSante/Nidalee/Viego/Senna/Rell) e
+duas capturas de tela.
+
+**1. "A tabela dos times deveria mostrar todos os itens até os não
+completos".** Investigação encontrou uma pegadinha real nos dados
+antes de mexer: `item_events` NUNCA gravou `ITEM_DESTROYED`
+(componente consumido numa receita) — de propósito, porque servia só
+pra "o que foi comprado" no build final. Se eu só ampliasse o filtro
+de itens pra incluir componentes/botas sem corrigir isso, os
+componentes ficariam "fantasmas" pra sempre no inventário reconstruído
+depois de virarem item final (pior que o bug atual). Corrigido na
+raiz:
+- `db/schema.sql`: `item_events.action` de `VARCHAR(4)` pra
+  `VARCHAR(10)` (cabe "DESTROY"); migração aplicada na tabela viva.
+- `src/etl/load_items.py`: agora grava `ITEM_DESTROYED` como ação
+  `DESTROY`. Confirmado seguro: todo consumidor de `item_events` já
+  trata qualquer ação != BUY como remoção (`CASE WHEN action='BUY'
+  THEN 1 ELSE -1 END` em SQL, `1 if action=="BUY" else -1` em Python)
+  — adicionar DESTROY não quebra `champion_items`, `tactics.py` nem
+  nada existente, só corrige a contagem. Limite documentado: ITEM_UNDO
+  só desfaz BUY/SELL (a Riot nunca referencia um DESTROY em
+  beforeId/afterId), então desfazer a compra que finaliza uma receita
+  deixa os componentes permanentemente "destruídos" na reconstrução —
+  caso raro, não tratado.
+- Reprocessado (`python -m src.etl.load_items`): 23.133 timelines →
+  10.392.285 eventos (quase dobrou, DESTROY ficou perto de metade das
+  linhas — 4,59M).
+- Novo `_trackable_item_ids` em `main.py` (purchasable, não consumível/
+  trinket, mapa 11 — SEM exigir `into` vazio nem custo >= 1100) usado
+  só em `/matches/{id}/positions` (a `TeamTable` por minuto); o coach
+  (`tactics.py`) e `/stats/champion/{name}/items` continuam com
+  `_completed_item_ids` (intencional — "itens finalizados" faz mais
+  sentido pra recomendação de build e pra "o que essa build significa"
+  do que componente solto).
+- Verificado que não ficou nada fantasma: rastreei Singed minuto a
+  minuto — aos 20min tinha Cinzas do Destino + Máscara Assustadora,
+  aos 25min os dois sumiram e virou Tormento de Liandry (os dois
+  componentes constroem nele) — comportamento correto.
+
+**2. "Essa é a análise do draft, mas o ganhador foi o time azul".** O
+usuário apontou que a leitura de draft concluiu "o vermelho é
+claramente favorecido" mas quem ganhou foi o azul — e a leitura tinha
+dito algo tipo "o azul só vence se fechar antes dos 25min", só que a
+partida terminou aos 28,7min. Decisão: não faz sentido "consertar" a
+leitura pra sempre bater com o resultado (isso destruiria o propósito
+dela — um draft pior no papel pode vencer por execução, não é uma
+predição de resultado). O que É um problema real: a leitura estava
+soando confiante demais com números específicos (um corte de "25
+minutos" preciso) sem deixar claro que é uma leitura ESTRATÉGICA
+pré-jogo, não uma predição. Adicionado ao final do prompt de
+`generate_draft_analysis()`: a leitura precisa terminar deixando
+explícito que é sobre "quem tem o caminho mais fácil no papel", e que
+um draft pior pode vencer por execução/agressão early/erro do
+adversário — então pode não bater com o resultado real.
+
+**3. "Deveríamos saber quem é o jogador... a análise do draft deveria
+fazer isso".** O pedido construtivo por trás do ponto 2: a leitura de
+draft comparava só CAMPEÃO×CAMPEÃO, cega pra quem estava jogando —
+mas o sistema já tinha exatamente esse dado pronto
+(`player_effect()`/shrinkage, usado no "Jogadores (opcional)" do
+Simulador). Faltava só conectar pra partida REAL:
+- `/matches/{id}/analysis` ganha `puuid` por participante (já era
+  consultado no SQL, só não ia pra resposta).
+- `CoachLane` (Pydantic + TS) ganha `blue_player`/`red_player`
+  opcionais (mesmo formato de `ComposePlayerEffect` — nome, jogos no
+  campeão, win rate bruto e ajustado por shrinkage).
+- `MatchDetail.tsx`: `bluePlayers`/`redPlayers` (posição→puuid)
+  calculados do mesmo jeito que `blueChampions`/`redChampions` (antes
+  do early-return), passados pro `/compose` — fecha de vez o gap, essa
+  partida real agora usa a MESMA leitura ajustada por jogador que o
+  Simulador já tinha quando o usuário especifica jogadores.
+- `_format_lanes()`/`generate_draft_analysis()` em `advice.py`: cita
+  win rate do jogador NAQUELE campeão quando disponível, e instrui a
+  LLM a ponderar isso na leitura (jogador muito acima/abaixo da média
+  pode inverter a leitura do matchup puro).
+
+Testado com a partida real: a leitura passou a citar "o jogador azul
+singed420#asc25 tem 59% de taxa ajustada especificamente neste
+campeão, enquanto beware#虚無月 está em apenas 50% ajustado" e "o
+jogador vermelho saoksaopkaojsip#br1 está em apenas 43% ajustado após
+shrinkage em apenas 5 jogos — isso é um sinal de falta de
+familiaridade com Khazix". Verificado nos três pontos via curl direto
+e Playwright real, sem erro de console. `npm run lint` (0 erros) /
+`npm run test` (31/31) / `npm run build`: verdes.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

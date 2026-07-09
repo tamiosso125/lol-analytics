@@ -401,6 +401,8 @@ export interface CoachLane {
   red: string;
   blue_lane_win_rate: number;
   matchup_games: number;
+  blue_player?: ComposePlayerEffect | null;
+  red_player?: ComposePlayerEffect | null;
 }
 export interface CoachSynergyItem {
   a: string;
@@ -447,6 +449,7 @@ export interface MatchParticipantFull {
   champion: string;
   champion_id: number;
   position: string;
+  puuid: string;
   kills: number;
   deaths: number;
   assists: number;
