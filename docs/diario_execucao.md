@@ -2879,6 +2879,75 @@ Lissandra... e prolonga a sobrevivência em teamfights" — batendo
 exatamente com o que a mesma narrativa já dizia em texto. `npm run
 lint` (0 erros) / `npm run test` (31/31) / `npm run build`: verdes.
 
+## 2026-07-08 — Build sugerida virou dado real, não a LLM inventando (2 achados no mesmo dia)
+
+Usuário questionou a sugestão do exemplo anterior: "Camille + Coração
+de Aço" — "não acho que a Camille faça Coração de Aço, mas posso
+estar errado". Fui checar o item de verdade no catálogo em vez de
+confiar na memória: `item_id 3084` tem `tags: ['Health',
+'HealthRegen']` — SEM resistência mágica nenhuma. Minha explicação
+anterior ("oferece resistência mágica contra Lissandra") estava
+errada. Causa raiz: o mecanismo resolve o NOME do item de forma
+confiável (o ícone que aparece é sempre um item de verdade), mas o
+campo `reason` é texto livre da LLM recordado de memória, nunca
+checado contra os `tags` reais do item — a LLM pode escolher o item
+certo pro contexto e ainda assim inventar o "porquê" errado.
+
+**Correção pedida pelo usuário**: "precisamos saber os melhores itens
+pra cada campeão, os mais feitos com maior porcentagem" — dado que JÁ
+existia! `/stats/champion/{name}/items` (endpoint de 2026-07-03) já
+calcula, por campeão, os itens finalizados mais construídos com win
+rate REAL naqueles jogos (`item_events`, filtro `_completed_item_ids`,
+mínimo 20 jogos). Só faltava conectar no coach.
+
+- Extraída a query em `_champion_top_items(cur, champion_name,
+  min_games, limit)` — helper reutilizado tanto pelo endpoint de
+  análise do campeão (limit=12, como já era) quanto pelo `/coach`
+  (limit=3, pra não inchar o prompt).
+- `/coach` busca isso pra cada campeão conhecido (blue+red) antes de
+  chamar `generate_advice()`, passa como `top_items: dict[campeão,
+  lista_de_itens]`.
+- `advice.py`: novo bloco de prompt "Itens finalizados mais
+  construídos por campeão, com win rate NAQUELES jogos — DADO REAL do
+  histórico" + instrução pra preferir esses itens (citando o número
+  real) em vez de inventar item ou explicação de status.
+
+**Segundo achado, de confiabilidade (não só de precisão)**: com o
+bloco de itens reais adicionado, a taxa de acerto da lista estruturada
+`build_suggestions` DESABOU — de ~4/5 (medido antes) pra 0/3, depois
+2/6 mesmo simplificando a instrução. `stop_reason` do Anthropic
+sempre veio `tool_use` (nunca `max_tokens`), descartando truncamento —
+era genuinamente a LLM "esquecendo" de preencher a parte estruturada
+quando o prompt cresce, mesmo escrevendo o item explicitamente no
+texto (6 menções reais na narrativa, 0 na lista estruturada numa
+tentativa). Mesmo fenômeno de diluição de atenção por tamanho de
+prompt já visto no `schema_context.py` do NLQ (2026-07-08, mais
+cedo). **Correção estrutural**: separar em DUAS chamadas de LLM em vez
+de uma — a primeira só escreve a narrativa (sem tool calling, sem
+concorrência de atenção com uma tarefa de estruturação); a segunda
+(`_extract_build_suggestions`, temperatura mais baixa, 0.2) releem o
+texto já escrito e EXTRAI as menções de item — uma tarefa mecânica de
+releitura, não uma decisão nova concorrendo com a escrita criativa. Só
+roda a segunda chamada se o texto tiver alguma chance de mencionar
+item (atalho barato: `"item" in narrativa.lower()` etc.). Subiu de
+0/3-2/6 pra **6/6** em teste direto. Custa uma chamada extra de LLM
+(latência), mas o ganho de confiabilidade compensa.
+
+Limpeza: a instrução antiga que pedia "crie uma entrada em
+build_suggestions" tinha ficado presa no prompt da PRIMEIRA chamada
+(que não tem mais essa ferramenta) — a LLM tentava compensar colando
+um bloco `**Build suggestions:**` em markdown no fim do texto corrido
+(a regra era "sem markdown"). Removida a instrução obsoleta; texto
+voltou a ficar limpo (ainda ocorre ocasionalmente um cabeçalho em
+negrito tipo `**Orientação para o time vermelho:**` — resquício
+cosmético menor, não perseguido mais a fundo).
+
+Verificado: narrativa e seção estruturada citam os MESMOS números
+reais ("Ampulheta de Zhonya, 58% vitória em 505 jogos", "Couraça do
+Defunto, 58% vitória em 557 jogos", "Dente de Na'Shor, 52% vitória em
+957 jogos") — sem invenção de stat. `npm run lint` (0 erros) / `npm
+run test` (31/31) / `npm run build`: verdes.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

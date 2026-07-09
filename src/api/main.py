@@ -530,6 +530,61 @@ def champion_detail(champion_name: str):
     }
 
 
+def _champion_top_items(
+    cur, champion_name: str, min_games: int = 20, limit: int = 12
+) -> tuple[int, list[dict]]:
+    """Itens finalizados mais construídos pelo campeão: em quantos jogos o
+    item foi comprado, win rate nesses jogos e minuto médio da compra
+    (item_events, ETL de src/etl/load_items.py). Devolve
+    (jogos_do_campeao, lista_de_itens) — lista vazia se não há dado
+    suficiente. Usado tanto pelo endpoint de análise do campeão quanto
+    pelo coach, pra sugestão de build citar item REAL mais construído em
+    vez da LLM inventar de memória (ver docs/diario_execucao.md
+    2026-07-08 — "não acho que a Camille faça Coração de Aço")."""
+    if not _completed_item_ids:
+        return 0, []
+    cur.execute("SELECT COUNT(*) FROM participants WHERE champion_name = %s", (champion_name,))
+    champ_games = cur.fetchone()[0]
+    if champ_games == 0:
+        return 0, []
+    # filtra pelo campeão ANTES de agregar (item_events tem milhões de
+    # linhas); primeira compra por (partida, item) para não contar
+    # recompra após venda como dois jogos
+    cur.execute(
+        """WITH champ AS (
+               SELECT match_id, puuid, win FROM participants WHERE champion_name = %s
+           ),
+           first_buys AS (
+               SELECT ie.match_id, ie.puuid, ie.item_id, MIN(ie.ts_ms) AS ts_ms
+               FROM item_events ie
+               JOIN champ c ON c.match_id = ie.match_id AND c.puuid = ie.puuid
+               WHERE ie.action = 'BUY' AND ie.item_id = ANY(%s)
+               GROUP BY ie.match_id, ie.puuid, ie.item_id
+           )
+           SELECT fb.item_id, COUNT(*) AS games, AVG(c.win::int) AS win_rate,
+                  AVG(fb.ts_ms) / 60000.0 AS avg_minute
+           FROM first_buys fb
+           JOIN champ c ON c.match_id = fb.match_id AND c.puuid = fb.puuid
+           GROUP BY fb.item_id
+           HAVING COUNT(*) >= %s
+           ORDER BY COUNT(*) DESC
+           LIMIT %s""",
+        (champion_name, _completed_item_ids, min_games, limit),
+    )
+    items = [
+        {
+            "item_id": r[0],
+            "name": _items.get(str(r[0]), {}).get("name", f"Item {r[0]}"),
+            "games": r[1],
+            "pick_share": round(r[1] / champ_games, 4),
+            "win_rate": round(float(r[2]), 4),
+            "avg_minute": round(float(r[3]), 1),
+        }
+        for r in cur.fetchall()
+    ]
+    return champ_games, items
+
+
 @app.get("/stats/champion/{champion_name}/items")
 def champion_items(champion_name: str):
     """Itens finalizados mais construídos pelo campeão: em quantos jogos o
@@ -541,52 +596,10 @@ def champion_items(champion_name: str):
             detail="Catálogo de itens não carregado — gere data/items.json (ver docs/scripts.md, load_items).",
         )
     with get_conn() as conn, conn.cursor() as cur:
-        cur.execute(
-            "SELECT COUNT(*) FROM participants WHERE champion_name = %s", (champion_name,)
-        )
-        champ_games = cur.fetchone()[0]
-        if champ_games == 0:
-            raise HTTPException(status_code=404, detail=f"Campeão '{champion_name}' não encontrado.")
-        # filtra pelo campeão ANTES de agregar (item_events tem milhões de
-        # linhas); primeira compra por (partida, item) para não contar
-        # recompra após venda como dois jogos
-        cur.execute(
-            """WITH champ AS (
-                   SELECT match_id, puuid, win FROM participants WHERE champion_name = %s
-               ),
-               first_buys AS (
-                   SELECT ie.match_id, ie.puuid, ie.item_id, MIN(ie.ts_ms) AS ts_ms
-                   FROM item_events ie
-                   JOIN champ c ON c.match_id = ie.match_id AND c.puuid = ie.puuid
-                   WHERE ie.action = 'BUY' AND ie.item_id = ANY(%s)
-                   GROUP BY ie.match_id, ie.puuid, ie.item_id
-               )
-               SELECT fb.item_id, COUNT(*) AS games, AVG(c.win::int) AS win_rate,
-                      AVG(fb.ts_ms) / 60000.0 AS avg_minute
-               FROM first_buys fb
-               JOIN champ c ON c.match_id = fb.match_id AND c.puuid = fb.puuid
-               GROUP BY fb.item_id
-               HAVING COUNT(*) >= 20
-               ORDER BY COUNT(*) DESC
-               LIMIT 12""",
-            (champion_name, _completed_item_ids),
-        )
-        rows = cur.fetchall()
-    return {
-        "champion": champion_name,
-        "games": champ_games,
-        "items": [
-            {
-                "item_id": r[0],
-                "name": _items.get(str(r[0]), {}).get("name", f"Item {r[0]}"),
-                "games": r[1],
-                "pick_share": round(r[1] / champ_games, 4),
-                "win_rate": round(float(r[2]), 4),
-                "avg_minute": round(float(r[3]), 1),
-            }
-            for r in rows
-        ],
-    }
+        champ_games, items = _champion_top_items(cur, champion_name, min_games=20, limit=12)
+    if champ_games == 0:
+        raise HTTPException(status_code=404, detail=f"Campeão '{champion_name}' não encontrado.")
+    return {"champion": champion_name, "games": champ_games, "items": items}
 
 
 @app.get("/stats/champion/{champion_name}/pro")
@@ -1784,6 +1797,23 @@ def coach(req: CoachRequest):
             )
         except Exception:
             tactical = None  # contexto tático é opcional — nunca derruba o /coach
+
+    # itens REAIS mais construídos por campeão (win rate naqueles jogos) —
+    # a sugestão de build escolhe DAQUI em vez da LLM recordar de memória
+    # (2026-07-08: pegou sugerir item que o campeão nem constrói de
+    # verdade, com motivo de stat inventado)
+    top_items: dict[str, list[dict]] = {}
+    all_champions = list((req.blue_champions or {}).values()) + list((req.red_champions or {}).values())
+    if all_champions:
+        try:
+            with get_conn() as conn, conn.cursor() as cur:
+                for champ in set(all_champions):
+                    _, items = _champion_top_items(cur, champ, min_games=20, limit=3)
+                    if items:
+                        top_items[champ] = items
+        except Exception:
+            top_items = {}  # também opcional — nunca derruba o /coach
+
     try:
         narrative, raw_suggestions = generate_advice(
             req.state.model_dump(),
@@ -1795,6 +1825,7 @@ def coach(req: CoachRequest):
             blue_synergies=[s.model_dump() for s in req.blue_synergies],
             red_synergies=[s.model_dump() for s in req.red_synergies],
             tactical=tactical,
+            top_items=top_items,
         )
     except Exception as exc:
         raise _external_call_error(exc)

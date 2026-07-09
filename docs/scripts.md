@@ -344,7 +344,9 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   do campeão, win rate e minuto médio da PRIMEIRA compra do item na
   partida (recompra após venda não conta como jogo novo). Lê
   `item_events` + o catálogo `data/items.json` (503 se o catálogo não
-  existir);
+  existir). Query extraída em `_champion_top_items(cur, champion_name,
+  min_games, limit)` (2026-07-08) — reutilizada pelo `/coach` (ver
+  abaixo) pra grounded a sugestão de build em dado real;
 - `GET /stats/objectives` — média de objetivos por resultado;
 - `GET /stats/durations` — histograma de duração das partidas (5 min);
 - `GET /stats/gold15` — win rate azul por faixa de diferença de ouro aos
@@ -470,17 +472,30 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   se..." do `MatchDetail` passa match_id → contexto tático completo;
   aba Composição do Simulador é composição hipotética → só campeões/
   matchups/sinergias, sem match_id. **Build sugerida estruturada**
-  (2026-07-08): `generate_advice()` usa tool calling da Anthropic
-  (`BUILD_ADVICE_TOOL`, `tool_choice` forçado) — a LLM devolve
-  `narrative` (texto, como sempre) + `build_suggestions[]` (campeão,
-  time, 1-3 NOMES de item, motivo). `/coach` resolve nome → `item_id`
-  real via `_item_name_to_id` (descarta a sugestão se o nome não bater
-  com item nenhum do catálogo, nunca manda lixo pro front). Não é
-  100% confiável (a LLM às vezes menciona item só no texto sem
-  replicar na lista estruturada — mitigado reformulando a instrução
-  como "releia e transcreva", subiu de ~0/2 pra ~4/5 em teste, mas o
-  botão "Gerar de novo" já cobre o resto). Renderizado como uma seção
-  "Build sugerida" no `CoachCard`, com ícones reais via `itemIcon()`.
+  (2026-07-08, com correção de precisão + confiabilidade no mesmo dia):
+  `generate_advice()` faz DUAS chamadas de LLM — a primeira escreve só
+  a `narrative` (texto livre, sem tool calling); a segunda
+  (`_extract_build_suggestions`, temperatura 0.2, tool
+  `EXTRACT_BUILDS_TOOL`) relê esse texto já escrito e extrai as
+  menções de item — uma tarefa de releitura mecânica, não uma decisão
+  concorrendo com a escrita da narrativa. `/coach` resolve nome →
+  `item_id` real via `_item_name_to_id` (descarta a sugestão se o nome
+  não bater com item nenhum do catálogo). Antes era uma chamada só
+  (tool calling forçado com `narrative`+`build_suggestions` no mesmo
+  schema) — funcionava, mas a taxa de acerto da parte estruturada
+  desabava toda vez que o prompt crescia (mesma diluição de atenção do
+  `schema_context.py` do NLQ); separar em duas chamadas focadas subiu
+  de ~0/3-2/6 pra 6/6 em teste.
+  **Itens grounded em dado real**: `/coach` busca, pra cada campeão
+  conhecido, os itens finalizados mais construídos com win rate real
+  via `_champion_top_items()` (mesmo helper do
+  `/stats/champion/{name}/items`, `limit=3`) e passa como `top_items`
+  pro prompt — a LLM prefere sugerir DESSA lista em vez de recordar de
+  memória (achado real: sugeriu "Coração de Aço" pra Camille com
+  motivo "resistência mágica" quando o item só dá Vida/Regen — sem
+  grounding, a explicação do PORQUÊ pode estar errada mesmo quando o
+  item escolhido existe de verdade). Renderizado como seção "Build
+  sugerida" no `CoachCard`, ícones reais via `itemIcon()`.
 - `POST /coach/draft` (2026-07-08, `generate_draft_analysis` em
   `src/coach/advice.py`) — leitura de DRAFT: win condition, contra-pick
   e quem escala melhor, usando só os 10 campeões (sem `MatchState`, sem

@@ -28,30 +28,30 @@ import os
 
 import anthropic
 
-# tool call em vez de texto livre — a UI mostra "build sugerida" como
-# ícones de item de verdade, então precisa de nome estruturado, não
-# uma menção solta no meio do parágrafo (2026-07-08, pedido de
-# feedback: "foi adicionado exemplos de build pra fazer?" — a menção
-# em texto já existia, faltava a versão visual/estruturada)
-BUILD_ADVICE_TOOL = {
-    "name": "orientacao_estrategica",
-    "description": (
-        "Devolve a orientação estratégica em texto e, quando fizer sentido, "
-        "sugestões estruturadas de build (item) para campeões específicos."
-    ),
+# extração de build em CHAMADA SEPARADA da narrativa (2026-07-08) — a UI
+# mostra "build sugerida" como ícones de item de verdade, então precisa
+# de nome estruturado, não uma menção solta no meio do parágrafo. Tentei
+# pedir os dois (narrativa + build_suggestions) numa chamada só via tool
+# calling — funciona, mas a taxa de acerto da parte estruturada cai
+# muito quando o prompt cresce (contexto de itens reais por campeão
+# empurra a instrução de "também preencha build_suggestions" pra fora
+# da atenção efetiva do modelo — mesmo fenômeno de diluição já visto
+# no schema_context do NLQ). Separar em duas chamadas foca cada uma
+# numa tarefa só: a primeira só escreve texto (sem tool calling, sem
+# concorrência de atenção), a segunda só EXTRAI item já mencionado no
+# texto que acabou de ser escrito — uma tarefa mecânica de releitura,
+# muito mais confiável que "escreva E lembre de estruturar" numa
+# passada só. Custa uma chamada extra (latência), mas só roda quando o
+# texto tem chance real de mencionar item (ver _extract_build_suggestions).
+EXTRACT_BUILDS_TOOL = {
+    "name": "extrair_builds",
+    "description": "Extrai toda menção a item específico sugerido pra um campeão num texto.",
     "input_schema": {
         "type": "object",
         "properties": {
-            "narrative": {
-                "type": "string",
-                "description": "A orientação estratégica em texto corrido, português do Brasil.",
-            },
             "build_suggestions": {
                 "type": "array",
-                "description": (
-                    "Sugestões de item por campeão — vazio se não houver dado "
-                    "suficiente no contexto pra sugerir algo concreto."
-                ),
+                "description": "Vazio se o texto não mencionou item específico pra nenhum campeão.",
                 "items": {
                     "type": "object",
                     "properties": {
@@ -62,19 +62,20 @@ BUILD_ADVICE_TOOL = {
                             "items": {"type": "string"},
                             "description": (
                                 "1 a 3 nomes de item EXATOS de League of "
-                                "Legends, em ordem de prioridade."
+                                "Legends mencionados no texto pra esse "
+                                "campeão, em ordem de prioridade."
                             ),
                         },
                         "reason": {
                             "type": "string",
-                            "description": "Motivo curto (1 frase) da sugestão.",
+                            "description": "O motivo dado no texto, resumido em 1 frase.",
                         },
                     },
                     "required": ["champion", "team", "items", "reason"],
                 },
             },
         },
-        "required": ["narrative", "build_suggestions"],
+        "required": ["build_suggestions"],
     },
 }
 
@@ -159,7 +160,8 @@ def generate_advice(
     blue_synergies: list[dict] | None = None,
     red_synergies: list[dict] | None = None,
     tactical: dict | None = None,
-) -> str:
+    top_items: dict[str, list[dict]] | None = None,
+) -> tuple[str, list[dict]]:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
     state_lines = "\n".join(
@@ -263,6 +265,21 @@ def generate_advice(
                 f"desta partida:\nAzul {kw['blue']} × {kw['red']} Vermelho"
             )
 
+    if top_items:
+        ti_lines = "\n".join(
+            f"- {champ}: " + "; ".join(
+                f"{it['name']} ({it['win_rate'] * 100:.0f}% vitória, {it['games']} jogos)"
+                for it in items
+            )
+            for champ, items in top_items.items()
+        )
+        sections.append(
+            "Itens finalizados mais construídos por campeão, com win rate "
+            "NAQUELES jogos — DADO REAL do histórico, não opinião (a lista já "
+            "é 'os melhores itens pra cada campeão, os mais feitos com maior "
+            "porcentagem'):\n" + ti_lines
+        )
+
     instructions = (
         "\n\nCom base nisso, escreva uma orientação estratégica curta (4-8 "
         "frases — mais perto de 8 se houver recomendação de build pra "
@@ -288,15 +305,21 @@ def generate_advice(
             "prioridade de build pra quem estiver montado errado pro que "
             "enfrenta (ex.: time inimigo muito squishy pede itens de "
             "penetração/execução em vez de sobrevivência; time inimigo com "
-            "muito CC/engajamento pede resistência antes de dano puro). Isso "
-            "é leitura de conhecimento geral sobre os campeões, não dado "
-            "medido — não invente porcentagem de redução de dano ou número "
-            "específico. IMPORTANTE: sempre que você mencionar no texto que "
-            "um campeão deveria comprar/priorizar algum item, essa MESMA "
-            "sugestão também precisa virar uma entrada em "
-            "`build_suggestions` com o nome exato do item — não deixe a "
-            "sugestão só no texto corrido."
+            "muito CC/engajamento pede resistência antes de dano puro)."
         )
+        if top_items:
+            instructions += (
+                " Prefira sugerir item que já está na lista 'Itens mais "
+                "construídos por campeão' acima (cite o win rate/jogos "
+                "reais de lá) em vez de inventar item ou explicação de "
+                "status de memória."
+            )
+        else:
+            instructions += (
+                " Isso é leitura de conhecimento geral sobre os campeões, "
+                "não dado medido — não invente porcentagem de redução de "
+                "dano ou número específico."
+            )
     elif blue_champions or red_champions:
         instructions += (
             " Se fizer sentido, comente que tipo de prioridade de build cada "
@@ -333,29 +356,49 @@ def generate_advice(
         )
 
     prompt = "\n\n".join(sections) + instructions
-    prompt += (
-        "\n\nDepois de escrever a narrativa, releia o que você mesmo "
-        "escreveu: para CADA item que você mencionou (mesmo de passagem) "
-        "que um campeão específico deveria comprar, ter ou priorizar, crie "
-        "uma entrada correspondente em `build_suggestions` com o nome "
-        "EXATO desse item (League of Legends de verdade, não abrevie nem "
-        "invente) — isso não é uma decisão nova, é transcrever pra formato "
-        "estruturado o que você já decidiu no texto. Só deixe "
-        "`build_suggestions` vazio se a narrativa genuinamente não "
-        "mencionou nenhum item específico pra nenhum campeão."
-    )
 
     msg = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=1000,
+        max_tokens=900,
         temperature=0.4,
-        tools=[BUILD_ADVICE_TOOL],
-        tool_choice={"type": "tool", "name": "orientacao_estrategica"},
         messages=[{"role": "user", "content": prompt}],
     )
-    tool_use = next(b for b in msg.content if b.type == "tool_use")
-    result = tool_use.input
-    return result.get("narrative", "").strip(), result.get("build_suggestions", [])
+    narrative = msg.content[0].text.strip()
+    build_suggestions = _extract_build_suggestions(client, narrative)
+    return narrative, build_suggestions
+
+
+def _extract_build_suggestions(client: anthropic.Anthropic, narrative: str) -> list[dict]:
+    """Segunda chamada, focada só em releitura — ver comentário de
+    EXTRACT_BUILDS_TOOL acima pra por que isso é separado da geração da
+    narrativa. Atalho: se o texto nem menciona "item" (ou variação),
+    não vale a pena gastar uma chamada de LLM só pra confirmar vazio."""
+    if not any(w in narrative.lower() for w in ("item", "build", "compr")):
+        return []
+    msg = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=500,
+        temperature=0.2,
+        tools=[EXTRACT_BUILDS_TOOL],
+        tool_choice={"type": "tool", "name": "extrair_builds"},
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    "Releia o texto abaixo (orientação estratégica de League "
+                    "of Legends já escrita) e extraia toda menção a um item "
+                    "específico que um campeão deveria comprar/ter/"
+                    "priorizar — é uma tarefa de releitura mecânica, o texto "
+                    "já decidiu tudo, só precisa virar formato estruturado.\n\n"
+                    f"Texto:\n{narrative}"
+                ),
+            }
+        ],
+    )
+    tool_use = next((b for b in msg.content if b.type == "tool_use"), None)
+    if tool_use is None:
+        return []
+    return tool_use.input.get("build_suggestions", [])
 
 
 def generate_draft_analysis(
