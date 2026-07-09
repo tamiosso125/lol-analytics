@@ -389,8 +389,18 @@ export interface Prediction {
   minute: number;
 }
 
+export interface BuildSuggestion {
+  champion: string;
+  team: "blue" | "red";
+  /** IDs reais de item, já resolvidos pelo backend a partir do nome que
+   * a LLM devolveu — sempre desenháveis com itemIcon() */
+  items: number[];
+  reason: string;
+}
+
 export interface CoachAdvice {
   narrative: string;
+  build_suggestions: BuildSuggestion[];
 }
 
 /** Subconjunto de ComposeLane/ComposeSynergy que o /coach usa (Camada 2)

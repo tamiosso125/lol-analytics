@@ -469,7 +469,18 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   visão computacional). Consumido pelo `CoachCard` (frontend): card "E
   se..." do `MatchDetail` passa match_id → contexto tático completo;
   aba Composição do Simulador é composição hipotética → só campeões/
-  matchups/sinergias, sem match_id.
+  matchups/sinergias, sem match_id. **Build sugerida estruturada**
+  (2026-07-08): `generate_advice()` usa tool calling da Anthropic
+  (`BUILD_ADVICE_TOOL`, `tool_choice` forçado) — a LLM devolve
+  `narrative` (texto, como sempre) + `build_suggestions[]` (campeão,
+  time, 1-3 NOMES de item, motivo). `/coach` resolve nome → `item_id`
+  real via `_item_name_to_id` (descarta a sugestão se o nome não bater
+  com item nenhum do catálogo, nunca manda lixo pro front). Não é
+  100% confiável (a LLM às vezes menciona item só no texto sem
+  replicar na lista estruturada — mitigado reformulando a instrução
+  como "releia e transcreva", subiu de ~0/2 pra ~4/5 em teste, mas o
+  botão "Gerar de novo" já cobre o resto). Renderizado como uma seção
+  "Build sugerida" no `CoachCard`, com ícones reais via `itemIcon()`.
 - `POST /coach/draft` (2026-07-08, `generate_draft_analysis` em
   `src/coach/advice.py`) — leitura de DRAFT: win condition, contra-pick
   e quem escala melhor, usando só os 10 campeões (sem `MatchState`, sem

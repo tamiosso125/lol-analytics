@@ -3,6 +3,8 @@ import { Compass } from "lucide-react";
 
 import { Button, Card, CardContent, CardHeader, CardTitle, ErrorNote } from "@/components/ui";
 import { api, type CoachContext, type MatchState, type Prediction } from "@/lib/api";
+import { championDisplayName, itemIcon } from "@/lib/ddragon";
+import { cn } from "@/lib/utils";
 
 /** Orientação estratégica gerada por LLM em cima do estado + predição já
  * calculados pelo /predict (não recalcula nada) — camada 1 do plano
@@ -49,13 +51,46 @@ export function CoachCard({
         </Button>
       </CardHeader>
       {(advice.data || advice.isError) && (
-        <CardContent>
+        <CardContent className="space-y-3">
           {advice.isError ? (
             <ErrorNote message={advice.error.message} />
           ) : (
-            <p className="rounded-lg border border-gold/20 bg-gold/5 px-4 py-3 text-sm leading-relaxed text-secondary-ink">
-              {advice.data!.narrative}
-            </p>
+            <>
+              <p className="rounded-lg border border-gold/20 bg-gold/5 px-4 py-3 text-sm leading-relaxed text-secondary-ink">
+                {advice.data!.narrative}
+              </p>
+              {advice.data!.build_suggestions.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-ink">Build sugerida</p>
+                  {advice.data!.build_suggestions.map((s, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 rounded-lg border border-border px-3 py-2"
+                    >
+                      <span
+                        className={cn(
+                          "shrink-0 text-sm font-medium",
+                          s.team === "blue" ? "text-chart-1" : "text-chart-red",
+                        )}
+                      >
+                        {championDisplayName(s.champion)}
+                      </span>
+                      <div className="flex shrink-0 gap-1">
+                        {s.items.map((itemId, j) => (
+                          <img
+                            key={j}
+                            src={itemIcon(itemId)}
+                            alt=""
+                            className="size-7 rounded border border-border/50"
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs leading-relaxed text-muted-ink">{s.reason}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       )}

@@ -116,6 +116,10 @@ _trackable_item_ids = [
     and not ({"Consumable", "Trinket"} & set(it.get("tags", [])))
     and it.get("maps", {}).get("11")
 ]
+# nome (minúsculo) -> item_id — resolve as sugestões de build da LLM
+# (ela devolve nome, não ID; não dá pra confiar em ID de cabeça) pra um
+# item_id de verdade que o front sabe desenhar com itemIcon()
+_item_name_to_id = {it["name"].lower(): int(iid) for iid, it in _items.items() if it.get("name")}
 
 # cache do features.csv para o gráfico gold diff aos 15 (recarrega se o
 # arquivo for regenerado pelo build_features)
@@ -1781,7 +1785,7 @@ def coach(req: CoachRequest):
         except Exception:
             tactical = None  # contexto tático é opcional — nunca derruba o /coach
     try:
-        narrative = generate_advice(
+        narrative, raw_suggestions = generate_advice(
             req.state.model_dump(),
             req.blue_win_probability,
             req.shap_contributions,
@@ -1794,7 +1798,17 @@ def coach(req: CoachRequest):
         )
     except Exception as exc:
         raise _external_call_error(exc)
-    return {"narrative": narrative}
+
+    # resolve nome de item (LLM) -> item_id (catálogo) — descarta nome
+    # que não bate com item nenhum em vez de mandar lixo pro front
+    build_suggestions = []
+    for s in raw_suggestions:
+        ids = [_item_name_to_id[n.lower()] for n in s.get("items", []) if n.lower() in _item_name_to_id]
+        if ids:
+            build_suggestions.append(
+                {"champion": s.get("champion"), "team": s.get("team"), "items": ids, "reason": s.get("reason")}
+            )
+    return {"narrative": narrative, "build_suggestions": build_suggestions}
 
 
 @app.post("/coach/draft")

@@ -28,6 +28,56 @@ import os
 
 import anthropic
 
+# tool call em vez de texto livre — a UI mostra "build sugerida" como
+# ícones de item de verdade, então precisa de nome estruturado, não
+# uma menção solta no meio do parágrafo (2026-07-08, pedido de
+# feedback: "foi adicionado exemplos de build pra fazer?" — a menção
+# em texto já existia, faltava a versão visual/estruturada)
+BUILD_ADVICE_TOOL = {
+    "name": "orientacao_estrategica",
+    "description": (
+        "Devolve a orientação estratégica em texto e, quando fizer sentido, "
+        "sugestões estruturadas de build (item) para campeões específicos."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "narrative": {
+                "type": "string",
+                "description": "A orientação estratégica em texto corrido, português do Brasil.",
+            },
+            "build_suggestions": {
+                "type": "array",
+                "description": (
+                    "Sugestões de item por campeão — vazio se não houver dado "
+                    "suficiente no contexto pra sugerir algo concreto."
+                ),
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "champion": {"type": "string"},
+                        "team": {"type": "string", "enum": ["blue", "red"]},
+                        "items": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": (
+                                "1 a 3 nomes de item EXATOS de League of "
+                                "Legends, em ordem de prioridade."
+                            ),
+                        },
+                        "reason": {
+                            "type": "string",
+                            "description": "Motivo curto (1 frase) da sugestão.",
+                        },
+                    },
+                    "required": ["champion", "team", "items", "reason"],
+                },
+            },
+        },
+        "required": ["narrative", "build_suggestions"],
+    },
+}
+
 FEATURE_LABELS = {
     "gold_diff": "diferença de ouro",
     "xp_diff": "diferença de XP",
@@ -241,7 +291,11 @@ def generate_advice(
             "muito CC/engajamento pede resistência antes de dano puro). Isso "
             "é leitura de conhecimento geral sobre os campeões, não dado "
             "medido — não invente porcentagem de redução de dano ou número "
-            "específico."
+            "específico. IMPORTANTE: sempre que você mencionar no texto que "
+            "um campeão deveria comprar/priorizar algum item, essa MESMA "
+            "sugestão também precisa virar uma entrada em "
+            "`build_suggestions` com o nome exato do item — não deixe a "
+            "sugestão só no texto corrido."
         )
     elif blue_champions or red_champions:
         instructions += (
@@ -279,14 +333,29 @@ def generate_advice(
         )
 
     prompt = "\n\n".join(sections) + instructions
+    prompt += (
+        "\n\nDepois de escrever a narrativa, releia o que você mesmo "
+        "escreveu: para CADA item que você mencionou (mesmo de passagem) "
+        "que um campeão específico deveria comprar, ter ou priorizar, crie "
+        "uma entrada correspondente em `build_suggestions` com o nome "
+        "EXATO desse item (League of Legends de verdade, não abrevie nem "
+        "invente) — isso não é uma decisão nova, é transcrever pra formato "
+        "estruturado o que você já decidiu no texto. Só deixe "
+        "`build_suggestions` vazio se a narrativa genuinamente não "
+        "mencionou nenhum item específico pra nenhum campeão."
+    )
 
     msg = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=750,
+        max_tokens=1000,
         temperature=0.4,
+        tools=[BUILD_ADVICE_TOOL],
+        tool_choice={"type": "tool", "name": "orientacao_estrategica"},
         messages=[{"role": "user", "content": prompt}],
     )
-    return msg.content[0].text.strip()
+    tool_use = next(b for b in msg.content if b.type == "tool_use")
+    result = tool_use.input
+    return result.get("narrative", "").strip(), result.get("build_suggestions", [])
 
 
 def generate_draft_analysis(

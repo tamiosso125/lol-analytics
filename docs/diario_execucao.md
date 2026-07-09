@@ -2827,6 +2827,58 @@ familiaridade com Khazix". Verificado nos três pontos via curl direto
 e Playwright real, sem erro de console. `npm run lint` (0 erros) /
 `npm run test` (31/31) / `npm run build`: verdes.
 
+## 2026-07-08 — Build sugerida com ícones (versão estruturada, não só texto)
+
+Pergunta do usuário: "foi adicionado exemplos de builds para fazer?".
+A resposta era não — a recomendação de build (feedback 2/4 de mais
+cedo) só existia como menção solta dentro do parágrafo de texto, sem
+nenhuma UI dedicada. Pedido de adicionar a versão visual (ícones de
+item, como lolalytics/u.gg mostram).
+
+**Problema de design**: a LLM só devolve texto livre. Pra virar ícone
+de verdade na tela, precisa de um `item_id` que bata com o catálogo —
+não dá pra confiar na LLM "lembrar" o ID numérico certo de cabeça
+(ela erra fácil), então a solução foi: LLM devolve NOME do item
+(confiável, ela conhece os itens de LoL bem) via **tool calling**
+(function calling) da Anthropic, e o backend resolve nome → ID
+usando o catálogo já carregado (`_item_name_to_id`, novo dict
+minúsculo→id em `main.py`).
+
+- `generate_advice()` em `advice.py` agora usa
+  `tools=[BUILD_ADVICE_TOOL]` com `tool_choice` forçado — o schema
+  pede `narrative` (texto, como já era) + `build_suggestions[]`
+  (`champion`, `team`, `items` — 1-3 nomes de item, `reason`). Função
+  passou a devolver uma tupla `(narrative, build_suggestions)` em vez
+  de só string.
+- `/coach` resolve cada nome pro `item_id` real (ou descarta a
+  sugestão se o nome não bater com nenhum item do catálogo — nunca
+  manda "lixo" pro front) e devolve `build_suggestions` na resposta.
+- `CoachCard` (frontend) ganha uma seção "Build sugerida" abaixo do
+  texto — uma linha por sugestão, nome do campeão colorido por time
+  (azul/vermelho), ícones reais via `itemIcon()`, motivo curto.
+
+**Achado de confiabilidade real, não só código**: a primeira versão
+do prompt (pedindo `build_suggestions` como um "extra" ao final,
+"SÓ quando fizer sentido... lista vazia se não houver dado
+suficiente") tinha taxa de acerto baixa — em 2 tentativas reais no
+navegador, a narrativa mencionava item explicitamente no texto
+("Kaisa e Camille precisam de itens defensivos imediatos...") mas a
+lista estruturada vinha VAZIA mesmo assim. Corrigido reformulando a
+instrução como "releia o que você escreveu e transcreva pra
+`build_suggestions`" (uma tarefa de EXTRAÇÃO do que já foi decidido,
+não uma decisão nova) — subiu de 0/2 pra 4/5 em teste direto de
+backend. Ainda não é 100% (variância inerente de LLM numa tarefa de
+extração estruturada secundária) — aceito como razoável dado que o
+botão "Gerar de novo" já é um retry natural pro usuário.
+
+Verificado visualmente: a seção "Build sugerida" mostrou "Camille" +
+ícone de Coração de Aço + "Oferece resistência mágica contra
+Lissandra e escudo ao time, compensando a sinergia negativa com
+Khazix" e "Viktor" + ícone de Véu da Banshee + "Mitiga o burst de
+Lissandra... e prolonga a sobrevivência em teamfights" — batendo
+exatamente com o que a mesma narrativa já dizia em texto. `npm run
+lint` (0 erros) / `npm run test` (31/31) / `npm run build`: verdes.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
