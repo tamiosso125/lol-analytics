@@ -364,7 +364,13 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   0`, evento de sistema); o front precisa deixar a aproximação
   explícita (`MapHeatmap`, toggle "Wards (aproximado)", desligado por
   padrão, e o card "Controle de visão" que só usa contagem, sem
-  posição);
+  posição). Cada jogador de cada frame também carrega `items`
+  (2026-07-08) — itens finalizados que ele possuía NAQUELE minuto,
+  reconstruído andando pelos `item_events` em paralelo com os frames
+  (uma query ordenada por ts_ms, não uma por minuto); usado pela coluna
+  "Itens" da `TeamTable` no `MatchDetail`, que agora acompanha o slider
+  do mapa de calor em vez de mostrar só o build final. Não rastreia
+  trinket (fora do filtro de itens "finalizados");
 - `POST /compose` — análise de composição (montar time): matchups por
   lane (confronto direto >= 10 jogos, senão aproximação por perfil),
   sinergias de dupla (>= 20 jogos, delta vs média individual) e

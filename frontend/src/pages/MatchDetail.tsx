@@ -542,78 +542,114 @@ function VisionCard({ wards, maxMinute }: { wards: WardEvent[]; maxMinute: numbe
   );
 }
 
-function TeamTable({ players, label, won }: { players: MatchParticipantFull[]; label: string; won: boolean }) {
+function TeamTable({
+  players,
+  label,
+  won,
+  itemsAtMinute,
+  minute,
+}: {
+  players: MatchParticipantFull[];
+  label: string;
+  won: boolean;
+  /** champion_id -> itens que ele tinha NO `minute` (null = ainda carregando
+   * /positions; cai pros itens finais do /analysis nesse meio-tempo) */
+  itemsAtMinute: Record<number, number[]> | null;
+  minute: number;
+}) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className={winColor(won)}>
-          {label} — {won ? "Vitória" : "Derrota"}
-        </CardTitle>
+        <div>
+          <CardTitle className={winColor(won)}>
+            {label} — {won ? "Vitória" : "Derrota"}
+          </CardTitle>
+          {itemsAtMinute !== null && (
+            <p className="mt-0.5 text-xs text-muted-ink">
+              Coluna "Itens" mostra o build aos {minute} min (siga o slider do mapa de
+              calor), não o final da partida.
+            </p>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs text-secondary-ink">
-              <th className="py-2 font-medium">Campeão</th>
-              <th className="py-2 font-medium">KDA</th>
-              <th className="py-2 font-medium">Ouro</th>
-              <th className="py-2 font-medium">CS</th>
-              <th className="py-2 font-medium">Dano</th>
-              <th className="py-2 font-medium">Visão</th>
-              <th className="py-2 font-medium">Itens</th>
+              <th className="px-2 py-2 font-medium first:pl-0">Campeão</th>
+              <th className="px-2 py-2 font-medium">KDA</th>
+              <th className="px-2 py-2 font-medium">Ouro</th>
+              <th className="px-2 py-2 font-medium">CS</th>
+              <th className="px-2 py-2 font-medium">Dano</th>
+              <th className="px-2 py-2 font-medium">Visão</th>
+              <th className="px-2 py-2 font-medium">Itens</th>
             </tr>
           </thead>
           <tbody className="tabular-nums">
-            {players.map((p) => (
-              <tr key={p.champion} className="border-b border-border/50 last:border-0">
-                <td className="py-1.5">
-                  <Link to={`/campeoes/${p.champion}`} className="flex items-center gap-2 hover:underline">
-                    <img src={championIcon(p.champion_id)} alt="" className="size-7 rounded-md" />
-                    <span>
-                      {championDisplayName(p.champion)}
-                      <span className="ml-1.5 text-xs text-muted-ink">
-                        {POSITION_LABELS[p.position] ?? p.position}
+            {players.map((p) => {
+              // enquanto /positions ainda carrega, mostra os itens finais
+              // (com trinket); depois disso, itens NO minuto do slider —
+              // reconstruído de item_events, não rastreia trinket
+              const showFinal = itemsAtMinute === null;
+              const displayItems = showFinal
+                ? p.items.slice(0, 6)
+                : (itemsAtMinute[p.champion_id] ?? []).slice(0, 6);
+              return (
+                <tr key={p.champion} className="border-b border-border/50 last:border-0">
+                  <td className="px-2 py-1.5 first:pl-0">
+                    <Link to={`/campeoes/${p.champion}`} className="flex items-center gap-2 hover:underline">
+                      <img src={championIcon(p.champion_id)} alt="" className="size-7 rounded-md" />
+                      <span>
+                        {championDisplayName(p.champion)}
+                        <span className="ml-1.5 text-xs text-muted-ink">
+                          {POSITION_LABELS[p.position] ?? p.position}
+                        </span>
                       </span>
-                    </span>
-                  </Link>
-                </td>
-                <td className="py-1.5">{p.kills}/{p.deaths}/{p.assists}</td>
-                <td className="py-1.5">{p.gold.toLocaleString("pt-BR")}</td>
-                <td className="py-1.5">{p.cs}</td>
-                <td className="py-1.5">{p.dmg.toLocaleString("pt-BR")}</td>
-                <td className="py-1.5">{p.vision}</td>
-                <td className="py-1.5">
-                  <div className="flex gap-0.5">
-                    {p.items.slice(0, 6).map((itemId, i) =>
-                      itemId ? (
-                        <img
-                          key={i}
-                          src={itemIcon(itemId)}
-                          alt=""
-                          className="size-6 rounded border border-border/50"
-                        />
-                      ) : (
-                        <div key={i} className="size-6 rounded border border-dashed border-border/50" />
-                      ),
-                    )}
-                    <div className="ml-1 border-l border-border pl-1">
-                      {p.items[6] ? (
-                        <img
-                          src={itemIcon(p.items[6])}
-                          alt=""
-                          title="Trinket"
-                          className="size-6 rounded-full border border-gold/50"
-                        />
-                      ) : (
-                        <div className="size-6 rounded-full border border-dashed border-border/50" />
+                    </Link>
+                  </td>
+                  <td className="px-2 py-1.5">{p.kills}/{p.deaths}/{p.assists}</td>
+                  <td className="px-2 py-1.5">{p.gold.toLocaleString("pt-BR")}</td>
+                  <td className="px-2 py-1.5">{p.cs}</td>
+                  <td className="px-2 py-1.5">{p.dmg.toLocaleString("pt-BR")}</td>
+                  <td className="px-2 py-1.5">{p.vision}</td>
+                  <td className="px-2 py-1.5">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 6 }).map((_, i) => {
+                        const itemId = displayItems[i];
+                        return itemId ? (
+                          <img
+                            key={i}
+                            src={itemIcon(itemId)}
+                            alt=""
+                            className="size-6 rounded border border-border/50"
+                          />
+                        ) : (
+                          <div key={i} className="size-6 rounded border border-dashed border-border/50" />
+                        );
+                      })}
+                      {showFinal && (
+                        <div className="ml-1 border-l border-border pl-1">
+                          {p.items[6] ? (
+                            <img
+                              src={itemIcon(p.items[6])}
+                              alt=""
+                              title="Trinket"
+                              className="size-6 rounded-full border border-gold/50"
+                            />
+                          ) : (
+                            <div className="size-6 rounded-full border border-dashed border-border/50" />
+                          )}
+                        </div>
                       )}
                     </div>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+        </div>
       </CardContent>
     </Card>
   );
@@ -648,6 +684,19 @@ export function MatchDetail() {
   // campeão específico em vez de só "time azul"/"time vermelho"
   const blueChampions = Object.fromEntries(blue.map((p) => [p.position, p.champion]));
   const redChampions = Object.fromEntries(red.map((p) => [p.position, p.champion]));
+
+  // itens que cada campeão já tinha NO MINUTO do slider (não os itens
+  // finais) — champion_id é chave segura, LoL não permite campeão
+  // repetido na mesma partida (nem entre times)
+  const posFrames = positions.data?.frames;
+  const itemsAtMinute: Record<number, number[]> | null = posFrames
+    ? Object.fromEntries(
+        (posFrames[Math.min(minute, posFrames.length - 1)]?.players ?? []).map((fp) => [
+          fp.champion_id,
+          fp.items,
+        ]),
+      )
+    : null;
 
   return (
     <div className="space-y-5">
@@ -784,8 +833,20 @@ export function MatchDetail() {
       )}
 
       <div className="grid grid-cols-2 gap-4">
-        <TeamTable players={blue} label="Time azul" won={blueTeam?.win ?? false} />
-        <TeamTable players={red} label="Time vermelho" won={!(blueTeam?.win ?? false)} />
+        <TeamTable
+          players={blue}
+          label="Time azul"
+          won={blueTeam?.win ?? false}
+          itemsAtMinute={itemsAtMinute}
+          minute={Math.min(minute, posFrames ? posFrames.length - 1 : minute)}
+        />
+        <TeamTable
+          players={red}
+          label="Time vermelho"
+          won={!(blueTeam?.win ?? false)}
+          itemsAtMinute={itemsAtMinute}
+          minute={Math.min(minute, posFrames ? posFrames.length - 1 : minute)}
+        />
       </div>
     </div>
   );

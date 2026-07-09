@@ -466,6 +466,9 @@ export interface FramePlayer {
   x: number;
   y: number;
   level: number | null;
+  /** itens finalizados que o campeão já possuía NAQUELE minuto (não os
+   * itens finais da partida) */
+  items: number[];
 }
 
 export interface PositionFrame {

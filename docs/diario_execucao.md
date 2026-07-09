@@ -2497,6 +2497,57 @@ especificamente o estado de wave/minion e micro momento-a-momento
 (cooldown de habilidade, aggro de creep, congelamento de rota) — isso
 sim exige replay `.rofl` ou visão computacional, um projeto à parte.
 
+## 2026-07-08 — Feedback de uso real (Danone): 4 itens, começando pelo 1
+
+Usuário trouxe feedback de uso real da plataforma (conversa de
+WhatsApp), 4 itens distintos. Ordem confirmada com o usuário: itens
+por minutagem → recomendação de build → análise de draft/comp antes
+do jogo começar → replay mais rico. Resumo dos 4 (planejamento
+completo, efeito só do item 1 nesta entrada):
+
+1. **Itens refletirem a minutagem** — a coluna "Itens" do `MatchDetail`
+   sempre mostrava o build FINAL, não importa o minuto do slider do
+   mapa de calor.
+2. **Recomendação de build** — exemplo real do feedback: "Ludens teria
+   sido melhor que [item X] pra Syndra, dado o quão squishy o time
+   inimigo é" — raciocínio de item condicionado na comp adversária.
+3. **Análise de comp/draft antes da partida começar** — o feedback mais
+   rico: "essa comp do azul nunca ganha, a única win condition é a
+   Irelia snowballar na side contra o Jayce, mas mesmo assim o
+   vermelho tem Poppy pra pickar ela antes dela chegar no Ziggs" —
+   análise de win condition + contra-pick + scaling, sem depender de
+   nenhum estado de jogo (só os 10 campeões do draft).
+4. **"Assistir partida" com mais informação** — o replay (`?replay=1`)
+   hoje só anima a curva de probabilidade; feedback comparou com
+   overlay de broadcast ("BGL"), querendo ver mapa de calor/itens/
+   objetivos evoluindo junto, não só uma linha sozinha.
+
+**Item 1 implementado.** `/matches/{id}/positions` ganhou `items` em
+cada jogador de cada frame — reconstrói "o que cada um tinha NAQUELE
+minuto" andando pelos `item_events` em paralelo com os frames (uma
+única query ordenada por `ts_ms`, ponteiro avançando junto com o loop
+de frames — não é uma query por minuto). `TeamTable` (`MatchDetail`)
+agora lê de `positions.data.frames[minute]` em vez dos itens finais
+de `/analysis`; enquanto `/positions` ainda carrega, cai pros itens
+finais (com trinket) pra não piscar vazio. Sem trinket na versão por
+minuto — `item_events` não rastreia trinket (fora do filtro de itens
+"finalizados").
+
+**Bug real pego na verificação visual, não no code review**: o
+cabeçalho da coluna virou "Itens aos 14 min" pra dar contexto, e isso
+colidiu com "Visão" (virou "Visãoltens" ilegível) — a tabela já tinha
+zero padding horizontal nos `<th>`/`<td>` (só `py-2`, achado
+pré-existente, não introduzido agora, só ficou visível com o texto
+mais longo). Corrigido: contexto do minuto virou subtítulo do card
+("Coluna Itens mostra o build aos X min..."), cabeçalho voltou a ser
+só "Itens", e `px-2` + `overflow-x-auto` adicionados na tabela toda
+(mesma convenção já usada em `Champions.tsx`).
+
+Verificado: aos 14min a primeira linha mostrava 1 ícone de item;
+arrastando o slider pro fim (30min), 3 ícones — cabeçalho do card
+atualiza junto. `npm run lint` (0 erros) / `npm run test` (31/31) /
+`npm run build`: verdes.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

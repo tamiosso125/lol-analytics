@@ -995,6 +995,11 @@ def match_analysis(match_id: str):
 def match_positions(match_id: str):
     """Posições dos 10 jogadores minuto a minuto (participantFrames da
     timeline) + abates com local — base do mapa de calor da análise.
+    Cada jogador de cada frame também carrega `items` — itens
+    finalizados que ele possuía NAQUELE minuto (reconstruído andando
+    pelos item_events em paralelo com os frames), não os itens finais
+    da partida — permite a UI mostrar o build real de cada momento, não
+    só o resultado final.
     Também retorna `wards` (colocação/destruição de ward): a Riot NÃO
     grava a posição da própria ward no evento, então usa a posição do
     jogador que agiu naquele minuto como proxy aproximado — o front
@@ -1018,13 +1023,33 @@ def match_positions(match_id: str):
         )
         by_puuid = {r[0]: (r[1], r[2], r[3]) for r in cur.fetchall()}
 
+        # itens finalizados por puuid, em ORDEM de compra/venda — permite
+        # reconstruir "o que cada um tinha NAQUELE minuto" andando pelos
+        # eventos em paralelo com os frames, sem uma query por minuto
+        item_events = []
+        if _completed_item_ids:
+            cur.execute(
+                """SELECT puuid, item_id, action, ts_ms FROM item_events
+                   WHERE match_id = %s AND item_id = ANY(%s) ORDER BY ts_ms""",
+                (match_id, _completed_item_ids),
+            )
+            item_events = cur.fetchall()
+
     info = tl[0].get("info", {})
     # participantId da timeline -> (team, campeão) via puuid
     id_map = {}
+    puuid_by_pid = {}
     for p in info.get("participants", []):
-        meta = by_puuid.get(p.get("puuid"))
+        puuid = p.get("puuid")
+        meta = by_puuid.get(puuid)
         if meta:
             id_map[p.get("participantId")] = meta
+            puuid_by_pid[p.get("participantId")] = puuid
+
+    # estado de itens possuídos por puuid, atualizado incrementalmente
+    # conforme os frames avançam (ver loop abaixo)
+    owned: dict[str, dict[int, int]] = {}
+    event_idx = 0
 
     # eventos de objetivo -> categoria da tabela teams
     monster_kind = {"DRAGON": "dragons", "BARON_NASHOR": "barons", "RIFTHERALD": "heralds"}
@@ -1036,16 +1061,29 @@ def match_positions(match_id: str):
 
     frames, kills, objectives, wards = [], [], [], []
     for i, fr in enumerate(info.get("frames", [])):
+        # avança os eventos de item até o começo deste minuto — reconstrói
+        # "o que cada um tinha aos i minutos" sem reconsultar o banco
+        cutoff_ms = i * 60_000
+        while event_idx < len(item_events) and item_events[event_idx][3] <= cutoff_ms:
+            puuid, item_id, action, _ts_ms = item_events[event_idx]
+            counts = owned.setdefault(puuid, {})
+            counts[item_id] = counts.get(item_id, 0) + (1 if action == "BUY" else -1)
+            event_idx += 1
+
         players, frame_pos = [], {}
         for pf in fr.get("participantFrames", {}).values():
-            pos, meta = pf.get("position"), id_map.get(pf.get("participantId"))
+            pid = pf.get("participantId")
+            pos, meta = pf.get("position"), id_map.get(pid)
             if pos is None or meta is None:
                 continue
-            frame_pos[pf.get("participantId")] = pos
+            frame_pos[pid] = pos
+            item_counts = owned.get(puuid_by_pid.get(pid, ""), {})
+            items_now = [iid for iid, c in item_counts.items() if c > 0]
             players.append(
                 {
                     "team_id": meta[0], "champion": meta[1], "champion_id": meta[2],
                     "x": pos["x"], "y": pos["y"], "level": pf.get("level"),
+                    "items": items_now,
                 }
             )
         frames.append({"minute": i, "players": players})
