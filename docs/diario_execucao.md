@@ -2699,6 +2699,46 @@ reflete quando `lanes` está presente) e citou a mesma sinergia
 Khazix+Viktor no texto. `npm run lint` (0 erros) / `npm run test`
 (31/31) / `npm run build`: verdes.
 
+## 2026-07-08 — Bug real reportado: KDA/Ouro/CS/Dano não seguiam o minuto
+
+Usuário mandou screenshot aos 3min mostrando ouro/CS/dano com cara de
+totais finais de partida (ex.: Draven com 16.471 de ouro aos 3min, que
+é claramente valor de fim de jogo) — só a coluna "Itens" tinha sido
+corrigida antes (2026-07-08, item 1 do lote de feedback), KDA/Ouro/CS/
+Dano/Visão continuavam vindo do `/matches/{id}/analysis` (totais
+finais), nunca do minuto do slider.
+
+Verificação primeiro: quais desses dados a Riot realmente grava por
+minuto? `participantFrame` tem `totalGold`, `minionsKilled`+
+`jungleMinionsKilled`, `damageStats.totalDamageDoneToChampions` — os
+três dão pra reconstruir igual aos itens. **Visão não tem em lugar
+nenhum da timeline** — `visionScore` só existe como total final da
+partida, incremental não é gravado por nenhuma versão da match-v5.
+KDA também não é campo direto, mas dá pra contar eventos
+`CHAMPION_KILL` até o minuto.
+
+`/matches/{id}/positions` ganhou `gold`/`cs`/`dmg`/`kills`/`deaths`/
+`assists` em cada jogador de cada frame — mesma técnica de dois
+ponteiros dos itens: `gold`/`cs`/`dmg` vêm direto do
+`participantFrame` (sem precisar de evento), `kills`/`deaths`/
+`assists` reconstroem contando `CHAMPION_KILL` (`killerId`→abate,
+`victimId`→morte, `assistingParticipantIds`→assistência) numa lista
+pré-ordenada por timestamp, avançada em paralelo com o loop de frames.
+
+Frontend: `itemsAtMinute` virou `statsAtMinute` (guarda o `FramePlayer`
+inteiro por champion_id, não só os itens) — `TeamTable` lê KDA/Ouro/
+CS/Dano de lá quando disponível. Cabeçalho da coluna Visão ganhou
+`title` explicando que é sempre o total final; a legenda do card
+também deixa isso explícito ("Visão é sempre o total final — a Riot
+não grava esse número por minuto") — mesmo padrão de honestidade do
+resto do projeto (não escondemos a limitação, explicamos ela).
+
+Verificado: aos 3min, Singed mostrava KDA 0/0/0, ouro 959, CS 13, dano
+307 (bate exatamente com o `curl` direto no backend); no fim da
+partida, KDA 1/2/10, ouro 12.208 — visão idêntica nos dois momentos
+(19), confirmando que só ela ficou fixa como esperado. `npm run lint`
+(0 erros) / `npm run test` (31/31) / `npm run build`: verdes.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

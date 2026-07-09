@@ -1006,11 +1006,19 @@ def match_analysis(match_id: str):
 def match_positions(match_id: str):
     """Posições dos 10 jogadores minuto a minuto (participantFrames da
     timeline) + abates com local — base do mapa de calor da análise.
-    Cada jogador de cada frame também carrega `items` — itens
-    finalizados que ele possuía NAQUELE minuto (reconstruído andando
-    pelos item_events em paralelo com os frames), não os itens finais
-    da partida — permite a UI mostrar o build real de cada momento, não
-    só o resultado final.
+    Cada jogador de cada frame também carrega, TODOS reconstruídos pro
+    estado NAQUELE minuto (não os totais finais da partida):
+    - `items` — itens finalizados possuídos (item_events, mesma técnica
+      de dois ponteiros de `gold`/`cs`/`dmg` abaixo);
+    - `gold`, `cs`, `dmg` — direto do participantFrame (`totalGold`,
+      `minionsKilled`+`jungleMinionsKilled`,
+      `damageStats.totalDamageDoneToChampions`);
+    - `kills`/`deaths`/`assists` — reconstruído contando eventos
+      CHAMPION_KILL até o minuto (dois ponteiros, mesma técnica dos
+      itens).
+    NÃO incluído: visão (`visionScore`) — a Riot só grava o total final
+    por partida, não incrementalmente por minuto; nenhuma reconstrução
+    é possível com o dado que a match-v5 fornece.
     Também retorna `wards` (colocação/destruição de ward): a Riot NÃO
     grava a posição da própria ward no evento, então usa a posição do
     jogador que agiu naquele minuto como proxy aproximado — o front
@@ -1057,6 +1065,26 @@ def match_positions(match_id: str):
             id_map[p.get("participantId")] = meta
             puuid_by_pid[p.get("participantId")] = puuid
 
+    # eventos de abate extraídos e ordenados por timestamp uma vez, pra
+    # reconstruir KDA acumulado por minuto do mesmo jeito que os itens
+    # (dois ponteiros avançando junto com o loop de frames abaixo)
+    kill_events = sorted(
+        (
+            (
+                e.get("timestamp", 0),
+                e.get("killerId"),
+                e.get("victimId"),
+                e.get("assistingParticipantIds") or [],
+            )
+            for fr in info.get("frames", [])
+            for e in fr.get("events", [])
+            if e.get("type") == "CHAMPION_KILL"
+        ),
+        key=lambda t: t[0],
+    )
+    kda: dict[int, dict[str, int]] = {}
+    kill_idx = 0
+
     # estado de itens possuídos por puuid, atualizado incrementalmente
     # conforme os frames avançam (ver loop abaixo)
     owned: dict[str, dict[int, int]] = {}
@@ -1080,6 +1108,18 @@ def match_positions(match_id: str):
             counts = owned.setdefault(puuid, {})
             counts[item_id] = counts.get(item_id, 0) + (1 if action == "BUY" else -1)
             event_idx += 1
+        # mesma técnica pra KDA acumulado — abates/mortes/assistências
+        # ATÉ o começo deste minuto (não usa a lista `kills` mais abaixo,
+        # que é sobre POSIÇÃO do abate, escopo diferente)
+        while kill_idx < len(kill_events) and kill_events[kill_idx][0] <= cutoff_ms:
+            _ts, killer_pid, victim_pid, assist_pids = kill_events[kill_idx]
+            if killer_pid:
+                kda.setdefault(killer_pid, {"k": 0, "d": 0, "a": 0})["k"] += 1
+            if victim_pid:
+                kda.setdefault(victim_pid, {"k": 0, "d": 0, "a": 0})["d"] += 1
+            for apid in assist_pids:
+                kda.setdefault(apid, {"k": 0, "d": 0, "a": 0})["a"] += 1
+            kill_idx += 1
 
         players, frame_pos = [], {}
         for pf in fr.get("participantFrames", {}).values():
@@ -1090,11 +1130,16 @@ def match_positions(match_id: str):
             frame_pos[pid] = pos
             item_counts = owned.get(puuid_by_pid.get(pid, ""), {})
             items_now = [iid for iid, c in item_counts.items() if c > 0]
+            pk = kda.get(pid, {"k": 0, "d": 0, "a": 0})
             players.append(
                 {
                     "team_id": meta[0], "champion": meta[1], "champion_id": meta[2],
                     "x": pos["x"], "y": pos["y"], "level": pf.get("level"),
                     "items": items_now,
+                    "gold": pf.get("totalGold"),
+                    "cs": pf.get("minionsKilled", 0) + pf.get("jungleMinionsKilled", 0),
+                    "dmg": pf.get("damageStats", {}).get("totalDamageDoneToChampions"),
+                    "kills": pk["k"], "deaths": pk["d"], "assists": pk["a"],
                 }
             )
         frames.append({"minute": i, "players": players})

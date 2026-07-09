@@ -370,7 +370,18 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   (uma query ordenada por ts_ms, não uma por minuto); usado pela coluna
   "Itens" da `TeamTable` no `MatchDetail`, que agora acompanha o slider
   do mapa de calor em vez de mostrar só o build final. Não rastreia
-  trinket (fora do filtro de itens "finalizados");
+  trinket (fora do filtro de itens "finalizados"). **Ganhou
+  `gold`/`cs`/`dmg`/`kills`/`deaths`/`assists` por minuto também
+  (2026-07-08, bug reportado — só itens tinham sido corrigidos, o
+  resto ainda mostrava totais finais)**: `gold`/`cs`/`dmg` vêm direto
+  do `participantFrame` (`totalGold`, `minionsKilled`+
+  `jungleMinionsKilled`, `damageStats.totalDamageDoneToChampions`);
+  `kills`/`deaths`/`assists` reconstroem contando eventos
+  `CHAMPION_KILL` até o minuto (mesma técnica de dois ponteiros dos
+  itens, lista pré-ordenada por timestamp). **NÃO inclui visão**
+  (`visionScore`) — a Riot só grava o total final da partida, nenhuma
+  versão da match-v5 grava incrementalmente; a `TeamTable` mostra isso
+  sempre fixo no total final, com nota explícita na UI;
 - `POST /compose` — análise de composição (montar time): matchups por
   lane (confronto direto >= 10 jogos, senão aproximação por perfil),
   sinergias de dupla (>= 20 jogos, delta vs média individual) e

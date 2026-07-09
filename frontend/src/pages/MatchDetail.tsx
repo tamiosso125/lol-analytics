@@ -23,6 +23,7 @@ import {
   api,
   type CoachLane,
   type CoachSynergyItem,
+  type FramePlayer,
   type MatchParticipantFull,
   type MatchState,
   type MatchTeam,
@@ -578,15 +579,16 @@ function TeamTable({
   players,
   label,
   won,
-  itemsAtMinute,
+  statsAtMinute,
   minute,
 }: {
   players: MatchParticipantFull[];
   label: string;
   won: boolean;
-  /** champion_id -> itens que ele tinha NO `minute` (null = ainda carregando
-   * /positions; cai pros itens finais do /analysis nesse meio-tempo) */
-  itemsAtMinute: Record<number, number[]> | null;
+  /** champion_id -> estado NO `minute` (itens/ouro/CS/dano/KDA — tudo
+   * reconstruído daquele momento). null = ainda carregando /positions;
+   * cai pros totais finais do /analysis nesse meio-tempo. */
+  statsAtMinute: Record<number, FramePlayer> | null;
   minute: number;
 }) {
   return (
@@ -596,10 +598,11 @@ function TeamTable({
           <CardTitle className={winColor(won)}>
             {label} — {won ? "Vitória" : "Derrota"}
           </CardTitle>
-          {itemsAtMinute !== null && (
+          {statsAtMinute !== null && (
             <p className="mt-0.5 text-xs text-muted-ink">
-              Coluna "Itens" mostra o build aos {minute} min (siga o slider do mapa de
-              calor), não o final da partida.
+              KDA/Ouro/CS/Dano/Itens mostram o estado aos {minute} min (siga o slider do
+              mapa de calor), não o final da partida. Visão é sempre o total final — a
+              Riot não grava esse número por minuto.
             </p>
           )}
         </div>
@@ -614,19 +617,24 @@ function TeamTable({
               <th className="px-2 py-2 font-medium">Ouro</th>
               <th className="px-2 py-2 font-medium">CS</th>
               <th className="px-2 py-2 font-medium">Dano</th>
-              <th className="px-2 py-2 font-medium">Visão</th>
+              <th className="px-2 py-2 font-medium" title="Sempre o total final da partida">
+                Visão
+              </th>
               <th className="px-2 py-2 font-medium">Itens</th>
             </tr>
           </thead>
           <tbody className="tabular-nums">
             {players.map((p) => {
-              // enquanto /positions ainda carrega, mostra os itens finais
-              // (com trinket); depois disso, itens NO minuto do slider —
-              // reconstruído de item_events, não rastreia trinket
-              const showFinal = itemsAtMinute === null;
-              const displayItems = showFinal
-                ? p.items.slice(0, 6)
-                : (itemsAtMinute[p.champion_id] ?? []).slice(0, 6);
+              // enquanto /positions ainda carrega, mostra os totais finais
+              // (itens com trinket); depois disso, estado NO minuto do
+              // slider — reconstruído da timeline, itens não têm trinket
+              const showFinal = statsAtMinute === null;
+              const snap = showFinal ? null : statsAtMinute[p.champion_id];
+              const displayItems = snap ? snap.items.slice(0, 6) : p.items.slice(0, 6);
+              const kda = snap ? `${snap.kills}/${snap.deaths}/${snap.assists}` : `${p.kills}/${p.deaths}/${p.assists}`;
+              const gold = snap ? snap.gold : p.gold;
+              const cs = snap ? snap.cs : p.cs;
+              const dmg = snap ? snap.dmg : p.dmg;
               return (
                 <tr key={p.champion} className="border-b border-border/50 last:border-0">
                   <td className="px-2 py-1.5 first:pl-0">
@@ -640,10 +648,10 @@ function TeamTable({
                       </span>
                     </Link>
                   </td>
-                  <td className="px-2 py-1.5">{p.kills}/{p.deaths}/{p.assists}</td>
-                  <td className="px-2 py-1.5">{p.gold.toLocaleString("pt-BR")}</td>
-                  <td className="px-2 py-1.5">{p.cs}</td>
-                  <td className="px-2 py-1.5">{p.dmg.toLocaleString("pt-BR")}</td>
+                  <td className="px-2 py-1.5">{kda}</td>
+                  <td className="px-2 py-1.5">{gold.toLocaleString("pt-BR")}</td>
+                  <td className="px-2 py-1.5">{cs}</td>
+                  <td className="px-2 py-1.5">{dmg.toLocaleString("pt-BR")}</td>
                   <td className="px-2 py-1.5">{p.vision}</td>
                   <td className="px-2 py-1.5">
                     <div className="flex gap-0.5">
@@ -736,15 +744,15 @@ export function MatchDetail() {
   const blueTeam = m.teams.find((t) => t.team_id === 100);
   const redTeam = m.teams.find((t) => t.team_id === 200);
 
-  // itens que cada campeão já tinha NO MINUTO do slider (não os itens
-  // finais) — champion_id é chave segura, LoL não permite campeão
-  // repetido na mesma partida (nem entre times)
+  // itens/ouro/CS/dano/KDA que cada campeão já tinha NO MINUTO do
+  // slider (não os totais finais) — champion_id é chave segura, LoL
+  // não permite campeão repetido na mesma partida (nem entre times)
   const posFrames = positions.data?.frames;
-  const itemsAtMinute: Record<number, number[]> | null = posFrames
+  const statsAtMinute: Record<number, FramePlayer> | null = posFrames
     ? Object.fromEntries(
         (posFrames[Math.min(minute, posFrames.length - 1)]?.players ?? []).map((fp) => [
           fp.champion_id,
-          fp.items,
+          fp,
         ]),
       )
     : null;
@@ -900,14 +908,14 @@ export function MatchDetail() {
           players={blue}
           label="Time azul"
           won={blueTeam?.win ?? false}
-          itemsAtMinute={itemsAtMinute}
+          statsAtMinute={statsAtMinute}
           minute={Math.min(minute, posFrames ? posFrames.length - 1 : minute)}
         />
         <TeamTable
           players={red}
           label="Time vermelho"
           won={!(blueTeam?.win ?? false)}
-          itemsAtMinute={itemsAtMinute}
+          statsAtMinute={statsAtMinute}
           minute={Math.min(minute, posFrames ? posFrames.length - 1 : minute)}
         />
       </div>

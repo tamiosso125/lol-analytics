@@ -469,6 +469,15 @@ export interface FramePlayer {
   /** itens finalizados que o campeão já possuía NAQUELE minuto (não os
    * itens finais da partida) */
   items: number[];
+  /** ouro/CS/dano/KDA acumulados ATÉ este minuto (não os totais finais).
+   * Visão NÃO está aqui — a Riot só grava o total final por partida, não
+   * incrementalmente, então não tem como reconstruir por minuto. */
+  gold: number;
+  cs: number;
+  dmg: number;
+  kills: number;
+  deaths: number;
+  assists: number;
 }
 
 export interface PositionFrame {
