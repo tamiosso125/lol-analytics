@@ -1,20 +1,33 @@
 """Contexto tático derivado da timeline de uma partida real.
 
-Ponte entre a Camada 2 (itens — dado que a Riot grava) e o INÍCIO da
-Camada 3 (sinais espaciais/táticos derivados das posições — dado que a
-Riot grava por minuto, mas que ninguém entrega "mastigado": agrupamento,
-overextensão, tempo de selva). Ver docs/diario_execucao.md 2026-07-08.
+Ponte entre a Camada 2 (itens — dado que a Riot grava) e a Camada 3
+(sinais táticos derivados do dado que a Riot grava por minuto, mas que
+ninguém entrega "mastigado"). Ver docs/diario_execucao.md 2026-07-08.
+Sinais cobertos:
+  - espaciais (posições): agrupamento, overextensão, tempo de selva —
+    APROXIMADOS (posição a 1 amostra/minuto);
+  - visão (eventos WARD_PLACED): wards colocadas por time na janela
+    recente, controle à parte — EXATO (é contagem de evento, não usa
+    posição);
+  - momentum (eventos CHAMPION_KILL): abates por time na janela recente
+    — EXATO (contagem), distinto do kill_diff acumulado do estado.
 
-LIMITE HONESTO: isto usa posição a 1 amostra/minuto (participantFrames)
-— dá pra dizer "os 5 estão agrupados no meio" ou "o atirador está
-avançado na metade inimiga", mas NÃO o estado de wave/minion (não existe
-em nenhuma versão da match-v5; só via parsing de replay .rofl ou visão
-computacional — esse é o resto da Camada 3, ainda bloqueado). O
-consumidor (advice.py) rotula tudo como aproximado.
+LIMITE HONESTO / o que AINDA falta da Camada 3: o estado de wave/minion
+e micro (recall, aggro de creep, congelamento de rota) NÃO existe em
+nenhuma versão da match-v5 — só via parsing de replay .rofl ou visão
+computacional. O consumidor (advice.py) rotula posição como aproximada
+e deixa claro que wave/minion não é observável.
 """
 import math
 
 from src.db import get_conn
+
+# janela recente (minutos) para visão e momentum de abates — mesma do
+# mapa de calor (MapHeatmap.WINDOW), pra leitura "o que rolou agorinha"
+WINDOW = 4
+# tipos reais de ward (UNDEFINED é artefato de evento de sistema do
+# início da partida, não uma ward de verdade)
+_WARD_TYPES = {"YELLOW_TRINKET", "CONTROL_WARD", "SIGHT_WARD", "BLUE_TRINKET"}
 
 
 def _team(participant_id: int) -> int:
@@ -113,10 +126,32 @@ def tactical_context(
             "deep_overextended": deep,
         }
 
+    # visão + momentum de abates na janela recente (eventos, EXATO — não
+    # usa posição). creatorId/killerId 1-10 -> time; killerId 0 = execução
+    # (torre/monstro), ignorada aqui
+    from_min = max(0, minute - WINDOW)
+    vision = {100: {"control": 0, "normal": 0}, 200: {"control": 0, "normal": 0}}
+    kills_window = {100: 0, 200: 0}
+    for i in range(from_min, min(minute + 1, len(frames))):
+        for e in frames[i].get("events", []):
+            etype = e.get("type")
+            if etype == "WARD_PLACED" and e.get("wardType") in _WARD_TYPES:
+                cid = e.get("creatorId")
+                if cid:
+                    kind = "control" if e["wardType"] == "CONTROL_WARD" else "normal"
+                    vision[_team(cid)][kind] += 1
+            elif etype == "CHAMPION_KILL":
+                kid = e.get("killerId")
+                if kid:  # ignora execução (killerId 0)
+                    kills_window[_team(kid)] += 1
+
     return {
         "minute": minute,
+        "window": WINDOW,
         "items": items,
         "spatial": spatial,
         # tempo de selva (jungleMinionsKilled) azul menos vermelho
         "jungle_diff": jungle[100] - jungle[200],
+        "vision": {"blue": vision[100], "red": vision[200]},
+        "kills_window": {"blue": kills_window[100], "red": kills_window[200]},
     }

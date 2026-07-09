@@ -111,9 +111,12 @@ def generate_advice(
             f"confiança):\n{syn_lines.strip()}"
         )
 
-    # Camada 2 (itens) + início da Camada 3 (posições) — dado REAL da
-    # timeline desta partida, no minuto analisado (ver src/coach/tactics.py)
-    has_tactical = bool(tactical and (tactical.get("items") or tactical.get("spatial")))
+    # Camada 2 (itens) + Camada 3 (posições/visão/momentum) — dado REAL
+    # da timeline desta partida, no minuto analisado (src/coach/tactics.py)
+    has_tactical = bool(
+        tactical
+        and (tactical.get("items") or tactical.get("spatial") or tactical.get("vision"))
+    )
     if tactical and tactical.get("items"):
         item_lines = "\n".join(
             f"- {champ}: {', '.join(its)}" for champ, its in tactical["items"].items()
@@ -147,6 +150,28 @@ def generate_advice(
             + "\n".join(spatial_bits) + jungle_txt
         )
 
+    window = tactical.get("window") if tactical else None
+    if tactical and tactical.get("vision"):
+        v = tactical["vision"]
+        vision_txt = (
+            f"- Azul: {v['blue']['control']} wards de controle + "
+            f"{v['blue']['normal']} wards normais\n"
+            f"- Vermelho: {v['red']['control']} wards de controle + "
+            f"{v['red']['normal']} wards normais"
+        )
+        sections.append(
+            f"Wards colocadas nos últimos {window} minutos (contagem exata "
+            f"de evento, não é aproximação) — DADO REAL desta partida:\n{vision_txt}"
+        )
+    if tactical and tactical.get("kills_window"):
+        kw = tactical["kills_window"]
+        if kw["blue"] or kw["red"]:
+            sections.append(
+                f"Abates nos últimos {window} minutos (momentum recente, "
+                f"distinto da diferença acumulada do jogo todo) — DADO REAL "
+                f"desta partida:\nAzul {kw['blue']} × {kw['red']} Vermelho"
+            )
+
     instructions = (
         "\n\nCom base nisso, escreva uma orientação estratégica curta (4-6 "
         "frases, português do Brasil, texto corrido, sem markdown) para o "
@@ -165,9 +190,12 @@ def generate_advice(
         )
     if has_tactical:
         instructions += (
-            " Aproveite os itens e a leitura de posição/agrupamento acima na "
-            "orientação (ex.: quem já tem item-chave, quem está avançado demais "
-            "sem visão) — mas trate a posição como aproximada (1 amostra/minuto)."
+            " Aproveite os itens, a leitura de posição/agrupamento, visão "
+            "(wards) e momentum de abates recente acima na orientação (ex.: "
+            "quem já tem item-chave, quem está avançado demais sem visão "
+            "própria, qual time está no controle da luta agora) — mas trate "
+            "a posição como aproximada (1 amostra/minuto); wards e abates da "
+            "janela são contagem exata."
         )
     instructions += (
         " Use conhecimento geral de macro/estratégia de League of Legends "

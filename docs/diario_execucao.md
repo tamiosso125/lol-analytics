@@ -2453,6 +2453,50 @@ que continua bloqueado por falta de dado (replay .rofl / visão
 computacional — trabalho futuro no texto do TCC). Camada 4
 (verificação causal) segue como limitação/futuro.
 
+## 2026-07-08 — Camada 3 continuada: visão e momentum de abates
+
+O usuário cobrou continuar a Camada 3 depois do commit anterior — com
+razão: eu tinha tratado "o resto da Camada 3" como só o muro do
+wave/minion, mas ainda sobrava uma fatia derivável do dado que já
+temos e que eu não tinha esgotado: **visão** (eventos `WARD_PLACED`,
+já extraídos pro `/matches/{id}/positions`) e **momentum recente**
+(abates numa janela, distinto do `kill_diff` acumulado do jogo todo).
+Diferença importante em relação a agrupamento/overextensão: visão e
+momentum são **contagem exata de evento**, não aproximação de posição
+— dado mais forte que o resto da Camada 3.
+
+`tactical_context()` ganhou:
+- **Visão**: wards de controle vs normais colocadas por cada time nos
+  últimos `WINDOW=4` minutos (mesma janela do `MapHeatmap`). Filtra
+  `wardType == UNDEFINED` (artefato de evento de sistema do início da
+  partida — mesmo cuidado já tomado no `/matches/{id}/positions` de
+  2026-07-06).
+- **Momentum**: abates por time na mesma janela de 4 minutos (via
+  `CHAMPION_KILL.killerId`, ignorando `killerId=0` = execução por
+  torre/monstro).
+
+`advice.py` ganhou 2 blocos de prompt novos ("Wards colocadas..." e
+"Abates nos últimos N minutos..."), ambos rotulados DADO REAL, e a
+instrução final passou a mencionar visão/momentum explicitamente.
+`CoachCard` (frontend) atualizado pra citar isso no subtítulo.
+
+Testado com um cenário de vantagem grande (ouro +3800, 20min): a
+orientação citou "colocou apenas 2 wards de controle contra 5 do
+Azul nos últimos 4 minutos" e "momentum recente (11×4 para o Azul)"
+— tecidos com itens e posição no mesmo parágrafo, não como blocos
+separados. Verificado no navegador (14min) também: "usar a visão
+inferior (14 wards normais)" e "momentum de 5 abates nos últimos 4
+minutos indica que lutas estão sendo vencidas". `npm run lint` (0
+erros) / `npm run test` (31/31) / `npm run build`: verdes.
+
+**Estado do plano de 4 camadas, atualizado:** a fatia DERIVÁVEL da
+Camada 3 (agrupamento, overextensão, tempo de selva, visão, momentum)
+está completa por ora — não sobrou nenhum sinal óbvio no dado atual
+que ainda não tenha sido explorado. O que resta bloqueado é
+especificamente o estado de wave/minion e micro momento-a-momento
+(cooldown de habilidade, aggro de creep, congelamento de rota) — isso
+sim exige replay `.rofl` ou visão computacional, um projeto à parte.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

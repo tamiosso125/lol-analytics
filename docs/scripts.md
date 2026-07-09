@@ -423,16 +423,20 @@ API FastAPI que alimenta o front end React (e qualquer outro cliente):
   `blue_synergies`/`red_synergies` — os mesmos números que o
   `/compose` já calcula (shrinkage+IC), nunca invenção da LLM; o
   prompt distingue "dado real" de "conhecimento geral" e só cita
-  estatística fornecida. **Camada 2 (itens/posição) + início da Camada
-  3** (mesma data): com `match_id`+`game_minute` opcionais, o servidor
-  chama `src/coach/tactics.py` (`tactical_context`) e injeta DADO REAL
-  da timeline no minuto — itens finalizados que cada campeão já possuía
-  + sinais espaciais derivados (agrupamento dos 5, overextensão além do
-  rio, tempo de selva). O aviso do prompt vira condicional (itens/
-  posição reais mas posição aproximada a 1 amostra/min; wave/minion não
-  observável). Consumido pelo `CoachCard` (frontend): card "E se..." do
-  `MatchDetail` passa match_id → contexto tático completo; aba
-  Composição do Simulador é composição hipotética → só campeões/
+  estatística fornecida. **Camada 2 (itens/posição) + Camada 3** (mesma
+  data, estendida em seguida): com `match_id`+`game_minute` opcionais,
+  o servidor chama `src/coach/tactics.py` (`tactical_context`) e
+  injeta DADO REAL da timeline no minuto — itens finalizados que cada
+  campeão já possuía + sinais espaciais derivados (agrupamento dos 5,
+  overextensão além do rio, tempo de selva) + **visão e momentum**
+  (wards de controle/normais e abates numa janela de 4 min — contagem
+  EXATA de evento, não aproximação como a posição). O aviso do prompt
+  vira condicional (itens/posição/visão/momentum reais mas posição
+  aproximada a 1 amostra/min; wave/minion não observável — essa é a
+  única fatia da Camada 3 que segue bloqueada, exige replay .rofl ou
+  visão computacional). Consumido pelo `CoachCard` (frontend): card "E
+  se..." do `MatchDetail` passa match_id → contexto tático completo;
+  aba Composição do Simulador é composição hipotética → só campeões/
   matchups/sinergias, sem match_id.
 - `/reports/*` — serve os PNGs/JSON de `reports/` (explicabilidade).
 
