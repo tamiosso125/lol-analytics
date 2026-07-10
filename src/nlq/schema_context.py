@@ -70,6 +70,47 @@ bans(match_id, team_id, pick_turn, champion_id)
   --   ON c.champion_id = b.champion_id
   -- GROUP BY c.champion_name ORDER BY bans DESC LIMIT 5;
 
+item_events(match_id, puuid, ts_ms, item_id, action)
+  -- compras/vendas EFETIVAS de item por jogador (ITEM_UNDO já desfeito
+  -- no ETL — reflete o que o jogador manteve, não cada clique na
+  -- loja). NÃO tem champion_name nem win — junte com participants por
+  -- (match_id, puuid). NÃO tem nome do item — item_id é só número;
+  -- pra nome, JUNTE com items (abaixo), NUNCA responda com o nome de
+  -- um item de memória (você pode errar o item — já aconteceu). action
+  -- é 'BUY', 'SELL' ou 'DESTROY' (componente consumido numa receita —
+  -- o jogador COMPROU sim, só não ficou com aquele item específico no
+  -- fim; não é "não comprou"). Pra "quais itens o campeão X mais
+  -- constrói" conte pela PRIMEIRA compra de cada item por partida
+  -- (MIN(ts_ms), sempre filtrando action='BUY') — sem isso, recompra
+  -- do mesmo item após vender conta como dois jogos por engano.
+
+items(item_id, name, total_gold, purchasable, map_11)
+  -- catálogo (Data Dragon) — nome, custo e se é válido no mapa 11
+  -- (Summoner's Rift; sem esse filtro, item só de ARAM/outros modos
+  -- pode aparecer no meio do resultado). Pra pergunta de BUILD ("quais
+  -- itens X mais constrói"), SEMPRE filtre também total_gold >= 1300 —
+  -- sem isso o resultado fica dominado por poção, ward, bota básica e
+  -- componente barato (ex.: Espada Longa, Cristal de Rubi), que tecnicamente
+  -- são "comprados" mas não são o que a pergunta quer dizer com "build".
+  -- Exemplo — os 5 itens de build mais construídos pela Camille, com win
+  -- rate real:
+  -- WITH champ AS (
+  --   SELECT match_id, puuid, win FROM participants WHERE champion_name = 'Camille'
+  -- ), first_buys AS (
+  --   SELECT ie.match_id, ie.puuid, ie.item_id, MIN(ie.ts_ms) AS ts_ms
+  --   FROM item_events ie
+  --   JOIN champ c ON c.match_id = ie.match_id AND c.puuid = ie.puuid
+  --   WHERE ie.action = 'BUY'
+  --   GROUP BY ie.match_id, ie.puuid, ie.item_id
+  -- )
+  -- SELECT i.name, COUNT(*) AS jogos, AVG(c.win::int) AS win_rate
+  -- FROM first_buys fb
+  -- JOIN champ c ON c.match_id = fb.match_id AND c.puuid = fb.puuid
+  -- JOIN items i ON i.item_id = fb.item_id AND i.map_11 AND i.total_gold >= 1300
+  -- GROUP BY i.name
+  -- HAVING COUNT(*) >= 20
+  -- ORDER BY jogos DESC LIMIT 5;
+
 Regras:
 - Responda APENAS com uma query SQL (SELECT), sem explicação e sem markdown.
 - Sempre inclua LIMIT (máximo 100) quando o resultado puder ter muitas linhas.

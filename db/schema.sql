@@ -89,6 +89,21 @@ CREATE INDEX IF NOT EXISTS idx_item_events_match     ON item_events(match_id);
 CREATE INDEX IF NOT EXISTS idx_item_events_item      ON item_events(item_id);
 CREATE INDEX IF NOT EXISTS idx_item_events_puuid     ON item_events(puuid);
 
+-- Catálogo de itens (Data Dragon, data/items.json — src/etl/load_item_catalog.py,
+-- 2026-07-08). item_events só tem item_id numérico; sem esta tabela não
+-- dá pra JOIN e pegar o NOME do item em SQL — e pedir pra LLM "lembrar"
+-- nome de item de cabeça por ID já causou bug real no coach (ver
+-- docs/diario_execucao.md), então o mesmo golpe não vale aqui: nome de
+-- item em qualquer resposta tem que vir de JOIN com esta tabela, nunca
+-- de memória do modelo.
+CREATE TABLE IF NOT EXISTS items (
+    item_id      INT PRIMARY KEY,
+    name         TEXT,
+    total_gold   INT,
+    purchasable  BOOLEAN,
+    map_11       BOOLEAN       -- válido no mapa 11 (Summoner's Rift)
+);
+
 -- Partidas COMPETITIVAS (pro play) do Oracle's Elixir — fonte separada
 -- do pipeline de solo queue (Riot API). Duas tabelas espelhando o CSV:
 -- linhas de TIME (pro_games, 2 por jogo) e de JOGADOR (pro_players,

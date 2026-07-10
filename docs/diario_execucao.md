@@ -2948,6 +2948,85 @@ Defunto, 58% vitória em 557 jogos", "Dente de Na'Shor, 52% vitória em
 957 jogos") — sem invenção de stat. `npm run lint` (0 erros) / `npm
 run test` (31/31) / `npm run build`: verdes.
 
+## 2026-07-10 — Consulta NL não respondia build nem tinha catálogo de item
+
+Usuário reportou: "No modo consulta NL ele não está fornecendo builds,
+nem explicações de matchs. Devemos expandir nossa pergunta aos
+dados." Testei os dois separadamente antes de mexer em qualquer
+coisa. Matchup ("Camille contra Darius no topo, quem ganha mais
+confrontos diretos?") já funcionava de primeira — o schema_context já
+ensina o padrão EXISTS por campeão/team_id pra composição, não
+precisava de nada novo. Build ("Quais os itens mais construídos pela
+Camille?") falhava de verdade: `ValueError: Tabelas não permitidas:
+{'participant_items'}` — a LLM alucinou um nome de tabela porque
+`item_events` nunca tinha sido ensinada ao NLQ (só é usada pelo
+coach/endpoint de análise de campeão, nunca no `schema_context.py`).
+
+**Decisão de design**: `item_events` só tem `item_id` numérico, sem
+nome. Ensinar a tabela sozinha deixaria o `explain_result()` (a
+narração em português do resultado) tentando "lembrar" nome de item
+por ID de cabeça — exatamente o mesmo bug de invenção de stat já
+corrigido pro coach em 2026-07-08 (Coração de Aço). Solução: catálogo
+de verdade no banco, pra qualquer nome de item em qualquer resposta
+vir de JOIN, nunca de memória do modelo.
+
+- `db/schema.sql`: nova tabela `items(item_id, name, total_gold,
+  purchasable, map_11)`.
+- `src/etl/load_item_catalog.py` (novo): carrega `data/items.json`
+  (Data Dragon) na tabela — TRUNCATE + reinsere, 706 itens. Rodado:
+  `Coração de Aço` (3084) confere com o catálogo real (3000 ouro,
+  purchasable, map_11).
+- `schema_context.py`: ensinadas `item_events` e `items`, com exemplo
+  de CTE (primeira compra por partida via `MIN(ts_ms)` + `action =
+  'BUY'`, pra recompra após vender não contar duas vezes).
+  `evaluate_nlq`: 23/26 = 88%, mesmas 3 falhas benignas de sempre —
+  sem regressão.
+
+**Testando a pergunta original de ponta a ponta (não só o benchmark,
+que não cobre build) achei DOIS bugs reais no validador que o
+benchmark não pegou**, porque nenhuma das 26 perguntas usa CTE ou as
+tabelas novas:
+
+1. `validate_sql()` só aceitava SQL começando literalmente com
+   `select` — o exemplo de CTE que acabei de ensinar (`WITH ... AS
+   (...) SELECT`) era rejeitado antes mesmo de chegar na checagem de
+   tabelas. Corrigido: aceita prefixo `select` OU `with`.
+2. `item_events`/`items` nunca tinham sido adicionadas a
+   `ALLOWED_TABLES` — mesmo corrigindo o item 1, a query ainda
+   rejeitava com "Tabelas não permitidas". Corrigido: adicionadas.
+3. Um TERCEIRO bug apareceu só depois de corrigir os dois acima: o
+   regex que extrai nomes de tabela de `FROM`/`JOIN` não distinguia
+   tabela real de nome de CTE — `first_buys`/`champ` (definidos no
+   `WITH`) caíam no mesmo regex e eram rejeitados como tabela
+   desconhecida. Corrigido extraindo os nomes definidos em `nome AS
+   (` e excluindo-os do conjunto "desconhecido" (`FORBIDDEN` continua
+   rodando sobre o texto inteiro, então não abre brecha de segurança
+   — só a checagem de allowlist de tabela ficou mais precisa).
+
+Depois dos 3 fixes, `evaluate_nlq` rerodado de novo (regra da casa,
+mudei `validate_sql` duas vezes) — 23/26 = 88%, sem regressão em
+nenhuma das duas rodadas.
+
+**Quarto achado, de qualidade do resultado (não erro, mas inútil na
+prática)**: com tudo corrigido, a query rodava e retornava dados
+reais, mas o top da lista era poção, ward e bota básica (`Poção de
+Vida`, `Espada Longa`, `Cristal de Rubi`) — tecnicamente "comprado
+pela Camille", mas não é o que "build" quer dizer. Adicionado ao
+worked example: filtro `total_gold >= 1300` (exclui componente barato
+e consumível, mantém item lendário/mítico de verdade). Reconfirmado
+com SQL direto contra o banco antes de mudar o prompt: com o filtro,
+o topo vira `Céu Dividido` (2565 jogos, 49.5% vitória), `Sinal de
+Sterak`, `Força da Trindade` etc. — dado de build de verdade.
+`evaluate_nlq` rerodado uma terceira vez: 23/26, sem regressão.
+
+Teste final de ponta a ponta: `ask('Quais os itens mais construídos
+pela Camille?')` retorna SQL válida, dados reais, e `explain_result()`
+narra os nomes certos (vêm do JOIN, não de memória) — a seção "Leitura
+de jogo" (que é explicitamente conhecimento do modelo, não dado, por
+design do prompt) ainda pode errar detalhe de stat de item, mas isso
+já é avisado ao usuário como opinião, não fato — diferente do bug do
+coach que afirmava stat errada como se fosse dado.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

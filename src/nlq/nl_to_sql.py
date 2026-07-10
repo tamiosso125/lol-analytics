@@ -25,7 +25,7 @@ from src.nlq.schema_context import SCHEMA_DESCRIPTION
 
 ALLOWED_TABLES = {
     "matches", "teams", "participants", "players", "bans",
-    "pro_games", "pro_players",
+    "pro_games", "pro_players", "item_events", "items",
 }
 FORBIDDEN = re.compile(
     r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|copy)\b",
@@ -87,15 +87,26 @@ def _without_string_literals(sql: str) -> str:
 
 
 def validate_sql(sql: str) -> None:
-    if not sql.lower().lstrip().startswith("select"):
-        raise ValueError("Apenas SELECT é permitido.")
+    prefix = sql.lower().lstrip()
+    # WITH também é aceito — schema_context.py ensina um exemplo com CTE
+    # (item_events/items) e rejeitar isso aqui quebrava a query antes mesmo
+    # de checar a allowlist de tabelas.
+    if not (prefix.startswith("select") or prefix.startswith("with")):
+        raise ValueError("Apenas SELECT (ou WITH ... SELECT) é permitido.")
     structural = _without_string_literals(sql)
     if ";" in structural.rstrip().rstrip(";"):
         raise ValueError("Múltiplos statements não são permitidos.")
     if FORBIDDEN.search(structural):
         raise ValueError("Query contém palavra-chave proibida.")
+    # nomes de CTE (WITH nome AS (...), nome2 AS (...)) não são tabelas do
+    # schema — sem isso, uma query com CTE (ex.: o exemplo de item_events/
+    # items) rejeita a si mesma, porque o FROM/JOIN que usa a CTE depois
+    # bate no mesmo regex que detecta tabelas reais.
+    cte_names = {
+        m.lower() for m in re.findall(r"\b([a-z_][a-z0-9_]*)\s+AS\s*\(", structural, re.IGNORECASE)
+    }
     tables = set(re.findall(r"\b(?:from|join)\s+([a-z_][a-z0-9_]*)", structural, re.IGNORECASE))
-    unknown = {t.lower() for t in tables} - ALLOWED_TABLES
+    unknown = {t.lower() for t in tables} - ALLOWED_TABLES - cte_names
     if unknown:
         raise ValueError(f"Tabelas não permitidas: {unknown}")
 

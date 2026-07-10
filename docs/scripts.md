@@ -159,6 +159,23 @@ na reconstrução, caso raro não tratado.
 
 ---
 
+### `src/etl/load_item_catalog.py` (novo, 2026-07-10)
+Carrega `data/items.json` (catálogo Data Dragon) na tabela `items`
+(`item_id, name, total_gold, purchasable, map_11`) — TRUNCATE +
+reinsere, 706 itens. Diferente de `load_items.py` (que extrai COMPRAS
+por partida de `item_events`, só com `item_id` numérico): este é o
+CATÁLOGO, existe pra permitir JOIN em SQL e resolver o nome do item a
+partir do `item_id`. Motivo: a consulta NL não tinha como responder
+"quais itens X mais constrói" sem isso — e nome de item nunca deve vir
+de memória do LLM (mesmo bug de invenção de stat já visto no coach,
+ver diário 2026-07-08). Rodar de novo só se `data/items.json` mudar de
+versão.
+
+**Uso:** `python -m src.etl.load_item_catalog`
+**Lê:** `data/items.json`. **Escreve:** `items`.
+
+---
+
 ## Features
 
 ### `src/features/build_features.py`
@@ -261,12 +278,34 @@ time vermelho) quando o `GROUP BY` não isola esse subgrupo (nunca
 de fora do subgrupo — dilui a taxa, chega a sair pela metade do valor
 real; sempre `WHERE` para isolar antes de agregar, ou `GROUP BY`
 também pela coluna do subgrupo se a pergunta quiser os dois lados).
+**2026-07-10**: ensinadas `item_events`/`items` (perguntas de build
+não tinham vocabulário — a LLM alucinava tabela como
+`participant_items`). Worked example usa CTE (`WITH ... SELECT`,
+primeira compra por partida via `MIN(ts_ms)` + `action='BUY'`) e exige
+`total_gold >= 1300` no JOIN com `items` pra excluir poção/ward/bota
+básica de "itens mais construídos" (sem o filtro, esses dominam o
+resultado e a resposta fica tecnicamente certa mas inútil).
 
 ### `src/nlq/nl_to_sql.py`
 Text-to-SQL: envia a pergunta + `SCHEMA_DESCRIPTION` para o Claude
 (`claude-haiku-4-5`, `temperature=0` para determinismo), valida a query
-gerada (só `SELECT`, sem múltiplos statements, sem palavras-chave de
-escrita, só tabelas do schema) e executa com `statement_timeout=10s`.
+gerada (só `SELECT` **ou `WITH ... SELECT`** — CTE aceito desde
+2026-07-10, ver abaixo —, sem múltiplos statements, sem palavras-chave
+de escrita, só tabelas do schema) e executa com `statement_timeout=10s`.
+
+**`validate_sql()` — 3 bugs achados e corrigidos em 2026-07-10**, ao
+testar de ponta a ponta (não só o benchmark, que não cobre build/CTE)
+a pergunta que motivou o item acima: (1) o prefixo só aceitava
+`select` literal, rejeitando o `WITH` do worked example novo antes de
+checar tabelas; (2) `item_events`/`items` nunca tinham sido
+adicionadas a `ALLOWED_TABLES`, então mesmo sem CTE a query seria
+rejeitada; (3) o regex que extrai nome de tabela de `FROM`/`JOIN` não
+distinguia tabela real de nome de CTE — `WITH champ AS (...)` seguido
+de `FROM champ` fazia `champ` cair na lista de "tabela desconhecida".
+Corrigido extraindo nomes definidos em `nome AS (` e excluindo-os da
+checagem de desconhecidos (`FORBIDDEN`, a regex de palavra-chave
+perigosa, roda sobre o texto inteiro sem essa exclusão — não abre
+brecha).
 
 **Uso:** `python -m src.nlq.nl_to_sql "qual campeão tem maior win rate?"`
 **Requer:** `ANTHROPIC_API_KEY` no `.env`.
