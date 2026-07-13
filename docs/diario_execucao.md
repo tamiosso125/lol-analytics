@@ -3093,6 +3093,45 @@ navegador (sem Playwright disponível nesta sessão) — só validado via
 chamada real à API, não clique real na UI; fica pendente se quiser
 confirmação visual completa.
 
+## 2026-07-13 — Passo 4 da revisão: limpeza dos gaps pequenos
+
+Fechando os itens pequenos já documentados e "não perseguidos a
+fundo" em entradas anteriores:
+
+- **Resíduo de markdown na narrativa do coach** (`**Orientação para o
+  time X:**` ocasional, apesar do prompt pedir "sem markdown"): 0/8
+  amostras reais desta sessão reproduziram, então não vale caçar a
+  causa no prompt — em vez disso, `_strip_markdown()` (novo helper em
+  `advice.py`, `text.replace("**", "")`) aplicado nas duas narrativas
+  (`generate_advice`, `generate_draft_analysis`). Correção barata e
+  segura o bastante pra não valer a pena esperar o próximo usuário
+  achar de novo.
+- **2 warnings do ESLint em `chart.tsx`** (`react-refresh/only-export-
+  components` — o arquivo exportava `AXIS_TICK`/`GRID`, constantes,
+  junto com o componente `ChartTooltip`): extraídas pra
+  `frontend/src/lib/chart-tokens.ts`; `chart.tsx` agora só exporta o
+  componente. Atualizados os 5 imports (`Competitivo`, `Dashboard`,
+  `Explain`, `MatchDetail`, `Predict`). `npm run lint`: 0 erros, 0
+  warnings (era 0 erros, 2 warnings).
+- **Bundle único de 818KB** (acima do limite de aviso do Vite, achado
+  no passo 1 desta revisão — sintoma de acúmulo de página sem code-
+  splitting): `App.tsx` passou a importar cada página via
+  `React.lazy()` + `<Suspense fallback={<Skeleton />}>` em vez de
+  import estático. `npm run build`: sem aviso de chunk grande, maior
+  chunk agora 350KB; `tsc` (que checa a forma exata do export nomeado
+  de cada `import().then(m => ({default: m.X}))`) e `npm run test`
+  (31/31) continuam limpos. Ressalva: os testes de página montam cada
+  componente diretamente (`pages.smoke.test.tsx`), não passam pelo
+  `Suspense`/lazy-loading de `App.tsx` — e não há Playwright nesta
+  sessão pra clicar de verdade entre rotas. Risco residual considerado
+  baixo (mecanismo padrão do React/Vite, tipos conferidos pelo tsc),
+  mas fica registrado como não 100% verificado visualmente.
+- **Botas fora do filtro `total_gold >= 1300` de "itens de build"**
+  (decisão já tomada e testada mais cedo hoje, ver entrada "Consulta
+  NL não respondia build"): mantido como está — filtro existe pra
+  responder "itens de build", onde botas raramente são o ponto
+  central da pergunta; não é um gap, é escopo intencional.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

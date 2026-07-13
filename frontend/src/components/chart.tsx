@@ -1,8 +1,5 @@
 /** Peças compartilhadas dos gráficos (Recharts + tokens do tema). */
 
-export const AXIS_TICK = { fill: "var(--muted-ink)", fontSize: 12 } as const;
-export const GRID = { stroke: "var(--grid)", strokeDasharray: "0" } as const;
-
 type Formatter = (value: number, name: string) => string;
 
 interface ChartTooltipProps {

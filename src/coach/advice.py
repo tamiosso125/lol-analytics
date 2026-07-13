@@ -88,6 +88,16 @@ FEATURE_LABELS = {
 }
 
 
+def _strip_markdown(text: str) -> str:
+    """Remove negrito markdown que ocasionalmente escapa da instrução
+    "sem markdown" do prompt (ex.: `**Orientação para o time vermelho:**`
+    solto no início do texto — visto em produção, não perseguido a fundo
+    na hora por ser raro; 0/8 amostras reais desta sessão reproduziram,
+    mas o strip é seguro e barato o bastante pra não valer a pena esperar
+    o próximo usuário achar de novo)."""
+    return text.replace("**", "")
+
+
 def _format_player(label: str, pe: dict | None) -> str:
     """pe = subconjunto de player_effect() (name, games_on_champion,
     raw_win_rate, shrunk_win_rate) — win rate do JOGADOR naquele
@@ -372,7 +382,7 @@ def generate_advice(
             "A orientação gerada é complexa demais e foi cortada antes de "
             "terminar — tente novamente."
         )
-    narrative = msg.content[0].text.strip()
+    narrative = _strip_markdown(msg.content[0].text.strip())
     build_suggestions = _extract_build_suggestions(client, narrative)
     return narrative, build_suggestions
 
@@ -512,4 +522,4 @@ def generate_draft_analysis(
             "A leitura de draft gerada é complexa demais e foi cortada antes "
             "de terminar — tente novamente."
         )
-    return msg.content[0].text.strip()
+    return _strip_markdown(msg.content[0].text.strip())

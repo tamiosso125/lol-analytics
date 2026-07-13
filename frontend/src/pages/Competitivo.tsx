@@ -12,7 +12,8 @@ import {
   YAxis,
 } from "recharts";
 
-import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
+import { ChartTooltip } from "@/components/chart";
+import { AXIS_TICK, GRID } from "@/lib/chart-tokens";
 import { Card, CardContent, CardHeader, CardTitle, ErrorNote, PageHeader, Skeleton } from "@/components/ui";
 import { Takeaway } from "@/components/ui";
 import { api } from "@/lib/api";

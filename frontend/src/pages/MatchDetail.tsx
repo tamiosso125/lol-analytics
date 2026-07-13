@@ -14,7 +14,8 @@ import {
   YAxis,
 } from "recharts";
 
-import { AXIS_TICK, ChartTooltip, GRID } from "@/components/chart";
+import { ChartTooltip } from "@/components/chart";
+import { AXIS_TICK, GRID } from "@/lib/chart-tokens";
 import { CoachCard } from "@/components/CoachCard";
 import { DraftAnalysisCard } from "@/components/DraftAnalysisCard";
 import { MapHeatmap } from "@/components/MapHeatmap";
