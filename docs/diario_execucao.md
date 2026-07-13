@@ -3076,6 +3076,23 @@ narrativa, não é bug, e o atalho que evita a chamada de extração à
 toa funcionou corretamente). De 0/4 quebrado pra confiável sempre que
 a narrativa de fato recomenda item.
 
+Passo 3 (reverificação ponta a ponta das features empilhadas desde
+2026-07-08): reproduzi o fluxo REAL do MatchDetail contra a partida
+`BR1_3257266337` — `/compose` com os `puuid`s reais dos 10 jogadores
+→ `/coach/draft` com os `lanes`/`synergies` retornados (exatamente o
+que `DraftAnalysisCard` recebe na página de verdade). Conferi cada
+número citado na narrativa contra o JSON bruto do `/compose`: win
+rate de lane (64%/63%/65%/55%), win rate ajustado por jogador
+(59%/55%/56%/48%/43%...) e sinergia de dupla (Khazix+Camille -12,1pp,
+Khazix+Viktor +10,5pp) — **todos batem exatamente** com o dado real,
+zero número inventado. `/matches/{id}/positions` confirmado
+retornando itens+ouro+CS+dano+KDA+posição juntos por minuto no mesmo
+frame (base de `91b2e0c` e do replay sync de `6517a8a`) — estrutura
+já unificada, sem gap aparente. Não incluiu passada visual no
+navegador (sem Playwright disponível nesta sessão) — só validado via
+chamada real à API, não clique real na UI; fica pendente se quiser
+confirmação visual completa.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
