@@ -363,6 +363,15 @@ def generate_advice(
         temperature=0.4,
         messages=[{"role": "user", "content": prompt}],
     )
+    if msg.stop_reason == "max_tokens":
+        # narrativa cortada no meio é pior que um erro — o usuário veria um
+        # parágrafo quebrado sem aviso nenhum (mesma classe de bug já achada
+        # e corrigida em generate_sql do NLQ; risco cresceu aqui porque cada
+        # camada nova (itens/sinergia/tático) deixa o prompt maior).
+        raise ValueError(
+            "A orientação gerada é complexa demais e foi cortada antes de "
+            "terminar — tente novamente."
+        )
     narrative = msg.content[0].text.strip()
     build_suggestions = _extract_build_suggestions(client, narrative)
     return narrative, build_suggestions
@@ -377,7 +386,12 @@ def _extract_build_suggestions(client: anthropic.Anthropic, narrative: str) -> l
         return []
     msg = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=500,
+        # 500 cortava o tool call no meio (JSON incompleto -> {} vazio,
+        # sem erro nenhum) sempre que a narrativa citava vários itens com
+        # stats reais (min_games) — mesmo bug de orçamento de token já
+        # visto em generate_sql, só que aqui silencioso: build_suggestions
+        # simplesmente voltava [] e os ícones de item somiam da UI.
+        max_tokens=1000,
         temperature=0.2,
         tools=[EXTRACT_BUILDS_TOOL],
         tool_choice={"type": "tool", "name": "extrair_builds"},
@@ -395,6 +409,11 @@ def _extract_build_suggestions(client: anthropic.Anthropic, narrative: str) -> l
             }
         ],
     )
+    if msg.stop_reason == "max_tokens":
+        # JSON parcial não é confiável (pode faltar campo obrigatório) —
+        # melhor devolver vazio explicitamente do que arriscar um item sem
+        # "reason" ou um dict pela metade.
+        return []
     tool_use = next((b for b in msg.content if b.type == "tool_use"), None)
     if tool_use is None:
         return []
@@ -488,4 +507,9 @@ def generate_draft_analysis(
         temperature=0.4,
         messages=[{"role": "user", "content": prompt}],
     )
+    if msg.stop_reason == "max_tokens":
+        raise ValueError(
+            "A leitura de draft gerada é complexa demais e foi cortada antes "
+            "de terminar — tente novamente."
+        )
     return msg.content[0].text.strip()

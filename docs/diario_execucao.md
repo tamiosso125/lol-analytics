@@ -3027,6 +3027,55 @@ design do prompt) ainda pode errar detalhe de stat de item, mas isso
 já é avisado ao usuário como opinião, não fato — diferente do bug do
 coach que afirmava stat errada como se fosse dado.
 
+## 2026-07-13 — Revisão pós-features: build_suggestions voltava vazio de verdade
+
+Pedido do usuário: um planejamento de revisão focado em gaps deixados
+pelas features recentes (~20 commits desde a última revisão completa
+em 2026-07-03). Passo 1 (baseline): `npm run lint`/`test`/`build`
+(frontend) e `evaluate_nlq`/`smoke_test`/`validate_predictions`
+(backend) — tudo dentro do esperado, incluindo as 10 "falhas" de
+`validate_predictions` (mesmas categorias já documentadas em
+2026-07-03 como característica do modelo, não bug). Único achado
+novo: o bundle JS passou de despercebido para acima do limite de
+aviso do Vite (818KB) — sintoma de acúmulo de páginas sem
+code-splitting, anotado pra limpeza depois, não corrigido agora.
+
+Passo 2 (auditoria de grounding do LLM): testei `/coach` de ponta a
+ponta contra uma partida real (`BR1_3257266337`) em vez de só ler o
+código. `build_suggestions` voltou **vazio em 4/4 tentativas**, mesmo
+com a narrativa citando claramente vários itens reais com stats reais
+("Tormento de Liandry, 53% vitória em 771 jogos" etc.) — quebra a
+garantia de "6/6" verificada em 2026-07-08 pra essa mesma função.
+
+**Causa raiz**: `stop_reason: max_tokens` na chamada de extração
+(`_extract_build_suggestions`, `max_tokens=500`) — confirmado
+inspecionando a resposta bruta da API (`tool_use.input == {}`, JSON
+cortado no meio). Interação entre features: adicionar `top_items` com
+stats reais à narrativa (a correção de grounding de 2026-07-08) deixou
+a narrativa mais rica/longa, e ninguém reajustou o orçamento de tokens
+da chamada SEPARADA que releva essa narrativa depois — o mesmo tipo de
+bug já corrigido uma vez em `nl_to_sql.py` (`generate_sql`, 500→1200
+tokens), mas dessa vez silencioso: sem erro nenhum, só ícone de item
+sumindo da UI.
+
+**Gap sistêmico relacionado, também corrigido**: nenhuma das 3 chamadas
+de LLM em `advice.py` (`generate_advice`, `_extract_build_suggestions`,
+`generate_draft_analysis`) verificava `stop_reason` — só `generate_sql`
+do NLQ tinha esse guard. Adicionado `if stop_reason == "max_tokens":
+raise ValueError(...)` nas duas chamadas de narrativa (falha alta,
+melhor um erro claro que um parágrafo cortado sem aviso) e um retorno
+`[]` explícito na extração (falha baixa — é enriquecimento opcional,
+JSON parcial não é confiável o bastante pra usar mesmo que pareça
+válido por acaso).
+
+**Correção**: `_extract_build_suggestions` subiu de 500 para 1000
+tokens. Reverificado com 4 chamadas novas na mesma partida: 3/4
+`build_suggestions` populado (a 4ª vez a narrativa genuinamente não
+mencionou item nenhum — variação normal de `temperature=0.4` na
+narrativa, não é bug, e o atalho que evita a chamada de extração à
+toa funcionou corretamente). De 0/4 quebrado pra confiável sempre que
+a narrativa de fato recomenda item.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
