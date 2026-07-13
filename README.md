@@ -63,19 +63,25 @@ python -m src.models.export_model             # 13. exporta os modelos p/ a API 
 ## Front end (React)
 
 Interface principal da plataforma em `frontend/` (Vite + React + TypeScript,
-Tailwind CSS v4, Recharts, TanStack Query). Páginas: início (busca de
-campeão, rankings top-5 e insights com o "porquê"), dashboard analítico
-em seções narrativas (ouro × vitória, objetivos, viés de lado, durações,
+Tailwind CSS v4, Recharts, TanStack Query). Páginas (6, desde a
+consolidação de navegação de 2026-07-06): início (busca de campeão,
+rankings top-5 e insights com o "porquê"), dashboard analítico em
+seções narrativas (ouro × vitória, objetivos, viés de lado, durações,
 cobertura por patch), campeões (tabela win/pick/ban rate estilo op.gg,
 com detalhe e matchups por campeão), partidas (feed + análise completa
 com curva de probabilidade minuto a minuto, mapa de calor sobre o
-minimapa e objetivos por minuto), consulta em linguagem natural (com
-explicação e chat de acompanhamento), predição de vitória por fase do
-jogo (10/15/20/25 min), montar partida (team builder 5v5 com matchups,
-sinergias e estado de jogo opcional) e explicabilidade (SHAP por fase +
-evolução da importância) — tudo consumindo a API FastAPI (o Streamlit
-segue disponível como alternativa). Ícones de campeão via CDN
-CommunityDragon.
+minimapa, itens/KDA/ouro/CS/dano por minuto, modo "e se", leitura de
+draft e orientação estratégica via IA, replay sincronizado), competitivo
+(dados profissionais Oracle's Elixir, seletor de ano), consulta em
+linguagem natural (com explicação e chat de acompanhamento) e simulador
+(3 abas: composição — team builder 5v5 com matchups, sinergias e
+jogadores opcionais —, estado — predição de vitória por fase do jogo
+10/15/20/25 min — e explicabilidade — SHAP por fase e evolução da
+importância) — tudo consumindo a API FastAPI (o Streamlit segue
+disponível como alternativa). Orientação estratégica via LLM (`/coach`,
+`src/coach/advice.py`) sempre separa dado real (matchup/sinergia/item
+medido) de conhecimento geral do jogo, rotulado como tal. Ícones de
+campeão via CDN CommunityDragon.
 
 Obs.: a tabela `bans` é preenchida pelo ETL; se o banco foi populado antes
 dela existir, rode `python -m src.etl.load_matches` uma vez (backfill a
@@ -86,6 +92,14 @@ aplicado) é preenchida por `python -m src.etl.load_items` a partir das
 timelines brutas — rode após qualquer coleta nova. O catálogo de itens
 (`data/items.json`) vem do Data Dragon; a página de campeão usa os dois
 para a seção "Itens finalizados mais construídos".
+
+Obs. 3: a tabela `items` (catálogo — nome/custo/mapa, mesmo
+`data/items.json` acima) é preenchida por
+`python -m src.etl.load_item_catalog` — só precisa rodar uma vez, ou de
+novo se a versão do Data Dragon mudar (não depende de coleta nova).
+Permite a consulta em linguagem natural responder perguntas de build
+("quais itens X mais constrói") com JOIN em vez de a IA "lembrar" nome
+de item de memória.
 
 ```bash
 python -m src.models.export_model     # uma vez (habilita o /predict)

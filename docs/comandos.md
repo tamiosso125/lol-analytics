@@ -202,13 +202,14 @@ Ordem canônica quando se popula um banco vazio (também no README):
 2.  python -m src.collect.seed_players       # jogadores
 3.  python -m src.collect.collect_matches    # partidas + timelines
 4.  python -m src.collect.backfill_names     # nomes
-5.  python -m src.etl.load_items             # itens
-6.  python -m src.features.build_features     # features por fase
-7.  python -m src.models.train_baseline       # baseline
-8.  python -m src.models.tune_models          # tuning + calibração
-9.  python -m src.models.export_model         # modelos de produção
-10. python -m src.collect.collect_pro         # + competitivo (opcional)
-11. python -m src.etl.load_pro
-12. uvicorn src.api.main:app --port 8000     # API
-13. cd frontend && npm run dev                # front
+5.  python -m src.etl.load_items             # itens (compras/vendas por partida)
+6.  python -m src.etl.load_item_catalog      # catálogo de itens (nome/custo) — 1x, só se data/items.json mudar
+7.  python -m src.features.build_features     # features por fase
+8.  python -m src.models.train_baseline       # baseline
+9.  python -m src.models.tune_models          # tuning + calibração
+10. python -m src.models.export_model         # modelos de produção
+11. python -m src.collect.collect_pro         # + competitivo (opcional)
+12. python -m src.etl.load_pro
+13. uvicorn src.api.main:app --port 8000     # API
+14. cd frontend && npm run dev                # front
 ```

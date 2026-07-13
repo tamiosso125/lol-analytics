@@ -1,5 +1,11 @@
 # Planejamento v2 — Bellestraiko (pós-roadmap do TCC)
 
+> **Status (2026-07-13): todos os 6 sprints abaixo já foram entregues**
+> (ver `docs/diario_execucao.md`, entradas de 2026-07-05/06, e
+> `docs/handoff.md` → "Próximos passos" para a lista real de
+> pendências atuais). Este documento fica como registro histórico da
+> decisão de escopo/ordem — não é mais uma lista de tarefas ativas.
+
 Plano para os 4 objetivos definidos pelo usuário em 2026-07-04, na
 ordem de execução sugerida. O roadmap original de 6 etapas do TCC está
 concluído (ver `docs/diario_execucao.md`); este documento organiza a

@@ -15,10 +15,11 @@ cronológico (`docs/diario_execucao.md`), a referência de scripts
 TCC II (CS, Unisinos): plataforma de análise de esports de League of
 Legends com DOIS datasets complementares:
 
-1. **Solo queue** (Riot API): partidas ranqueadas Challenger/GM BR
-   (fila 420) — ~11,8k partidas e crescendo (coleta retomável), com
-   JSON bruto + timelines guardados para reprocessamento.
-2. **Competitivo** (Oracle's Elixir): 99.259 jogos profissionais de
+1. **Solo queue** (Riot API): partidas ranqueadas Challenger/GM
+   multi-região (BR1/EUW1/KR/NA1, fila 420) — **23.133 partidas**
+   (2026-07-06, coleta retomável), com JSON bruto + timelines
+   guardados para reprocessamento.
+2. **Competitivo** (Oracle's Elixir): ~99k jogos profissionais de
    2014-2026 (LCK/LPL/LEC/LTA/CBLOL etc.), carregados de CSVs anuais.
 
 Sobre eles: modelos de predição de vitória "em jogo" por fase
@@ -47,64 +48,105 @@ Oracle's Elixir CSVs → data/pro/ → pro_games/pro_players
 
 Decisões centrais: predição usa SÓ estado pré-corte da timeline (nunca
 totais finais — vazamento de dados; aviso em `build_features.py`); o
-`/compose` do Montar Partida é heurística de win rates históricos,
-deliberadamente separada do modelo ML e sinalizada como tal na UI.
+`/compose` (aba Composição do Simulador) é heurística de win rates
+históricos, deliberadamente separada do modelo ML e sinalizada como
+tal na UI.
 
 ## Onde estão as coisas
 
 - **Schema**: `db/schema.sql` — solo queue (`players`, `raw_*`,
-  `matches`, `teams`, `participants`, `bans`, `item_events`) +
+  `matches`, `teams`, `participants`, `bans`, `item_events`, `items`
+  — catálogo Data Dragon, 2026-07-10, pra JOIN de nome de item) +
   competitivo (`pro_games`, `pro_players`).
 - **Coleta**: `src/collect/` — `seed_players`/`collect_matches`
-  (Riot API, chave dev expira em 24h), `backfill_names`, `collect_pro`
-  (Oracle's Elixir; o Drive público tem quota diária — fallback é
-  baixar manualmente para `data/pro/`).
+  (Riot API, chave dev expira em 24h, multi-região via
+  `--platforms`), `backfill_names`, `collect_pro` (Oracle's Elixir; o
+  Drive público tem quota diária — fallback é baixar manualmente para
+  `data/pro/`; já usado com sucesso, não é um bloqueio ativo).
 - **ETLs**: `src/etl/` — `load_matches` (normalização match-v5),
-  `load_items` (compras/vendas com ITEM_UNDO aplicado; TRUNCATE+rebuild;
-  rodar após coleta nova), `load_pro` (CSVs do OE; idempotente por ano).
+  `load_items` (compras/vendas/ITEM_DESTROYED com ITEM_UNDO aplicado;
+  TRUNCATE+rebuild; rodar após coleta nova), `load_item_catalog`
+  (catálogo `items` a partir de `data/items.json`; roda só quando a
+  versão do Data Dragon muda), `load_pro` (CSVs do OE; idempotente por
+  ano).
 - **Features/modelos**: `src/features/build_features.py` (CUTOFFS
   10/15/20/25), `src/models/` (train_baseline, tune_models,
   export_model, explain_shap). Produção: XGBoost n=500/lr=0.01/depth=3
-  por fase em `data/models_phases.joblib`.
+  por fase em `data/models_phases.joblib`, retreinado em 23.133
+  partidas (2026-07-06) — ver números abaixo.
 - **API**: `src/api/main.py` — todos os endpoints (stats solo queue,
   `/stats/pro/*` com `?year=` padrão mais-recente, análise de partida
   com estado por minuto, heat map/posições, itens por campeão,
-  `/compose`, `/predict`, NLQ). Lista completa em `docs/scripts.md`.
-- **NLQ**: `src/nlq/` — `nl_to_sql.py`, `schema_context.py` (⚠️ regra:
+  `/compose`, `/predict`, `/coach` + `/coach/draft`, NLQ). Lista
+  completa em `docs/scripts.md`.
+- **Coach** (`src/coach/`): `advice.py` — orientação estratégica via
+  LLM (Claude Haiku) em cima do estado+SHAP já calculados, com 3
+  camadas opcionais de contexto real (composição/matchup/sinergia;
+  itens+posição+visão+momentum da timeline; nada é invenção — todo
+  "dado real" citado vem de uma query, não de memória do modelo) +
+  leitura de draft pré-jogo (`generate_draft_analysis`, sem estado de
+  jogo) + sugestão de build estruturada com ícones reais de item
+  (nome resolvido contra `items`, nunca confiado à LLM). Ver
+  `project_scope_decisions.md` na memória do assistente pro histórico
+  completo das 4 camadas.
+- **NLQ**: `src/nlq/` — `nl_to_sql.py` (aceita `SELECT` e `WITH ...
+  SELECT`/CTE desde 2026-07-10), `schema_context.py` (⚠️ regra:
   qualquer mudança aqui exige re-rodar `evaluate_nlq` — já regrediu
-  silenciosamente 2×), `evaluate_nlq.py` (benchmark, exigência da
-  banca).
-- **Front**: `frontend/` — páginas: Início, Dashboard, Campeões
-  (+detalhe com itens), Partidas (+análise com heat map, objetivos por
-  minuto e modo "e se"), Competitivo (seletor de ano), Consulta NL
-  (Explicação como aba padrão), Predição, Montar Partida (combobox de
-  busca, estado opcional combinado ao ML), Explicabilidade.
+  silenciosamente mais de uma vez), `evaluate_nlq.py` (benchmark, 26
+  perguntas, exigência da banca).
+- **Front**: `frontend/` — 6 páginas desde a consolidação de
+  2026-07-06: Início, Dashboard, Campeões (+detalhe com itens),
+  Partidas (+análise com heat map, itens/KDA/ouro/CS/dano por minuto,
+  modo "e se", leitura de draft, replay sincronizado), Competitivo
+  (seletor de ano), Consulta NL, Simulador (3 abas: Composição —
+  antiga Montar Partida, com jogadores opcionais —, Estado — antiga
+  Predição —, Explicabilidade). Rotas antigas (`/montar`, `/predicao`,
+  `/explicabilidade`) redirecionam para `/simulador`.
 - **Testes**: `tests/smoke_test.py` (roda em tempdir — NÃO toca dados
   reais) e `tests/validate_predictions.py` (bateria comportamental do
-  modelo de produção).
+  modelo de produção); front tem Vitest (`frontend/npm run test`,
+  31 testes) + ESLint.
 - **Docs**: `diario_execucao.md` (fonte primária para escrever o TCC),
-  `scripts.md` (referência), `planejamento_v2.md` (próxima fase, 8
-  sprints).
+  `scripts.md` (referência), `planejamento_v2.md` (plano de sprints —
+  **todos os 6 sprints já entregues**, ver diário; mantido como
+  registro histórico da decisão, não uma lista de pendências ativas).
 - **Memória do assistente** (Claude Code): contexto persistente em
   `C:\Users\Home\.claude\projects\...\memory\` — lido automaticamente.
 
 ## Números que importam (para o texto do TCC)
 
-Modelos tunados, solo queue 10k+ (logs em `reports/*_10k.log`):
+Modelo em produção, solo queue **23.133 partidas** (retreino final
+2026-07-06 — números do `train_baseline` CV 5-fold no corte de 15min;
+hiperparâmetros são os tunados na base de 10k por `tune_models.py`,
+reaplicados ao volume maior via `export_model.py`; não houve um novo
+GridSearchCV completo em 23k — se a banca cobrar isso, é reproduzível):
 
 | Modelo | Acurácia | AUC-ROC |
 |---|---|---|
-| MLP | 0,7522 | 0,8325 |
-| XGBoost (produção) | 0,7501 | 0,8319 |
-| RandomForest | 0,7507 | 0,8305 |
+| XGBoost (produção) | 0,7573 | 0,8393 |
+| MLP | ~0,74 | 0,8385 |
+| RandomForest | ~0,73 | 0,8219 |
 
-NLQ: **91-95% execution accuracy** (flutua entre execuções; 22
-perguntas; citar a faixa, não um número cravado; re-medir ao escrever).
+(MLP/RF são do mesmo retreino, ver `docs/diario_execucao.md`
+2026-07-06 pra tabela completa com os 4 cortes de fase.)
+
+NLQ: **88% execution accuracy** (23/26, medido repetidamente e estável
+nesta sessão de revisão — 2026-07-13; as 3 falhas são a mesma família
+benigna de sempre, formatação/coluna extra, não erro real). 26
+perguntas de referência (22 solo queue + 4 competitivo).
 
 **Achados de tese (os dois lados do viés de lado):**
-- Solo queue Challenger/GM BR: **vermelho vence 56,3%** (estável entre
-  patches) — contraria a literatura.
-- Competitivo (99k jogos): **azul vence ~53%**, estável ATRAVÉS DOS
+- Solo queue Challenger/GM BR: **vermelho vence 56,3%** no agregado —
+  mas **NÃO é constante por fase** (achado 2026-07-08, não repetir a
+  versão simplificada em texto): a probabilidade-base do modelo pra
+  partidas empatadas sobe de 47,8% (10min) a 51,1% (25min) — mais
+  favorável ao vermelho cedo, quase neutro tarde. Testado 3 formas
+  (win rate bruto de partidas empatadas, restrito a BR1, duração total
+  sem filtro de empate) — a tendência de enfraquecimento é sólida, mas
+  a amostra de "empatado aos 25min" é pequena (IC ainda inclui viés
+  vermelho) — não afirmar uma inversão completa confirmada. Ver diário
+  2026-07-08 pra tabela e metodologia completas.
+- Competitivo (~99k jogos): **azul vence ~53%**, estável ATRAVÉS DOS
   ANOS — a literatura descreve o pro; nosso solo queue é o outlier.
   Hipótese documentada: counter-pick garantido (solo queue) vs
   prioridade de primeiro pick (pro).
@@ -113,10 +155,11 @@ perguntas; citar a faixa, não um número cravado; re-medir ao escrever).
 - SHAP por fase: torres saem de ~0 (10-15 min) para dezenas de vezes
   mais importância aos 25 (as placas caem aos 14) — razão de existir
   um modelo por fase.
-- **6 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
+- **8 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
   dispersão de time, tuning por fase, calibração extra, ouro em itens,
-  split def/off): a abordagem atual está no teto do que features
-  agregadas de estado permitem — material para a seção de limitações.
+  split def/off, item_gold_diff refeito, ward_diff/ward_kill_diff):
+  a abordagem atual está no teto do que features agregadas de estado
+  permitem — material para a seção de limitações.
 - Validação externa: o próprio Oracle's Elixir publica uma calculadora
   de win probability early-game com a mesma estrutura da nossa
   Predição.
@@ -132,14 +175,16 @@ uvicorn src.api.main:app     cd frontend && npm run dev
 Pré-requisitos: Postgres com schema (`python -m src.db`), `.env`
 (RIOT_API_KEY 24h, DATABASE_URL, ANTHROPIC_API_KEY). Ordem completa de
 pipeline no README. Após coleta nova: `load_items` + `build_features` +
-`export_model` + restart da API.
+`export_model` + restart da API. `load_item_catalog` só precisa rodar
+de novo se `data/items.json` mudar de versão (não depende de coleta).
 
 ## Limitações conhecidas (documentar, não "consertar às pressas")
 
 - Amostras pequenas em matchups/sinergias específicos — NLQ avisa e
-  rotula "Leitura de jogo"; shrinkage formal é o sprint 4 do plano.
-- Benchmark NLQ tem 1-2 falhas benignas aceitas (formatação, não erro)
-  — deliberadamente não superajustado.
+  rotula "Leitura de jogo"; shrinkage de dupla (com IC) já shipped
+  (2026-07-06), ver `team_synergies()`.
+- Benchmark NLQ tem 3 falhas benignas aceitas (formatação, não erro)
+  — deliberadamente não superajustado; 23/26 = 88%.
 - Cobertura por patch desigual no solo queue (16.13 domina) — exposto
   no Dashboard.
 - Wave/micro state não existe em nenhuma API da Riot — caminhos reais
@@ -149,12 +194,24 @@ pipeline no README. Após coleta nova: `load_items` + `build_features` +
 - Monotonicidade isolada de kill/tower_diff imperfeita (fatores
   redundantes/raros) — característica documentada na bateria de
   validação, `monotone_constraints` é opção se a banca cobrar.
+- Champion select competitivo no Simulador/Team Builder — único item
+  pendente da visão original que ainda não foi iniciado (ver
+  `project_team_builder.md` na memória do assistente).
 
 ## Próximos passos
 
-Seguir `docs/planejamento_v2.md` (8 sprints): sprint 0 = pedir a
-Personal API Key da Riot (aprovação demora); sprint 1 = competitivo em
-tudo (NLQ, campeão); sprint 2 = modelo pro + tipos de dragão; sprints
-3-4 = perfis de jogador + Montar Partida com shrinkage; sprint 5 =
-multi-região; sprint 6 = MVP tempo real (replay-ao-vivo); 7+ pós-TCC.
-Em paralelo: escrever os capítulos do TCC a partir do diário.
+`docs/planejamento_v2.md` está **100% entregue** (sprints 0-6, ver
+diário 2026-07-05/06) — mantido só como registro histórico da decisão
+de escopo, não uma lista de pendências ativas. Pendências reais atuais
+(ver "Próximos registros pendentes" no fim de `diario_execucao.md`,
+seção sempre mantida atualizada):
+- Escrever os capítulos do TCC a partir do diário (maior pendência
+  real) — inclui atualizar as tabelas de métrica com os números de
+  23k partidas (2026-07-06) e o achado de viés de lado por fase
+  (2026-07-08), não os números antigos de 10k.
+- Champion select competitivo no Team Builder (única feature da visão
+  original ainda não iniciada).
+- Ampliar mais a amostra por região (KR/EUW1/NA1 ainda bem menores
+  que BR1) se quiser reforçar o achado de viés de lado.
+- `monotone_constraints` no XGBoost — só se a banca cobrar
+  monotonicidade formal; não é bug, é característica documentada.
