@@ -518,6 +518,59 @@ def listas_de_ilustracoes(doc, resumos: dict) -> None:
     resumos["listas"] = 2
 
 
+def formatar_referencias(doc) -> int:
+    """Aplica o estilo REFERÊNCIAS e a separação de 1 linha em branco entre
+    entradas.
+
+    REGRA DO ORIENTADOR (Prof. Elvandi, em comentário no TCC 1, registrada
+    em `docs/tcc2_texto.md` -> Pendências finais item 4): "Referências
+    bibliográficas com 1 linha em branco separando cada entrada (norma
+    ABNT)". O pandoc não faz isso — ele emite todas as entradas coladas em
+    parágrafos `Normal`. Sem esta etapa o documento sai em desacordo com a
+    correção que o próprio professor aplicou na versão anterior.
+
+    O estilo REFERÊNCIAS também vem do TCC 1 (Arial 12, espaçamento após
+    12pt) — é o estilo da instituição, não uma reconstrução local.
+    """
+    corpo = doc.element.body
+    elementos = list(corpo.iterchildren())
+
+    ini = None
+    for i, el in enumerate(elementos):
+        if not el.tag.endswith("}p"):
+            continue
+        p = Paragraph(el, doc)
+        if p.text.strip().upper().startswith("REFERÊNCIAS") and \
+           p.style.name.lower().startswith(("heading", "t")):
+            ini = i
+            break
+    if ini is None:
+        sys.exit("seção REFERÊNCIAS não encontrada")
+
+    estilo_ref = _estilo(doc, "REFERÊNCIAS")
+    n = 0
+    entrada_anterior = None
+    for el in elementos[ini + 1:]:
+        if not el.tag.endswith("}p"):
+            break
+        p = Paragraph(el, doc)
+        if p.style.name.lower().startswith(("heading", "t")):
+            break  # acabou a seção (APÊNDICE A)
+        if not p.text.strip():
+            continue
+        if estilo_ref is not None:
+            p.style = estilo_ref
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        p.paragraph_format.line_spacing = 1.5
+        if entrada_anterior is not None:
+            # linha em branco entre entradas
+            br = entrada_anterior.add_run()
+            br.add_break()
+        entrada_anterior = p
+        n += 1
+    return n
+
+
 def main() -> None:
     ref = os.environ.get("TCC1_REFERENCE_DOCX", "")
     if not ref or not os.path.exists(ref):
@@ -550,12 +603,15 @@ def main() -> None:
     montar_pre_textual(doc, resumo, palavras, abstract, kwords)
     n_q = numerar_quadros(doc)
     n_f = inserir_figuras(doc)
+    n_r = formatar_referencias(doc)
     listas_de_ilustracoes(doc, {})
     _numeracao_comeca_em_um(doc)
     doc.save(OUT)
     os.remove(STAGE)
     print(f"[3/4] pre-textual montado")
-    print(f"[4/4] {n_q} Quadros numerados (campo SEQ) + {n_f} Figuras inseridas")
+    print(f"[4/4] {n_q} Quadros numerados (campo SEQ) + {n_f} Figuras "
+          f"inseridas + {n_r} referências no estilo REFERÊNCIAS com 1 "
+          f"linha em branco entre entradas")
     print(f"       -> {OUT}")
     print(f"       paragrafos: {len(doc.paragraphs)} | tabelas: {len(doc.tables)}")
     print("       falta: docs/finalize-fields.ps1 (Word atualiza SUMARIO, "

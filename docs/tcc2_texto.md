@@ -1163,43 +1163,43 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
    88% confirmado com dados frescos), C (quadro cruzado 4 cortes × 3
    modelos), D (9 experimentos negativos), Anexo A (6 capturas de tela
    reais em `reports/anexo_a/`), Anexo B (referência da API).
-4. **Formatação final** — verter este texto para o template `.docx`
-   institucional (capa, espaçamento, fonte, numeração ABNT), que este
-   Markdown não reproduz. Único item puramente mecânico ainda em
-   aberto; precisa do arquivo-modelo `.docx` (não localizado neste
-   repositório nem nas pastas locais verificadas — `Downloads/TCC/`
-   só tinha versões do TCC I). Duas correções de formatação concretas
-   já feitas pelo Prof. Elvandi em comentários no TCC I (extraídas de
-   `Downloads/Revisado - TCC - revisado Prof. Elvandi.docx`, aplicam
-   igualmente ao TCC II):
-   - Títulos de seção (ex.: "1.4 OBJETIVOS") em maiúscula **sem
-     negrito** — diferente do que os templates brutos mostram em
-     negrito.
-   - Referências bibliográficas com **1 linha em branco** separando
-     cada entrada (norma ABNT).
+4. **Formatação final — FEITA (2026-10-03).** O texto foi vertido para
+   `.docx` institucional por script, não à mão. Pipeline em
+   `docs/build_tcc_docx.py` + `docs/finalize-fields.ps1`, produzindo
+   `docs/tcc2_final.docx` (49 páginas; corpo = 21 páginas, dentro do
+   limite de 25-30). A formatação (A4, margens 3/2/3/2 cm, Arial 12,
+   entrelinha 1,5, capa, folha de rosto, identidade) é **herdada do
+   TCC I** via `--reference-doc`, não reescrita.
 
-   Mais 3 regras confirmadas em 2026-09-29 ao analisar a estrutura
-   LaTeX oficial (`UNISINOSartigo`, exemplo enviado pelo curso) — já
-   aplicadas neste Markdown onde fazia sentido:
+   As duas correções do Prof. Elvandi aplicadas no TCC I foram
+   conferidas no documento gerado:
+   - Títulos de seção em maiúscula **sem negrito** — verificado: 41
+     títulos, 0 em negrito. Já saía certo.
+   - Referências com **1 linha em branco** separando cada entrada —
+     **não saía certo** na primeira geração (o pandoc cola as entradas
+     em parágrafos `Normal`). Corrigido no pipeline: 12 referências no
+     estilo `REFERÊNCIAS` do TCC I, com a separação entre entradas.
+
+   As 3 regras do modelo institucional de 2026-09-29 também estão
+   aplicadas — as duas últimas passaram a valer no `.docx`, não só no
+   Markdown:
    - Palavras-chave separadas por **ponto final**, não ponto-e-vírgula
      — corrigido no Resumo/Abstract.
-   - Tabelas se chamam **"Quadro"** nesta instituição (ambiente LaTeX
-     próprio, com "Lista de Quadros") — todas as tabelas do texto
-     (Seções 4.3/4.4, Apêndices B/C/D) já foram rotuladas como
-     "Quadro" em vez de "Tabela"; falta só a numeração sequencial
-     final (Quadro 1, 2, 3...) que só faz sentido atribuir na conversão
-     para LaTeX.
+   - Tabelas se chamam **"Quadro"** nesta instituição, com "Lista de
+     Quadros" — feito no `.docx`: 5 Quadros com numeração automática por
+     campo `SEQ` e página de Lista de Quadros montada.
    - Figuras: legenda no **topo**, fonte obrigatória **abaixo** (mesmo
-     para figura de autoria própria) — relevante quando os screenshots
-     do Anexo A virarem figuras no documento final; ainda não aplicável
-     ao Markdown atual.
+     para figura de autoria própria) — feito: as 6 capturas do Anexo A
+     entraram como figuras com essa convenção, e há Lista de
+     Ilustrações.
    - Confirmado também: a estrutura de seções do corpo (além de
      Introdução/Referencial Teórico obrigatórios) é **livre, por
      acordo com o orientador** — não há seção "Trabalhos Relacionados"
      obrigatória no template genérico, o que dá mais folga à pendência
-     nº 2 acima (não é mais um bloqueio estrutural, só uma preferência
+     nº 3 acima (não é mais um bloqueio estrutural, só uma preferência
      a confirmar). Limite de páginas do TCC II: **25 a 30 páginas**,
-     não contando apêndices/anexos.
+     não contando apêndices/anexos — o corpo do documento gerado tem
+     21 páginas.
 5. ~~Ampliar a coleta EUW1/KR/NA1~~ — **feito**: EUW1 1.307→11.744
    partidas, KR 1.308→8.567 (NA1 ficou em 1.446 mesmo após duas novas
    rodadas — anotado como limitação, não re-executado de novo). Quadro
@@ -1208,6 +1208,17 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
    *dashboard* (metodologia registrada em memória do projeto:
    `feedback_verify_dashboard_numbers`).
 
-**Status:** de 5 pendências, restam apenas 2 itens puramente mecânicos
-ou externos (decisão do orientador; formatação `.docx`) — nenhum é
-trabalho de conteúdo ou de análise.
+**Status (2026-10-03):** de 6 pendências, **4 estão fechadas** (Resumo,
+Apêndices/Anexos, formatação `.docx`, ampliação da coleta). Restam **2 itens
+que dependem do orientador** e nenhum deles é trabalho de conteúdo ou análise
+— ambos são decisão de escopo, não de escrita:
+
+1. **Título acadêmico** — aplicado (mantido igual ao TCC I), falta confirmar.
+2. **Trabalhos Relacionados** — nota na Seção 2 (posição atual) ou seção de
+   primeiro nível como no TCC I. Se virar seção própria, a numeração de
+   Material e Métodos em diante desloca e o documento precisa ser regerado.
+
+Há ainda **1 item de confirmação do autor** (não do orientador): o título do
+Quadro 4 (Apêndice C), que no rascunho só tinha nota de método. O título foi
+escrito durante a conversão e está marcado como `CONFIRMAR` em
+`docs/build_tcc_docx.py`.
