@@ -176,6 +176,33 @@ abaixo de 0,05), e por isso a direção não é exigível. Detalhes em
 
 ---
 
+## 7b. Gerar o documento do TCC (.docx)
+
+Sempre que alterar `docs/tcc2_texto.md`, regere o entregável:
+
+```powershell
+# TCC 1 é usado só como REFERÊNCIA DE ESTILO (fonte, margens, espaçamento);
+# o conteúdo dele não é lido. Ajuste o caminho para o seu arquivo.
+$env:TCC1_REFERENCE_DOCX = 'C:\Users\Home\Downloads\TCC\TCC_Final.docx'
+
+# 1. markdown -> .docx (pandoc gera o corpo; python-docx monta
+#    capa/folha/numeração de Quadros/insere as 6 figuras do Anexo A)
+.\.venv\Scripts\python.exe docs\build_tcc_docx.py
+
+# 2. o Word preenche SUMÁRIO, LISTA DE QUADROS e a numeração dos campos SEQ
+powershell -ExecutionPolicy Bypass -File docs\finalize-fields.ps1
+```
+
+O passo 2 não é opcional: campos `TOC`/`SEQ` nascem vazios e sem ele o
+documento sai com o sumário em branco e os Quadros sem número. O script
+também repagina e reporta a contagem final de páginas — útil para conferir
+o limite de 25–30 do corpo.
+
+Precisa de `pandoc` no PATH (`winget install JohnMacFarlane.Pandoc`) e
+`python-docx` no venv. Detalhes em `docs/scripts.md`.
+
+---
+
 ## 8. Dashboard Streamlit (alternativa ao React)
 
 ```powershell

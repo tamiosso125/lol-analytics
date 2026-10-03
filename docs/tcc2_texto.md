@@ -161,7 +161,9 @@ utilizadas na construção deste trabalho.
 
 O tema deste trabalho é a análise de dados aplicada a esports, com
 foco no desenvolvimento de uma plataforma inteligente para exploração
-de informações competitivas em *League of Legends*. O estudo está
+de informações competitivas em *League of Legends*. A plataforma,
+batizada **Bellestraiko**, constitui a materialização do sistema
+desenvolvido e implementado ao longo deste trabalho. O estudo está
 inserido na área da Ciência da Computação e envolve conceitos de
 ciência de dados, inteligência artificial, *machine learning* e
 sistemas de informação, contribuindo para a organização, interpretação
@@ -373,7 +375,7 @@ apresentado na análise de partida da plataforma (Seção 4).
 
 ---
 
-## 3 MATERIAL E MÉTODOS
+## 3 MATERIAL(IS) E MÉTODOS
 
 Esta seção descreve os procedimentos metodológicos efetivamente
 empregados no desenvolvimento da pesquisa e da plataforma, detalhando a
@@ -1140,12 +1142,23 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
 ## Pendências finais antes da entrega
 
 1. ~~Resumo/Abstract~~ — **feito**.
-2. **Decisão do orientador** (única pendência de conteúdo que ainda
-   depende de terceiros): posição de "Trabalhos Relacionados" (nota na
-   Seção 2) e se o título muda para citar "Bellestraiko" — a própria
-   interface já usa esse nome em produção (ver capturas do Anexo A),
-   então vale perguntar diretamente se o título acadêmico deve
-   acompanhar.
+2. **Título acadêmico — aplicado, confirmar com o orientador.** O
+   título do TCC 2 foi mantido igual ao do TCC 1 ("Plataforma
+   Inteligente para Análise de Dados de Esports: uma proposta para
+   League of Legends com uso de machine learning e interface em
+   linguagem natural"), por ser o mesmo trabalho e a troca não ter
+   aval do orientador. Em vez disso o nome do produto foi registrado
+   no corpo, na Seção 1.1: "A plataforma, batizada Bellestraiko,
+   constitui a materialização do sistema desenvolvido". A interface
+   já usa esse nome em produção (ver capturas do Anexo A), então vale
+   perguntar se o título deve acompanhar.
+3. **Trabalhos Relacionados — decisão de escopo ainda aberta.** O TCC 1
+   tem "3 TRABALHOS RELACIONADOS" como seção de primeiro nível,
+   aprovada; o modelo institucional de 2026-09-28 não inclui essa
+   seção. Este texto a mantém como nota na Seção 2. Perguntar ao
+   orientador qual das duas formas vale para o TCC 2 — se ele escolher
+   seção própria, a numeração de Material e Métodos em diante
+   desloca.
 3. ~~Apêndices/Anexos~~ — **feitos**: A (schema), B (26 perguntas NLQ,
    88% confirmado com dados frescos), C (quadro cruzado 4 cortes × 3
    modelos), D (9 experimentos negativos), Anexo A (6 capturas de tela

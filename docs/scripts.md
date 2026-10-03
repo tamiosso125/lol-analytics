@@ -760,3 +760,68 @@ para não passarem por números derivados.
 **Uso:** `python tests/validate_predictions.py`
 **Lê:** `data/models_phases.joblib`, `data/features_phases.csv`, banco
 (amostra de `raw_timelines` para a checagem retrospectiva).
+
+---
+
+## Geração do documento do TCC
+
+Pipeline que converte `docs/tcc2_texto.md` no `.docx` entregável, no padrão
+do modelo institucional da UNISINOS.
+
+### Por que `.docx` e não LaTeX
+
+O modelo que a coordenação distribui foi produzido em **Microsoft Word** — o
+PDF oficial de 2026-09-28 traz `/Producer: Microsoft Word para Microsoft 365`.
+A classe `UNISINOSartigo.cls` do pacote `tugunisinos` (em
+`docs/tcc2_latex/template_src`, ignorado pelo git por ser third-party) também
+funciona, mas é um projeto comunitário: usar LaTeX significaria reconstruir em
+vez de seguir o formato que a banca usa. O TCC 1 aprovado também está em
+`.docx`, e é ele que serve de referência de estilo.
+
+### `docs/build_tcc_docx.py`
+
+Gera `docs/tcc2_final.docx` em 4 passos:
+
+1. **Preprocessa o markdown** — remove o cabeçalho de trabalho, o bloco de
+   pendências internas, a seção "Pendências finais antes da entrega" e o bloco
+   Resumo/Abstract (que vira pré-textual), além dos `---` (viravam réguas
+   horizontais entre seções, inexistentes em documento ABNT).
+2. **pandoc gera o corpo** com `--reference-doc` apontando para o TCC 1 — é
+   daqui que vem fonte, margens e espaçamento (A4, 3/2/3/2 cm, Arial 12,
+   entrelinha 1,5, justificado). Também `--shift-heading-level-by=-1`, porque
+   no markdown a seção de 1º grau é `##`.
+   **Não** usar `--toc`: o sumário é montado no passo 3, senão o documento
+   fica com dois. **Não** usar `--number-sections`: o markdown já traz a
+   numeração, e a flag duplicava ("1  1 INTRODUÇÃO") e numerava
+   REFERÊNCIAS/APÊNDICES como seções 7..13.
+3. **Monta o pré-textual** — capa, folha de rosto, Resumo/Palavras-chave/
+   Abstract/Key-words e campo do SUMÁRIO, que o pandoc não faz. Zera a
+   contagem de páginas no início do corpo.
+4. **Numera Quadros e insere Figuras** — legenda com campo `SEQ` acima,
+   fonte (estilo `Fonte das ilustrações` do TCC 1) abaixo, e as 6 capturas de
+   `reports/anexo_a/` no lugar da tabela que as listava. Adiciona as páginas
+   de Lista de Ilustrações e Lista de Quadros (`TOC \c`).
+
+O campo `SEQ` é o que permite a numeração automática: inseriu ou removeu um
+quadro, o Word reenumera e as listas se reconstroem.
+
+**Uso:**
+```powershell
+$env:TCC1_REFERENCE_DOCX = 'C:\...\TCC_Final.docx'   # só estilo, não conteúdo
+.\.venv\Scripts\python.exe docs\build_tcc_docx.py
+```
+
+### `docs/finalize-fields.ps1`
+
+Campos do Word (`TOC`, `TOC \c`, `SEQ`, `PAGE`) nascem vazios — só o Word os
+preenche. Este script abre o `.docx`, atualiza os campos em duas passadas
+(a primeira gera o sumário, a segunda preenche os números que a inserção do
+próprio sumário desloca), repagina e salva.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File docs\finalize-fields.ps1
+```
+
+### Dependências
+
+`pandoc` (winget install JohnMacFarlane.Pandoc) e `python-docx` (já no venv).
