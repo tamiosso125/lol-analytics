@@ -73,8 +73,8 @@ QUADROS = [
     "Comparação entre modelos (corte de 15 minutos)",
     "Benchmark de 26 perguntas de referência (NLQ)",
     # A 4ª tabela (Apêndice C) não tem título no markdown — só uma nota de
-    # método. O título abaixo foi escrito para esta conversão; CONFIRMAR com o
-    # autor antes da entrega.
+    # método, o que viola a regra da instituição (tabela sem legenda).
+    # Título escrito na conversão e CONFIRMADO pelo autor em 2026-10-03.
     "Métricas completas por corte temporal — comparação entre os três modelos",
     "Experimentos negativos de enriquecimento de features",
 ]

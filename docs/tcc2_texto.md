@@ -1215,10 +1215,13 @@ decisões de escopo). **Nenhuma pendência depende do orientador.**
 2. **Trabalhos Relacionados** — decidido: não é seção de primeiro nível,
    segue o modelo do TCC 2 (item 3 acima).
 
-Resta **1 item de confirmação do autor** (não do orientador): o título do
-Quadro 4 (Apêndice C), que no rascunho só tinha nota de método. O título foi
-escrito durante a conversão e está marcado como `CONFIRMAR` em
-`docs/build_tcc_docx.py`.
+**Resta 1 item, já resolvido:** o título do Quadro 4 (Apêndice C), que no
+rascunho só tinha nota de método — o que viola a regra da instituição, já
+que tabela sem legenda não é permitida. O título foi escrito na conversão e
+**confirmado pelo autor em 2026-10-03**: "Métricas completas por corte temporal
+— comparação entre os três modelos".
+
+**Nenhuma pendência em aberto.** As 6 estão fechadas.
 
 **Consequência prática:** com as duas decisões fechadas, a numeração do corpo
 fica exatamente igual à do modelo institucional (1 Introdução, 2 Referencial
