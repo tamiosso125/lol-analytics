@@ -53,7 +53,10 @@ def features_from_timeline(payload: dict, cutoff_min: int = CUTOFF_MIN) -> dict 
                 if ev.get("killerId", 0) > 0:
                     kills[team] += 1
             elif t == "BUILDING_KILL":
-                # killerTeamId no evento é o time que PERDEU a torre
+                # teamId é o time que PERDEU a torre; killerTeamId é o que a
+                # DESTRUIU (ganhou). Somar killerTeamId direto põe a torre no
+                # time errado — bug invertido por 2 semanas de dashboard em
+                # 2026-07-08. O 300 - lost abaixo é a inversão explícita.
                 lost = ev.get("teamId")
                 if lost in (100, 200):
                     towers[300 - lost] += 1

@@ -161,9 +161,18 @@ salvar em `data/pro/{ano}_LoL_esports_match_data_from_OraclesElixir.csv`.
 # Smoke test (sem banco/API, roda em tempdir — não toca dados reais):
 .venv\Scripts\python.exe tests\smoke_test.py
 
-# Bateria de validação comportamental do modelo de produção:
+# Bateria de validação comportamental do modelo de produção
+# (precisa do modelo exportado; ~30s):
 .venv\Scripts\python.exe tests\validate_predictions.py
 ```
+
+O smoke test e a bateria saem com código 1 em caso de falha e podem ser
+usados como portão em CI ou script. A bateria imprime um veredito de
+três estados — `APROVADO`, `APROVADO COM RESSALVAS` ou `REPROVADO`:
+ressalvas são casos em que o modelo exibe a limitação que o TCC 5.2
+declara, ou em que um fator tem peso despresível naquele corte (SHAP
+abaixo de 0,05), e por isso a direção não é exigível. Detalhes em
+`docs/scripts.md`.
 
 ---
 

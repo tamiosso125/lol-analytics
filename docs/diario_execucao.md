@@ -3132,6 +3132,358 @@ fundo" em entradas anteriores:
   responder "itens de build", onde botas raramente são o ponto
   central da pergunta; não é um gap, é escopo intencional.
 
+## 2026-09-28 — Coleta ampliada (só a EUW1 avançou), Anexo A e o quadro do Apêndice C
+
+Fechando a rastreabilidade de três coisas que o texto do TCC atribui a esta
+data e que não tinham registro aqui: a rodada de coleta multi-região, as
+6 capturas do Anexo A e a geração do quadro cruzado do Apêndice C.
+
+**1. Estado da base medido nesta data.** Comparando com o fechamento de
+2026-07-06 (23.133 partidas; BR1 11.936, EUW1 5.280, KR 4.471, NA1 1.446 —
+somam exatamente 23.133, sem EUN1):
+
+| Região | 2026-07-06 | 2026-09-28 | Δ | Vitória vermelho |
+|---|---:|---:|---:|---:|
+| BR1 | 11.936 | 11.936 | 0 | 56,3% |
+| EUW1 | 5.280 | 6.281 | +1.001 | 53,8% |
+| KR | 4.471 | 4.471 | 0 | 50,2% |
+| NA1 | 1.446 | 1.446 | 0 | 51,9% |
+| EUN1 | — | 20 | +20 | 50,0% (fora da conclusão) |
+| **Total** | **23.133** | **24.154** | **+1.021** | |
+
+Só a EUW1 cresceu. **BR1, KR e NA1 estão idênticos aos de 2026-07-06** — a
+coleta multi-região desses três pontos simplesmente não avançou no intervalo
+(o mesmo sintoma de NA1 já registrado em 2026-07-06). Causa provável segue
+sendo a mesma, já diagnosticada: `collect_matches` sempre seleciona o top-N
+por `league_points DESC`, e o topo do ladder Challenger/GM já foi colhido —
+crescer exige `--players` bem maior (500-1000+), não só rodar de novo. Os
++1.021 (+4,4%) são da ordem do "incremento pequeno" que a entrada de
+2026-07-06 já classificou como insuficiente para retreinar, e por isso
+**não houve retreino** — decisão mantida.
+
+**2. Divergência de 11 partidas com a captura do Anexo A — REGISTRADA COMO
+LACUNA, NÃO RESOLVIDA.** A captura `reports/anexo_a/02_dashboard.png`
+mostra **EUW1 6.270** e KPI **Partidas 24.143**, enquanto o quadro do TCC
+traz EUW1 6.281 e total 24.154. O que dá para afirmar sem inventar:
+- As duas leituras são **internamente consistentes**. Somando as linhas da
+  captura: 11.936 + 6.270 + 4.471 + 1.446 + 20 = **24.143**, igual ao KPI.
+  Somando as linhas do quadro do TCC: 11.936 + 6.281 + 4.471 + 1.446 + 20 =
+  **24.154**. Nenhuma das duas tem região transcrita errada.
+- A diferença é **exatamente 11 partidas, todas em EUW1** — ou seja, a única
+  região que estava crescendo. Hipótese mais provável: **a coleta ainda
+  estava rodando no momento da captura**, e o quadro do TCC foi lido
+  minutos depois. É exatamente o efeito já documentado em 2026-07-04 ("a
+  coleta adicional estava RODANDO durante a verificação — solo queue
+  passou de 10,4k para 11,8k ao longo da sessão").
+- **Não corrigi nenhum dos dois números.** Reprodução: `GET /stats/regions`
+  (`src/api/main.py:332`) ou a query direta
+  `SELECT m.platform_id, COUNT(*), AVG(t.win::int) FROM matches m JOIN
+  teams t ON t.match_id = m.match_id AND t.team_id = 200 GROUP BY
+  m.platform_id ORDER BY COUNT(*) DESC`. Quem for conferir vai ver 33.713
+  (ver entrada de 2026-10-03), porque a base cresceu de novo desde então.
+
+**3. Números que o Anexo A deixa como artefato.** A captura do Dashboard é
+a única das 6 que carrega números do modelo de dados, e eles são
+verificáveis direto na imagem: 24.143 partidas, 25.642 jogadores únicos, 17
+patches cobertos, duração média 26,8 min, 57,3 abates por partida, 63,5%
+das partidas chegam ao late game, lado azul 45,7% / vermelho 54,3%, e a
+leitura da faixa +6k a +8k (azul vence 96,1%; extremo oposto, -8k a -6k,
+3,2%). O gráfico de patches mostra 16.13 ainda dominante e 16.17/16.18/
+16.19 com barras pequenas — **inferência minha**: as partidas novas da
+rodada vieram de patches posteriores ao fechamento de 2026-07-06, o que é
+coerente com a coleta ter seguido rodando. A data de geração das 6
+capturas (2026-09-28, Playwright/Chromium 1440×900, página inteira) vem do
+Anexo A do TCC; a metadata dos PNG não foi conferida nesta revisão.
+
+**4. Apêndice C: gerado nesta data, mas sobre o dataset de 2026-07-06.**
+Os `n` do quadro (23.053 / 22.973 / 20.254 / 16.179) são **exatamente** os
+registrados na entrada de 2026-07-06 para os quatro cortes. Ou seja:
+`data/features_phases.csv` **não foi regenerado** entre 2026-07-06 e
+2026-09-28 — coerente com a coleta ter crescido sem `build_features` ter
+rodado. Consequência honesta para a Seção 4.4: dizer que a medição "de
+2026-09-28 reproduz exatamente os números do retreino de 2026-07-06"
+(45,6% de vitória azul em 22.973) é verdade, mas é **reprodução sobre
+arquivo idêntico**, não confirmação independente — o mesmo `train_baseline`
+sobre o mesmo CSV. Não é erro; é o que o registro permite afirmar.
+
+**Pendências abertas por esta data (não resolvidas, e é para não fingir
+resolução):**
+- **O quadro do Apêndice C não tem script reproduzível no repositório.**
+  `train_baseline.py` faz **só o corte de 15 min** (o próprio docstring diz
+  "vitória do time azul aos 15 min") e lê `data/features.csv`. As linhas de
+  10/20/25 min × 3 modelos foram geradas por uma execução que não ficou
+  registrada em script. Se a banca pedir reprodução, falta escrever o
+  script que varre `features_phases.csv` pelos 4 cortes.
+- **A "verificação por SQL direto" citada no TCC (pendência 5 da lista
+  final) não tem artefato neste repositório.** O texto remete à memória do
+  projeto (`feedback_verify_dashboard_numbers`), que não é versionada aqui
+  — nem `project_scope_decisions.md`, citado em entradas anteriores, existe
+  no repo. Pendente: rerodar a query e arquivar a saída (ex.:
+  `reports/stats_regions_2026-10-03.txt`), para que a afirmação tenha
+  lastro no repositório e não só na memória.
+- **A divergência de 11 partidas** acima: confirmar por `GET /stats/regions`
+  e, se for realmente instantâneo, escolher uma única data de corte para o
+  quadro do TCC e citar a captura como evidência do que ela mostra.
+
+## 2026-09-29 — Regras de formatação ABNT/UNISINOS confirmadas no template oficial
+
+Origem das regras: duas fontes **externas ao repositório** — a estrutura
+LaTeX oficial da instituição (classe `UNISINOSartigo`, exemplo enviado pelo
+curso) e os comentários do Prof. Elvandi no TCC I revisado
+(`Downloads/Revisado - TCC - revisado Prof. Elvandi.docx`, que não está no
+repo). Nenhuma das duas é preferência do autor, e é por isso que valem mais
+que a aparência dos templates brutos: são duas leituras independentes da
+mesma fonte institucional.
+
+**Aplicado (a lista real, não um resumo):**
+- **Títulos de seção em maiúscula e SEM negrito** — os templates brutos
+  mostram negrito; a orientação é sem. Já aplicado.
+- **Referências bibliográficas com 1 linha em branco** separando cada
+  entrada (norma ABNT). Já aplicado.
+- **Palavras-chave separadas por ponto final**, não ponto-e-vírgula —
+  corrigido no Resumo e no Abstract.
+- **Tabelas do texto (Seções 4.3/4.4, Apêndices B/C/D) rotuladas como
+  "Quadro"**, não "Tabela": a instituição tem ambiente LaTeX próprio e
+  "Lista de Quadros". Todas já renomeadas.
+- **Estrutura de seções do corpo é livre, por acordo com o orientador** —
+  não existe seção "Trabalhos Relacionados" obrigatória no template
+  genérico. Isso **reduz** a pendência de conteúdo nº 2 (posição de
+  "Trabalhos Relacionados"): deixa de ser bloqueio estrutural e vira
+  preferência a confirmar. **Limite de páginas: 25 a 30**, sem contar
+  apêndices e anexos.
+
+**O que ainda falta (e é mecânico, não de conteúdo):**
+- **Numeração sequencial dos Quadros** (Quadro 1, 2, 3...). Deixada de fora
+  de propósito: a ordem dos quadros ainda muda com a consolidação do texto,
+  e o número só fecha na conversão final.
+- **Conversão para o formato de entrega — que ainda não está decidido.** A
+  pendência 4 do texto fala em verter para o template `.docx`
+  institucional (capa, espaçamento, fonte, numeração de página), mas a
+  análise de 2026-09-29 foi sobre a estrutura **LaTeX**. Os dois caminhos
+  foram lidos; a escolha é o que define se a numeração de Quadros e a
+  legenda/fonte das figuras são aplicadas em `.docx` ou no LaTeX. Fica
+  registrado como pendência, não como decisão tomada.
+- **Figuras: legenda no topo, fonte obrigatória abaixo**, inclusive em
+  figura de autoria própria. Ainda não aplicável ao Markdown atual; fica
+  obrigatório quando as 6 capturas do Anexo A entrarem como figuras — cada
+  uma vai precisar de fonte ("captura de tela própria, dados de
+  produção").
+- **Arquivo-modelo `.docx` ainda não localizado** no repositório nem nas
+  pastas locais verificadas (`Downloads/TCC/` só tinha versões do TCC I).
+
+**Por que isto entra no diário e não só na lista de pendências do TCC:**
+regra de formatação que mora só no texto se perde na conversão — e a
+conversão é exatamente a etapa em que alguém abre o arquivo, vê "Quadro"
+virou "Tabela" de novo e não tem como saber que era regra da instituição.
+
+## 2026-10-03 — Viés de lado remedido em 33.713 partidas, reforma da bateria de validação e correções de consistência
+
+### 1. Medição do viés de lado com a coleta avançada
+
+Mesma pergunta do `GET /stats/regions` (`src/api/main.py:332`):
+
+```sql
+SELECT m.platform_id, COUNT(*) AS matches, AVG(t.win::int) AS red_win_rate
+FROM matches m JOIN teams t ON t.match_id = m.match_id AND t.team_id = 200
+GROUP BY m.platform_id ORDER BY COUNT(*) DESC
+```
+
+| Região | 2026-07-06 | 2026-09-28 | 2026-10-03 | Δ (09-28→10-03) | Vermelho (10-03) |
+|---|---:|---:|---:|---:|---:|
+| BR1 | 11.936 | 11.936 | 11.936 | 0 | 56,3% |
+| EUW1 | 5.280 | 6.281 | 11.744 | +5.463 | 53,4% |
+| KR | 4.471 | 4.471 | 8.567 | +4.096 | 50,3% |
+| NA1 | 1.446 | 1.446 | 1.446 | 0 | 51,9% |
+| EUN1 | — | 20 | 20 | 0 | 50,0% (fora) |
+| **Total** | **23.133** | **24.154** | **33.713** | **+9.559** | |
+
+O que importa no achado: **a direção não mudou**. As quatro regiões com
+amostra relevante continuam pendendo para o vermelho (50,3% a 56,3%) pela
+**terceira** medição seguida, e agora com EUW1 e KR quase dobradas em
+relação a 2026-09-28. Isso é o que fecha a leitura "é padrão de elo
+altíssimo em geral, não artefato do Brasil": com 11,7 mil partidas de
+EUW1 e 8,5 mil de KR, o BR1 (11.936, estável nas três medições) deixa de
+ser o único nem o maior volume de evidência isolado. BR1 e NA1 **não se
+moveram** de
+2026-07-06 até agora — o growth foi todo de EUW1/KR, e NA1 continua sendo a
+limitação declarada.
+
+**Ressalva de verificação (para não passar por mais forte do que é):** os
+números acima vêm da medição feita nesta data. O que eu conferi nesta
+passada de documentação foi a **coerência interna** (as linhas somam
+exatamente 33.713; BR1 11.936 e NA1 1.446 batem com os artefatos de
+2026-07-06 e com a captura do Anexo A) — **não** houve segunda execução
+independente da query, e **a saída não foi arquivada**. Pendente: rerodar e
+salvar em `reports/`, para a Seção 4.3 ter lastro no repo e não só nesta
+entrada.
+
+**Decisão de escopo:** usar **33.713 para a análise de viés de lado**
+(Seção 4.3) e **manter o modelo em 23.133 partidas**. O motivo é de escopo,
+não de medição: retreinar com o volume novo exigiria rever a Seção 4.4
+inteira e o Apêndice C (as duas seções citam métricas que nascem do
+dataset de 23.133), e o texto já estava em consolidação. Vale registrar o
+que se está assumindo ao não retreinar: as features de produção
+(`data/features_phases.csv`) **continuam as de 2026-07-06** — as 33.713
+partidas existem no banco, mas não têm contraparte em features nem em
+modelo. Ou seja, o modelo em produção não "sabe" nada das 10,5 mil
+partidas que a Seção 4.3 usa para medir viés de lado. O Apêndice D
+justifica a escolha pela mesma lógica em outro contexto: entre as 9
+tentativas de enriquecimento, o único ganho real veio de **volume**
+(0,8214 → 0,8393), o que torna o retreino o caminho certo — só não era o
+caminho cabível nesta versão do texto.
+
+### 2. Reforma da bateria de validação comportamental
+
+**O problema de fundo: um portão que não podia falhar.** `tests/validate_predictions.py`
+acumulava as falhas numa lista `FAIL`, imprimia "N checagens falharam" e
+**terminava com código 0 sempre**. O `import sys` estava no arquivo desde o
+começo, para um `sys.exit` que nunca foi escrito. Ou seja: **nenhum script
+em `tests/` podia reprovar**, e o agente `validador` do projeto rodava um
+gate que reportava sucesso ao sistema independente do resultado. Isso é
+pior que não ter bateria: é ter uma bateria que dá um tick verde falso.
+
+**A seção 1 media a coisa errada.** A antiga "Monotonicidade" variava uma
+feature por vez com as outras 4 **cravadas em zero** e media correlação
+> 0,9. Isso media duas coisas que não são o modelo: (i) **contexto zerado** —
+`tower_diff=+2` com `gold_diff=0` é estado que a partida praticamente não
+produz (o próprio diário registra isso em 2026-07-03); (ii) **valores
+fracionários** — as features são aritmética inteira sobre o payload, e o
+`np.linspace` gerava 0,29 torre / 0,14 dragão, que a feature não pode
+assumir: **13 dos 15 pontos eram fisicamente impossíveis**. O sintoma era
+correlação negativa nos cortes iniciais e positiva nos tardios **para a
+mesma feature**, que é ruído de região de baixa densidade. E o `nan` de
+`kill_diff` no corte de 25 min era "modelo insensível ao fator neste
+contexto", reportado como se fosse o oposto.
+
+**E o ponto de honestidade: as falhas não eram bugs novos.** As 9 checagens
+não-OK apontadas pela versão antiga **já tinham sido diagnosticadas** na
+entrada de 2026-07-03 deste diário (bateria de validação, item 1), que
+decidiu **deliberadamente não corrigir** e classificou como "característica
+do modelo, não bug" — o mesmo raciocínio está hoje declarado na Seção 5.2
+do TCC: o XGBoost não garante formalmente que aumentar **isoladamente** a
+diferença de **abates** ou **torres** nunca reduza a probabilidade, por
+conta de interações e redundâncias entre variáveis. Ou seja: a reforma
+**não** transformou 9 achados em 0; ela impediu que um resultado já
+diagnosticado e já declarado no texto aparecesse como reprovação do modelo.
+
+**A correção foi reformular a afirmação, não afrouxar o limiar.**
+- Seção 1 renomeada para **"Sanidade direcional"**: parte de linhas
+  **reais** de `features_phases.csv` (400 linhas por corte,
+  `random_state=42`), usa **valores inteiros** do percentil 1%-99% da
+  própria feature e mede a **fração de pares em que aumentar a feature
+  move a probabilidade na direção certa** — "vantagem REAL sobe a chance",
+  não "toda feature é monotônica".
+- Os percentis entram como **offset sobre a linha real**, não como valor
+  absoluto: uma linha de `gold_diff` +14.000 no corte de 25 é sondada em
+  +14.000+1.041, que é a pergunta que interessa ("dado o resto do estado
+  real, e se esta feature fosse maior?").
+- **Empates contados à parte e excluídos do denominador.** Com features
+  inteiras e faixa curta, boa parte dos pares consecutivos cai na mesma
+  folha da árvore; contar empate como acerto **infla** o número — foi
+  exatamente o que mascarou `tower_diff`/15min como "40%" quando, sem
+  empates, é 1%.
+- **Três estados de resultado**, em vez de "OK/não-OK":
+  - `FALHA` — fator com SHAP médio ≥ 0,05 (ou seja, realmente usado pelo
+    modelo), direção errada, **e** o TCC não declara isso para ele. Foi o
+    único estado que passou a reprovar (`sys.exit(1)`).
+  - `LIMITADO` — não-monotonicidade isolada de um fator que a Seção 5.2
+    **nomeia** ("abates e torres"): reportada, não reprovada.
+  - `NEUTRO` — SHAP médio < 0,05: o modelo praticamente não usa o fator
+    naquele corte, então direção não é exigível.
+- `LIMITADO` é definido por **propriedade**
+  (`FEATURES_NOMEADOS_PELO_TCC = {kill_diff, tower_diff}`), não por tupla
+  (feature, corte) — deliberadamente, para não ser uma lista feita sob
+  medida para o único caso que falhava. Se amanhã outro fator nomeado
+  falhar, ele entra como `LIMITADO` sem ninguém mexer no código.
+
+**Resultado da execução reformulada** (registrado em `docs/scripts.md`,
+seção `tests/validate_predictions.py`): `gold_diff` 99-100% e `xp_diff`
+92-100% de direção correta — são os fatores dominantes, com SHAP de 0,65 a
+1,04. **1 caso `LIMITADO`**: `kill_diff`/15min, direção em 60%, SHAP 0,070.
+**3 casos `NEUTRO`**: `tower_diff`/10min (SHAP 0,004), `tower_diff`/15min
+(0,014) e `kill_diff`/25min (0,009) — as placas só caem aos 14 min, que é a
+própria justificativa do TCC para treinar um modelo por fase. Bateria em
+~26 s, determinística (`setseed`), saída 0, veredito final **"APROVADO COM
+RESSALVAS"** — que é a última linha que o `validador` e a banca leem, e
+que nunca diz "todas passaram" havendo ressalvas listadas acima.
+
+**Duas outras mudanças no mesmo passo:** a checagem retrospectiva (seção 5)
+saiu de n=30 com `ORDER BY random()` **sem semente** para **n=150 com
+`setseed(0.4242)`** — um gate que podia falhar conforme o humor do banco,
+e n=30 não daria IC 95% capaz de sustentar afirmação (28/30 = 93% não é
+evidência de nada); e o `predict_proba` passou a rodar em **lote** por
+(corte, feature), porque 40.000 chamadas de uma linha levavam minutos e o
+`validador` roda isto como portão.
+
+**Lacunas honestas desta reforma:** a saída da execução **não foi
+arquivada** (não existe `reports/validate_predictions*.log`), então os
+percentuais acima vêm do registro em `docs/scripts.md` e não de um log
+re-executável; e o **detalhe por caso** das 9 falhas da versão antiga
+(tipo "kill_diff/10min reprovou em X%") não foi preservado — a contagem
+agregada de 9 e o diagnóstico de 2026-07-03 sustentam a conclusão, mas
+não há como reapresentar a tabela antiga caso a banca peça. Pendente:
+arquivar a próxima execução em `reports/`.
+
+**O que NÃO foi feito, deliberadamente:** (a) não adicionar
+`monotone_constraints` ao treino — isso é **retraining, mudança de
+modelagem**, não correção de bateria (e a limitação segue declarada na
+Seção 5.2, que é o lugar honesto para ela); (b) não afrouxar nenhum
+limiar — direção mínima 0,60, `SHAP_RELEVANTE` 0,05 e taxa mínima 0,70 da
+retrospectiva seguem como estão, todos registrados em `scripts.md` como
+**escolha de implementação, não derivação do TCC**; (c) não regenerar
+`features_phases.csv` nem rodar `export_model` — o modelo de produção segue
+sendo o mesmo arquivo de antes, byte a byte.
+
+### 3. Correções de consistência documental
+
+- **Contagem de experimentos negativos: 8 → 9.** O Apêndice D do TCC
+  omitia o experimento de **dragões por tipo (`monsterSubType`)**,
+  registrado na entrada de 2026-07-05 deste diário (Sprint 2) como **7º
+  experimento negativo**, com AUC dos 15 min **piorando** de 0,8319 para
+  **0,8295** (20 min 0,8661→0,8651; 25 min 0,9013→0,8999) — **o único dos
+  nove em que o desempenho piorou de forma mensurável**, e por isso o mais
+  informativo da série. A confusão nasceu de renumeração local: os títulos
+  "Experimento 7" (`item_gold_diff`) e "Experimento 8" (visão) das entradas
+  de 2026-07-06 contam a partir de uma lista que pula o dragões-por-tipo, e
+  o texto do "7º" chega a enumerar os antecessores ("barão/arauto,
+  dispersão de time, tuning por fase e calibração") sem citá-lo. A
+  reconstrução completa da série, conferida entrada a entrada: dispersão
+  espacial (2026-07-03), barão/arauto (2026-07-03), tuning por fase
+  (2026-07-03), calibração adicional (2026-07-03), ouro em itens
+  (`item_gold_diff`, 1ª versão, 2026-07-03), split defensivo/ofensivo
+  (2026-07-03), **dragões por tipo (2026-07-05)**, `item_gold_diff` refeito
+  (2026-07-06), visão (2026-07-06) — **9**. Observação de ordenação: no
+  Apêndice D o dragões-por-tipo aparece na posição 9, mas
+  cronologicamente foi o 7º; a escolha foi finalizá-lo por ser o único com
+  piora mensurável. **Os títulos "Experimento 7"/"Experimento 8" das
+  entradas de 2026-07-06 ficam como estão** — são registro histórico da
+  sessão, não índice da série.
+- **`docs/handoff.md` ainda holdava** "Solo queue Challenger/GM BR:
+  vermelho vence 56,3%" como se fosse fato do BR. O TCC 4.3 (regionalizado)
+  mostra que é padrão das quatro regiões com amostra relevante. **Corrigido
+  no handoff** — a formulação antiga ("é do BR") não deve voltar ao texto.
+- **`docs/diario_execucao.md:3160`** mandava "usar o nome novo 'Hextech
+  Lab'" — que é o nome **antigo**, descartado em 2026-07-03 por colisão com
+  um canal do YouTube. **Corrigido para Bellestraiko.** As outras 4
+  ocorrências de "Hextech Lab" são narrativa histórica legítima dos dois
+  renomes e **ficaram** — o erro era a instrução, não a história.
+- **Comentário invertido em `src/features/build_features.py`** (seção
+  `BUILDING_KILL`): afirmava que `killerTeamId` é o time que **PERDEU** a
+  torre, quando é o que a **DESTRUIU**. O código estava certo; o que estava
+  errado era a descrição da armadilha — e um leitor futuro que acreditasse
+  no comentário reintroduziria exatamente o bug invertido que a entrada de
+  2026-07-08 passou 2 semanas documentando. **Comentário corrigido, lógica
+  intocada.**
+- **Ressalva de volume acrescentada ao TCC** para o "~68%" de conversão de
+  vantagem: as taxas do solo queue dessa comparação foram medidas em
+  2026-07-04 sobre **~12 mil** partidas (a base disponível na ocasião; a
+  entrada de 2026-07-04 registra a coleta correndo de 10,4k para 11,8k ao
+  longo da própria sessão), **não sobre as 23.133** do modelo. A ressalva
+  existia no `handoff.md` e não no texto - agora está nos dois. É
+  uma estimativa de apoio a um achado qualitativo (a diferença de ~16 pontos
+  percentuais entre os dois cenários é grande demais para ser artefato de
+  amostra), não medida sobre a base de treino.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
@@ -3157,7 +3509,10 @@ fundo" em entradas anteriores:
 - Atualizar as tabelas de métricas do texto do TCC com os números do
   retreino de 2026-07-03 (acima).
 - Revisar os capítulos do texto do TCC com os resultados registrados
-  neste diário — usar o nome novo "Hextech Lab".
+  neste diário — usar o nome do produto, **Bellestraiko** (o "Hextech Lab"
+  foi descartado em 2026-07-03 por colisão com canal do YouTube; as
+  menções históricas aos dois renomes nas entradas acima são legítimas e
+  devem ficar).
 - Considerar `monotone_constraints` no XGBoost se a banca cobrar
   monotonicidade formal por fator isolado (ver bateria de validação
   acima) — mudança de modelagem, não prioridade atual.

@@ -688,20 +688,74 @@ um `TemporaryDirectory`.)
 Bateria de validação COMPORTAMENTAL do modelo de produção (diferente
 das métricas de teste de `train_baseline.py`/`tune_models.py`, que
 medem acerto médio — este script testa se o modelo se comporta como
-esperado): monotonicidade por fator (mais vantagem não deveria reduzir
-a prob. do azul), casos extremos (liderança/déficit total, simetria),
-taxa-base por fase (viés de lado com tudo empatado), evolução da
-importância SHAP entre fases, e uma checagem retrospectiva rodando o
-pipeline completo (timeline real → features → modelo por fase) em uma
-amostra de partidas reais, comparando a direção da predição nos
-últimos minutos com o vencedor de fato. Resultado de 2026-07-03: os
-únicos "FALHA" são monotonicidade isolada de `kill_diff`/`tower_diff`
-(esperado — baixa importância/redundância já documentada no SHAP,
-testar um fator isolado com os outros 4 em zero é um estado artificial
-fora da distribuição de treino) e a taxa-base aos 25min ligeiramente
-> 50% (esperado — "empatado aos 25min" é uma população condicional
-diferente do viés de lado incondicional de 56,3%). Ver a entrada do
-diário do mesmo dia para a interpretação completa.
+esperado). ** Sai com código 1 se alguma checagem FALHAR** (antes de
+2026-10-03 ele acumulava as falhas e saía com 0 sempre, o que tornava
+a bateria inútil como portão):
+
+1. **Sanidade direcional** — partindo de linhas REAIS de
+   `data/features_phases.csv`, aumentar uma feature isolada (valores
+   inteiros, dentro do percentil observado) move a probabilidade na
+   direção certa? Ver "reformulação de 2026-10-03" abaixo.
+2. Casos extremos (liderança/déficit total, simetria).
+3. Taxa-base por fase (viés de lado com tudo empatado) — dentro da
+   faixa que o TCC 4.3 documenta, e o corte mais vermelho é o de 15min
+   (não o de 25min: é isso que "enfraquece ao longo da partida" quer dizer).
+4. Evolução da importância SHAP entre fases.
+5. Checagem retrospectiva rodando o pipeline completo (timeline real →
+   features → modelo por fase) em **150 partidas reais com `setseed`
+   fixo** (antes era `ORDER BY random()` sem semente e n=30 — um gate
+   que podia falhar conforme o humor do Postgres).
+
+**Reformulação de 2026-10-03 (por que a seção 1 mudou).** A versão
+anterior chamava a checagem de "monotonicidade", variava uma feature
+por vez com as outras 4 cravadas em **zero** e media correlação > 0.9.
+Isso media duas coisas que não são o modelo: contexto zerado
+(`tower_diff=+2` com `gold_diff=0` é estado que a partida quase não
+produz) e valores **fracionários** — as features são aritmética
+inteira, e `np.linspace` gerava 0.29 torre / 0.14 dragão, que a feature
+não pode assumir (13 dos 15 pontos). O sintoma era correlação negativa
+nos cortes iniciais e positiva nos tardios para a MESMA feature. A
+versão nova usa linhas reais e valores inteiros do percentil observado.
+
+**Resultado atual (2026-10-03):** `gold_diff` 99–100% e `xp_diff`
+92–100% de direção correta (são os fatores dominantes — SHAP do
+`gold_diff` de 0,65 a 1,04). Empatadas são contadas **à parte** e
+excluídas do denominador: com features inteiras e faixa curta, boa parte
+dos pares consecutivos cai na mesma folha da árvore, e contar empate
+como acerto infla o número (foi o que mascarou `tower_diff`/15min como
+"40%" quando, sem empates, é 1%).
+
+Classificação dos não-OK, por **propriedade** e não por lista de casos:
+- `LIMITADO` (1): `kill_diff`/15min — direção em 60%, SHAP 0,070. A
+  Seção 5.2 do TCC nomeia explicitamente "abates e torres" ao declarar
+  a não-garantia de monotonicidade isolada.
+- `NEUTRO` (3): `tower_diff`/10min (SHAP 0,004), `tower_diff`/15min
+  (0,014) e `kill_diff`/25min (0,009) — abaixo do limiar de 0,05, ou
+  seja, o modelo praticamente não usa o fator nesse corte (as placas só
+  caem aos 14min, que é a justificativa do TCC para treinar um modelo
+  por fase). Direção não é exigível quando o fator não tem peso.
+
+`FALHA` continua reservada ao caso em que um fator **realmente usado**
+pelo modelo (SHAP ≥ 0,05) tem direção errada **e** o TCC não declara
+isso para ele. `gold_diff` e `xp_diff` medem 99–100%; se invertessem,
+reprovariam.
+
+O veredito final distingue os três casos — `APROVADO`,
+`APROVADO COM RESSALVAS` ou `REPROVADO` — e nunca diz "todas passaram"
+havendo ressalvas listadas acima.
+
+**Ressalva de método:** a seção 1 sonda o modelo em
+`features_phases.csv`, que é o mesmo dataset do treino
+(`export_model.py` faz `fit` sem split). Não há vazamento — o alvo não
+entra na entrada — mas isto é **sondagem de sanidade, não avaliação de
+generalização**: a seção 1 não detecta overfitting. As métricas de
+generalização são as do CV 5-fold, na Seção 4.4 do TCC.
+
+**Limiares (escolha de implementação, não derivação do TCC):**
+`SHAP_RELEVANTE = 0,05` (≈5 pontos percentuais de efeito médio na
+probabilidade) e direção mínima `0,60` — escolhido abaixo do pior valor
+não-exceptado observado (`kill_diff`/20min a 70%). Registrados aqui
+para não passarem por números derivados.
 
 **Uso:** `python tests/validate_predictions.py`
 **Lê:** `data/models_phases.joblib`, `data/features_phases.csv`, banco

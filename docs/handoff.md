@@ -16,9 +16,14 @@ TCC II (CS, Unisinos): plataforma de análise de esports de League of
 Legends com DOIS datasets complementares:
 
 1. **Solo queue** (Riot API): partidas ranqueadas Challenger/GM
-   multi-região (BR1/EUW1/KR/NA1, fila 420) — **23.133 partidas**
-   (2026-07-06, coleta retomável), com JSON bruto + timelines
-   guardados para reprocessamento.
+   multi-região (BR1/EUW1/KR/NA1, mais um resíduo EUN1, fila 420) —
+   **23.133 partidas** na base do modelo preditivo (2026-07-06,
+   coleta retomável). A coleta continuou depois: **24.154** em 2026-09-28
+   (rodada extra para o estudo de viés de lado por região) e **33.713**
+   em 2026-10-03, quando EUW1 e KR quase dobraram. Nenhum desses volumes
+   entrou no retreino — ver "Números que importam" para o porquê de
+   manter o modelo em 23.133. JSON bruto + timelines guardados para
+   reprocessamento.
 2. **Competitivo** (Oracle's Elixir): ~99k jogos profissionais de
    2014-2026 (LCK/LPL/LEC/LTA/CBLOL etc.), carregados de CSVs anuais.
 
@@ -121,14 +126,21 @@ hiperparâmetros são os tunados na base de 10k por `tune_models.py`,
 reaplicados ao volume maior via `export_model.py`; não houve um novo
 GridSearchCV completo em 23k — se a banca cobrar isso, é reproduzível):
 
-| Modelo | Acurácia | AUC-ROC |
-|---|---|---|
-| XGBoost (produção) | 0,7573 | 0,8393 |
-| MLP | ~0,74 | 0,8385 |
-| RandomForest | ~0,73 | 0,8219 |
+| Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
+|---|---|---|---|---|---|
+| XGBoost (produção) | 0,7573 | 0,7444 | 0,7133 | 0,7285 | 0,8393 |
+| MLP | 0,7550 | 0,7457 | 0,7034 | 0,7238 | 0,8385 |
+| RandomForest | 0,7409 | 0,7237 | 0,6997 | 0,7115 | 0,8219 |
 
-(MLP/RF são do mesmo retreino, ver `docs/diario_execucao.md`
-2026-07-06 pra tabela completa com os 4 cortes de fase.)
+(Números exatos, não aproximados: 0,7550 arredonda para 0,76 e
+0,7409 para 0,74 — escrever "~0,74"/"~0,73" subestimava o MLP em
+~0,01 e já divergia do quadro do TCC.) Reproduz com
+`.venv\Scripts\python.exe -m src.models.train_baseline` (que roda só
+o corte de 15 min, em `data/features.csv`). O quadro completo dos 4
+cortes × 3 modelos está no Apêndice C de `tcc2_texto.md` — **sem script
+que o reproduza**: `train_baseline.py` não tem modo multi-corte, então
+regerar aquele quadro exige um script novo (pendência real, registrada no
+diário em 2026-10-03).
 
 NLQ: **88% execution accuracy** (23/26, medido repetidamente e estável
 nesta sessão de revisão — 2026-07-13; as 3 falhas são a mesma família
@@ -136,30 +148,48 @@ benigna de sempre, formatação/coluna extra, não erro real). 26
 perguntas de referência (22 solo queue + 4 competitivo).
 
 **Achados de tese (os dois lados do viés de lado):**
-- Solo queue Challenger/GM BR: **vermelho vence 56,3%** no agregado —
-  mas **NÃO é constante por fase** (achado 2026-07-08, não repetir a
-  versão simplificada em texto): a probabilidade-base do modelo pra
-  partidas empatadas sobe de 47,8% (10min) a 51,1% (25min) — mais
-  favorável ao vermelho cedo, quase neutro tarde. Testado 3 formas
-  (win rate bruto de partidas empatadas, restrito a BR1, duração total
-  sem filtro de empate) — a tendência de enfraquecimento é sólida, mas
-  a amostra de "empatado aos 25min" é pequena (IC ainda inclui viés
-  vermelho) — não afirmar uma inversão completa confirmada. Ver diário
-  2026-07-08 pra tabela e metodologia completas.
+- Solo queue Challenger/GM de elo alto: **o vermelho vence mais que o azul
+  em TODAS as regiões com amostra relevante** — medido em SQL sobre 24.154
+  partidas em 2026-09-28: BR1 56,3% (11.936), EUW1 53,8% (6.281), KR 50,2%
+  (4.471), NA1 51,9% (1.446); EUN1 (20 partidas) fica fora por amostra
+  insuficiente. Ou seja: **não é um fato do Brasil**, é um padrão de elo
+  muito alto em geral — a formulação antiga ("vermelho vence 56,3% no
+  BR") foi superada por esta leitura regionalizada e não deve voltar ao
+  texto (o próprio TCC adverte, Seção 4.3). A direção do achado se
+  manteve idêntica à leitura original de 2026-07-06; ver diário
+  2026-09-28.
+- **E o viés NEM É CONSTANTE POR FASE** (achado 2026-07-08, não
+  confirmado de novo em 2026-09-28 — é a mesma medição de 2026-07-08 que
+  o TCC 4.3 reproduz): a probabilidade-base do modelo pra partidas
+  empatadas vai de 47,8% azul (10min) → 46,3% (15min, o ponto mais
+  vermelho) → 49,1% (20min) → 51,1% (25min). Testado 3 formas (win rate
+  bruto de partidas empatadas, restrito a BR1, duração total sem filtro
+  de empate) — a tendência de enfraquecimento é sólida, mas **não há
+  inversão completa confirmada**: o IC Wilson 95% do ponto BR1 aos 25min
+  (n=458) é [46,5%–55,6%], que inclui 50% e ainda inclui valores
+  favoráveis ao vermelho. Ver diário 2026-07-08 pra tabela e
+  metodologia completas.
 - Competitivo (~99k jogos): **azul vence ~53%**, estável ATRAVÉS DOS
   ANOS — a literatura descreve o pro; nosso solo queue é o outlier.
   Hipótese documentada: counter-pick garantido (solo queue) vs
   prioridade de primeiro pick (pro).
 - Conversão de vantagem: com +2k a +4k de ouro aos 15, o pro vence
   84,0% vs ~68% no solo queue — "macro ganha jogo", quantificado.
+  (medido em 2026-07-04, sobre ~12k partidas; ver ressalva de volume na
+  lista de pendências do diário)
 - SHAP por fase: torres saem de ~0 (10-15 min) para dezenas de vezes
   mais importância aos 25 (as placas caem aos 14) — razão de existir
   um modelo por fase.
-- **8 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
+- **9 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
   dispersão de time, tuning por fase, calibração extra, ouro em itens,
-  split def/off, item_gold_diff refeito, ward_diff/ward_kill_diff):
-  a abordagem atual está no teto do que features agregadas de estado
-  permitem — material para a seção de limitações.
+  split def/off, dragões por tipo, item_gold_diff refeito,
+  ward_diff/ward_kill_diff): a abordagem atual está no teto do que
+  features agregadas de estado permitem — material para a seção de
+  limitações. A contagem é 9 e não 8 porque o experimento de dragões por
+  tipo (`monsterSubType`, diário 2026-07-05) entrou na série e ficou de
+  fora do Apêndice D do TCC até 2026-10-03; o "7º"/"8º" nos títulos das
+  entradas de 2026-07-06 do diário é renumeração local que ignora esse
+  experimento.
 - Validação externa: o próprio Oracle's Elixir publica uma calculadora
   de win probability early-game com a mesma estrutura da nossa
   Predição.
