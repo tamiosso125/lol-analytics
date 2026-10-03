@@ -4,10 +4,12 @@
 > de consistência (`docs/plano_contexto.md`, fases 0–5) e da geração do
 > entregável em `.docx`.
 >
-> **Estado resumido:** de 6 pendências que o texto registrava, **4 estão
-> fechadas**. Restam 2 decisões do orientador, 1 confirmação do autor e
-> 2 itens opcionais que usam o espaço que sobrou no limite de páginas.
-> **Não falta escrever texto.** O corpo tem 21 páginas de um limite de 25–30.
+> **Estado resumido:** de 6 pendências que o texto registrava, **5 estão
+> fechadas** — as duas decisões de escopo (título e Trabalhos Relacionados)
+> foram tomadas em 2026-10-03, e **nenhum item depende mais do orientador**.
+> Resta 1 confirmação do autor e 2 itens opcionais que usam o espaço que
+> sobrou no limite de páginas. **Não falta escrever texto.** O corpo tem 21
+> páginas de um limite de 25–30.
 
 ---
 
@@ -38,62 +40,55 @@ powershell -ExecutionPolicy Bypass -File docs\finalize-fields.ps1
 
 ## Bloco 1 — Pendências que bloqueiam a entrega
 
-Três itens. Os dois primeiros **dependem do Prof. Elvandi** — nenhum é
-trabalho de escrita, é decisão de escopo.
+**As duas decisões de escopo foram tomadas em 2026-10-03.** Nenhum item
+deste bloco depende mais do orientador. Resta só a confirmação do autor.
 
-### 1.1 Título acadêmico — ⚠️ bloqueia, precisa do orientador
+### 1.1 Título acadêmico — ✅ DECIDIDO: não citar Bellestraiko
 
-**Estado:** aplicado um padrão, falta confirmar.
+O título do TCC II é **igual ao TCC I**: "Plataforma Inteligente para Análise
+de Dados de Esports: uma proposta para League of Legends com uso de machine
+learning e interface em linguagem natural". Por ser o mesmo trabalho, o título
+acompanha o da versão anterior.
 
-O título do TCC II foi mantido **igual ao TCC I** ("Plataforma Inteligente
-para Análise de Dados de Esports: uma proposta para League of Legends com uso
-de machine learning e interface em linguagem natural"). O raciocínio: TCC I e
-TCC II são o mesmo trabalho, e trocar o título no meio sem aval cria uma
-divergência entre os dois documentos que a banca pode estranhar.
+O nome do produto foi registrado no **corpo**, na Seção 1.1 (página 10):
+*"A plataforma, batizada Bellestraiko, constitui a materialização do sistema
+desenvolvido e implementado ao longo deste trabalho"*. Antes disso,
+Bellestraiko **não aparecia** no texto entregue — só num bloco interno de
+pendências.
 
-Em vez disso o nome do produto foi registrado no **corpo**, na Seção 1.1
-(página 10): *"A plataforma, batizada Bellestraiko, constitui a materialização
-do sistema desenvolvido"*. Antes disso, Bellestraiko **não aparecia** no texto
-entregue — só num bloco interno de pendências.
-
-**Pergunta para o orientador:** o título deve citar Bellestraiko?
-
-| Se a resposta for | O que fazer | Custo |
-|---|---|---|
-| Não, manter como está | nada | 0 |
-| Sim, com Bellestraiko | `TITULO_PT` e `TITULO_EN` em `docs/build_tcc_docx.py` + regerar | 2 min |
+**Nada a fazer.** Para reverter, seria editar `TITULO_PT`/`TITULO_EN` em
+`docs/build_tcc_docx.py` e regerar.
 
 ---
 
-### 1.2 Trabalhos Relacionados — ⚠️ bloqueia, precisa do orientador
+### 1.2 Trabalhos Relacionados — ✅ DECIDIDO: não é seção de primeiro nível
 
-**Estado:** mantido como nota dentro da Seção 2 (Referencial Teórico).
+Seguindo o **modelo institucional do TCC II** (2026-09-28), que não prevê
+essa seção:
 
-Existe uma assimetria real entre os documentos:
+- **Seção 2 (Referencial Teórico)** — 2.1 a 2.5 descrevem o que cada
+  trabalho relacionado afirma.
+- **Seção 5.1 (Discussão)** — a confrontação de cada trabalho com os
+  resultados deste, trabalho por trabalho (Hodge, Birant & Birant,
+  García-Méndez, Jiang, Wallner).
 
-- **TCC I** tem `3 TRABALHOS RELACIONADOS` como **seção de primeiro nível**,
-  aprovada.
-- **Modelo institucional de 2026-09-28** (o que a coordenação mandou) **não
-  inclui** essa seção.
+O TCC I **tem** "3 TRABALHOS RELACIONADOS" como seção de primeiro nível,
+aprovada naquele documento. Mas o modelo do TCC II difere, e prevaleceu o do
+TCC II.
 
-O documento de pendências registra que, por acordo com o orientador, "a
-estrutura de seções do corpo é livre, além de Introdução e Referencial
-Teórico" — o que tira o caráter de bloqueio, mas não resolve a preferência.
+**Benefício colateral:** com esta decisão, a numeração do corpo fica
+**exatamente igual à do modelo** (1 Introdução … 6 Conclusão), sem o deslocamento
+que uma seção própria causaria.
 
-**Pergunta para o orientador:** seção própria (como no TCC I) ou nota na
-Seção 2 (como está)?
+A nota de trabalho que existia no fim da Seção 2 perguntando onde posicionar a
+comparação foi substituída por uma frase de navegação para o leitor, que
+justifica a escolha no próprio texto.
 
-| Se a resposta for | Consequência | Custo |
-|---|---|---|
-| Nota na Seção 2 (atual) | nada | 0 |
-| Seção de 1º nível | **a numeração de Material e Métodos em diante desloca** — e com ela sumário, listas e referências cruzadas. O pipeline absorve, mas tudo precisa ser regerado e conferido | ~15 min |
-
-**Seção de primeiro nível exige também** promover o conteúdo atual da nota a
-uma seção completa, com texto próprio — não só renumerar.
+**Nada a fazer.**
 
 ---
 
-### 1.3 Título do Quadro 4 — ⚠️ bloqueia, precisa do autor
+### 1.3 Título do Quadro 4 — ⚠️ único item restante, precisa do autor
 
 **Estado:** escrito, marcado como `CONFIRMAR com o autor` em
 `docs/build_tcc_docx.py`, na lista `QUADROS`.
@@ -189,16 +184,16 @@ Executar quando os Blocos 1 e 2 estiverem resolvidos.
 ## Ordem sugerida
 
 ```
-1. Perguntar ao orientador (1.1 título + 1.2 Trabalhos Relacionados)
-   └─ enquanto espera: decidir 1.3 (Quadro 4) e disparar 2.1 (NA1) em background
-2. Aplicar as respostas; regerar
-3. Se collect rodou: atualizar 4.3/4.2/5.2 + entrada de diário
-4. Revisão visual no Word
+1. Confirmar o título do Quadro 4 (2 min) — único item que bloqueia
+2. Disparar a coleta da NA1 em background (2.1), se quiser o achado mais forte
+3. Quando a coleta terminar: atualizar 4.3/4.2/5.2 + entrada de diário
+4. Regerar o .docx e fazer a revisão visual no Word
 5. Testes + commit
 ```
 
-**Nada no Bloco 1 exige escrever texto novo.** São três decisões, das quais
-duas são do orientador e uma é sua. O Bloco 2 é opcional por completo.
+**Nada no Bloco 1 exige escrever texto novo.** As duas decisões de escopo já
+estão tomadas e aplicadas — a numeração do corpo já é a do modelo
+institucional. O Bloco 2 é opcional por completo.
 
 ---
 

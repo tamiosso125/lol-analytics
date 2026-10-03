@@ -1,23 +1,23 @@
-# TCC II — Texto (rascunho de trabalho)
+# TCC II — Texto do trabalho
 
-> Documento de trabalho para redigir o TCC II no formato de artigo exigido
-> pelo template institucional (capa → Resumo/Abstract → 1 Introdução → 2
-> Referencial Teórico → 3 Material e Métodos → 4 Resultados → 5 Discussão
-> → 6 Conclusão → Referências → Apêndices/Anexos). Não é o documento final
-> formatado (fonte, espaçamento, capa ABNT) — é o texto corrido, seção por
-> seção, para depois ser vertido ao template `.docx` da UNISINOS.
+> **Este arquivo é a fonte do entregável.** O documento formatado é gerado a
+> partir dele por `docs/build_tcc_docx.py` + `docs/finalize-fields.ps1`, na
+> ordem do modelo institucional (capa → folha de rosto → Resumo/Abstract →
+> 1 Introdução → 2 Referencial Teórico → 3 Material(is) e Métodos →
+> 4 Resultados → 5 Discussão → 6 Conclusão → Referências → Apêndices/Anexos).
+> **Não edite o `.docx` diretamente** — edite aqui e regere, senão texto e
+> entregável divergem.
 >
-> **Pendências que ainda dependem de você/orientador** (não bloqueiam a
-> redação, mas precisam ser resolvidas antes da entrega):
-> - Posicionamento de "Trabalhos Relacionados" (subseção do Referencial
->   Teórico vs. integrado à Discussão) — confirmar com o Prof. Elvandi.
-> - Título do trabalho: o TCC I usa "Plataforma Inteligente para Análise
->   de Dados de Esports: uma proposta para League of Legends...". O
->   produto foi batizado **Bellestraiko** durante a execução (ver
->   `docs/handoff.md`) — decidir se o título acadêmico muda ou se o nome
->   do produto só aparece mencionado no corpo do texto (ex.: "a
->   plataforma, batizada Bellestraiko, ...").
-> - ~~Resumo/Abstract~~ — **escrito** (ver abaixo).
+> **Decisões de escopo já tomadas (2026-10-03):**
+> - **Título acadêmico não cita Bellestraiko.** Mantido igual ao TCC I, por
+>   ser o mesmo trabalho. O nome do produto aparece no corpo do texto, na
+>   Seção 1.1.
+> - **Trabalhos Relacionados não são seção de primeiro nível**, porque o
+>   modelo institucional do TCC II não prevê essa seção. A referência
+>   teórica fica na Seção 2 e a comparação com os resultados na Seção 5.1.
+> - O TCC I tem "3 TRABALHOS RELACIONADOS" como seção, mas o modelo do TCC II
+>   (2026-09-28) não inclui — prevalecou o modelo do TCC II.
+> - ~~Resumo/Abstract~~ — escrito.
 
 ---
 
@@ -366,12 +366,11 @@ localização em uma única representação visual. Esse referencial
 fundamentou o desenvolvimento do mapa de calor de posicionamento
 apresentado na análise de partida da plataforma (Seção 4).
 
-> **Nota de trabalho:** conforme pendência sinalizada no topo deste
-> documento, a comparação com os Trabalhos Relacionados do TCC I
-> (Quadro 1) ainda precisa ser posicionada — como subseção 2.6 aqui, ou
-> incorporada à Discussão (Seção 5). Por ora, a comparação direta com
-> cada trabalho relacionado foi mantida na Seção 5, e pode ser movida
-> para cá sem perda de conteúdo assim que a decisão for confirmada.
+A comparação direta entre estes trabalhos e os resultados obtidos neste
+trabalho é apresentada na Seção 5.1. O modelo institucional do TCC II não
+prevê uma seção própria de trabalhos relacionados — a referência teórica é
+descrita aqui e a confrontação com os resultados fica na discussão, que é
+onde a leitura crítica faz sentido.
 
 ---
 
@@ -1142,23 +1141,23 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
 ## Pendências finais antes da entrega
 
 1. ~~Resumo/Abstract~~ — **feito**.
-2. **Título acadêmico — aplicado, confirmar com o orientador.** O
-   título do TCC 2 foi mantido igual ao do TCC 1 ("Plataforma
-   Inteligente para Análise de Dados de Esports: uma proposta para
-   League of Legends com uso de machine learning e interface em
-   linguagem natural"), por ser o mesmo trabalho e a troca não ter
-   aval do orientador. Em vez disso o nome do produto foi registrado
-   no corpo, na Seção 1.1: "A plataforma, batizada Bellestraiko,
-   constitui a materialização do sistema desenvolvido". A interface
-   já usa esse nome em produção (ver capturas do Anexo A), então vale
-   perguntar se o título deve acompanhar.
-3. **Trabalhos Relacionados — decisão de escopo ainda aberta.** O TCC 1
-   tem "3 TRABALHOS RELACIONADOS" como seção de primeiro nível,
-   aprovada; o modelo institucional de 2026-09-28 não inclui essa
-   seção. Este texto a mantém como nota na Seção 2. Perguntar ao
-   orientador qual das duas formas vale para o TCC 2 — se ele escolher
-   seção própria, a numeração de Material e Métodos em diante
-   desloca.
+2. **Título acadêmico — DECIDIDO (2026-10-03): não citar Bellestraiko.**
+   O título do TCC 2 é o mesmo do TCC 1 ("Plataforma Inteligente para
+   Análise de Dados de Esports: uma proposta para League of Legends com
+   uso de machine learning e interface em linguagem natural"). Decisão do
+   autor: por ser o mesmo trabalho, o título acompanha o do TCC 1. O nome
+   do produto foi registrado no corpo, na Seção 1.1: "A plataforma,
+   batizada Bellestraiko, constitui a materialização do sistema
+   desenvolvido e implementado ao longo deste trabalho". A interface já
+   usa esse nome em produção (ver capturas do Anexo A).
+3. **Trabalhos Relacionados — DECIDIDO (2026-10-03): não é seção de
+   primeiro nível.** Seguindo o modelo institucional do TCC 2 (2026-09-28),
+   que não prevê essa seção, a referência teórica fica na Seção 2 e a
+   comparação direta com os resultados obtidos fica na Seção 5.1. Note que
+   o TCC 1 tem "3 TRABALHOS RELACIONADOS" como seção de primeiro nível,
+   aprovada naquele documento — mas o modelo do TCC 2 difere, e prevalecceu
+   o do TCC 2. Efeito colateral vantajoso: a numeração do corpo segue
+   exatamente a do modelo (1 Introdução … 6 Conclusão).
 3. ~~Apêndices/Anexos~~ — **feitos**: A (schema), B (26 perguntas NLQ,
    88% confirmado com dados frescos), C (quadro cruzado 4 cortes × 3
    modelos), D (9 experimentos negativos), Anexo A (6 capturas de tela
@@ -1208,17 +1207,20 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
    *dashboard* (metodologia registrada em memória do projeto:
    `feedback_verify_dashboard_numbers`).
 
-**Status (2026-10-03):** de 6 pendências, **4 estão fechadas** (Resumo,
-Apêndices/Anexos, formatação `.docx`, ampliação da coleta). Restam **2 itens
-que dependem do orientador** e nenhum deles é trabalho de conteúdo ou análise
-— ambos são decisão de escopo, não de escrita:
+**Status (2026-10-03):** de 6 pendências, **5 estão fechadas** (Resumo,
+Apêndices/Anexos, formatação `.docx`, ampliação da coleta, e agora as duas
+decisões de escopo). **Nenhuma pendência depende do orientador.**
 
-1. **Título acadêmico** — aplicado (mantido igual ao TCC I), falta confirmar.
-2. **Trabalhos Relacionados** — nota na Seção 2 (posição atual) ou seção de
-   primeiro nível como no TCC I. Se virar seção própria, a numeração de
-   Material e Métodos em diante desloca e o documento precisa ser regerado.
+1. **Título acadêmico** — decidido: não cita Bellestraiko (item 2 acima).
+2. **Trabalhos Relacionados** — decidido: não é seção de primeiro nível,
+   segue o modelo do TCC 2 (item 3 acima).
 
-Há ainda **1 item de confirmação do autor** (não do orientador): o título do
+Resta **1 item de confirmação do autor** (não do orientador): o título do
 Quadro 4 (Apêndice C), que no rascunho só tinha nota de método. O título foi
 escrito durante a conversão e está marcado como `CONFIRMAR` em
 `docs/build_tcc_docx.py`.
+
+**Consequência prática:** com as duas decisões fechadas, a numeração do corpo
+fica exatamente igual à do modelo institucional (1 Introdução, 2 Referencial
+Teórico, 3 Material(is) e Métodos, 4 Resultados, 5 Discussão, 6 Conclusão) e
+não há mais nada a regenerar por causa delas.
