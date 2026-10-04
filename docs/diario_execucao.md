@@ -3661,10 +3661,22 @@ apontou esse buraco.
   foi entregue na análise de partidas).
 - ~~Sinergias de dupla com correção de amostra (shrinkage/IC)~~ —
   **feito em 2026-07-06** (ver entrada acima).
-- Atualizar as tabelas de métricas do texto do TCC com os números do
-  retreino de 2026-07-03 (acima).
-- Revisar os capítulos do texto do TCC com os resultados registrados
-  neste diário — usar o nome do produto, **Bellestraiko** (o "Hextech Lab"
+- ~~Atualizar as tabelas de métricas do texto do TCC com os números do
+  retreino de 2026-07-03~~ — **feito, e superado**: o retreino de
+  2026-07-03 foi substituído pelo de 2026-10-04 (39.188 linhas no corte
+  de 15 min, XGBoost 0,7621 / AUC 0,8473). O Quadro 2, o Apêndice C e a
+  série de AUC por corte estão com os números atuais, e
+  `docs/verifica_tcc.py` confronta o texto com
+  `reports/metricas_corte.json` para não voltarem a divergir.
+- ~~Revisar os capítulos do texto do TCC com os resultados registrados
+  neste diário~~ — **feito** (2026-10-04). A revisão independente
+  encontrou
+  quatro números que nunca existiram (99.259 jogos profissionais,
+  Quadro 1 com a NA1 desatualizada, conversão de vantagem, série de
+  SHAP), um achado refutado pelo aumento da amostra (o viés de lado é
+  **constante**, não dinâmico) e o Abstract em inglês repetindo a forma
+  antiga — que vai impresso no pré-textual do `.docx`. O nome do produto
+  Bellestraiko está registrado na Seção 1.1. — usar o nome do produto, **Bellestraiko** (o "Hextech Lab"
   foi descartado em 2026-07-03 por colisão com canal do YouTube; as
   menções históricas aos dois renomes nas entradas acima são legítimas e
   devem ficar).
