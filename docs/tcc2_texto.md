@@ -1157,7 +1157,18 @@ reconhecida e discutida na próxima subseção.
   modelo, e o custo medido é pequeno mas real — o que faz da troca uma
   decisão de escopo, não um ajuste de parâmetro. O experimento está em
   `docs/experimento_calibracao.py` e o veredito em
-  `reports/experimento_calibracao_veredito.json`.
+  relatório em `reports/experimento_calibracao_veredito.json`.
+
+  Resta registrar por que a troca não foi adotada, já que ela está
+  disponível e é barata em desempenho: o critério de escolha do modelo de
+  produção foi a acurácia no corte de 15 minutos, e nela a *Random Forest*
+  fica em 0,7617 contra 0,7621 do XGBoost — diferença pequena, mas no
+  critério adotado a troca representaria perder o modelo de produção por
+  um ganho em um estado de jogo que a plataforma quase nunca exibe. A
+  manutenção do XGBoost é, portanto, uma decisão consciente e reversível: se a
+  taxa-base projetada passar a importar mais que a acurácia formal, o
+  modelo pode ser trocado sem retreinar nada, bastando reexecutar
+  `export_model` com a *Random Forest* de profundidade 6.
 
   Trata-se de calibração em
   estado degenerado — um ponto que o jogo real não produz com frequência
@@ -1574,6 +1585,19 @@ Quadro — Experimentos negativos de enriquecimento de *features*
 | 7 | `item_gold_diff` (segunda tentativa, refeita) | Δ AUC ≈ ruído |
 | 8 | Visão (ward_diff / ward_kill_diff) | Δ AUC ≈ ruído |
 | 9 | Dragões por tipo (`monsterSubType`) | **AUC piorou** (0,8319 → 0,8295), sobre a base de 23.133 partidas |
+
+*Nota sobre o experimento 4.* A ausência de ganho de AUC da calibração foi
+reexaminada em 2026-10-04, quando a limitação de taxa-base da Seção 5.8
+passou a ser testada contra as alavancas que este apêndice não cobre. O
+resultado é mais forte que "sem ganho": a calibração **piora** também a
+discrepância de taxa-base, de 1,7 para 2,3 pontos percentuais, porque o
+estado de empate total fica fora da distribuição observada e o calibrador o
+extrapola para perto de 50%. A *Random Forest* com 500 árvores e
+profundidade 6 fecha a discrepância (0,6 pp) ao custo de 0,0005 de AUC,
+mas não foi adotada — a justificativa está na Seção 5.8. Esse teste não
+figura na tabela porque não é enriquecimento de *features*, e sim
+caracterização de uma limitação de modelo; o comando é
+`python docs/experimento_calibracao.py`.
 
 Em contraste, o aumento de *volume* de partidas produziu ganho real:
 AUC-ROC do XGBoost (corte 15 min) subiu de 0,8214 (10.295 partidas)

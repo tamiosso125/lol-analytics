@@ -909,6 +909,72 @@ escreve; só `REFERÊNCIAS` mantém o nome do TCC I. Referências também não
 devem ser contadas por linhas em branco: existe um estilo dedicado, que é o
 contador confiável.
 
+### `docs/testa_faixa_duracao.py`
+
+Teste (ii) de robustez: taxa de vitória do azul por faixa de duração total
+da partida, **incondicional** (sem filtro de empate).
+
+```powershell
+.venv\Scripts\python.exe docs\testa_faixa_duracao.py   # grava reports/faixa_duracao.json
+```
+
+Responde se o viés de lado é confundido com "partidas longas são um tipo
+diferente de jogo". Medido em 2026-10-04 sobre as 39.426 partidas: 46,4% /
+47,2% / 46,4% / 45,6% / 46,4% nas faixas de 0-25 a 40+ minutos, amplitude
+de 1,6 pp, todas abaixo de 50%.
+
+O texto citava "44%-47%" sem data e sem base, de uma medição de 2026-07-08
+sobre 23.133 partidas. Teste de robustez citado sem base não é
+reproduzível.
+
+Duas armadilhas do próprio script, ambas cometidas antes de funcionar e
+registradas no código:
+
+- chavear o dicionário de ordem pelos **minutos** (inteiros) e comparar
+  com o **rótulo** que o `CASE` do SQL devolve (string). Todas as linhas
+  eram descartadas e a tabela saía sem nenhum número — um resultado vazio
+  com aparência de "não há partidas nestas faixas", que é bem diferente de
+  "o comando está errado".
+- agregar sobre `participants` sem agregar antes. `win` é por jogador,
+  cinco por partida, então a média daria 50,0% por simetria: um número
+  plausível e errado. O certo é reduzir a uma linha por partida e testar
+  se o time azul venceu. É a mesma armadilha que já produziu o Quadro 1
+  com a taxa errada.
+
+### `docs/experimento_calibracao.py` e `docs/reavalia_calibracao.py`
+
+Teste **D1**: calibração e regularização alternativa contra a discrepância
+de taxa-base da Seção 5.8. São as duas alavancas que a grade de
+hiperparâmetros não cobre — ela variou só `n_estimators`,
+`learning_rate` e `max_depth`, e a discrepância é justamente de
+taxa-base.
+
+```powershell
+# LENTO: ~40 min, validação cruzada aninhada sobre 39.188 linhas
+.venv\Scripts\python.exe docs\experimento_calibracao.py
+
+# Reavalia o veredito a partir do JSON, sem reexecutar (1s)
+.venv\Scripts\python.exe docs\reavalia_calibracao.py
+```
+
+Resultado: a calibração **piora** a discrepância (1,7 → 2,3 pp), porque
+o estado de empate total fica fora da distribuição observada e o
+calibrador o extrapola para perto de 50%; a regularização alternativa move
+o desvio dentro do ruído; e a troca de família (*Random Forest* 500/prof 6)
+fecha, com desvio de 0,6 pp ao custo de 0,0005 de AUC.
+
+São dois scripts porque a primeira versão do experimento declarava
+*"VEREDITO: FECHA"* com um limiar de desvio abaixo de 2,0 pp — e a
+variante **de produção já estava em 1,7 pp**, ou seja, qualquer coisa que
+não fosse pior que a produção contava como sucesso. Separar a
+reavaliação faz o critério ser auditável sem reexecutar 40 minutos de
+cruzamento aninhado. **Limiar que aceita o estado atual como sucesso não é
+limiar, é noise floor.**
+
+A referência do dado bruto (47,9%) é lida de `reports/taxa_base_por_corte.json`
+e não é hardcoded, para a comparação não poder divergir se o dado for
+remedido.
+
 ### `docs/verifica_tcc.py`
 
 Confere o texto do TCC contra o que ele afirma. Existe porque números

@@ -171,12 +171,32 @@ resultado está em `reports/`.**
 .venv\Scripts\python.exe docs\confere_conversao_advantagem.py
 ```
 
+```powershell
+# Teste D1: calibração e regularização alternativa contra a discrepância de
+# taxa-base da Seção 5.8. LENTO (~40 min): cada variante roda validação
+# cruzada aninhada sobre 39.188 linhas. Grava
+# reports/experimento_calibracao.json, e o veredito sai de
+# reports/experimento_calibracao_veredito.json:
+.venv\Scripts\python.exe docs\experimento_calibracao.py
+
+# Reavalia o veredito a partir do JSON, sem reexecutar o experimento (1s):
+.venv\Scripts\python.exe docs\reavalia_calibracao.py
+```
+
+> `reavalia_calibracao.py` é separado porque a primeira versão do
+> experimento declarava *"VEREDITO: FECHA"* com um limiar que aceitava o
+> próprio estado atual como sucesso: a variante de produção já estava em
+> 1,7 pp e o corte era 2,0 pp. Limiar que aceita o estado atual como
+> sucesso não é limiar, é noise floor. O critério corrigido exige desvio
+> abaixo de 1,0 pp **e** custo de AUC abaixo de 0,001.
+
 | artefato | quem consome |
 |---|---|
 | `reports/metricas_corte.json` | Quadro 2 e Apêndice C; checagem 5 |
 | `reports/tune_models_39k.json` | Seção 5.8; checagem 12 |
 | `reports/taxa_base_por_corte.json` | Seção 5.3 e 5.8 |
 | `reports/faixa_duracao.json` | Seção 4.5 e 5.3 (teste ii) |
+| `reports/experimento_calibracao_veredito.json` | Seção 5.8 e Apêndice D; checagem 14 |
 
 > `reports/tune_models_39k.log` cai no `.gitignore` (`*.log`) e não é
 > versionado; o `.json` é, e é dele que a checagem 12 lê. O log é a versão

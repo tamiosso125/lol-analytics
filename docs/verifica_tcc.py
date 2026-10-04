@@ -579,6 +579,59 @@ def check_calibracao(t: str) -> None:
               f"AUC {num(melhor['auc'])}")
 
 
+def check_scripts_documentados() -> None:
+    """Todo script executável do projeto tem de estar em `docs/comandos.md`.
+
+    Esta checagem existe porque o padrão se repetiu duas vezes: no Bloco A
+    do plano de fechamento documentei os 9 scripts que existiam naquele
+    momento, e depois criei mais 3 (`testa_faixa_duracao`,
+    `experimento_calibracao`, `reavalia_calibracao`) sem documentar nenhum.
+    O `AGENTS.md` chama documentação divergente do código de bug, e a
+    divergência foi exatamente essa.
+
+    Escopo: scripts que produzem medida ou artefato. Um utilitário interno
+    não entra, e por isso a lista de exceções é explícita e não um filtro
+    por nome de arquivo.
+    """
+    import re as _re
+
+    # (caminho, está em comandos.md)
+    alvos = [
+        ("src/models/multi_cutoff_metrics.py", "multi_cutoff_metrics"),
+        ("src/models/tune_models_full.py", "tune_models_full"),
+        ("docs/verifica_tcc.py", "verifica_tcc"),
+        ("docs/confere_docx.py", "confere_docx"),
+        ("docs/recapturar_anexo_a.py", "recapturar_anexo_a"),
+        ("docs/taxa_base_por_corte.py", "taxa_base_por_corte"),
+        ("docs/testa_diferenca_taxas.py", "testa_diferenca_taxas"),
+        ("docs/confere_conversao_advantagem.py", "confere_conversao_advantagem"),
+        ("docs/testa_faixa_duracao.py", "testa_faixa_duracao"),
+        ("docs/experimento_calibracao.py", "experimento_calibracao"),
+        ("docs/reavalia_calibracao.py", "reavalia_calibracao"),
+    ]
+    doc = RAIZ / "docs" / "comandos.md"
+    if not doc.exists():
+        aviso("docs/comandos.md ausente: cobertura dos scripts nao conferida")
+        return
+    texto = doc.read_text(encoding="utf-8")
+
+    faltando, inexistente = [], []
+    for caminho, token in alvos:
+        if not (RAIZ / caminho).exists():
+            inexistente.append(caminho)
+            continue
+        if token not in texto:
+            faltando.append(f"{caminho} (procure por `{token}`)")
+
+    for f in faltando:
+        falha(f"script existe mas nao esta em docs/comandos.md: {f}")
+    for c in inexistente:
+        falha(f"docs/comandos.md cita um script que nao existe: {c}")
+    if not faltando and not inexistente:
+        print(f"  [OK] os {len(alvos)} scripts que produzem medida estao "
+              "documentados em comandos.md")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -613,6 +666,8 @@ def main() -> None:
     check_citacoes(t)
     print("14. Discrepancia de taxa-base x artefato do experimento")
     check_calibracao(t)
+    print("15. Scripts que produzem medida estao em comandos.md")
+    check_scripts_documentados()
 
     print()
     print("=" * 66)
