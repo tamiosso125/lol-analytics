@@ -1,0 +1,106 @@
+"""Confere o .docx gerado contra as regras formais do TCC II.
+
+POR QUE UM SCRIPT: o checklist de entrega afirmava "41 títulos, 0 em negrito"
+e "12 referências". Os dois foram escritos à mão e envelheceram — o
+documento ganhou seções novas (6.1, 6.2) e 6 referências de método. Número
+de checklist que ninguém conta é número que mente.
+
+Verifica: contagem de títulos e se algum está em negrito (a regra da
+UNISINOS é maiúscula SEM negrito); entradas de REFERÊNCIAS; legendas de
+figura e de quadro; tabelas e imagens.
+
+Nomes de estilo: Despite "REFERÊNCIAS" ser o estilo do TCC I, os estilos de
+título ficam em inglês no arquivo ('Heading 1'..'Heading 3') porque é o que o
+pandoc escreve. A primeira versão deste script procurava "Título 1" e
+encontrou zero títulos, zero negrito e "suspiciosamente poucas referências"
+— um relatório de conformidade errado é pior do que nenhum.
+
+Uso:
+    .venv\\Scripts\\python.exe docs\\confere_docx.py
+"""
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+from docx import Document
+
+DOCX = Path(__file__).resolve().parent.parent / "docs" / "tcc2_final.docx"
+RE_TITULO = re.compile(r"Heading\s*\d", re.I)
+
+
+def main() -> None:
+    if not DOCX.exists():
+        sys.exit(f"ERRO: {DOCX} nao existe — rode build_tcc_docx.py antes")
+    d = Document(str(DOCX))
+
+    titulos, negrito = [], []
+    for p in d.paragraphs:
+        if not RE_TITULO.match(p.style.name or ""):
+            continue
+        txt = p.text.strip()
+        if not txt:
+            continue  # sumário/TOC não conta como título do corpo
+        titulos.append(txt)
+        if any(r.bold for r in p.runs):
+            negrito.append(txt)
+
+    # REFERÊNCIAS: o TCC I traz um estilo dedicado, então basta contar os
+    # parágrafos nele — não é preciso inferir entradas por linhas em branco.
+    refs = [p for p in d.paragraphs if (p.style.name or "") == "REFERÊNCIAS"]
+
+    leg_fig = [
+        p
+        for p in d.paragraphs
+        if (p.style.name or "") == "Caption" and p.text.strip().upper().startswith("FIGURA")
+    ]
+    leg_quad = [
+        p
+        for p in d.paragraphs
+        if (p.style.name or "") == "Caption" and p.text.strip().upper().startswith("QUADRO")
+    ]
+    fontes = [p for p in d.paragraphs if (p.style.name or "") == "Fonte das ilustrações"]
+
+    print(f"títulos de seção        : {len(titulos)}")
+    print(f"títulos em negrito      : {len(negrito)}  (regra: zero)")
+    for t in negrito:
+        print(f"   VIOLAÇÃO: {t!r}")
+    print(f"entradas de REFERÊNCIAS : {len(refs)}")
+    print(f"legendas de Figura      : {len(leg_fig)}")
+    print(f"legendas de Quadro      : {len(leg_quad)}")
+    print(f"fontes de ilustração    : {len(fontes)}")
+    print(f"tabelas                 : {len(d.tables)}")
+    print(f"imagens                 : {len(d.inline_shapes)}")
+
+    problemas = []
+    if negrito:
+        problemas.append(f"{len(negrito)} título(s) de seção em negrito")
+    if len(titulos) < 40:
+        problemas.append(f"suspiciousamente poucos títulos ({len(titulos)})")
+    if len(refs) != 18:
+        problemas.append(f"referências: esperado 18, achou {len(refs)}")
+    if len(leg_fig) != 6:
+        problemas.append(f"legendas de figura: esperado 6, achou {len(leg_fig)}")
+    if len(leg_quad) != 5:
+        problemas.append(f"legendas de quadro: esperado 5, achou {len(leg_quad)}")
+    if len(fontes) != len(leg_fig) + len(leg_quad):
+        problemas.append(
+            f"fontes ({len(fontes)}) não cobrem as legendas "
+            f"({len(leg_fig) + len(leg_quad)})"
+        )
+    if len(d.tables) != 5:
+        problemas.append(f"tabelas: esperado 5, achou {len(d.tables)}")
+    if len(d.inline_shapes) != 6:
+        problemas.append(f"imagens: esperado 6, achou {len(d.inline_shapes)}")
+
+    print()
+    if problemas:
+        for p in problemas:
+            print(f"FALHA: {p}")
+        sys.exit(1)
+    print("VEREDITO: conforme")
+
+
+if __name__ == "__main__":
+    main()

@@ -855,6 +855,32 @@ O script recusa a captura se a página mostrar "Erro no servidor" ou se o
 arquivo sair com menos de 60 KB. Sem essa trava, ele reportava `ok` e gravava
 telas de erro — o sintoma é um PNG de 24 KB, idêntico entre páginas.
 
+### `docs/confere_docx.py`
+
+Confere o `.docx` gerado contra as regras formais do TCC II. Roda **depois**
+de `build_tcc_docx.py` + `finalize-fields.ps1`.
+
+```powershell
+.venv\Scripts\python.exe docs\confere_docx.py   # exit 0 = conforme
+```
+
+Verifica: contagem de títulos de seção e se algum está em negrito (a regra da
+instituição é maiúscula **sem** negrito); entradas de `REFERÊNCIAS`; legendas
+de Figura e de Quadro; fontes de ilustração; tabelas; imagens.
+
+Existe porque o checklist de entrega citava "41 títulos" e "12 referências",
+escritos à mão. O documento ganhou 6.1, 6.2 e seis referências de método, e
+os números do checklist ficaram velhos sem ninguém perceber — que é o mesmo
+modo de falha dos números do texto, e a mesma razão para medir.
+
+A primeira versão deste script procurava o estilo `Título 1` e encontrou
+**zero** títulos, zero negrito e "suspiciousamente poucas referências", ou
+seja, um relatório de conformidade errado. Os estilos de título ficam em
+inglês no arquivo (`Heading 1`..`Heading 3`) porque é o que o pandoc
+escreve; só `REFERÊNCIAS` mantém o nome do TCC I. Referências também não
+devem ser contadas por linhas em branco: existe um estilo dedicado, que é o
+contador confiável.
+
 ### `docs/verifica_tcc.py`
 
 Confere o texto do TCC contra o que ele afirma. Existe porque números

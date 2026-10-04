@@ -104,15 +104,35 @@ conformidade. Custo: 2 min.
 
 ---
 
-## Bloco 2 — Fechar o corpo (agora é obrigatório, não opcional)
+## Bloco 2 — Fechar o corpo — ✅ feito
 
-O corpo tem **22 páginas** num limite de **25–30**: está **abaixo do mínimo**,
-faltam pelo menos 3. Medido por `docs/finalize-fields.ps1`, que localiza a
-Seção 1 e o fim das Referências e reporta a diferença — antes o número era
-derivado à mão e não tinha artefato.
+O corpo tinha **22 páginas** num limite de **25–30**: abaixo do mínimo.
+Medido por `docs/finalize-fields.ps1`, que localiza a Seção 1 e o fim das
+Referências e reporta a diferença — antes o número era derivado à mão e não
+tinha artefato.
 
 Isto **inverteu** a situação que o plano registrava: quando o corpo tinha 21
-páginas e a faixa era 25–30, sobrar espaço era luxury. Agora é lacuna.
+páginas e a faixa era 25–30, sobrar espaço era luxo. Virou lacuna.
+
+**Resolvido em 2026-10-04.** Para fechá-la com conteúdo e não com enchimento,
+foi medida a extensão de cada seção nos 10 trabalhos aprovados pela banca. O
+diagnóstico mostrou três seções abaixo da mediana e a Conclusão abaixo do
+**mínimo** dos dez (442 palavras contra 983):
+
+| Seção | Antes | Mediana dos 10 | Agora |
+|---|---:|---:|---:|
+| 2 Fundamentação | 837 | 1.852 | 1.696 |
+| 3 Trabalhos Relacionados | 695 | 1.255 | 1.061 |
+| 4 Metodologia | 1.235 | 1.420 | 1.235 |
+| 5 Resultados e Análise | 2.575 | 1.956 | 2.575 |
+| 6 Conclusão | 442 | **983 (mínimo)** | 1.074 |
+
+A Fundamentação passou a citar as obras originais dos métodos que o trabalho
+usa — seis referências, todas verificadas por DOI no Crossref antes de
+entrar. A 3.6 virou comparação por eixos, e a conclusão ganhou 6.1
+Limitações e ameaças à validade e 6.2 Trabalhos futuros.
+
+**Corpo final: 29 páginas** (56 no total), dentro da faixa.
 
 ### 2.1 Ampliar a amostra da NA1 — ✅ feito
 

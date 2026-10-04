@@ -1606,12 +1606,18 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
 
    As duas correções do Prof. Elvandi aplicadas no TCC I foram
    conferidas no documento gerado:
-   - Títulos de seção em maiúscula **sem negrito** — verificado: 41
-     títulos, 0 em negrito. Já saía certo.
+   - Títulos de seção em maiúscula **sem negrito** — verificado no `.docx`
+     gerado: **49 títulos, 0 em negrito**. Já saía certo.
    - Referências com **1 linha em branco** separando cada entrada —
      **não saía certo** na primeira geração (o pandoc cola as entradas
-     em parágrafos `Normal`). Corrigido no pipeline: 12 referências no
+     em parágrafos `Normal`). Corrigido no pipeline: **18 referências** no
      estilo `REFERÊNCIAS` do TCC I, com a separação entre entradas.
+
+   Todas as contagens acima são medidas por `python docs/confere_docx.py`,
+   que confere também legendas (6 Figuras, 5 Quadros), fontes de ilustração
+   (11), tabelas (5) e imagens (6). Ele falha com exit 1 se qualquer uma
+   divergir — os números do checklist não são mais escritos à mão, que era
+   como "41 títulos" e "12 referências" ficaram velhos sem ninguém perceber.
 
    As 3 regras do modelo institucional de 2026-09-29 também estão
    aplicadas — as duas últimas passaram a valer no `.docx`, não só no
@@ -1642,7 +1648,12 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
    vitória do time vermelho, sobre 39.426 partidas.
 
 **Status (2026-10-04):** de 6 pendências, **6 estão fechadas**. **Nenhuma
-depende do orientador.**
+depende do orientador.** Antes de entregar, a suíte completa passa:
+`tests/smoke_test.py` (exit 0), `tests/validate_predictions.py`
+(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (9 checagens de
+consistência do texto contra o banco e os artefatos, exit 0),
+`docs/confere_docx.py` (conformidade formal do `.docx`, exit 0), e
+`cd frontend; npm run lint; npm run test` (31/31).
 
 1. **Título acadêmico** — decidido: não cita Bellestraiko (item 2 acima).
 2. **Trabalhos Relacionados** — decidido em 2026-10-04: **é** seção de
