@@ -3588,6 +3588,41 @@ entrar**: duas crenças minhas estavam erras e a verificação pegou — RAT-SQL
 de Wang et al., não de Xie; e o DOI do pandas que eu lembrava pertence a um
 artigo sobre crédito imobiliário.
 
+### O "nao e subajuste" finalmente tem lastro
+
+Ultima afirmacao do TCC sem artefato. A secao 5.8 diz que a limitacao de
+taxa-base nao e subajuste porque a grade escolhe a mesma profundidade e
+fica equivalente em AUC — e nenhum log em `reports/` sustentava isso.
+`tune_models.py` imprime e nao guarda, e so tinha rodado sobre a base de
+10 mil.
+
+Criado `src/models/tune_models_full.py`, que roda a grade completa sobre as
+39.188 linhas do corte de 15 min e grava `reports/tune_models_39k.log` e
+`.json`. Medido:
+
+| | AUC | posicao |
+|---|---:|---|
+| producao (500 / 0,01 / 3) | 0,8473 | 2 de 27 |
+| vencedora da grade (200 / 0,05 / 3) | 0,8475 | 1 de 27 |
+
+Profundidade **a mesma (3)** nos dois. Delta de **+0,0001** — uma casa
+decimal que a variacao entre folds produz sozinha. A afirmacao da 5.8
+estava correta e agora e verificavel por comando.
+
+A checagem 12 de `docs/verifica_tcc.py` confronta o texto com esse JSON e
+falha com exit 1 se o delta passar de 0,005, se a profundidade divergir ou
+se o numero medido nao estiver no texto. Testada inflando o delta para
+0,0231 no JSON: acusa tres falhas de uma vez.
+
+O que a medicao **nao** sustenta, e que vale registrar: o delta de 0,0001
+e sobre AUCROC e um unico par (profundidade, arvores, taxa). Nao probei
+regularizacao alternativa nem calibracao forcada, que sao as duas alavancas
+naturais contra um modelo que projeta o empate para perto de 50%. O
+arguito da 5.8 e "a grade nao acha ajuste melhor", e nao "nao existe ajuste
+melhor" — a segunda afirmacao seria mais forte do que o experimento
+sustenta.
+
+
 ### Ferramenta que evita a repetição
 
 `docs/verifica_tcc.py` roda 8 checagens antes de qualquer commit: CJK,

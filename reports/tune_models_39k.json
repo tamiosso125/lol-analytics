@@ -1,0 +1,41 @@
+{
+  "XGBoost": {
+    "linhas": 39188,
+    "cv": "StratifiedKFold(5, shuffle=True, random_state=42)",
+    "scoring": "roc_auc",
+    "grade": {
+      "n_estimators": [
+        200,
+        300,
+        500
+      ],
+      "learning_rate": [
+        0.01,
+        0.05,
+        0.1
+      ],
+      "max_depth": [
+        3,
+        4,
+        6
+      ]
+    },
+    "producao": {
+      "n_estimators": 500,
+      "learning_rate": 0.01,
+      "max_depth": 3
+    },
+    "melhor_combinacao": {
+      "learning_rate": 0.05,
+      "max_depth": 3,
+      "n_estimators": 200
+    },
+    "auc_melhor": 0.8475,
+    "auc_producao": 0.8473,
+    "delta_auc": 0.0001,
+    "posicao_producao_na_grade": 2,
+    "mesma_profundidade": true,
+    "acuracia_producao": 0.7621,
+    "tempo_segundos": 51.7
+  }
+}

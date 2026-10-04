@@ -855,6 +855,34 @@ O script recusa a captura se a página mostrar "Erro no servidor" ou se o
 arquivo sair com menos de 60 KB. Sem essa trava, ele reportava `ok` e gravava
 telas de erro — o sintoma é um PNG de 24 KB, idêntico entre páginas.
 
+### `src/models/tune_models_full.py`
+
+Reexecuta o `GridSearchCV` na base final e **arquiva o log**. É o que dá lastro à afirmação da Seção 5.8 de que a limitação de taxa-base **não é subajuste**.
+
+```powershell
+.venv\Scripts\python.exe -m src.models.tune_models_full            # só o XGBoost, ~50s
+.venv\Scripts\python.exe -m src.models.tune_models_full --completo # + RandomForest e MLP
+```
+
+Grava `reports/tune_models_39k.log` (texto) e `reports/tune_models_39k.json` (estruturado).
+
+`tune_models.py` — o script original — não servia: ele imprime o resultado e não guarda nada, e foi rodado sobre a base de 10 mil. A afirmação da 5.8 ficou semanas sem artefato por causa disso.
+
+Resultado medido em 2026-10-04, sobre as 39.188 linhas do corte de 15 min:
+
+| | |
+|---|---|
+| Produção (500 / 0,01 / 3) | AUC **0,8473** — 2º lugar de 27 |
+| Vencedora da grade (200 / 0,05 / 3) | AUC 0,8475 |
+| Profundidade | **a mesma: 3** |
+| Delta | **+0,0001** |
+
+Ou seja: a afirmação da 5.8 estava correta, e agora é verificável por comando.
+
+A checagem 12 de `docs/verifica_tcc.py` confronta o texto com esse JSON e falha com exit 1 se o delta passar de 0,005, se a profundidade divergir, ou se o número medido não estiver no texto. Testada nos dois sentidos.
+
+Duas armadilhas do próprio script, ambas cometidas e corrigidas na execução: remover a definição de `RAIZ` numa limpeza de imports faz o script quebrar **depois** de todo o trabalho — o resultado aparecia no console mas nada era gravado; e o console do Windows em `cp1252` come os acentos, o que é só display (o log é escrito em UTF-8), mas atrapalha quem lê o stdout.
+
 ### `docs/confere_docx.py`
 
 Confere o `.docx` gerado contra as regras formais do TCC II. Roda **depois**

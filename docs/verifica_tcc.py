@@ -439,6 +439,61 @@ def check_anglicismos(t: str) -> None:
         print(f"  [OK] nenhum dos {len(ANGLICISMOS_PROSA)} anglicismos de prosa")
 
 
+def check_gridsearch(t: str) -> None:
+    """A afirmação da 5.8 sobre o GridSearchCV tem que bater com o artefato.
+
+    A 5.8 diz que a limitacao de taxa-base NAO e subajuste porque a grade
+    escolheu a mesma profundidade e ficou equivalente em AUC. Durante muito
+    tempo essa frase nao tinha lastro: nenhum log em reports/ a sustentava,
+    e ela sobreviveu a duas rodadas de coleta sem ninguem conferir. E o
+    oposto aconteceu antes — 0,7573 e 0,8393 sobreviveram ao retreino.
+
+    Checagem de presenca nao resolve: o texto dizer "0,0001" e o relatorio
+    dizer 0,0001 sao coisas diferentes. Aqui os dois sao confrontados.
+    """
+    import json
+
+    rel = RAIZ / "reports" / "tune_models_39k.json"
+    if not rel.exists():
+        aviso("reports/tune_models_39k.json ausente: a afirmacao de nao-subajuste "
+              "nao tem artefato (gere com python -m src.models.tune_models_full)")
+        return
+    try:
+        d = json.loads(rel.read_text(encoding="utf-8"))["XGBoost"]
+    except (json.JSONDecodeError, KeyError) as exc:
+        falha(f"reports/tune_models_39k.json invalido: {exc}")
+        return
+
+    delta = d["delta_auc"]
+    auc_prod = d["auc_producao"]
+    posicao = d.get("posicao_producao_na_grade")
+    mesma = d.get("mesma_profundidade")
+
+    def num(x: float) -> str:
+        return f"{x:.4f}".replace(".", ",")
+
+    if abs(delta) >= 0.005:
+        falha(f"a grade GANHA {num(delta)} de AUC sobre producao — a 5.8 nao pode "
+              "afirmar que o ajuste e equivalente")
+    if not mesma:
+        falha(f"a grade escolheu outra profundidade; 5.8 afirma a mesma "
+              f"(producao={d['producao'].get('max_depth')}, "
+              f"vencedora={d['melhor_combinacao'].get('max_depth')})")
+    if num(auc_prod) not in t:
+        falha(f"AUC de producao ({num(auc_prod)}) medido no tuning nao esta no texto")
+    # o texto tem de citar o delta com o mesmo numero de casas
+    for variante in (f"{abs(delta):.4f}".replace(".", ","),
+                     f"{abs(delta):.2f}".replace(".", ",")):
+        if variante not in t:
+            falha(f"o delta de AUC ({variante}) do tuning nao aparece no texto")
+    if posicao and f"{posicao}º lugar" not in t and f"{posicao}o lugar" not in t:
+        aviso(f"a posicao de producao na grade ({posicao} de 27) nao e citada "
+              "no texto — o leitor nao consegue julgar o 'equivalente'")
+    if not any("grade" in f.lower() or "profundidade" in f.lower() for f in FALHAS):
+        print(f"  [OK] afirmacao de nao-subajuste confere com o artefato "
+              f"(delta {num(delta)}, producao em {posicao}o de 27)")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -467,6 +522,8 @@ def main() -> None:
     check_fonte_figuras(t)
     print("11. Anglicismos de prosa")
     check_anglicismos(t)
+    print("12. Afirmacao de nao-subajuste x artefato do tuning")
+    check_gridsearch(t)
 
     print()
     print("=" * 66)

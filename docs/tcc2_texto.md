@@ -1118,9 +1118,13 @@ reconhecida e discutida na próxima subseção.
   enquanto o dado bruto dá 46,7%, favorecendo o vermelho — é neste corte
   que a inversão de sentido aparece. O modelo projeta o empate para perto
   de 50%, e portanto **subestima o viés em todos os cortes (a diferença é de 1,7 a 4,7 pontos percentuais conforme o corte)**. A
-  discrepância não decorre de subajuste: um novo *GridSearchCV* sobre as 39
-  mil partidas retornou os mesmos valores de profundidade e um ajuste
-  equivalente de árvores e taxa de aprendizado. Trata-se de calibração em
+  discrepância não decorre de subajuste: uma busca em grade completa — 27
+  combinações de número de árvores, taxa de aprendizado e profundidade,
+  com validação cruzada estratificada de 5 *folds* — sobre as 39 mil
+  linhas escolheu a **mesma profundidade** de produção (3) e terminou
+  0,0001 de AUC acima dela, de 0,8473 para 0,8475, colocando a combinação
+  de produção em 2º lugar entre as 27. A diferença é uma casa decimal que
+  a própria variação entre *folds* produz. Trata-se de calibração em
   estado degenerado — um ponto que o jogo real não produz com frequência
   suficiente para ser bem Representado no treino —, e não de erro na
   leitura da assimetria, que é medida diretamente dos dados.
@@ -1262,9 +1266,10 @@ deveria ser omitida. O modelo retreinado sobre a base ampliada
 reproduz a direção dos achados, mas subestima o viés de lado: nos cortes
 em que o jogo estava empatado, os dados brutos indicam predominância do
 time vermelho e o modelo projeta-se para taxas próximas de 50%. A
-investigação realizada não sustenta a hipótese de subajuste — uma busca de
-hiperparâmetros sobre as 39 mil linhas devolveu ajuste equivalente ao de
-produção. O padrão é, portanto, uma limitação da função de decisão
+investigação realizada não sustenta a hipótese de subajuste — a busca em
+grade completa sobre as 39 mil linhas escolheu a mesma profundidade de
+produção e ficou 0,0001 de AUC acima dela (detalhado na Seção 5.8).
+O padrão é, portanto, uma limitação da função de decisão
 aprendida nesse recorte, e não um defeito de ajuste. A descrição
 completa está na Seção 5.8.
 
