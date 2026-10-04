@@ -382,6 +382,63 @@ def check_figuras_citadas(t: str) -> None:
         print("  [OK] as 6 figuras sao citadas no corpo")
 
 
+def check_fonte_figuras(t: str) -> None:
+    """A fonte impressa sob cada figura não pode contradizer o Anexo A.
+
+    A fonte vai impressa em todas as seis figuras; o Anexo A descreve como as
+    capturas foram feitas. Quando os dois divergem, o documento afirma duas
+    coisas incompatíveis sobre o mesmo artefato — e a fonte é a que o leitor
+    vê primeiro, embaixo da figura.
+    """
+    import re as _re
+
+    caminho = RAIZ / "docs" / "build_tcc_docx.py"
+    if not caminho.exists():
+        aviso("build_tcc_docx.py nao encontrado: fonte de figura nao conferida")
+        return
+    fonte_py = caminho.read_text(encoding="utf-8")
+    m = _re.search(r"FONTE_IMAGENS\s*=\s*\((.*?)\)\s*\n", fonte_py, _re.S)
+    if not m:
+        aviso("FONTE_IMAGENS nao encontrado em build_tcc_docx.py")
+        return
+    fonte = " ".join(m.group(1).split())
+
+    # O que o Anexo A afirma sobre a captura.
+    if not _re.search(r"altura\s*\n?\s*ajustada|altura ajustada", t):
+        falha("Anexo A nao descreve a altura ajustada da captura")
+    # A fonte nao pode declarar viewport fixa, que e o que a capture refaz.
+    if _re.search(r"1440\s*[x×]\s*\d+", fonte):
+        falha(f"FONTE_IMAGENS declara viewport fixa, que o Anexo A nega: {fonte[:70]!r}")
+    if not any("falha" in f.lower() for f in FALHAS):
+        print("  [OK] FONTE_IMAGENS nao contradiz o Anexo A")
+
+
+# Anglicismos de prosa. Termo tecnico legitimamente ingles (machine
+# learning, random forest, dashboard, streaming, bagging, bootstrapeada,
+# patch, insight quando usado como categoria) NAO entra aqui — so o que e
+# editorializavel em PT-BR e aparecia no corpo.
+ANGLICISMOS_PROSA: list[tuple[str, str]] = [
+    ("\\brates\\b", "ingles no meio de frase em portugues"),
+    ("\\bdisclaimer\\b", "anglicismo editorializavel"),
+    ("\\bcaso avaliada como necess", "falta o 'seja'"),
+]
+
+
+def check_anglicismos(t: str) -> None:
+    """Nenhum anglicismo de prosa sobrevive no corpo."""
+    import re as _re
+
+    achados = []
+    for padrao, porque in ANGLICISMOS_PROSA:
+        for m in _re.finditer(padrao, t, _re.I):
+            ln = t[: m.start()].count("\n") + 1
+            achados.append(f"linha {ln}: {m.group(0)!r} ({porque})")
+    for a in achados:
+        falha(a)
+    if not achados:
+        print(f"  [OK] nenhum dos {len(ANGLICISMOS_PROSA)} anglicismos de prosa")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -406,6 +463,10 @@ def main() -> None:
     check_residuos(t)
     print("9. Figuras citadas no corpo (NBR 14724)")
     check_figuras_citadas(t)
+    print("10. Fonte das figuras x Anexo A")
+    check_fonte_figuras(t)
+    print("11. Anglicismos de prosa")
+    check_anglicismos(t)
 
     print()
     print("=" * 66)

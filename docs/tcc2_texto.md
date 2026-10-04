@@ -251,7 +251,7 @@ f) propor dashboards para visualização das informações e dos
 resultados analíticos produzidos pela plataforma;
 
 g) propor uma interface em linguagem natural para facilitar a consulta
-aos dados e a geração de *insights* no contexto competitivo estudado.
+aos dados e a geração de descobertas no contexto competitivo estudado.
 
 ### 1.5 JUSTIFICATIVA
 
@@ -304,9 +304,13 @@ Jiang et al. (2025) fundamentam o uso de modelos de linguagem em
 soluções analíticas.
 
 Esta seção é conceitual: define os conceitos e os termos usados no
-restante do trabalho. Os estudos que dão origem a esses conceitos —
-com seu objeto, sua abordagem e seus resultados — são descritos,
-autor a autor, na Seção 3.
+restante do trabalho. Duas famílias de referência são usadas aqui, com
+papéis distintos. As obras originais dos métodos que este trabalho aplica
+— Random Forest, XGBoost, AUC-ROC, SHAP, LIME e conversão de linguagem
+natural em SQL — são citadas no ponto em que o método é introduzido, nas
+subseções 2.2 a 2.4, porque o que importa ali é a propriedade técnica que
+justifica o uso. Os estudos de contexto do domínio, estes sim com objeto,
+abordagem e resultados, são descritos autor a autor na Seção 3.
 
 ### 2.1 ESPORTS E ANÁLISE DE DADOS
 
@@ -455,7 +459,7 @@ o esquema é amplo ou as perguntas ambíguas.
 Este trabalho implementou uma interface de linguagem natural capaz de
 traduzir perguntas em português para consultas SQL validadas contra o
 esquema real do banco de dados, integrando visualização, recuperação de
-informações e geração de *insights* em uma mesma plataforma. A
+informações e geração de descobertas em uma mesma plataforma. A
 validação não é delegada ao modelo: a consulta gerposta é submetida a
 uma checagem em quatro camadas antes de tocar o banco, descrita na
 Seção 4. Os resultados de acurácia dessa interface são apresentados na
@@ -490,9 +494,13 @@ apresentados.
 A seção anterior define os conceitos mobilizados por esta pesquisa;
 esta seção descreve os estudos que os sustentam. Para cada um, são
 apresentados o objeto, a abordagem adotada e a contribuição
-relevante para o problema aqui tratado. Os sete estudos listados são
-todos citados ao longo do trabalho — nenhum foi incluído apenas para
-preencher esta seção.
+relevante para o problema aqui tratado. São sete estudos de domínio, todos
+citados ao longo do trabalho — nenhum foi incluído apenas para preencher
+esta seção. As obras de método (Breiman, 2001; Chen e Guestrin, 2016;
+Hanley e McNeil, 1982; Lundberg e Lee, 2017; Ribeiro, Singh e Guestrin,
+2016; Wang et al., 2020) não aparecem aqui: são textos de técnica, não de
+domínio, e estão citados na Seção 2, no ponto em que o método que eles
+fundamentam é introduzido.
 
 ### 3.1 ESPORTS COMO FENÔMENO DE PRODUÇÃO E ANÁLISE DE DADOS
 
@@ -700,15 +708,19 @@ A análise exploratória buscou identificar distribuições, padrões
 iniciais e relações entre variáveis relevantes ao problema de pesquisa,
 com particular atenção à taxa de vitória por lado do mapa (azul/vermelho)
 em diferentes recortes — por região, por fase da partida e por contexto
-competitivo (*solo queue* vs. profissional). Achados quantitativos
-inesperados (como a variação do viés de lado ao longo do tempo de jogo)
-foram submetidos a testes de robustez adicionais antes de serem aceitos
-como resultado, incluindo: replicação restrita a uma única região (para
-descartar efeito de mistura regional), comparação contra a duração total
-da partida (para descartar confusão com "jogos longos") e cálculo de
-intervalo de confiança de Wilson sobre a proporção observada (para
-avaliar a significância estatística do efeito em amostras menores). Os
-resultados dessa análise são apresentados na Seção 5.3.
+competitivo (*solo queue* vs. profissional). Todo padrão quantitativo
+encontrado nessa etapa foi submetido a testes de robustez antes de ser
+aceito como resultado, e o conjunto desses testes é o mesmo para todos os
+achados: (i) replicação restrita a uma única região, para descartar efeito
+de mistura regional; (ii) comparação contra a duração total da partida,
+para descartar confusão com "jogos longos"; (iii) intervalo de confiança
+de Wilson sobre a proporção observada, para avaliar a significância
+estatística do efeito em amostras menores; e (iv) comparação de pares com
+correção de Holm, que corrige a multiplicidade quando várias diferenças
+são testadas sobre a mesma base. Este último foi o teste decisivo para o
+achado de viés de lado: sem ele, a dispersão entre cortes seria lida como
+tendência (ver Seção 5.3). Os resultados dessa análise são apresentados na
+Seção 5.3.
 
 ### 4.6 MODELAGEM PREDITIVA E COMPARAÇÃO ENTRE MODELOS
 
@@ -872,16 +884,18 @@ intervalo de confiança do corte de 10 minutos, o de maior amostra, é
 quatro cortes. O que a base ampliada desfez foi a *evolução* atribuída ao
 viés, não o viés.
 
-Dois testes de robustez foram mantidos quanto à explicação do achado. O
-primeiro restringe a análise à região BR1 isoladamente e reproduz a
-assimetria, descartando mistura regional como explicação. O segundo
-confirma que a taxa de vitória incondicional por faixa de duração total
-de partida permaneceu estável (44%-47%), o que descarta a hipótese de que
-"partidas longas são um tipo diferente de jogo". Um terceiro teste, antes
-usado para sustentar a alegação de enfraquecimento, deixou de ser
-aplicável e foi substituído pela comparação de pares com correção de Holm
-descrita acima — é esse teste que hoje sustenta a afirmação de
-constância.
+Os quatro testes de robustez definidos na Seção 4.5 se aplicam todos aqui,
+com o desfecho de cada um. O teste (i), de replicação regional, restringe a
+análise à BR1 isoladamente e reproduz a assimetria, descartando mistura
+regional como explicação. O teste (ii), de faixa de duração, confirma que a
+taxa de vitória incondicional por faixa de duração total de partida
+permaneceu estável (44%-47%), o que descarta a hipótese de que "partidas
+longas são um tipo diferente de jogo". O teste (iii), o intervalo de Wilson,
+está aplicado acima: mostra que nenhum dos quatro cortes admite 50%. E o
+teste (iv), a comparação de pares com correção de Holm, é o que sustenta a
+afirmação de constância e está detalhado no parágrafo anterior. É ele que
+substituiu o teste que antes sustentava a alegação de enfraquecimento,
+deixando de ser aplicável quando a forma deixou de existir.
 
 Este resultado negativo tem valor próprio. Um padrão que se dissolve ao
 aumentar a amostra era, em verdade, um artefato de tamanho de amostra: as
@@ -1099,14 +1113,16 @@ reconhecida e discutida na próxima subseção.
   estado "tudo empatado" ficou em 49,2% (10 min), 49,6% (15 min), 51,4%
   (20 min) e 49,0% (25 min). A medição direta sobre os dados brutos, entre
   partidas genuinamente empatadas, dá 46,4% a 47,9% de vitória azul nos
-  mesmos cortes (Seção 5.3). As duas séries são planas e consistentes entre
-  si quanto à forma, mas o modelo projeta o empate para perto de 50% e
-  portanto **subestima o viés em cerca de três pontos percentuais**. A
+  mesmos cortes (Seção 5.3). As duas séries são planas, mas não concordam apenas em magnitude: aos 20
+  minutos o modelo projeta 51,4% de vitória azul, favorecendo o azul,
+  enquanto o dado bruto dá 46,7%, favorecendo o vermelho — é neste corte
+  que a inversão de sentido aparece. O modelo projeta o empate para perto
+  de 50%, e portanto **subestima o viés em todos os cortes (a diferença é de 1,7 a 4,7 pontos percentuais conforme o corte)**. A
   discrepância não decorre de subajuste: um novo *GridSearchCV* sobre as 39
   mil partidas retornou os mesmos valores de profundidade e um ajuste
   equivalente de árvores e taxa de aprendizado. Trata-se de calibração em
   estado degenerado — um ponto que o jogo real não produz com frequência
-  suficiente para ser bem Representado na treino —, e não de erro na
+  suficiente para ser bem Representado no treino —, e não de erro na
   leitura da assimetria, que é medida diretamente dos dados.
 - **Desequilíbrio de amostra por região**: após as rodadas adicionais de
   coleta (Seção 5.3), BR1 e EUW1 concentram a maior parte dos dados
@@ -1210,7 +1226,7 @@ de vantagem material em vitória entre os dois contextos.
 ### 6.1 LIMITAÇÕES E AMEAÇAS À VALIDADE
 
 Registrar o que o trabalho não sustenta é parte da conclusão, e não uma
-disclaimer ritual. As limitações a seguir não invalidam os achados
+fórmula de cortesia. As limitações a seguir não invalidam os achados
 apresentados, mas delimitam o alcance em que podem ser generalizados.
 
 A primeira limitação é de validade de construto, e decorre da própria
@@ -1238,16 +1254,15 @@ ou a outros jogos, ainda que a arquitetura seja reaproveitável.
 A terceira limitação é de validade interna, e é de natureza temporal.
 As partidas foram coletadas em janelas de tempo delimitadas, e não
 amostradas aleatoriamente ao longo de todo o histórico disponível. Um
-padrío sazonal — mudanças de patch, eventos do cenário competitivo — pode
+padrão sazonal — mudanças de *patch*, eventos do cenário competitivo — pode
 portanto estar parcialmente confundido com o que os dados descrevem.
 
 Há ainda uma limitação técnica em aberto, que não foi resolvida e não
 deveria ser omitida. O modelo retreinado sobre a base ampliada
-reproduz a direção dos achados, mas apresenta uma taxa-base mais plana do
-que os dados brutos: em cortes de tempo em que o jogo estava empatado,
-os dados mostram leve predominância do time vermelho, enquanto o modelo
-projeta-se para rates próximos de 50%. A investigação realizada com três
-testes de robustez não sustenta a hipótese de subajuste — uma busca de
+reproduz a direção dos achados, mas subestima o viés de lado: nos cortes
+em que o jogo estava empatado, os dados brutos indicam predominância do
+time vermelho e o modelo projeta-se para taxas próximas de 50%. A
+investigação realizada não sustenta a hipótese de subajuste — uma busca de
 hiperparâmetros sobre as 39 mil linhas devolveu ajuste equivalente ao de
 produção. O padrão é, portanto, uma limitação da função de decisão
 aprendida nesse recorte, e não um defeito de ajuste. A descrição
@@ -1267,7 +1282,7 @@ estado de jogo arbitrário por fase, não apenas dados pré-processados de
 um conjunto fixo, de modo que a barreira é de dados em tempo real, não
 de modelo. O segundo é a inclusão de seleção de campeão competitiva no
 simulador de time. O terceiro é a investigação de restrições de
-monotonicidade formal no modelo, caso avaliada como necessária. O quarto
+monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto
 é a extensão do recorte de validade externa, que passaria por coletar
 outras filas e, eventualmente, outro jogo, de modo a testar se o viés
 de lado descreva o jogo ou o modo de jogar de uma população específica.
@@ -1597,7 +1612,7 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
 4. **Formatação final — FEITA (2026-10-03).** O texto foi vertido para
    `.docx` institucional por script, não à mão. Pipeline em
    `docs/build_tcc_docx.py` + `docs/finalize-fields.ps1`, produzindo
-   `docs/tcc2_final.docx` (56 páginas; corpo = **29 páginas**, medido por
+   `docs/tcc2_final.docx` (57 páginas; corpo = **29 páginas**, medido por
    `docs/finalize-fields.ps1`, que localiza a Seção 1 e o fim das
    Referências e reporta a diferença — a faixa institucional é 25 a 30).
    A formatação (A4, margens 3/2/3/2 cm, Arial 12, entrelinha 1,5, capa,
