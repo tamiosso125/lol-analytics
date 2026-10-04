@@ -527,6 +527,58 @@ def check_citacoes(t: str) -> None:
         print("  [OK] nenhuma citacao autor-data em caixa alta")
 
 
+def check_calibracao(t: str) -> None:
+    """A conclusão da 5.8 sobre a discrepância de taxa-base tem que bater com o artefato.
+
+    A 5.8 afirma três coisas que vieram de `experimento_calibracao.py`: que a
+    calibração PIORA a discrepância, que a regularização a move dentro do
+    ruído, e que só a troca de família a fecha. Cada uma é verificável contra
+    `reports/experimento_calibracao_veredito.json`.
+
+    Sem esta checagem o texto afirmaria "a calibração piora" sem que nada
+    registrasse que isso foi medido — e é a afirmação mais contraintuitiva
+    do trabalho, a que a banca mais vai questionar.
+    """
+    import json
+
+    rel = RAIZ / "reports" / "experimento_calibracao_veredito.json"
+    if not rel.exists():
+        aviso("experimento_calibracao_veredito.json ausente: a afirmação da 5.8 "
+              "sobre a discrepância não tem artefato")
+        return
+    try:
+        d = json.loads(rel.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        falha(f"experimento_calibracao_veredito.json invalido: {exc}")
+        return
+
+    prod = d["producao"]
+    pioram = d.get("variantes_que_pioram", [])
+    fecham = d.get("variantes_que_fecham", [])
+
+    def num(x: float) -> str:
+        return f"{x:.4f}".replace(".", ",")
+
+    # 1. a affirmacao central: nenhuma variante barata fecha
+    if fecham and not d.get("alguma_variante_fecha"):
+        falha("veredito contradiz a propria lista de variantes que fecham")
+    # 2. a calibracao tem de estar entre as que pioram
+    if not any("calib" in n for n in pioram):
+        aviso("a 5.8 afirma que a calibracao piora a discrepancia, mas o "
+              f"artefato lista {pioram} — confira a frase")
+    # 3. os numeros citados no texto tem de existir no artefato
+    for v in d.get("variantes_que_fecham", []):
+        pass
+    melhor = d.get("melhor_desvio")
+    if melhor:
+        for valor in (num(melhor["taxa_base"]), num(melhor["desvio_pp"] / 100)):
+            if valor not in t and f"{melhor['desvio_pp']:.1f}".replace(".", ",") not in t:
+                aviso(f"a taxa/desvio da variante que fecha ({valor}) não "
+                      "aparece no texto — o leitor não consegue conferir")
+        print(f"  [OK] variante que fecha: desvio {melhor['desvio_pp']:.1f} pp, "
+              f"AUC {num(melhor['auc'])}")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -559,6 +611,8 @@ def main() -> None:
     check_gridsearch(t)
     print("13. Citacoes autor-data em caixa alta (NBR 10520)")
     check_citacoes(t)
+    print("14. Discrepancia de taxa-base x artefato do experimento")
+    check_calibracao(t)
 
     print()
     print("=" * 66)

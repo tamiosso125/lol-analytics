@@ -1131,7 +1131,35 @@ reconhecida e discutida na próxima subseção.
   linhas escolheu a **mesma profundidade** de produção (3) e terminou
   0,0001 de AUC acima dela, de 0,8473 para 0,8475, colocando a combinação
   de produção em 2º lugar entre as 27. A diferença é uma casa decimal que
-  a própria variação entre *folds* produz. Trata-se de calibração em
+  a própria variação entre *folds* produz.
+
+  A discrepância foi então submetida a um teste adicional, porque a grade
+  acima variou apenas número de árvores, taxa de aprendizado e
+  profundidade — e a discrepância é justamente de taxa-base, que esses
+  três eixos não alcançam. Três alavancas foram testadas no corte de 15
+  minutos, o de **menor** discrepância entre os quatro (1,7 pp), de modo
+  que é o caso mais favorável a uma correção: **calibração** da saída
+  (sigmoidal e isotônica), **regularização alternativa** do XGBoost
+  (`min_child_weight`, `gamma`, `subsample`) e **troca de família de
+  modelo**. O resultado é contra-intuitivo e vale ser relatado com
+  precisão. A calibração **piora** a discrepância (de 1,7 para 2,3 pp na
+  sigmoidal, que é justamente a técnica que se esperaria resolver um erro
+  de taxa-base), porque o estado de empate total fica fora da distribuição
+  observada e o calibrador extrapola para perto de 50%. A regularização
+  alternativa move o desvio dentro do ruído (1,6 a 1,8 pp). A única
+  variante que o fecha é a **troca de família**: uma *Random Forest* com
+  500 árvores e profundidade 6 leva a taxa-base de 49,6% para 48,5%,
+  reduzindo o desvio ao dado bruto de 1,7 para **0,6 pp**, ao custo de
+  0,0005 de AUC (0,8473 → 0,8468). A conclusão que a 5.8 registra é
+  então mais específica do que "não achou ajuste melhor": a discrepância
+  **não é um déficit de ajuste do XGBoost**, e sim uma propriedade da
+  função que essa família aprende neste recorte. Corrigi-la exige trocar de
+  modelo, e o custo medido é pequeno mas real — o que faz da troca uma
+  decisão de escopo, não um ajuste de parâmetro. O experimento está em
+  `docs/experimento_calibracao.py` e o veredito em
+  `reports/experimento_calibracao_veredito.json`.
+
+  Trata-se de calibração em
   estado degenerado — um ponto que o jogo real não produz com frequência
   suficiente para ser bem Representado no treino —, e não de erro na
   leitura da assimetria, que é medida diretamente dos dados.
@@ -1275,9 +1303,13 @@ em que o jogo estava empatado, os dados brutos indicam predominância do
 time vermelho e o modelo projeta-se para taxas próximas de 50%. A
 investigação realizada não sustenta a hipótese de subajuste — a busca em
 grade completa sobre as 39 mil linhas escolheu a mesma profundidade de
-produção e ficou 0,0001 de AUC acima dela (detalhado na Seção 5.8).
+produção e ficou 0,0001 de AUC acima dela, e o teste das três alavancas
+que a grade não cobre (calibração, regularização alternativa e troca de
+família de modelo) só fecha a discrepância com a troca, ao custo de
+0,0005 de AUC (detalhado na Seção 5.8).
 O padrão é, portanto, uma limitação da função de decisão
-aprendida nesse recorte, e não um defeito de ajuste. A descrição
+aprendida nesse recorte por esta família de modelo, e não um defeito de
+ajuste. A descrição
 completa está na Seção 5.8.
 
 Uma fragilidade declarada na primeira versão deste texto foi resolvida e
@@ -1623,7 +1655,7 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
 5. **Formatação final — FEITA (2026-10-03).** O texto foi vertido para
    `.docx` institucional por script, não à mão. Pipeline em
    `docs/build_tcc_docx.py` + `docs/finalize-fields.ps1`, produzindo
-   `docs/tcc2_final.docx` (57 páginas; corpo = **29 páginas**, medido por
+   `docs/tcc2_final.docx` (58 páginas; corpo = **30 páginas**, medido por
    `docs/finalize-fields.ps1`, que localiza a Seção 1 e o fim das
    Referências e reporta a diferença — a faixa institucional é 25 a 30).
    A formatação (A4, margens 3/2/3/2 cm, Arial 12, entrelinha 1,5, capa,

@@ -1,0 +1,30 @@
+{
+  "criterio": {
+    "limiar_desvio_pp": 1.0,
+    "limiar_custo_auc": 0.001
+  },
+  "producao": {
+    "nome": "producao (sem calibracao)",
+    "auc": 0.8473,
+    "taxa_base": 0.4955,
+    "desvio_pp": 1.7,
+    "acuracia": 0.7621
+  },
+  "alguma_variante_fecha": true,
+  "variantes_que_fecham": [
+    "RandomForest 500/prof6 (referencia de capacidade)"
+  ],
+  "variantes_que_pioram": [
+    "calibrada sigmoidal",
+    "calibrada isotonica",
+    "regularizada min_child_weight=20",
+    "calib. sigmoidal + regularizacao"
+  ],
+  "melhor_desvio": {
+    "nome": "RandomForest 500/prof6 (referencia de capacidade)",
+    "auc": 0.8468,
+    "taxa_base": 0.4852,
+    "desvio_pp": 0.6,
+    "acuracia": 0.7617
+  }
+}

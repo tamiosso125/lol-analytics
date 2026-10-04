@@ -3623,6 +3623,63 @@ melhor" — a segunda afirmacao seria mais forte do que o experimento
 sustenta.
 
 
+### D1 — As duas alavancas que a grade nao cobria, testadas
+
+A 5.8 dizia que a limitacao de taxa-base nao e subajuste porque a grade de
+hiperparametros nao achou ajuste melhor. A frase era verdadeira e incompleta:
+a grade variou so `n_estimators`, `learning_rate` e `max_depth`, e a
+discrepancia e justamente de taxa-base — que esses tres eixos nao alcancam.
+Faltava testar **calibração** (a tecnica que se esperaria resolver um erro
+de taxa-base) e **regularização alternativa**.
+
+Medido em `docs/experimento_calibracao.py`, no corte de 15 min — o de MENOR
+discrepancia entre os quatro (1,7 pp), ou seja, o caso mais favoravel a uma
+correcao:
+
+| variante | AUC | taxa-base | desvio do dado bruto |
+|---|---:|---:|---:|
+| producao (500/0,01/3) | 0,8473 | 49,6% | 1,7 pp |
+| calibrada sigmoidal | 0,8474 | 50,2% | **2,3 pp** |
+| calibrada isotonica | 0,8472 | 49,8% | 1,9 pp |
+| regularizada (min_child_weight=20) | 0,8474 | 49,7% | 1,8 pp |
+| regularizada (gamma=1, subsample=0,8) | 0,8474 | 49,5% | 1,6 pp |
+| **RandomForest 500/prof 6** | 0,8468 | **48,5%** | **0,6 pp** |
+
+Referencia do dado bruto: 47,9% de vitoria do azul entre partidas
+genuinamente empatadas, lida de `reports/taxa_base_por_corte.json` — nao
+hardcoded, para a comparacao nao poder divergir se o dado for remedido.
+
+**RESULTADO CONTRA-INTUITIVO, E REGISTRADO COMO TAL.** A calibracao
+**piora** a discrepancia (de 1,7 para 2,3 pp na sigmoidal). A intuicao —
+"calibrar a saida para a frequencia observada" — falha porque o estado de
+empate total nao esta na distribuição observada: e um ponto que o jogo real
+nao produz com frequencia, e o calibrador o extrapola para perto de 50%.
+Ou seja, a técnica mesma de que resolveria o problema e a que mais o
+agrava. A regularizacao alternativa move o desvio dentro do ruido.
+
+A unica variante que fecha a discrepancia e a **troca de família de
+modelo**: RandomForest 500 árvores, profundidade 6. Custo: 0,0005 de AUC
+(0,8473 → 0,8468). Vale notar que a RF *sem* limite de profundidade, que é
+a que aparece no Apêndice C, AUC de 0,8277 — a limitacao a profundidade 6
+e o que faz ela emparelhar com o XGBoost.
+
+**O QUE ISSO MUDA NO TCC.** A conclusao da 5.8 fica mais especifica e mais
+forte: a discrepancia nao e um déficit de ajuste do XGBoost, e uma
+propriedade da função que essa família aprende neste recorte. Corrigi-la
+exige trocar de modelo, e o custo medido e pequeno mas real — o que faz da
+troca uma decisão de escopo, nao um ajuste de parametro.
+
+**ERRO MEU, E REGISTRADO.** A primeira versao do script declarava
+"VEREDITO: FECHA" com limiar de desvio < 2,0 pp — e a variante de producao
+ja estava em 1,7 pp. Qualquer coisa que nao fosse pior que a producao
+contava como "fechou", e a regularizacao, que melhora 1,7 → 1,6 pp, foi
+contada como sucesso. O limiar foi corrigido para exigir desvio < 1,0 pp E
+custo de AUC < 0,001, e a reavaliacao esta em
+`docs/reavalia_calibracao.py` +
+`reports/experimento_calibracao_veredito.json`. Limiar que aceita o estado
+atual como sucesso nao e limiar, e noise floor.
+
+
 ### Ferramenta que evita a repetição
 
 `docs/verifica_tcc.py` roda 8 checagens antes de qualquer commit: CJK,

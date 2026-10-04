@@ -67,8 +67,12 @@ try {
   Write-Output "  imagens:  $imagens"
   Write-Output "  TOCs:     $($doc.TablesOfContents.Count) sumario + $($doc.TablesOfFigures.Count) lista(s)"
   if ($corpo) {
+    # Faixa institucional 25-30. O corpo esta em 30, o TETO exato: cabe,
+    # mas nao ha folga. Qualquer acréscimo de texto empurra para fora, e o
+    # script tem de dizer isso em voz alta em vez de so reportar o numero.
     $situacao = if ($corpo -lt 25) { 'ABAIXO do minimo de 25' }
                 elseif ($corpo -gt 30) { 'ACIMA do maximo de 30' }
+                elseif ($corpo -eq 30) { 'NO TETO da faixa 25-30 - sem folga, qualquer acréscimo empurra para fora' }
                 else { 'dentro da faixa 25-30' }
     Write-Output "  CORPO:    paginas $pgInicio ate $pgFim = $corpo paginas ($situacao)"
   } else {
