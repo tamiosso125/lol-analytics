@@ -143,8 +143,13 @@ portal da Riot (limites maiores, sem expiração diária).
 - [x] (f) API FastAPI com endpoints para dashboards — `src/api/main.py`
 - [x] (e) Explicabilidade com SHAP — `src/models/explain_shap.py`
 - [x] (f) Dashboard interativo Streamlit com consulta NL — `src/dashboard/app.py`
-- [x] (e) Tuning de hiperparâmetros (GridSearchCV) — `src/models/tune_models.py`
-- [x] Rodar tudo com dados reais (10,4k partidas; métricas em
-      `docs/diario_execucao.md`, entrada de 2026-07-03)
+- [x] (e) Tuning de hiperparâmetros (GridSearchCV) — `src/models/tune_models.py`,
+      e `src/models/tune_models_full.py` para a base final com artefato em
+      `reports/tune_models_39k.json`
+- [x] Rodar tudo com dados reais (**39.426 partidas** de *solo queue* em cinco
+      regiões + **96.716 jogos** profissionais). Métricas do modelo de
+      produção (XGBoost, corte de 15 min, 39.188 linhas): acurácia **0,7621**,
+      AUC-ROC **0,8473** — em `docs/diario_execucao.md`, entrada de 2026-10-04,
+      e reproduzível com `python -m src.models.multi_cutoff_metrics`
 - [x] (f) Front end React como interface principal — `frontend/`
 - [ ] Escrever os capítulos do TCC II a partir de `docs/diario_execucao.md`

@@ -494,6 +494,39 @@ def check_gridsearch(t: str) -> None:
               f"(delta {num(delta)}, producao em {posicao}o de 27)")
 
 
+def check_citacoes(t: str) -> None:
+    """Citação autor-data em caixa alta viola a NBR 10520.
+
+    Dentro de parênteses, o sobrenome vai em caixa alta e o resto em
+    minúscula: "(Prodanov; Freitas, 2013)", nunca "(PRODANOV; FREITAS,
+    2013)". A prosa do texto usava a forma correta — "Prodanov e Freitas
+    (2013)" — e só a forma entre parênteses estava errada, o que é a pior
+    mistura possível porque parece coerente.
+
+    Três das cinco ocorrências tinham QUEBRA DE LINHA dentro do parêntese,
+    que é o que fazia o casamento exato falhar. O padrão aqui aceita
+    \\s+ entre os campos.
+    """
+    import re as _re
+
+    padrao = _re.compile(
+        r"\((?:GIL|CRESWELL|PRODANOV|FREITAS|YIN|LUND|RIBEIRO|BREIMAN|CHEN|"
+        r"HANLEY|WALLNER|HODGE|JIANG|GARC)[^)]*\d{4}\)"
+    )
+    achados = []
+    for m in padrao.finditer(t):
+        # a citacao e autor-data se tem sobrenome ALFA + ano; o restante
+        # em caixa alta e o defeito
+        dentro = m.group(0)[1:-1]
+        if _re.search(r"\b[A-ZÁÉÍÓÚÂÊÔÃÕÇ]{3,}\b", dentro):
+            ln = t[: m.start()].count("\n") + 1
+            achados.append(f"linha {ln}: {m.group(0)[:44]!r} em caixa alta")
+    for a in achados:
+        falha(f"citacao autor-data em caixa alta (NBR 10520): {a}")
+    if not achados:
+        print("  [OK] nenhuma citacao autor-data em caixa alta")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -524,6 +557,8 @@ def main() -> None:
     check_anglicismos(t)
     print("12. Afirmacao de nao-subajuste x artefato do tuning")
     check_gridsearch(t)
+    print("13. Citacoes autor-data em caixa alta (NBR 10520)")
+    check_citacoes(t)
 
     print()
     print("=" * 66)

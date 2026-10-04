@@ -1,0 +1,44 @@
+{
+  "medido_em": "2026-10-04",
+  "definicao": "taxa de vitória do time azul, incondicional, por faixa de duração total da partida",
+  "faixas": [
+    {
+      "faixa": "0-25",
+      "min": 0,
+      "max": 25,
+      "jogos": 15122,
+      "pct_azul": 46.4
+    },
+    {
+      "faixa": "25-30",
+      "min": 25,
+      "max": 30,
+      "jogos": 12836,
+      "pct_azul": 47.2
+    },
+    {
+      "faixa": "30-35",
+      "min": 30,
+      "max": 35,
+      "jogos": 8120,
+      "pct_azul": 46.4
+    },
+    {
+      "faixa": "35-40",
+      "min": 35,
+      "max": 40,
+      "jogos": 2613,
+      "pct_azul": 45.6
+    },
+    {
+      "faixa": "40+",
+      "min": 40,
+      "max": null,
+      "jogos": 735,
+      "pct_azul": 46.4
+    }
+  ],
+  "amplitude_pp": 1.6,
+  "todos_abaixo_de_50": true,
+  "amplitude_ate_5pp": true
+}

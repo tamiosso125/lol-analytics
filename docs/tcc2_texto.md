@@ -640,22 +640,19 @@ aplicada busca produzir conhecimentos voltados à solução de problemas
 específicos e com possibilidade de utilização prática, o que se
 concretizou na estruturação de uma plataforma funcional para coletar,
 organizar e analisar dados competitivos de *League of Legends*. Quanto
-aos objetivos, a pesquisa teve caráter exploratório e descritivo (GIL,
-2002): exploratório na investigação inicial sobre a Riot Games API e as
+aos objetivos, a pesquisa teve caráter exploratório e descritivo (Gil, 2002): exploratório na investigação inicial sobre a Riot Games API e as
 possibilidades de modelagem, e descritivo na caracterização dos dados
 coletados, dos padrões identificados e dos modelos comparados. Quanto à
-abordagem, a pesquisa adotou perspectiva mista (CRESWELL; CRESWELL,
-2023): o componente qualitativo esteve presente na revisão
+abordagem, a pesquisa adotou perspectiva mista (Creswell; Creswell, 2023): o componente qualitativo esteve presente na revisão
 bibliográfica e na interpretação dos achados; o componente quantitativo
 esteve associado à coleta e ao tratamento dos dados, à análise
 exploratória e à comparação entre os modelos de *machine learning*.
 
 ### 4.2 ESTRATÉGIAS DE PESQUISA
 
-O trabalho foi desenvolvido por meio de pesquisa bibliográfica (GIL,
-2002), pesquisa documental sobre a documentação oficial da Riot Games
-API (PRODANOV; FREITAS, 2013) e estudo aplicado com recorte de caso no
-domínio de *League of Legends* (YIN, 2018).
+O trabalho foi desenvolvido por meio de pesquisa bibliográfica (Gil, 2002), pesquisa documental sobre a documentação oficial da Riot Games
+API (Prodanov; Freitas, 2013) e estudo aplicado com recorte de caso no
+domínio de *League of Legends* (Yin, 2018).
 
 ### 4.3 COLETA DE DADOS
 
@@ -889,13 +886,23 @@ com o desfecho de cada um. O teste (i), de replicação regional, restringe a
 análise à BR1 isoladamente e reproduz a assimetria, descartando mistura
 regional como explicação. O teste (ii), de faixa de duração, confirma que a
 taxa de vitória incondicional por faixa de duração total de partida
-permaneceu estável (44%-47%), o que descarta a hipótese de que "partidas
+permaneceu estável (medido em 2026-10-04 sobre as 39.426 partidas: 45,6%
+a 47,2% entre as faixas de duração, amplitude de 1,6 ponto percentual,
+todas abaixo de 50%), o que descarta a hipótese de que "partidas
 longas são um tipo diferente de jogo". O teste (iii), o intervalo de Wilson,
 está aplicado acima: mostra que nenhum dos quatro cortes admite 50%. E o
 teste (iv), a comparação de pares com correção de Holm, é o que sustenta a
 afirmação de constância e está detalhado no parágrafo anterior. É ele que
 substituiu o teste que antes sustentava a alegação de enfraquecimento,
 deixando de ser aplicável quando a forma deixou de existir.
+
+O teste (ii) foi **remedido** em 2026-10-04 sobre a base atual, porque a
+medição que o texto usava era de 2026-07-08 e de uma base quase metade
+desta: as taxas por faixa de duração total são 46,4% (0 a 25 min, 15.122
+partidas), 47,2% (25 a 30, 12.836), 46,4% (30 a 35, 8.120), 45,6% (35 a 40,
+2.613) e 46,4% (acima de 40, 735). A amplitude é de 1,6 ponto percentual e
+todas as faixas ficam abaixo de 50% — o teste se sustenta, agora com data,
+base e amplitude explícitas.
 
 Este resultado negativo tem valor próprio. Um padrão que se dissolve ao
 aumentar a amostra era, em verdade, um artefato de tamanho de amostra: as
@@ -1354,8 +1361,7 @@ VLDB Endowment**, [S. l.], v. 18, n. 12, p. 4860-4873, 2025. DOI:
 10.14778/3750601.3750610.
 
 LUNDBERG, Scott M.; LEE, Su-In. A unified approach to interpreting model
-predictions. In: Advances in Neural Information Processing Systems 30 (NIPS
-2017). 2017. p. 4765-4774. Disponível em: https://arxiv.org/abs/1705.07874.
+predictions. In: Advances in Neural Information Processing Systems 30 (NIPS 2017). 2017. p. 4765-4774. Disponível em: https://arxiv.org/abs/1705.07874.
 Acesso em: 4 out. 2026.
 
 PRODANOV, Cleber Cristiano; FREITAS, Ernani Cesar de. **Metodologia do
@@ -1614,7 +1620,7 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
    88% confirmado com dados frescos), C (quadro cruzado 4 cortes × 3
    modelos), D (9 experimentos negativos), Anexo A (6 capturas de tela
    reais em `reports/anexo_a/`), Anexo B (referência da API).
-4. **Formatação final — FEITA (2026-10-03).** O texto foi vertido para
+5. **Formatação final — FEITA (2026-10-03).** O texto foi vertido para
    `.docx` institucional por script, não à mão. Pipeline em
    `docs/build_tcc_docx.py` + `docs/finalize-fields.ps1`, produzindo
    `docs/tcc2_final.docx` (57 páginas; corpo = **29 páginas**, medido por
@@ -1659,7 +1665,7 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
      Métodos"), o que reverte a pendência nº 3 (item 3 acima).
      Limite de páginas do TCC II: **25 a 30 páginas**, não contando
      apêndices/anexos.
-5. ~~Ampliar a coleta EUW1/KR/NA1~~ — **feito**: EUW1 1.307→11.744
+6. ~~Ampliar a coleta EUW1/KR/NA1~~ — **feito**: EUW1 1.307→11.744
    partidas, KR 1.308→8.567 e **NA1 1.446→7.159** (a NA1 foi ampliada na
    rodada final de 2026-10-04; a limitação que ela representava saiu da
    Seção 5.8). Quadro de viés de lado por região remedido com dados de
@@ -1668,16 +1674,16 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
    vitória do time vermelho, sobre 39.426 partidas.
 
 **Status (2026-10-04):** de 6 pendências, **6 estão fechadas**. **Nenhuma
-depende do orientador.** Antes de entregar, a suíte completa passa:
+depende do orientador.** As duas decisões de escopo (título acadêmico e
+Trabalhos Relacionados como seção de primeiro nível) estão nos itens 2 e 3
+acima e não se repetem aqui.
+
+Antes de entregar, a suíte completa passa:
 `tests/smoke_test.py` (exit 0), `tests/validate_predictions.py`
-(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (9 checagens de
+(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (12 checagens de
 consistência do texto contra o banco e os artefatos, exit 0),
 `docs/confere_docx.py` (conformidade formal do `.docx`, exit 0), e
 `cd frontend; npm run lint; npm run test` (31/31).
-
-1. **Título acadêmico** — decidido: não cita Bellestraiko (item 2 acima).
-2. **Trabalhos Relacionados** — decidido em 2026-10-04: **é** seção de
-   primeiro nível, seguindo os 10 TCC II aprovados (item 3 acima).
 
 **Resta 1 item, já resolvido:** o título do Quadro 4 (Apêndice C), que no
 rascunho só tinha nota de método — o que viola a regra da instituição, já

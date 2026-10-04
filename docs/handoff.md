@@ -17,15 +17,17 @@ Legends com DOIS datasets complementares:
 
 1. **Solo queue** (Riot API): partidas ranqueadas Challenger/GM
    multi-região (BR1/EUW1/KR/NA1, mais um resíduo EUN1, fila 420) —
-   **23.133 partidas** na base do modelo preditivo (2026-07-06,
-   coleta retomável). A coleta continuou depois: **24.154** em 2026-09-28
-   (rodada extra para o estudo de viés de lado por região) e **33.713**
-   em 2026-10-03, quando EUW1 e KR quase dobraram. Nenhum desses volumes
-   entrou no retreino — ver "Números que importam" para o porquê de
-   manter o modelo em 23.133. JSON bruto + timelines guardados para
-   reprocessamento.
-2. **Competitivo** (Oracle's Elixir): ~99k jogos profissionais de
+   **39.426 partidas** no banco (BR1 11.936, EUW1 11.744, KR 8.567,
+   NA1 7.159, EUN1 20) e **39.188 linhas** na base do modelo preditivo
+   (corte de 15 min, retreino de 2026-10-04). A coleta foi retomável ao
+   longo de todo o projeto: 10.295 em julho, 23.133 em 2026-07-06,
+   24.154 em 2026-09-28, 33.713 em 2026-10-03 e 39.426 em 2026-10-04,
+   quando a NA1 foi de 1.446 para 7.159. JSON bruto + timelines
+   guardados para reprocessamento.
+2. **Competitivo** (Oracle's Elixir): **96.716 jogos** profissionais de
    2014-2026 (LCK/LPL/LEC/LTA/CBLOL etc.), carregados de CSVs anuais.
+   Contagem por `game_id` distinto — `pro_games` guarda duas linhas por
+   jogo (uma por time), então `COUNT(*)` devolve o dobro.
 
 Sobre eles: modelos de predição de vitória "em jogo" por fase
 (10/15/20/25 min), interface de perguntas em linguagem natural
@@ -76,9 +78,10 @@ tal na UI.
   ano).
 - **Features/modelos**: `src/features/build_features.py` (CUTOFFS
   10/15/20/25), `src/models/` (train_baseline, tune_models,
-  export_model, explain_shap). Produção: XGBoost n=500/lr=0.01/depth=3
-  por fase em `data/models_phases.joblib`, retreinado em 23.133
-  partidas (2026-07-06) — ver números abaixo.
+  tune_models_full, export_model, explain_shap). Produção:
+  XGBoost n=500/lr=0.01/depth=3 por fase em `data/models_phases.joblib`,
+  retreinado em **39.188 linhas** (corte de 15 min, 2026-10-04) — ver
+  números abaixo.
 - **API**: `src/api/main.py` — todos os endpoints (stats solo queue,
   `/stats/pro/*` com `?year=` padrão mais-recente, análise de partida
   com estado por minuto, heat map/posições, itens por campeão,

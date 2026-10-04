@@ -129,13 +129,94 @@ salvar em `data/pro/{ano}_LoL_esports_match_data_from_OraclesElixir.csv`.
 .venv\Scripts\python.exe -m src.models.explain_shap
 
 # Comparação formal solo queue × pro + salva model_pro.joblib:
-.venv\Scripts\python.exe -m src.models.train_pro
+`.venv\Scripts\python.exe -m src.models.train_pro
 ```
 
 > **Após recoletar**: a ordem é `load_items` → `build_features` →
 > `export_model`, e **reiniciar a API** (ela carrega os modelos no
 > startup). Depois de mexer em features/modelo, o `/predict` só reflete
 > a mudança com a API reiniciada.
+
+### 5b. Medidas que sustentam números do TCC
+
+São os comandos que produzem os números citados no texto. Regra do projeto:
+**um número só entra no TCC depois que o comando que o mede existe e o
+resultado está em `reports/`.**
+
+```powershell
+# Quadro do Apêndice C (4 cortes × 3 modelos) + reports/metricas_corte.json:
+# usa os hiperparâmetros DE PRODUÇÃO e CV 5-fold com semente 42.
+.venv\Scripts\python.exe -m src.models.multi_cutoff_metrics
+
+# GridSearchCV na base final + reports/tune_models_39k.log/.json (~50s só
+# com XGBoost). Sustenta a afirmação da 5.8 de que a limitação de
+# taxa-base NÃO é subajuste. --completo acrescenta RF e MLP (muito lento):
+.venv\Scripts\python.exe -m src.models.tune_models_full
+.venv\Scripts\python.exe -m src.models.tune_models_full --completo
+
+# Taxa de vitória do azul por corte, no estado de empate
+# + reports/taxa_base_por_corte.json:
+.venv\Scripts\python.exe docs\taxa_base_por_corte.py
+
+# Teste (iv) de robustez: Wilson + Holm sobre as taxas por corte.
+# É o teste que sustenta a afirmação central da Seção 5.3:
+.venv\Scripts\python.exe docs\testa_diferenca_taxas.py
+
+# Teste (ii) de robustez: taxa do azul por faixa de duração total
+# + reports/faixa_duracao.json:
+.venv\Scripts\python.exe docs\testa_faixa_duracao.py
+
+# Conversão de vantagem material, nos DOIS contextos e com a mesma
+# definição de faixa:
+.venv\Scripts\python.exe docs\confere_conversao_advantagem.py
+```
+
+| artefato | quem consome |
+|---|---|
+| `reports/metricas_corte.json` | Quadro 2 e Apêndice C; checagem 5 |
+| `reports/tune_models_39k.json` | Seção 5.8; checagem 12 |
+| `reports/taxa_base_por_corte.json` | Seção 5.3 e 5.8 |
+| `reports/faixa_duracao.json` | Seção 4.5 e 5.3 (teste ii) |
+
+> `reports/tune_models_39k.log` cai no `.gitignore` (`*.log`) e não é
+> versionado; o `.json` é, e é dele que a checagem 12 lê. O log é a versão
+> legível e se regenera com o comando acima.
+
+### 5c. Conferir o texto e o entregável
+
+Antes de fechar o TCC, duas checagens automáticas. Ambas saem com exit 1
+quando algo diverge, e ambas devem passar.
+
+```powershell
+# 12 checagens de consistência do texto contra o banco e os artefatos:
+# CJK, referências cruzadas, tabelas, ordem alfabética de referências,
+# números de modelo contra metricas_corte.json, Quadro 1 contra o banco,
+# dataset profissional contra o banco, guard de resíduo (valores
+# substituídos e formas refutadas), figuras citadas no corpo, fonte das
+# figuras contra o Anexo A, anglicismos de prosa, e a afirmação de
+# não-subajuste contra o artefato do tuning.
+.venv\Scripts\python.exe docs\verifica_tcc.py
+
+# Conformidade formal do .docx gerado: títulos em negrito, contagem de
+# títulos e de referências, legendas, fontes, tabelas, imagens.
+# Rode DEPOIS de build + finalize-fields:
+.venv\Scripts\python.exe docs\confere_docx.py
+```
+
+### 5d. Regerar as capturas do Anexo A
+
+```powershell
+# A API precisa estar em :8000 e o frontend na porta LIBERADA NO CORS
+# (:5173). Servir em outra porta funciona no navegador até a página fazer
+# fetch, e aí o Chromium renderiza o banner de erro.
+Push-Location frontend; npx vite preview --port 5173; Pop-Location
+$env:FRONT_URL = "http://localhost:5173"
+.venv\Scripts\python.exe docs\recapturar_anexo_a.py
+```
+
+O script recusa a captura se a página mostrar "Erro no servidor" ou se o
+arquivo sair com menos de 60 KB. Vale deixar essa trava: sem ela o script
+grava a tela de erro e reporta sucesso.
 
 ---
 
@@ -248,4 +329,18 @@ Ordem canônica quando se popula um banco vazio (também no README):
 12. python -m src.etl.load_pro
 13. uvicorn src.api.main:app --port 8000     # API
 14. cd frontend && npm run dev                # front
+```
+
+## Antes de entregar o TCC
+
+Não faz parte do pipeline de dados, mas é o que garante que os números do
+texto existam de verdade. Ver **5b**, **5c** e **5d**.
+
+```
+15. python -m src.models.multi_cutoff_metrics  # Apêndice C + metricas_corte.json
+16. python -m src.models.tune_models_full     # lastro da 5.8
+17. python docs/verifica_tcc.py               # 12 checagens, exit 0
+18. python docs/build_tcc_docx.py             # gera o .docx
+19. powershell -File docs/finalize-fields.ps1  # Word preenche os campos
+20. python docs/confere_docx.py               # conformidade formal, exit 0
 ```
