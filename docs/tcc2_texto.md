@@ -45,7 +45,7 @@ organização e exploração de dados competitivos, modelagem preditiva
 com *machine learning* e mecanismos de visualização e consulta em
 linguagem natural. Foram coletadas e organizadas 39.426 partidas
 ranqueadas de elo alto (cinco regiões) via Riot Games API, e
-incorporadas 99.259 partidas profissionais (2014-2026, Oracle's
+incorporadas 96.716 partidas profissionais (2014-2026, Oracle's
 Elixir). Três modelos — XGBoost, *Random Forest* e uma rede neural
 (MLP) — foram treinados e comparados para predizer o vencedor a partir
 do estado da partida em quatro cortes temporais (10, 15, 20 e 25
@@ -54,8 +54,8 @@ minutos (acurácia de 0,7621; AUC-ROC de 0,8473). A análise exploratória
 identificou que o time vermelho é favorecido no *solo queue* de elo
 alto (56,3% de vitórias na região com maior amostra), um padrão de
 magnitude estável ao longo da partida e que se inverte no cenário
-profissional (onde o time azul vence cerca de 53% das partidas, de forma
-estável entre 2014 e 2026) — achado sustentado por testes de robustez
+profissional (onde o time azul vence 53,2% das partidas, padrão estável
+desde 2016) — achado sustentado por testes de robustez
 estatística. Uma interface em linguagem natural (*text-to-SQL* com
 validação estrutural da consulta) atingiu 88% de acurácia de execução
 em um benchmark de 26 perguntas de referência. A plataforma foi
@@ -666,7 +666,7 @@ horas, o que exigiu um processo de coleta resumível (script capaz de
 retomar de onde parou, pulando partidas já salvas).
 
 **b) Oracle's Elixir (dados de partidas profissionais).** Foram
-incorporados **99.259 jogos profissionais** (2014-2026), cobrindo as
+incorporados **96.716 jogos profissionais** (2014-2026), cobrindo as
 principais ligas mundiais (LCK, LPL, LEC, LTA, CBLOL, entre outras), a
 partir de arquivos CSV anuais publicados publicamente. Essa fonte não
 estava prevista no recorte original do TCC I e foi adicionada para
@@ -789,7 +789,7 @@ A base usada para treinar e comparar os modelos preditivos (Seção 5.4)
 reúne **39.188 partidas** de *solo queue* no corte de 15 minutos,
 provenientes de **39.426 partidas** normalizadas em cinco regiões
 (BR1/EUW1/KR/NA1/EUN1), com JSON bruto de partida e linha do tempo
-preservados para reprocessamento, e **99.259 jogos profissionais**
+preservados para reprocessamento, e **96.716 jogos profissionais**
 (2014-2026, Oracle's Elixir). O esquema relacional contempla partidas,
 times, participantes, jogadores, banimentos, eventos de item (com
 desfazimento de compras/vendas aplicado) e um catálogo de itens para
@@ -882,14 +882,19 @@ metodológica do trabalho: em corpus de esports, diferença de um ponto
 percentual em subamostras de mil partidas não é diferença.
 
 **Comparação com o cenário profissional.** No dataset competitivo
-(Oracle's Elixir), o time azul venceu aproximadamente 53% das partidas,
-de forma estável entre 2014 e 2026 — o padrão descrito pela literatura
-geral sobre *League of Legends*. O viés de lado do *solo queue* de elo
-alto vai na direção oposta ao do jogo profissional, o que constitui um
-dos achados centrais deste trabalho: a mesma métrica, medida em dois
-contextos institucionalmente diferentes, produz sinais opostos —
-hipótese de explicação: no *solo queue*, sem coordenação de *draft* de
-cinco jogadores, o *counter-pick* garantido do time vermelho (que
+(Oracle's Elixir, 96.716 jogos), o time azul venceu 53,2% das partidas — o
+padrão descrito pela literatura geral sobre *League of Legends*. A série
+anual é estável a partir de 2016: 53,6% (2016), 55,0% (2017), 53,7%
+(2018), 53,2% (2019), 52,7% (2020), 52,6% (2021), 52,5% (2022), 53,3%
+(2023), 53,1% (2024), 53,3% (2025) e 53,1% (2026). Os dois primeiros anos
+divergem (58,2% em 2014 e 55,3% em 2015), mas apoiadas em amostras muito
+menores (814 e 1.702 jogos, contra 96.716 no total), e a diferença é
+atribuída a essa assimetria de volume, não a uma mudança no padrão. O viés de lado do
+*solo queue* de elo alto vai na direção oposta ao do jogo profissional, o
+que constitui um dos achados centrais deste trabalho: a mesma métrica,
+medida em dois contextos institucionalmente diferentes, produz sinais
+opostos — hipótese de explicação: no *solo queue*, sem coordenação de
+*draft* de cinco jogadores, o *counter-pick* garantido do time vermelho (que
 escolhe por último) pesa mais; no jogo profissional, a prioridade de
 primeira escolha é valorizada o suficiente para influenciar decisões
 de lado em *playoffs*.
@@ -1125,7 +1130,7 @@ foram identificadas e organizadas em um esquema relacional específico;
 
 c) foi estruturado e executado um processo de coleta, tratamento e
 organização capaz de escalar de um piloto de ~100 partidas para uma
-base de 39.426 partidas de *solo queue* somadas a 99.259 partidas
+base de 39.426 partidas de *solo queue* somadas a 96.716 partidas
 profissionais;
 
 d) técnicas de análise de dados identificaram padrões relevantes,

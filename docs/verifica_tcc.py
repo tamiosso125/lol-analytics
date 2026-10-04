@@ -218,6 +218,54 @@ def check_quadro_regioes(t: str) -> None:
         print(f"  [OK] Quadro 1 confere com o banco ({len(linhas)} regioes)")
 
 
+def check_profissional(t: str) -> None:
+    """Contagem de jogos profissionais e taxa do azul x banco.
+
+    O texto afirmava 99.259 jogos profissionais; o banco tem 96.716. O erro
+    sobreviveu a dois ciclos de coleta porque ninguem contava. A contagem
+    correta e `COUNT(DISTINCT game_id)`: `pro_games` guarda DUAS linhas por
+    jogo (uma por time, nao uma por jogador), entao `COUNT(*)` devolve o
+    dobro — 193.432 — e parece um numero plausivel.
+    """
+    m = _re_num(r"(\d{2}\.\d{3})\s+(?:jogos|partidas)\s+profissionais", t)
+    if not m:
+        aviso("contagem de jogos profissionais nao encontrada no texto")
+        return
+    txt = int(m.group(1).replace(".", ""))
+    try:
+        import sys
+
+        sys.path.insert(0, str(RAIZ))
+        from src.db import get_conn  # noqa: PLC0415
+    except Exception as exc:  # noqa: BLE001
+        aviso(f"banco inacessivel, contagem profissional pulada: {exc}")
+        return
+    try:
+        cur = get_conn().cursor()
+        cur.execute("SELECT COUNT(DISTINCT game_id) FROM pro_games")
+        real = cur.fetchone()[0]
+        cur.execute("""SELECT ROUND(100.0*AVG(CASE WHEN win THEN 1 ELSE 0 END)::numeric,1)
+                       FROM pro_games WHERE side='Blue'""")
+        pct_azul = cur.fetchone()[0]
+    except Exception as exc:  # noqa: BLE001
+        aviso(f"consulta profissional falhou: {exc}")
+        return
+    if txt != real:
+        falha(f"jogos profissionais: {txt} no texto, {real} no banco")
+        return
+    pct_txt = f"{pct_azul:.1f}".replace(".", ",")
+    if f"{pct_txt}%" not in t:
+        aviso(f"taxa do azul no profissional ({pct_txt}%) nao aparece no texto")
+    print(f"  [OK] jogos profissionais {real} e taxa do azul {pct_txt}% "
+          f"conferem com o banco")
+
+
+def _re_num(padrao: str, t: str):
+    import re as _re
+
+    return _re.search(padrao, t)
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -236,6 +284,8 @@ def main() -> None:
     check_numeros_modelo(t)
     print("6. Quadro 1 (regioes) x banco")
     check_quadro_regioes(t)
+    print("7. Dataset profissional x banco")
+    check_profissional(t)
 
     print()
     print("=" * 66)
