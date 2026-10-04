@@ -120,27 +120,27 @@ tal na UI.
 
 ## Números que importam (para o texto do TCC)
 
-Modelo em produção, solo queue **23.133 partidas** (retreino final
-2026-07-06 — números do `train_baseline` CV 5-fold no corte de 15min;
-hiperparâmetros são os tunados na base de 10k por `tune_models.py`,
-reaplicados ao volume maior via `export_model.py`; não houve um novo
-GridSearchCV completo em 23k — se a banca cobrar isso, é reproduzível):
+Modelo em produção, solo queue **39.188 partidas** no corte de 15 min
+(retreino de 2026-10-04 — números do CV 5-fold com semente 42 e
+hiperparâmetros de produção 500/0,01/3; o `GridSearchCV` sobre as 39 mil
+linhas devolveu ajuste equivalente, 200 árvores a taxa 0,05, o que
+confirma que a limitação de taxa-base registrada na Seção 5.8 do TCC não
+é subajuste):
 
 | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
 |---|---|---|---|---|---|
-| XGBoost (produção) | 0,7573 | 0,7444 | 0,7133 | 0,7285 | 0,8393 |
-| MLP | 0,7550 | 0,7457 | 0,7034 | 0,7238 | 0,8385 |
-| RandomForest | 0,7409 | 0,7237 | 0,6997 | 0,7115 | 0,8219 |
+| XGBoost (produção) | 0,7621 | 0,7561 | 0,7228 | 0,7391 | 0,8473 |
+| MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
+| RandomForest | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
 
-(Números exatos, não aproximados: 0,7550 arredonda para 0,76 e
-0,7409 para 0,74 — escrever "~0,74"/"~0,73" subestimava o MLP em
-~0,01 e já divergia do quadro do TCC.) Reproduz com
-`.venv\Scripts\python.exe -m src.models.train_baseline` (que roda só
-o corte de 15 min, em `data/features.csv`). O quadro completo dos 4
-cortes × 3 modelos está no Apêndice C de `tcc2_texto.md` — **sem script
-que o reproduza**: `train_baseline.py` não tem modo multi-corte, então
-regerar aquele quadro exige um script novo (pendência real, registrada no
-diário em 2026-10-03).
+(Números exatos, não aproximados: 0,7610 arredonda para 0,76 e 0,7457 para
+0,75 — escrever "~0,74" subestimava o MLP.) Reproduz com
+`.venv\Scripts\python.exe -m src.models.multi_cutoff_metrics`, que cobre
+os **4 cortes × 3 modelos** do Apêndice C e grava
+`reports/metricas_corte.json`. Esse JSON é o que
+`python docs/verifica_tcc.py` confronta com os números citados no texto —
+é por ele que um número velho no TCC é detectado em vez de passar.
+`train_baseline.py` continua sendo só o corte de 15 min.
 
 NLQ: **88% execution accuracy** (23/26, medido repetidamente e estável
 nesta sessão de revisão — 2026-07-13; as 3 falhas são a mesma família
@@ -158,28 +158,35 @@ perguntas de referência (22 solo queue + 4 competitivo).
   texto (o próprio TCC adverte, Seção 5.3). A direção do achado se
   manteve idêntica à leitura original de 2026-07-06; ver diário
   2026-09-28.
-- **E o viés NEM É CONSTANTE POR FASE** (achado 2026-07-08, não
-  confirmado de novo em 2026-09-28 — é a mesma medição de 2026-07-08 que
-  o TCC 4.3 reproduz): a probabilidade-base do modelo pra partidas
-  empatadas vai de 47,8% azul (10min) → 46,3% (15min, o ponto mais
-  vermelho) → 49,1% (20min) → 51,1% (25min). Testado 3 formas (win rate
-  bruto de partidas empatadas, restrito a BR1, duração total sem filtro
-  de empate) — a tendência de enfraquecimento é sólida, mas **não há
-  inversão completa confirmada**: o IC Wilson 95% do ponto BR1 aos 25min
-  (n=458) é [46,5%–55,6%], que inclui 50% e ainda inclui valores
-  favoráveis ao vermelho. Ver diário 2026-07-08 pra tabela e
-  metodologia completas.
-- Competitivo (~99k jogos): **azul vence ~53%**, estável ATRAVÉS DOS
-  ANOS — a literatura descreve o pro; nosso solo queue é o outlier.
+- **E O VIÉS É CONSTANTE POR FASE** — resultado de 2026-10-04, que
+  substitui e refuta o achado de 2026-07-08. Entre partidas genuinamente
+  empatadas (|diferença de ouro| < 500) a taxa de vitória do azul é 46,4%
+  (10min, n=7.349), 47,9% (15min, n=3.970), 46,7% (20min, n=2.423) e 47,1%
+  (25min, n=1.430). Dispersão de 1,4 pp e **nenhuma diferença entre pares
+  sobrevive ao ajuste de Holm** (menor p corrigido = 0,83). Os ICs de 95% se
+  sobrepõem: as quatro taxas são indistinguíveis, e o corte mais vermelho
+  é o de 10 min, não o de 15. O que a amostra maior desfez foi a
+  *evolução* atribuída ao viês, não o viês — que segue forte: o IC
+  do corte de 10 min é [45,3%, 47,6%], que exclui 50% com folga.
+  Mede com `python docs/testa_diferenca_taxas.py`; a bateria
+  (`tests/validate_predictions.py`) cobra a constância, não o pico.
+- Competitivo (**96.716 jogos**, 2014-2026): **azul vence 53,2%**.
+  A série anual é estável a partir de 2016 (52,5% a 55,0%); 2014
+  (58,2%) e 2015 (55,3%) divergem sobre amostras de 814 e 1.702 jogos,
+  contra 96.716 no total.
   Hipótese documentada: counter-pick garantido (solo queue) vs
   prioridade de primeiro pick (pro).
-- Conversão de vantagem: com +2k a +4k de ouro aos 15, o pro vence
-  84,0% vs ~68% no solo queue — "macro ganha jogo", quantificado.
-  (medido em 2026-07-04, sobre ~12k partidas; ver ressalva de volume na
-  lista de pendências do diário)
-- SHAP por fase: torres saem de ~0 (10-15 min) para dezenas de vezes
-  mais importância aos 25 (as placas caem aos 14) — razão de existir
-  um modelo por fase.
+- Conversão de vantagem: com +2k a +4k de ouro aos 15, o azul vence
+  81,5% no pro (n=3.294) contra 73,7% no solo queue (n=5.166) — "macro
+  ganha jogo", quantificado. Diferença de 7,8 pp, z = 8,28. A faixa
+  +4k a +6k no pro apoia-se em só 72 jogos e é indicativa. O valor
+  antigo (84,0% vs ~68%, medido sobre ~12k partidas) era o dobro do
+  efeito real. Mede com `python docs/confere_conversao_advantagem.py`.
+- SHAP por fase: torres ficam em ~0 nos três primeiros cortes (0,0044 /
+  0,0060 / 0,0031) e saltam para 0,0928 aos 25 min — 15x entre 15 e 25.
+  A série **não é monôtona** (20 min é menor que 10 e 15): é
+  concentração tardia, não crescimento contínuo. As placas caem
+  aos 14 min, razão de existir um modelo por fase.
 - **9 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
   dispersão de time, tuning por fase, calibração extra, ouro em itens,
   split def/off, dragões por tipo, item_gold_diff refeito,

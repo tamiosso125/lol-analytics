@@ -28,6 +28,16 @@ TEXTO = RAIZ / "docs" / "tcc2_texto.md"
 FALHAS: list[str] = []
 AVISOS: list[str] = []
 
+# O console do Windows e cp1252 e morre em seta, aspas tipograficas e
+# qualquer caractere nao-latino — inclusive o texto que a checagem precisa
+# mostrar. Sem isto o script levanta UnicodeEncodeError no meio da lista de
+# falhas e nao diz qual era a falha, que e o oposto do objetivo dele.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+    except (AttributeError, ValueError):
+        pass
+
 
 def falha(msg: str) -> None:
     FALHAS.append(msg)
@@ -266,6 +276,85 @@ def _re_num(padrao: str, t: str):
     return _re.search(padrao, t)
 
 
+# Valores que NUNCA devem aparecer em lugar nenhum do texto: foram
+# substituidos por retreino, por remocao do dataset, ou por achado refutado.
+#
+# A checagem de presenca acima (acuracia no texto) passa mesmo com o valor
+# velho ainda la — ela so pergunta se o numero novo existe, nao se o antigo
+# sumiu. Foi exatamente essa lacuna que deixou 0,7573 no texto e fez o
+# Abstract em ingles repetir a forma refutada do achado por meses.
+VALORES_SUBSTITUIDOS: list[tuple[str, str]] = [
+    ("0,7573", "acuracia do XGBoost antes do retreino de 39.188"),
+    ("0,8219", "AUC do Random Forest antes do retreino"),
+    ("46,3%", "taxa do azul aos 15 min, do periodo em que se acreditava no pico"),
+    ("84,0%", "conversao de vantagem no profissional, antes da remedicao"),
+    ("33.713", "tamanho da base entre 2026-10-03 e 2026-10-04"),
+    ("99.259", "contagem de jogos profissionais, nunca conferida"),
+]
+# NAO entra em VALORES_SUBSTITUIDOS: 0,8319 e 0,8295 sao o experimento 9 do
+# Apendice D, medido legitimamente sobre a base de 23.133. O que o texto
+# precisa e da anotacao de base ao lado, para o leitor poder julgar — nao da
+# proibicao do numero.
+
+# A forma REFUTADA do achado de lado, nos dois idiomas. Enquanto o texto
+# afirmar que o vies enfraquece ao longo da partida, ele contradiz a Secao 5.3
+# e a bateria de testes.
+PADROES_REFUTADOS: list[tuple[str, str]] = [
+    (r"enfraquece\s+ao\s+longo\s+da\s+partida", "forma refutada do vies"),
+    (r"n[ãa]o\s+[ée]\s+constante\s+ao\s+longo", "forma refutada do vies"),
+    (r"weakens\s+over\s+the\s+course", "forma refutada do vies (abstract)"),
+    (r"weakens\s+over", "forma refutada do vies (abstract)"),
+]
+
+
+def check_residuos(t: str) -> None:
+    """Nenhum valor substituido e nenhuma forma refutada pode sobrar no texto."""
+    import re as _re
+
+    for valor, porque in VALORES_SUBSTITUIDOS:
+        for m in _re.finditer(_re.escape(valor), t):
+            linha = t[: m.start()].count("\n") + 1
+            trecho = t.splitlines()[linha - 1].strip()[:78]
+            falha(f"linha {linha}: valor substituido {valor} ainda presente "
+                  f"({porque}) -> {trecho!r}")
+    for padrao, porque in PADROES_REFUTADOS:
+        for m in _re.finditer(padrao, t, _re.I):
+            linha = t[: m.start()].count("\n") + 1
+            trecho = t.splitlines()[linha - 1].strip()[:78]
+            falha(f"linha {linha}: {porque} -> {trecho!r}")
+
+    # O Abstract nao tem heading proprio: `build_tcc_docx.py` extrai o bloco
+    # que vem logo apos o RESUMO como texto em ingles, e o monta no
+    # pre-textual do .docx — ou seja, o que esta la vai impresso. Por isso
+    # uma checagem so do corpo em portugues nao pega o Abstract.
+    m = _re.search(r"(?s)##\s*RESUMO(.*?)\n\*\*?Abstract\b|\*\*Abstract\b(.*)",
+                   t, _re.I)
+    abstrato = ""
+    if m:
+        abstrato = m.group(0)
+    else:
+        m2 = _re.search(r"(?s)Abstract\b(.{0,3000})", t)
+        abstrato = m2.group(0) if m2 else ""
+    if not abstrato:
+        aviso("trecho do Abstract nao encontrado")
+        return
+    for valor, _porque in VALORES_SUBSTITUIDOS:
+        if valor in abstrato:
+            falha(f"ABSTRACT cita valor substituido {valor}")
+    for pt, porque in PADROES_REFUTADOS:
+        if _re.search(pt, abstrato, _re.I):
+            falha(f"ABSTRACT repete a {porque}")
+    if not _re.search(r"39[.,]426", abstrato):
+        falha("ABSTRACT nao menciona a base atual (39.426)")
+    if not _re.search(r"0[.,]7621", abstrato):
+        falha("ABSTRACT nao menciona a acuracia atual (0,7621)")
+    if not _re.search(r"0[.,]8473", abstrato):
+        falha("ABSTRACT nao menciona o AUC atual (0,8473)")
+    if not any("falha" in f.lower() for f in FALHAS):
+        print(f"  [OK] nenhum dos {len(VALORES_SUBSTITUIDOS)} valores "
+              "substituidos e nenhum dos padroes refutados")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -286,6 +375,8 @@ def main() -> None:
     check_quadro_regioes(t)
     print("7. Dataset profissional x banco")
     check_profissional(t)
+    print("8. Residuos de valores substituidos e formas refutadas")
+    check_residuos(t)
 
     print()
     print("=" * 66)

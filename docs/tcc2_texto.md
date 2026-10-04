@@ -78,18 +78,18 @@ developed an intelligent platform for esports data analysis focused on
 *League of Legends*, integrating the collection, organization and
 exploration of competitive data, predictive modeling with *machine
 learning* techniques, and visualization and natural language query
-mechanisms. A total of 23,133 high-elo ranked matches (four regions)
+mechanisms. A total of 39,426 high-elo ranked matches (five regions)
 were collected and organized through the Riot Games API, complemented
-by 99,259 professional matches (2014-2026, Oracle's Elixir). Three
+by 96,716 professional matches (2014-2026, Oracle's Elixir). Three
 models — XGBoost, Random Forest and a neural network (MLP) — were
 trained and compared to predict the winning team from the match state
 at four time cutoffs (10, 15, 20 and 25 minutes), with XGBoost
 achieving the best performance at the 15-minute cutoff (accuracy of
-0.7573; AUC-ROC of 0.8393). The exploratory analysis identified that
+0.7621; AUC-ROC of 0.8473). The exploratory analysis identified that
 the red side is favored in high-elo solo queue (56.3% win rate in the
-region with the largest sample), a pattern that weakens over the
-course of the match and reverses in the professional scenario (where
-the blue side wins about 53% of matches, stable from 2014 to 2026) — a
+region with the largest sample), a pattern of nearly constant magnitude
+along the match that reverses in the professional scenario (where
+the blue side wins 53.2% of matches, stable from 2016 on) — a
 finding supported by statistical robustness tests. A natural language
 interface (text-to-SQL with structural query validation) achieved 88%
 execution accuracy on a 26-question reference benchmark. The platform
@@ -414,21 +414,20 @@ genérico sobre o jogo. A honestidade dessa separação é tratada na
 Seção 4.
 
 A avaliação dos modelos apresentados na seção anterior exige ainda
-uma escolha metodológica sobre a métrica. Em um problema binário
-desequilibrado como a predição de vitória, a acurácia isolada é
+uma escolha metodológica sobre a métrica. Com classes praticamente
+balanceadas (46,6% de vitória azul contra 53,4%), a acurácia isolada é
 enganosa: um classificador que sempre responde "vitória do time azul"
-alcança acurácia próxima de 50% sem qualquer poder preditivo, porque
-as partidas terminadas em empate são naturalmente balanceadas. Por esse
-motivo a avaliação deste trabalho se apoia na área sob a curva da
-característica operacional do receptor (AUC-ROC), que mede a capacidade
-de discriminação do modelo em todos os limiares de decisão e,
-consequentemente, independe da escolha de um limiar específico. Hanley e
-McNeil (1982) demonstram que essa medida é equivalente à probabilidade
-de que um caso positivo receba uma pontuação maior que a de um caso
-negativo, o que a torna interpretável diretamente como proporção de
-pares corretamente ordenados. AUC-ROC e acurácia são reportados
-conjuntamente na Seção 5 justamente para tornar essa distinção visível
-nos números.
+alcança 46,6% — a própria taxa-base da amostra — sem qualquer poder
+preditivo. Por esse motivo a avaliação deste trabalho se apoia na área
+sob a curva da característica operacional do receptor (AUC-ROC), que
+mede a capacidade de discriminação do modelo em todos os limiares de
+decisão e, consequentemente, independe da escolha de um limiar
+específico. Hanley e McNeil (1982) demonstram que essa medida é
+equivalente à probabilidade de que um caso positivo receba uma
+pontuação maior que a de um caso negativo, o que a torna interpretável
+diretamente como proporção de pares corretamente ordenados. AUC-ROC e
+acurácia são reportados conjuntamente na Seção 5 justamente para tornar
+essa distinção visível nos números.
 
 ### 2.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
 
@@ -594,9 +593,11 @@ O segundo eixo é a natureza da fonte de dados. Os estudos de
 terceiros. Este trabalho coletou a base diretamente da *timeline-v5* da
 Riot Games, que é a única fonte que expõe a posição dos eventos e a
 evolução minuto a minuto dos recursos em cada partida. Essa granularidade
-é o que torna possível a análise espaço-temporal da Seção 5.5, e também
-o que confere peso ao achado do viés de lado, calculado sobre a posição
-real dos cinco jogadores de cada time ao longo da partida.
+é o que torna possível a análise espaço-temporal da Seção 5.5. O viés de
+lado em si é medido sobre o agregado de vitória por time e região — e, no
+recorte de empate, sobre a diferença de ouro —, sem usar coordenada
+alguma; o que a *timeline* acrescenta aqui é a análise de uma partida
+individual, não a medição do viés.
 
 O terceiro eixo é o recorte de população. Os trabalhos de predição
 analisados atuam sobre o cenário profissional. Parte da contribuição
@@ -658,7 +659,8 @@ escopo originalmente previsto no TCC I:
 Foram utilizados os endpoints *league-v4* (para identificar jogadores
 nos elos Desafiante e Grão-Mestre), *account-v1* (resolução de Riot ID)
 e *match-v5*/*timeline-v5* (dados de partida e linha do tempo minuto a
-minuto). A coleta abrangeu quatro regiões (BR1, EUW1, KR, NA1) na fila
+minuto). A coleta abrangeu cinco regiões (BR1, EUW1, KR, NA1 e EUN1, esta
+última com amostra insuficiente e excluída da leitura) na fila
 420 (ranqueada solo/duo), totalizando **39.426 partidas** normalizadas,
 com estado bruto (JSON) preservado em `raw_matches`/`raw_timelines`
 para reprocessamento. A chave de desenvolvedor da Riot expira a cada 24
@@ -824,14 +826,17 @@ Quadro — Vitória do time vermelho por região
 *(Nota de método: quadro original — medido em 2026-07-06 com BR1
 11.936, EUW1 1.307, NA1 1.367, KR 1.308 partidas — foi substituído por
 uma segunda rodada de coleta destinada especificamente a ampliar
-EUW1/KR/NA1, e depois por esta medição de 2026-10-03, quando EUW1 e
-KR já haviam quase dobrado novamente. A direção do achado (as quatro
+EUW1/KR/NA1, e depois por esta medição de 2026-10-04, quando EUW1 e
+KR já haviam quase dobrado novamente e a NA1 também foi ampliada. A
+direção do achado (as quatro
 regiões com amostra relevante pendem para o vermelho, entre 50,3% e
-56,3%) se manteve idêntica em todas as três medições — o que
+56,3%) se manteve idêntica em todas as quatro medições — o que
 fortalece a leitura de "padrão de elo altíssimo em geral", não
 artefato de uma região com pouca amostra. BR1 não se alterou em nenhum
-dos três levantamentos. NA1 segue com volume pequeno mesmo após as
-coletas adicionais — ver Seção 5.8.)*
+dos quatro levantamentos. A NA1, que era o elo mais frágil da
+generalização, foi ampliada de 1.446 para 7.159 partidas na rodada final
+e a taxa do vermelho passou de 51,9% para 52,2% — a direção do achado não
+mudou, e a limitação saiu da Seção 5.8.)*
 
 **O viés de lado é estável ao longo da partida — e essa constância é o
 resultado.** Uma primeira versão deste texto afirmava que o viés atingia um
@@ -940,22 +945,30 @@ cruzada estratificada de 5 *folds* e semente 42. Reproduzível por
 `python -m src.models.multi_cutoff_metrics`.)*
 
 Os três modelos performaram de forma próxima entre si, com o XGBoost
-adotado como modelo de produção. Modelos independentes foram treinados
-para os quatro cortes temporais, com desempenho crescente conforme a
-partida avança (medido com os hiperparâmetros de produção): AUC-ROC de
-0,767 (10min), 0,842 (15min), 0,872 (20min) e 0,907 (25min) — resultado
+adotado como modelo de produção pela estabilidade da faixa intermediária
+— a 10 minutos o MLP o supera em acurácia (0,7020 contra 0,7004) e aos
+25 minutos o MLP iguala seu AUC (0,9072 contra 0,9090), de modo que a
+escolha não decorre de vantagem em todos os cortes, e sim de comportamento
+consistente na faixa em que a previsão é usada. Modelos independentes
+foram treinados para os quatro cortes temporais, com desempenho crescente
+conforme a partida avança (medido com os hiperparâmetros de produção, sobre
+a base de 39.426 partidas): AUC-ROC de 0,774 (10min), 0,847 (15min), 0,876
+(20min) e 0,909 (25min) — resultado
 esperado, já que mais informação está disponível em cortes mais
 tardios, mas que só se sustenta porque um modelo *por fase* foi
 treinado especificamente para cada corte.
 
 A análise de importância de variáveis (SHAP, valor médio absoluto por
 *feature*) mostrou a diferença de ouro e de experiência como os fatores
-dominantes em todos os cortes (gold_diff variando de 0,65 a 10min até
-1,04 a 20-25min; xp_diff de 0,26 a 10min até 0,79 a 25min), com a
-diferença de torres crescendo de forma acentuada apenas nos cortes
-tardios — de 0,004 (10min) e 0,014 (15min) para 0,018 (20min) e 0,108
-(25min), um salto de cerca de 26 vezes entre o corte de 15 e o de 25
-minutos. Esse comportamento é consistente com a mecânica do jogo, em
+dominantes em todos os cortes (gold_diff variando de 0,66 aos 10 min até
+1,07 aos 20 min; xp_diff de 0,27 aos 10 min até 0,81 aos 25 min). A
+diferença de torres tem comportamento distinto: quase irrelevante nos três
+primeiros cortes — 0,0044 aos 10 min, 0,0060 aos 15 min e 0,0031 aos 20
+min — e salta para 0,0928 aos 25 min, um salto de cerca de 15 vezes entre
+o corte de 15 e o de 25 minutos. Vale notar que a série das torres não é
+monótona: o corte de 20 min registra valor menor que os de 10 e de 15, de
+modo que o que se observa é uma concentração tardia, e não um crescimento
+contínuo. Esse comportamento é consistente com a mecânica do jogo, em
 que as placas de defesa das torres caem por volta dos 14 minutos,
 tornando destruições de torre um evento raro (e pouco informativo) antes
 disso — e é a justificativa concreta para treinar um modelo *por fase*
@@ -976,7 +989,8 @@ visão (colocação/destruição de sentinelas) e o tipo do dragão
 de forma mensurável (AUC-ROC de 0,8319 para 0,8295). Em contraste, o
 aumento do *volume* de partidas produziu ganhos reais e consistentes: o
 AUC-ROC do
-XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133 partidas)
+XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133 partidas) e
+para 0,8473 (39.188 partidas)
 ao longo da coleta incremental — evidência de que, com as *features* de
 estado agregado atualmente disponíveis via API, o teto de desempenho é
 limitado mais pelo volume de dados do que pela engenharia de novas
@@ -1014,7 +1028,7 @@ Hodge et al. (2021) demonstraram a viabilidade de modelos preditivos
 para partidas profissionais de esports em tempo real; este trabalho
 corrobora essa viabilidade para *League of Legends* especificamente, com
 a particularidade de ter caracterizado como o desempenho preditivo varia
-ao longo da partida (AUC-ROC de 0,767 a 10 minutos a 0,907 a 25 minutos)
+ao longo da partida (AUC-ROC de 0,774 a 10 minutos a 0,909 a 25 minutos)
 — uma dimensão que o estudo original não detalha por fase. Diferente de
 Hodge et al. (2021), que não propõem uma plataforma integrada com
 *dashboards* e interface em linguagem natural, este trabalho se
@@ -1095,8 +1109,12 @@ reconhecida e discutida na próxima subseção.
   enriquecimento de *features* a partir da mesma fonte de dados (linha
   do tempo da partida) não superaram o modelo com as cinco variáveis
   originais, sugerindo que o próximo ganho relevante depende de um tipo
-  de dado que a API atual não fornece — por exemplo, ordem de escolha de
-  campeão (*draft*) ou posição em tempo real para *features* espaciais.
+  de dado que a API atual não fornece — notadamente a ordem de escolha de
+  campeão (*draft*), que a API pública não expõe, e o estado das ondas de
+  *minions*. A posição em tempo real **existe** no payload da *timeline*
+  (`participantFrames`) e já foi testada sem ganho mensurável (experimento 2
+  do Apêndice D, dispersão espacial do time), de modo que ela não é o que
+  falta; o que falta são as duas variáveis acima.
 - **Ausência de dados de micro-posicionamento** (movimentação de
   *minions*, controle de onda): nenhuma API pública da Riot expõe esse
   nível de detalhe; caminhos alternativos (replays `.rofl`, visão
@@ -1134,10 +1152,10 @@ base de 39.426 partidas de *solo queue* somadas a 96.716 partidas
 profissionais;
 
 d) técnicas de análise de dados identificaram padrões relevantes,
-incluindo o viés de lado no *solo queue* de elo alto, sua variação ao
-longo da partida e sua inversão em relação ao cenário profissional —
-achados sustentados por testes de robustez estatística, não apenas
-observação pontual;
+incluindo o viés de lado no *solo queue* de elo alto, sua constância
+ao longo da partida e sua inversão em relação ao cenário
+profissional — achados sustentados por testes de robustez estatística,
+não apenas observação pontual;
 
 e) três modelos de *machine learning* (XGBoost, *Random Forest* e MLP)
 foram comparados, com o XGBoost adotado como modelo de produção
@@ -1181,12 +1199,15 @@ disclaimer ritual. As limitações a seguir não invalidam os achados
 apresentados, mas delimitam o alcance em que podem ser generalizados.
 
 A primeira limitação é de validade de construto, e decorre da própria
-fonte de dados. A *timeline-v5* não registra a posição dos campanhas
-nem o estado das ondas de minions, de modo que o modelo de predição
-trabalha sem as variáveis que um analista humano consideraria mais
-informativas sobre o momento da partida. Isso significa que a acurácia
-relatada é um piso, não uma medição do teto atingível: parte do que o
-modelo erra é informação que ele jamais recebeu. A consequência prática
+fonte de dados. A *timeline-v5* não registra o estado das ondas de
+*minions*, de modo que o modelo de predição trabalha sem uma variável que
+um analista humano consideraria informativa sobre o momento da partida. É
+razoável supor que parte do que o modelo erra é informação que ele jamais
+recebeu — mas essa é uma hipótese, e não um resultado medido: nenhum
+experimento deste trabalho isola o efeito de acrescentar essa variável,
+porque ela não existe na fonte. O que se pode afirmar é o que a
+consequência prática mostra: nenhuma orientação exibida pela plataforma
+cuja fundamentação A consequência prática
 é que nenhuma orientação exibida pela plataforma cuja fundamentação
 dependa de posição, itemização ou estado de ondas é aquela que o modelo
 produziu, e a interface marca essa orientação como inferência geral em
@@ -1194,7 +1215,8 @@ vez de resultado calculado.
 
 A segunda limitação é de validade externa. Todos os resultados de
 *solo queue* vêm da fila ranqueada, nas faixas Challenger e Grandmaster,
-em quatro regiões. Não há base para estender as taxas de vitória por
+em cinco regiões coletadas, quatro delas com amostra suficiente para a
+leitura. Não há base para estender as taxas de vitória por
 lado, nem a acurácia do modelo, a outras filas, a outros níveis de elo
 ou a outros jogos, ainda que a arquitetura seja reaproveitável.
 
@@ -1383,10 +1405,12 @@ linguagem natural.
 
 ## APÊNDICE B — Benchmark da interface em linguagem natural
 
-Execução em 2026-09-28 sobre a base de produção (39.188-39.426 partidas
-— a coleta regional estava em andamento durante a medição, ver nota
-abaixo): **23/26 = 88% de acurácia de execução**, reproduzindo
-exatamente o número já documentado no histórico do projeto. Uma
+Execução em 2026-10-04 sobre a base de produção de 39.426 partidas:
+**23/26 = 88% de acurácia de execução**, com o comando
+`python -m src.nlq.evaluate_nlq`. O mesmo número havia sido obtido em
+execuções anteriores — a de 2026-09-28, sobre a base de então (24.154
+partidas), e uma de 2026-07-13 —, o que dá alguma estabilidade ao
+resultado. Uma
 primeira execução, feita simultaneamente à coleta em background, mediu
 22/26 (85%) com uma falha adicional na pergunta 3 ("win rate do time
 azul") — repetida a execução sem a interferência de escrita
@@ -1460,16 +1484,16 @@ já citados na Seção 5.4.
 | 25min | 26.837 | 0,467 | **XGBoost** | 0,8241 | 0,8172 | 0,8034 | 0,8103 | 0,9090 |
 | 25min | 26.837 | 0,467 | MLP | 0,8240 | 0,8171 | 0,8033 | 0,8101 | 0,9072 |
 
-Nota: os valores de AUC-ROC por fase citados na Seção 5.4
-(0,767/0,842/0,872/0,907) usam os hiperparâmetros *tunados* de produção
-do XGBoost (500 árvores, *learning rate* 0,01), diferentes dos
-hiperparâmetros base usados neste quadro para a comparação entre os 3
-modelos — por isso os números não são idênticos, embora a mesma
-tendência (desempenho crescente com o corte) apareça nos dois casos.
-Com os hiperparâmetros base, o XGBoost superou os demais modelos em
-AUC-ROC nos 4 cortes; com os hiperparâmetros tunados (Seção 5.4, corte
-de 15 min), a diferença entre XGBoost e MLP fica marginal (0,8393 vs.
-0,8385).
+Nota: este quadro e a série de AUC-ROC por fase citada na Seção 5.4
+(0,774 / 0,847 / 0,876 / 0,909) usam os **mesmos** hiperparâmetros de
+produção do XGBoost (500 árvores, *learning rate* 0,01, profundidade 3) — a
+versão anterior desta nota afirmava que eram diferentes, e não são:
+`src/models/multi_cutoff_metrics.py` e `src/models/export_model.py` leem a
+mesma configuração. A diferença entre os valores atuais e a série
+histórica de 2026-07-08 (0,767 / 0,842 / 0,872 / 0,907) vem da base de
+treino, que era de 23.133 partidas e passou a 39.426, e não do ajuste. O
+comando que regenera este quadro é
+`python -m src.models.multi_cutoff_metrics`.
 
 ---
 
@@ -1487,13 +1511,14 @@ Quadro — Experimentos negativos de enriquecimento de *features*
 | 6 | Separação de features defensivas/ofensivas | Δ AUC ≈ ruído |
 | 7 | `item_gold_diff` (segunda tentativa, refeita) | Δ AUC ≈ ruído |
 | 8 | Visão (ward_diff / ward_kill_diff) | Δ AUC ≈ ruído |
-| 9 | Dragões por tipo (`monsterSubType`) | **AUC piorou** (0,8319 → 0,8295) |
+| 9 | Dragões por tipo (`monsterSubType`) | **AUC piorou** (0,8319 → 0,8295), sobre a base de 23.133 partidas |
 
 Em contraste, o aumento de *volume* de partidas produziu ganho real:
 AUC-ROC do XGBoost (corte 15 min) subiu de 0,8214 (10.295 partidas)
-para 0,8393 (23.133 partidas) ao longo da coleta incremental — cerca de
-20× maior que o maior ganho obtido por qualquer um dos 9 experimentos
-de *feature*.
+para 0,8393 (23.133 partidas) e para 0,8473 (39.188 partidas) ao longo
+da coleta incremental — um ganho acumulado de 0,0259, cerca de 6× maior
+que o maior ganho de qualquer um dos 9 experimentos de *feature* (0,003),
+e cerca de 26× o menor deles (0,001).
 
 ---
 
@@ -1557,7 +1582,7 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
 4. **Formatação final — FEITA (2026-10-03).** O texto foi vertido para
    `.docx` institucional por script, não à mão. Pipeline em
    `docs/build_tcc_docx.py` + `docs/finalize-fields.ps1`, produzindo
-   `docs/tcc2_final.docx` (55 páginas; corpo = **28 páginas**, medido por
+   `docs/tcc2_final.docx` (56 páginas; corpo = **29 páginas**, medido por
    `docs/finalize-fields.ps1`, que localiza a Seção 1 e o fim das
    Referências e reporta a diferença — a faixa institucional é 25 a 30).
    A formatação (A4, margens 3/2/3/2 cm, Arial 12, entrelinha 1,5, capa,

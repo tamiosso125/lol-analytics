@@ -867,9 +867,33 @@ checagens eram feitas a olho.
 
 Verifica: caractere CJK/cirílico escapado; referência cruzada "Seção N.M"
 sem seção correspondente; coluna inconsistente em tabela markdown; ordem
-alfabética e duplicata em referência ABNT; e — o mais importante — se a
-acurácia e o AUC do XGBoost citados no texto batem com
-`reports/metricas_corte.json`.
+alfabética e duplicata em referência ABNT; a acurácia e o AUC do XGBoost
+citados no texto contra `reports/metricas_corte.json`; o Quadro 1 contra o
+banco; a contagem de jogos profissionais e a taxa do azul contra o banco;
+e o **guard de resíduo**.
+
+O guard de resíduo é a checagem que mais importa e a que custou mais para
+existir. As outras perguntam "o número novo está no texto?" — o que passa
+mesmo quando o número velho continua lá. Foi assim que `0,7573` sobreviveu
+ao retreino e o Abstract em inglês (`build_tcc_docx.py` monta o pré-textual
+do `.docx`, então ele vai impresso sem passar por revisão em português)
+continuou afirmando a forma **refutada** do achado de viés de lado. O
+guard recusa uma lista de valores substituídos (`0,7573`, `0,8219`,
+`46,3%`, `84,0%`, `33.713`, `99.259`) e as frases que descrevem a forma
+refutada, em português e em inglês, e exige que o Abstract cite a base, a
+acurácia e o AUC atuais.
+
+Duas armadilhas do próprio script, ambas encontradas ao usá-lo:
+
+- o console do Windows é `cp1252` e morre em seta e aspas tipográficas —
+  inclusive no texto da mensagem de falha, que é justamente o que o script
+  existe para mostrar. Resolvido com `reconfigure(encoding="utf-8")`.
+- medir vitória por região direto sobre `participants` dá **50,0% em todas
+  as regiões**: `win` é por jogador, e a média de uma coluna que soma cinco
+  por partida é 50% por simetria. O número parece plausível e está errado.
+  O certo é filtrar `team_id = 200` (vermelho), agregar por partida e testar
+  se alguém do time venceu. Pelo mesmo motivo `COUNT(*)` em `pro_games`
+  devolve o dobro dos jogos: são duas linhas por jogo, uma por time.
 
 ### `docs/taxa_base_por_corte.py` e `docs/testa_diferenca_taxas.py`
 

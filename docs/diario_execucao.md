@@ -2821,6 +2821,13 @@ Simulador). Faltava só conectar pra partida REAL:
 Testado com a partida real: a leitura passou a citar "o jogador azul
 singed420#asc25 tem 59% de taxa ajustada especificamente neste
 campeão, enquanto beware#虚無月 está em apenas 50% ajustado" e "o
+
+> **Os caracteres CJK desta linha NÃO são erro de geração.** `beware#虚無月`
+> é o Riot ID de um jogador profissional real (a base tem `Beware` com 139
+> jogos em `pro_players.player_name`; o banco guarda só o nome antes do `#`,
+> e a tag depois do `#` pode estar em qualquer alfabeto). Anotado aqui porque
+> `docs/verifica_tcc.py` acusa caractere não latino — e ele tem razão para o
+> TCC, onde não cabe nome de invocador, mas aqui o nome é o dado.
 jogador vermelho saoksaopkaojsip#br1 está em apenas 43% ajustado após
 shrinkage em apenas 5 jogos — isso é um sinal de falta de
 familiaridade com Khazix". Verificado nos três pontos via curl direto
@@ -3329,6 +3336,13 @@ modelo. Ou seja, o modelo em produção não "sabe" nada das 10,5 mil
 partidas que a Seção 4.3 usa para medir viés de lado. O Apêndice D
 justifica a escolha pela mesma lógica em outro contexto: entre as 9
 tentativas de enriquecimento, o único ganho real veio de **volume**
+
+> **REVOGADA em 2026-10-04.** A decisão acima foi anulada no dia seguinte:
+> a coleta seguiu até 39.426 partidas (a NA1 foi de 1.446 para 7.159), o
+> modelo foi retreinado sobre 39.188 e o Apêndice C foi refeito. O raciocínio
+> de escopo estava certo na data e ficou errado com a base maior — o que
+> fica registrado aqui porque a entrada original continuaria parecendo a
+> decisão vigente. Ver a entrada de 2026-10-04.
 (0,8214 → 0,8393), o que torna o retreino o caminho certo — só não era o
 caminho cabível nesta versão do texto.
 
@@ -3483,6 +3497,112 @@ sendo o mesmo arquivo de antes, byte a byte.
   uma estimativa de apoio a um achado qualitativo (a diferença de ~16 pontos
   percentuais entre os dois cenários é grande demais para ser artefato de
   amostra), não medida sobre a base de treino.
+
+
+## 2026-10-04
+
+### Coleta, retreino e um achado que mudou de forma
+
+**Ampliação da NA1.** A região, que era o elo mais frágil da generalização
+com 1.446 partidas, foi de 1.446 para **7.159**. A taxa de vitória do vermelho
+na região foi de 51,9% para **52,2%** — a direção do achado não mudou. Base
+final: **39.426 partidas** (BR1 11.936, EUW1 11.744, KR 8.567, NA1 7.159,
+EUN1 20). Isso reverte a decisão de escopo de 2026-10-03, que fixava
+33.713: coletar foi mais barato do que a ressalva de volume custava ao texto.
+
+**Retreino.** XGBoost no corte de 15 min passa de 0,7573/0,8393
+(23.133 partidas) para **0,7621/0,8473** (39.188). O `GridSearchCV` sobre as
+39 mil linhas devolveu ajuste equivalente (200 árvores a taxa 0,05), o que
+confirma que a limitação de taxa-base da Seção 5.8 **não é subajuste**.
+AUC por corte: 0,774 / 0,847 / 0,876 / 0,909 — monotônico.
+
+### O achado de viés de lado foi refutado pelo aumento da amostra
+
+**Este é o registro mais importante do dia.** A Seção 5.3 afirmava, desde
+2026-07-08, que o viés de lado *enfraquecia* ao longo da partida, com pico
+aos 15 min (46,3% de vitória do azul) e queda para 51,1% aos 25. A bateria
+`validate_predictions.py` vinha reprovando por causa disso desde a
+ampliação da base, e eu vinha tratando a reprovação como "limitação
+conhecida". **A bateria estava certa e o texto errado** — e é exatamente para
+isso que uma bateria que valida o enunciado do texto serve.
+
+Medido (`docs/taxa_base_por_corte.py`), entre partidas genuinamente
+empatadas, com |diferença de ouro| menor que 500:
+
+| corte | vitória do azul | n |
+|---|---:|---:|
+| 10 min | 46,4% | 7.349 |
+| 15 min | 47,9% | 3.970 |
+| 20 min | 46,7% | 2.423 |
+| 25 min | 47,1% | 1.430 |
+
+Dispersão de 1,4 ponto percentual. O teste de pares com correção de Holm
+(`docs/testa_diferenca_taxas.py`) não deixa **nenhum** par sobreviver: menor
+p corrigido = 0,83, no par 10 contra 15. Os intervalos de confiança de 95%
+se sobrepõem. O corte mais vermelho é o de **10 min**, não o de 15.
+
+Conclusão: o viés é **constante** ao longo da partida. O que a base maior
+desfez foi a *evolução*, não o viés — que segue forte, com o IC do corte de
+10 min em [45,3%, 47,6%], excluindo 50% com folga.
+
+**Por que isso importa mais do que a correção:** o texto afirmava uma
+tendência sobre quatro taxas que sempre ficaram perto umas das outras. Com a
+amostra menor, o ruído se desenhava como padrão. Efeito colateral útil:
+Abstract em inglês, Apêndice C e Conclusão foram reescritos, porque todos
+afirmavam a forma antiga.
+
+### Números velhos que sobreviveram à ampliação
+
+Auditoria do texto contra o banco e os artefatos, que revelou quatro erros que
+a checagem a olho nunca pegaria:
+
+- **99.259 jogos profissionais**: nunca conferido. São **96.716**. A tabela
+  `pro_games` tem duas linhas por jogo, então `COUNT(*)` devolve 193.432 — o
+  dobro, e plausível.
+- **Quadro 1 com NA1 em 1.446 / 51,9%** enquanto o banco tinha 7.159 /
+  52,2%. A legenda dizia "medido em 2026-10-03, sobre 33.713" e nenhuma
+  região somava esse total.
+- **SHAP das torres**: o texto dizia 0,004 / 0,014 / 0,018 / 0,108 com
+  "salto de 26 vezes". O JSON diz 0,0044 / 0,0060 / **0,0031** / 0,0928 — a
+  série **não é monotônica** e o salto é de 15 vezes.
+- **Conversão de vantagem**: 84,0% contra ~68%, medido sobre ~12 mil partidas
+  (o próprio texto admitia numa ressalva). Remedido nos dois lados:
+  **81,5% contra 73,7%** — o efeito é real (z = 8,28) mas tem metade do
+  tamanho declarado.
+
+### Corpo do trabalho
+
+O "corpo = 21 páginas" do texto era derivação manual. O
+`finalize-fields.ps1` agora mede — localiza a Seção 1 e o fim das
+Referências e reporta a diferença — e a primeira medição honesta deu **22**,
+abaixo do mínimo institucional de 25.
+
+Medi os 10 trabalhos aprovados pela banca, seção por seção. Três seções
+estavam abaixo da mediana e a Conclusão abaixo do **mínimo** dos 10 (442
+palavras contra 983). Expansão: Fundamentação 837 para 1.696, Relacionados
+695 para 1.061, Conclusão 442 para 1.074. Corpo = **28 páginas**.
+
+A Fundamentação citava XGBoost e SHAP pelo nome sem citar as obras
+originais. Acrescentadas 6, **todas verificadas por DOI no Crossref antes de
+entrar**: duas crenças minhas estavam erras e a verificação pegou — RAT-SQL é
+de Wang et al., não de Xie; e o DOI do pandas que eu lembrava pertence a um
+artigo sobre crédito imobiliário.
+
+### Ferramenta que evita a repetição
+
+`docs/verifica_tcc.py` roda 8 checagens antes de qualquer commit: CJK,
+referências cruzadas, consistência de tabela, ordem alfabética de
+referências, números de modelo contra `reports/metricas_corte.json`, Quadro 1
+contra o banco, dataset profissional contra o banco, e um **guard de
+resíduo** que recusa os valores substituídos (0,7573, 46,3%, 84,0%, 33.713,
+99.259) e as formas refutadas do achado, inclusive no Abstract em inglês —
+que é montado no pré-textual do `.docx` e vai impresso sem passar por
+nenhuma revisão em português.
+
+O guard nasceu porque a checagem anterior era de **presença** ("0,7621 está
+no texto?"), que passa mesmo com 0,7573 ainda lá. Foi o agente `doc-tcc` que
+apontou esse buraco.
+
 
 ## Próximos registros pendentes
 
