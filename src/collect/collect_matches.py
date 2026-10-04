@@ -67,7 +67,8 @@ def collect_for_platform(
     return new
 
 
-def main(platforms: list[str] | None, n_players: int, per_player: int, with_timeline: bool) -> None:
+def main(platforms: list[str] | None, n_players: int, per_player: int,
+         with_timeline: bool, skip_collected: bool = False) -> None:
     conn = get_conn()
     conn.autocommit = True
     seen = known_match_ids(conn)
@@ -88,8 +89,27 @@ def main(platforms: list[str] | None, n_players: int, per_player: int, with_time
 
     total_new = 0
     for platform, all_puuids in by_platform.items():
+        if skip_collected:
+            # Filtrar ANTES de cortar no limite, e nao depois. Filtrar depois
+            # devolve zero quando o topo do ladder ja esta inteiro — que e
+            # exatamente o caso da KR, em que os 400 de maior league_points
+            # ja tinham sido cobertos nas rodadas anteriores. Para ampliar
+            # uma regiao e preciso DESCER no ladder ate achar gente nova, e
+            # isso so funciona se o filtro agir sobre a lista inteira.
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT DISTINCT puuid FROM participants WHERE puuid = ANY(%s)",
+                    (all_puuids,),
+                )
+                ja_coletados = {r[0] for r in cur.fetchall()}
+            antes = len(all_puuids)
+            all_puuids = [p for p in all_puuids if p not in ja_coletados]
+        else:
+            antes = len(all_puuids)
+        disponiveis = len(all_puuids)
         puuids = all_puuids[:n_players]
-        print(f"\n=== {platform}: {len(puuids)} jogador(es) ===")
+        print(f"\n=== {platform}: {len(puuids)} jogador(es) de {disponiveis} "
+              f"ainda sem coleta (base tem {antes}) ===")
         client = RiotClient(platform=platform)
         total_new += collect_for_platform(conn, client, puuids, per_player, with_timeline, seen)
 
@@ -103,5 +123,10 @@ if __name__ == "__main__":
     p.add_argument("--players", type=int, default=50, help="jogadores por plataforma")
     p.add_argument("--matches-per-player", type=int, default=20)
     p.add_argument("--no-timeline", action="store_true")
+    p.add_argument(
+        "--skip-collected", action="store_true",
+        help="pula jogadores que ja tem partida no banco; NECESSARIO para\n             ampliar uma regiao, porque sem isso a rodada re-percorre o topo\n             do ladder, que ja foi coletado (medido em 2026-10-04: 150\n             jogadores -> 88 partidas novas em 15 min)",
+    )
     args = p.parse_args()
-    main(args.platforms, args.players, args.matches_per_player, not args.no_timeline)
+    main(args.platforms, args.players, args.matches_per_player,
+         not args.no_timeline, args.skip_collected)
