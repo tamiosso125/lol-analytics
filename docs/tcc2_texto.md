@@ -744,7 +744,12 @@ composição/draft e modo contrafactual "e se"), Competitivo (comparação
 *solo queue* × profissional, com seletor de ano/*split*) e Simulador
 (composição de time com estimativa por heurística de taxa de vitória
 histórica, estado de jogo com predição por modelo e explicabilidade via
-SHAP). A interface em linguagem natural foi implementada como um
+SHAP). As seis telas estão reproduzidas no Anexo A: a Figura 1 mostra a
+página inicial, a Figura 2 o painel de indicadores agregados, a Figura 3 o
+detalhe de um campeão, a Figura 4 a análise de uma partida, a Figura 5 a
+comparação com o cenário profissional e a Figura 6 o simulador com o estado
+de jogo e a explicação por SHAP. A interface em linguagem natural foi
+implementada como um
 pipeline *text-to-SQL*: a pergunta do usuário é traduzida em uma consulta
 SQL por um modelo de linguagem (Claude), a consulta é validada
 estruturalmente antes da execução (apenas `SELECT`/`WITH...SELECT`,
@@ -1007,6 +1012,16 @@ combina composição de time (heurística de taxa de vitória histórica,
 sinalizada como tal na interface para não ser confundida com predição
 por modelo), estado de jogo (predição pelo modelo de produção) e
 explicabilidade (SHAP).
+
+A Figura 2 exibe o painel de indicadores agregados, incluindo a leitura de
+viés de lado por região que fundamenta a Seção 5.3; a Figura 4 mostra a
+análise de uma partida individual, com o mapa de calor de posicionamento e
+a evolução das variáveis ao longo da partida; a Figura 3 traz o detalhe de
+um campeão, com os itens finalizados extraídos das *timelines*; e a Figura
+6 apresenta o simulador com o estado de jogo e a explicação por SHAP, na
+mesma tela em que a previsão é exibida. A Figura 5 traz a comparação com o
+cenário profissional discutida adiante, e a Figura 1 a tela inicial da
+plataforma.
 
 ### 5.6 Interface em linguagem natural (objetivo g)
 

@@ -355,6 +355,33 @@ def check_residuos(t: str) -> None:
               "substituidos e nenhum dos padroes refutados")
 
 
+def check_figuras_citadas(t: str) -> None:
+    """Toda figura precisa ser chamada no corpo (NBR 14724).
+
+    As seis capturas do Anexo A entram no .docx com legenda, fonte e Lista
+    de Ilustrações — e nenhuma era chamada em paragrafo nenhum. A norma
+    exige que toda ilustracao seja localizada no texto; uma figura so com
+    legenda e lista e orfa para quem le, e a banca conta isso.
+    """
+    import re as _re
+
+    i = t.find("## ANEXO A")
+    if i < 0:
+        i = t.find("## 5 ")
+    if i < 0:
+        aviso("corpo nao localizado para conferir as figuras")
+        return
+    corpo = t[:i]
+    orfas = []
+    for n in range(1, 7):
+        if not _re.search(rf"Figura {n}\b", corpo):
+            orfas.append(n)
+    if orfas:
+        falha(f"figura sem citacao no corpo (NBR 14724): {orfas}")
+    else:
+        print("  [OK] as 6 figuras sao citadas no corpo")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -377,6 +404,8 @@ def main() -> None:
     check_profissional(t)
     print("8. Residuos de valores substituidos e formas refutadas")
     check_residuos(t)
+    print("9. Figuras citadas no corpo (NBR 14724)")
+    check_figuras_citadas(t)
 
     print()
     print("=" * 66)
