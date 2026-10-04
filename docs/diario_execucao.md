@@ -3733,30 +3733,71 @@ o teto, sem folga. Detalhe em `docs/plano_fechamento.md`.
 
 A entrada anterior deixou a KR como **medição de risco** e a pergunta aberta:
 ampliar fecha o intervalo em torno de 50%, ou confirma o viés? Coletei
-**1.637 partidas** da KR (8.567 para 10.204 no relacional) e a resposta é a
-primeira:
+**1.549 partidas** da KR — a tabela `matches` foi de KR 8.655 / total 39.514
+para KR 10.204 / total 41.063 — e a resposta é a primeira:
 
 | região | antes | depois | IC antes | IC depois |
 |---|---:|---:|---|---|
-| KR | 8.567 | 10.204 | [49,2%, 51,3%] | [49,5%, 51,4%] |
+| KR | 8.655 | 10.204 | [49,2%, 51,3%] | [49,5%, 51,4%] |
 
 A taxa foi de 50,3% para **50,4%**. O intervalo continua incluindo 50%. Mais
-1.637 partidas custaram 0,1 ponto percentual de deslocamento e o intervalo
+1.549 partidas custaram 0,1 ponto percentual de deslocamento e o intervalo
 continua abertos — exatamente o que um teste de poder previa.
 
+**O "antes" era 8.655, e o texto dizia 8.567.** A diferença é que 8.567 era a
+contagem da KR que chegou a produzir *features*, enquanto a medição de lado é
+lida de `participants`, que tinha as 8.655. Os dois números estavam certos em
+contextos diferentes e eu usei o menor como se fosse o total. Isso também
+explica de onde vem a "diferença de 1.637 partidas" que o TCC declara: ela é
+contra a base de modelagem de 39.426, e não o rendimento da rodada.
+
 **O CÁLCULO QUE FECHA A QUESTÃO.** Para o IC da KR excluir 50% mantendo a
-taxa observada de 50,4%, seriam necessárias **~106.700 partidas**: 12× a
-amostra de KR e 3× toda a base do projeto. Se a taxa real da KR fosse 51,0%,
-bastariam 9.600 — mas não sabemos qual é, e é exatamente isso que o intervalo
-expressa. A afirmação qualificada da Seção 5.3 **não é uma ressalva temporária
+taxa observada de 50,4%, seriam necessárias **60.025 partidas**
+(5.9× a amostra de KR, 1.5× toda a base do projeto),
+pela mesma fórmula da Seção 5.8 — n = z²·0,25/(p−0,5)² com z de 95%. Se a
+taxa real da KR fosse 51,0%, bastariam 9.604 — menos que a amostra que já
+existe. Não sabemos qual das duas é, e é exatamente isso que o intervalo
+expressa.
+
+**ERRO MEU NESTE CÁLCULO, E ELE MUDAVA A CONCLUSÃO.** A primeira versão
+publicou ~106.700 partidas. Esse é o valor para a taxa **antes** da rodada,
+50,3%. Com a taxa de 50,4% que o texto afirma, o mesmo cálculo dá 60.025:
+o número estava 1,8× alto, e o multiplicador "12× a amostra de KR" saía 5,9×.
+O erro não veio de fórmula errada, e sim de eu ter calculado com o número
+antigo e redigido com o novo — a mesma classe de erro que a frase "medido
+sobre as 41.063" com taxas de 39.426. Um número colado ao lado de outro
+número recém-alterado precisa ser recalculado, não reescrito. A afirmação qualificada da Seção 5.3 **não é uma ressalva temporária
 esperando coleta: é a resposta final.** Registrar isso é o que separa
 "faltou dados" de "o dado não sustenta".
 
-**DECISÃO: MANTER AS 1.637, NÃO REVERTER.** Duas bases passaram a coexistir,
+**A CONCILIAÇÃO DOS QUATRO NÚMEROS, QUE ESTAVA INCOERENTE.** Durante a
+revisão do diff, o `stats_regions.txt` arquivado em `045fdc0` — que a checagem
+6 gera a partir do SQL — registrava KR 8.655 / TOTAL 39.514, enquanto o texto
+usava 8.567 e 39.426. Os dois não estavam errados: mediam coisas diferentes.
+Conciliando:
+
+| | partidas |
+|---|---:|
+| `matches` no congelamento das *features* | 39.514 |
+| das quais produziram linha em `features_phases.csv` | 39.309 |
+| sem *features* naquela altura | 205 |
+| rodada da KR depois | 1.549 |
+| **`matches` hoje** | **41.063** |
+| **`features_phases.csv` hoje** (distintas) | **39.309** |
+| **sem *features* hoje** | **1.754** |
+
+205 + 1.549 = 1.754, e 1.647 (KR) + 59 (BR1) + 29 (EUW1) + 19 (NA1) = 1.754.
+Era esta reconciliação que faltava para o texto poder dizer com segurança
+"quase todas da KR" em vez de "todas", e para a limitação da 5.8 declarar que
+o modelo viu 39.309 partidas — e não 39.426, que é o total do banco na altura
+do congelamento e não o conjunto que virou linha de feature.
+
+**DECISÃO: MANTER A RODADA, NÃO REVERTER.** Duas bases passaram a coexistir,
 e a alternativa era escolher um número e esconder o outro:
 
 - **base descritiva** (Quadro 1, viés de lado, teste de duração): **41.063**
-- **base de modelagem** (features e modelos): **39.426**
+- **base de modelagem** (features e modelos): **39.426**, das quais 39.309
+  geraram *features* e 39.188 chegam ao corte de 15 minutos
 
 Não houve troca em bloco: das 20 ocorrências de 39.426 no texto, 13 viraram
 41.063 e **7 continuam 39.426** — a série de AUC por corte, o Apêndice C, o
@@ -3813,7 +3854,7 @@ amostragem.
 
 ### Ferramenta que evita a repetição
 
-`docs/verifica_tcc.py` roda 17 checagens antes de qualquer commit: CJK,
+`docs/verifica_tcc.py` roda 18 checagens antes de qualquer commit: CJK,
 referências cruzadas, consistência de tabela, ordem alfabética de
 referências, números de modelo contra `reports/metricas_corte.json`, Quadro 1
 contra o banco, dataset profissional contra o banco, e um **guard de

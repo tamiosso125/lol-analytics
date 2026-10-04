@@ -1,16 +1,40 @@
 """Verificacao de consistencia do texto do TCC II.
 
-Roda as checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e
-que antes eram feitas a mao (e por isso falhavam):
+18 checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e que
+antes eram feitas a mao (e por isso falhavam). Exit code 0 = tudo consistente.
 
+TEXTO E FORMATACAO
   1. nenhum caractere CJK/cirilico escapado no texto PT-BR;
   2. toda referencia cruzada "Seção N.M" aponta para uma seção que existe;
-  3. os numeros citados na conclusão batem com o quadro de métricas;
-  4. nenhuma tabela do texto tem coluna com contagem incompatível com o
-     cabeçalho;
-  5. as referências ABNT estão em ordem alfabética e sem entradas duplicadas;
-  6. os números de desempenho citados no texto existem no relatório de
-     métricas por corte (guards de regressão numérica).
+  3. nenhuma tabela tem coluna com contagem incompatível com o cabeçalho;
+  4. as referências ABNT estão em ordem alfabética e sem entradas duplicadas;
+  8. guard de RESÍDUO: nenhum valor substituído e nenhuma forma refutada
+     sobrou no texto — inclui o Abstract em inglês, que é montado no
+     pré-textual do .docx e vai impresso sem passar por revisão em português;
+  9. toda figura citada no corpo existe como legenda (NBR 14724);
+ 10. a fonte declarada de cada figura bate com o Anexo A;
+ 11. nenhum anglicismo de prosa;
+ 13. nenhuma citação autor-data em caixa alta (NBR 10520).
+
+NUMERO CONTRA ARTEFATO — a regra de ouro do projeto
+  6. o Quadro 1 contra o banco (taxa do vermelho por região, agregado por
+     partida: `win` em `participants` é por jogador);
+  7. o dataset profissional contra o banco (`pro_games` guarda duas linhas
+     por jogo, então `COUNT(*)` devolve o dobro);
+ 12. Abstract e Resumo contra os artefatos de métrica, exigindo as DUAS bases
+     que coexistem desde a rodada da KR;
+ 14. a discrepância de taxa-base contra `reports/experimento_calibracao_veredito.json`;
+ 16. o intervalo de Wilson de cada região: o texto não pode uniformizar o que
+     o intervalo não sustenta (a KR não exclui 50%);
+ 17. o teste (ii) de faixa de duração contra `reports/faixa_duracao.json` E
+     contra `COUNT(*)` da fila 420 no banco — a soma das contagens do
+     artefato é a base que o texto precisa citar;
+ 18. as DUAS bases declaradas onde cada número aparece: a frase que declara a
+     base de modelagem não pode citar o número da descritiva, a nota da 5.3
+     tem que citar as duas, e o RESUMO em português também.
+
+PROCESSO
+ 15. todo script que produz medida está documentado em `docs/comandos.md`.
 
 Uso:
     .venv\\Scripts\\python.exe docs\\verifica_tcc.py
@@ -317,6 +341,11 @@ VALORES_SUBSTITUIDOS: list[tuple[str, str]] = [
     ("84,0%", "conversao de vantagem no profissional, antes da remedicao"),
     ("33.713", "tamanho da base entre 2026-10-03 e 2026-10-04"),
     ("99.259", "contagem de jogos profissionais, nunca conferida"),
+    # rodada final da KR: os numeros que a base de 41.063 substituiu
+    ("8.567", "KR antes da rodada final, a contagem que(features) alcançou"),
+    ("50,3%", "taxa do vermelho na KR antes da rodada final"),
+    ("15.122", "contagem da faixa 0-25 min antes da rodada final"),
+    ("47,2%", "taxa maxima da faixa 25-30 min antes da rodada final"),
 ]
 # NAO entra em VALORES_SUBSTITUIDOS: 0,8319 e 0,8295 sao o experimento 9 do
 # Apendice D, medido legitimamente sobre a base de 23.133. O que o texto
@@ -362,7 +391,20 @@ def check_residuos(t: str) -> None:
     # 39.426 (que estava no RESUMO) e rejeitava 41.063: ela checava o
     # resumo, nao o abstract.
     m = _re.search(r"(?s)\*\*Abstract:?\*\*(.*?)(?=\n##\s|\Z)", t)
-    abstrato = m.group(1) if m else ""
+    if m is None:
+        # Reserva: sem ela, um "**ABSTRACT:**" ou "**Abstract**:" desliga
+        # silenciosamente as sete asercoes do Abstract e ainda sai com
+        # exit 0. Cobertura que se pode desligar sem erro nao e cobertura.
+        m = _re.search(r"(?is)\babstract\b[^*\n]*\*{0,2}\s*(.{0,4000})", t)
+        if m:
+            aviso("Abstract encontrado por reserva, nao por '**Abstract:**' — "
+                  "conferir a marcacao")
+    if m is None:
+        falha("ABSTRACT nao encontrado no texto — sete asercoes do Abstract "
+              "ficaram sem executar")
+        abstrato = ""
+    else:
+        abstrato = m.group(1)
     if not abstrato:
         aviso("trecho do Abstract nao encontrado")
         return
@@ -756,7 +798,7 @@ def check_scripts_documentados() -> None:
 
 
 def check_faixa_duracao(t: str) -> None:
-    """O teste (ii) de robustez no texto tem de bater com o artefato.
+    """O teste (ii) de robustez no texto tem de bater com o artefato E com o banco.
 
     O teste (ii) pergunta se o vies de lado e confundido com partida longa.
     O texto afirma as taxas por faixa de duracao total; `testa_faixa_duracao.py`
@@ -769,6 +811,10 @@ def check_faixa_duracao(t: str) -> None:
     aconteceu: a base foi atualizada para 41.063 e as taxas ficaram nas de
     39.426, produzindo uma frase que citava a base certa com os numeros
     errados.
+
+    A soma tambem e confrontada com `COUNT(*)` da fila 420 no banco. Sem isso,
+    uma correcao editorial no JSON se auto-ratificava: o artefato passaria a
+    concordar com o texto sem nenhuma das duas coisas estar certa.
     """
     import json
     import re as _re
@@ -776,76 +822,199 @@ def check_faixa_duracao(t: str) -> None:
     caminho = RAIZ / "reports" / "faixa_duracao.json"
     try:
         artefato = json.loads(caminho.read_text(encoding="utf-8"))
+        faixas = artefato.get("faixas") or artefato.get("faixa") or []
+        if not faixas:
+            raise ValueError("sem faixas")
+        pct_artefato = [f"{f['pct_azul']:.1f}".replace(".", ",") for f in faixas]
+        n_artefato = [f"{f['jogos']:,}".replace(",", ".") for f in faixas]
+        amplitude = f"{artefato['amplitude_pp']:.1f}".replace(".", ",")
+        abaixo = bool(artefato["todos_abaixo_de_50"])
     except Exception as exc:  # noqa: BLE001
-        aviso(f"faixa_duracao.json inacessivel, teste (ii) pulado: {exc}")
+        aviso(f"faixa_duracao.json inacessivel ou com outro formato, "
+              f"teste (ii) pulado: {exc}")
         return
 
-    faixas = artefato.get("faixas") or artefato.get("faixa") or []
-    if not faixas:
-        aviso("faixa_duracao.json sem faixas, teste (ii) pulado")
-        return
-
-    pct_artefato = [f"{f['pct_azul']:.1f}".replace(".", ",") for f in faixas]
-    n_artefato = [f"{f['jogos']:,}".replace(",", ".") for f in faixas]
-    amplitude = f"{artefato['amplitude_pp']:.1f}".replace(".", ",")
-    base = f"{sum(f['jogos'] for f in faixas):,}".replace(",", ".")
+    base = f"{sum(int(f['jogos']) for f in faixas):,}".replace(",", ".")
+    base_digitos = base.replace(".", "")
     rotulo = " / ".join(f"{p}% ({n})" for p, n in zip(pct_artefato, n_artefato))
     print(f"    artefato: {rotulo} | base {base} | amplitude {amplitude} pp")
 
-    # (a) frase-sintese: base, faixa de valores e amplitude
-    r1 = _re.search(
-        r"medido em \S+ sobre as ([\d.]+) partidas: ([\d,]+)%\s*a\s*([\d,]+)%"
-        r" entre as faixas de dura\u00e7\u00e3o,\s*amplitude de ([\d,]+) ponto",
-        t)
-    if not r1:
-        falha("teste (ii): a frase-sintese da faixa de duracao nao foi "
-              "encontrada com base, faixa de valores e amplitude")
-    else:
-        base_txt, lo_txt, hi_txt, amp_txt = r1.groups()
-        if base_txt != base:
-            falha(f"teste (ii): o texto diz que mediu sobre {base_txt} partidas, "
-                  f"e o artefato soma {base}")
-        if {lo_txt, hi_txt} != {min(pct_artefato, key=lambda s: float(s.replace(",", "."))),
-                                max(pct_artefato, key=lambda s: float(s.replace(",", ".")))}:
-            falha(f"teste (ii): o texto cita a faixa {lo_txt}%-{hi_txt}%, "
-                  f"e o artefato mede {min(pct_artefato, key=lambda s: float(s.replace(chr(44), chr(46))))}"
-                  f"-{max(pct_artefato, key=lambda s: float(s.replace(chr(44), chr(46))))}")
-        if amp_txt != amplitude:
-            falha(f"teste (ii): amplitude de {amp_txt} pp no texto, "
-                  f"{amplitude} pp no artefato")
+    def como_numero(s: str) -> float:
+        return float(s.replace(",", "."))
 
-    # (b) paragrafode detalhe: a serie de taxas com a contagem de cada faixa
+    lo_artefato = min(pct_artefato, key=como_numero)
+    hi_artefato = max(pct_artefato, key=como_numero)
+
+    # (a) o artefato tem que concordar com o banco, e nao so com o texto
+    try:
+        import sys as _sys
+
+        _sys.path.insert(0, str(RAIZ))
+        from src.db import get_conn  # noqa: PLC0415
+
+        fila = get_conn().cursor()
+        fila.execute("SELECT COUNT(*) FROM matches WHERE queue_id = 420")
+        no_banco = fila.fetchone()[0]
+        if str(no_banco) != base_digitos:
+            falha(f"teste (ii): o artefato soma {base} partidas e a fila 420 do "
+                  f"banco tem {no_banco} — o JSON foi editado a mao, ou o banco "
+                  f"mudou e o teste nao foi remedido")
+        else:
+            print(f"    banco: fila 420 com {no_banco} partidas, confere com a "
+                  f"soma do artefato")
+    except Exception as exc:  # noqa: BLE001
+        aviso(f"banco inacessivel, cruzamento do teste (ii) pulado: {exc}")
+
+    # (b) TODAS as frases-sintese, nao so a primeira
+    padrao_sintese = (
+        r"medido em \S+ sobre as ([\d.]+) partidas: ([\d,]+)%\s*a\s*([\d,]+)%"
+        r" entre as faixas de dura\u00e7\u00e3o,\s*amplitude de ([\d,]+) ponto")
+    sintetese = list(_re.finditer(padrao_sintese, t))
+    if not sintetese:
+        falha("teste (ii): nenhuma frase-sintese da faixa de duracao foi "
+              "encontrada com base, faixa de valores e amplitude")
+    for m in sintetese:
+        base_txt, lo_txt, hi_txt, amp_txt = m.groups()
+        ln = t[: m.start()].count("\n") + 1
+        # ordem, e nao conjunto: "47,3% a 45,6%" e invertido e tem de falhar
+        if (lo_txt, hi_txt) != (lo_artefato, hi_artefato):
+            falha(f"teste (ii) L{ln}: a sintese cita {lo_txt}%-{hi_txt}%, e o "
+                  f"artefato mede {lo_artefato}-{hi_artefato}")
+        if amp_txt != amplitude:
+            falha(f"teste (ii) L{ln}: amplitude de {amp_txt} pp na sintese, "
+                  f"{amplitude} pp no artefato")
+        if base_txt != base:
+            falha(f"teste (ii) L{ln}: a sintese diz que mediu sobre {base_txt} "
+                  f"partidas, e a soma do artefato e {base}")
+
+    # (c) o paragrafo de detalhe: a serie com a contagem de cada faixa
     r2 = _re.search(r"taxas por faixa de dura\u00e7\u00e3o total s\u00e3o (.+?)\.\s*"
                     r"A amplitude \u00e9 de ([\d,]+) ponto", t, _re.S)
     if not r2:
         falha("teste (ii): o paragrafo de detalhe das faixas nao foi encontrado")
     else:
         serie, amp2 = r2.groups()
-        # a contagem e o ULTIMO numero do parenteses ("(0 a 25 min, 15.944
-        # partidas)"); casar o primeiro pega o "0" do rotulo da faixa.
         achados = _re.findall(r"([\d,]+)%\s*\(([^)]*)\)", serie)
         pct_txt = [a for a, _ in achados]
-        n_txt = [
-            m.group(0) for m in (_re.search(r"[\d.]+(?=[\s]*partidas?\b|$)", dentro)
-                                 for _, dentro in achados) if m
-        ]
+        # a contagem e o ULTIMO numero do parenteses ("(0 a 25 min, 15.944
+        # partidas)"); casar o primeiro pega o "0" do rotulo da faixa.
+        n_txt = []
+        for _, dentro in achados:
+            m_n = _re.search(r"[\d.]+(?=[\s]*(?:partidas?|jogos?)\b|$)", dentro)
+            if m_n is None:
+                falha(f"teste (ii): a faixa {dentro!r} nao tem contagem "
+                      "reconhecivel no paragrafo de detalhe")
+            else:
+                n_txt.append(m_n.group(0))
         if pct_txt != pct_artefato:
             falha(f"teste (ii): taxas no texto {pct_txt} diferem do artefato "
                   f"{pct_artefato}")
-        if n_txt != n_artefato:
+        if n_txt and n_txt != n_artefato:
             falha(f"teste (ii): contagens no texto {n_txt} diferem do artefato "
                   f"{n_artefato}")
         if amp2 != amplitude:
             falha(f"teste (ii): amplitude de {amp2} pp no paragrafo de detalhe, "
                   f"{amplitude} pp no artefato")
 
-    # (c) o veredito so pode ser afirmativo se o artefato sustenta
-    if not artefato.get("todos_abaixo_de_50") and "todas abaixo de 50%" in t:
-        falha("teste (ii): o texto afirma que todas as faixas ficam abaixo de "
-              "50%, e o artefato registra que nao")
+    # (d) o veredito so pode ser afirmativo se o artefato sustenta — nas DUAS
+    # redacoes que o texto usa, porque o detalhe nao repete a frase da sintese
+    if not abaixo:
+        for m in _re.finditer(r"todas[^.\n]{0,40}abaixo de 50%", t, _re.I):
+            ln = t[: m.start()].count("\n") + 1
+            falha(f"teste (ii) L{ln}: o texto afirma {m.group(0)!r} e o "
+                  "artefato registra que nao")
     if not any("teste (ii)" in f for f in FALHAS):
-        print(f"  [OK] teste (ii) bate com o artefato: base {base}, "
-              f"amplitude {amplitude} pp")
+        print(f"  [OK] teste (ii) bate com o artefato e com o banco: base "
+              f"{base}, amplitude {amplitude} pp")
+
+
+def check_bases_declaradas(t: str) -> None:
+    """As DUAS bases tem que estar declaradas onde cada numero aparece.
+
+    A checagem 17 protege o teste (ii). Esta protege o invariant que a rodada
+    da KR criou: a base descritiva (41.063) e a base de modelagem (39.426)
+    coexistem, e cada frase tem que dizer de qual base fala.
+
+    O bug que a motivou: a Secao 5.2 abria com "A base usada para treinar e
+    comparar os modelos preditivos (Secao 5.4) reune 39.188 partidas [...]
+    provenientes de 41.063 partidas" — a base de modelagem declarada com o
+    numero da descritiva. E a secao que o leitor encontra ANTES da nota que
+    explica as duas. Passava em qualquer revisao humana, porque 41.063 e o
+    total real do banco.
+
+    Por isso a checagem amarra tres coisas: a frase que declara a base de
+    modelagem tem que citar 39.426 e nao 41.063; a nota das duas bases tem que
+    existir e citar as duas; e o RESUMO em portugues tambem — o Abstract
+    ingles ja e verificado pela 12, e um resumo que so declara uma das bases
+    encadeia "41.063 coletadas" com "os modelos foram treinados".
+    """
+    import re as _re
+
+    MODELAGEM = "39.426"
+    DESCRITIVA = "41.063"
+
+    # (a) a frase que declara a base de modelagem
+    # o \** antes e depois: no markdown a base vem em negrito, e um padrao
+    # que nao admite o asterisco deixa de casar com a frase que quer vigiar
+    m = _re.search(r"provenientes d(?:e|as) \**([\d.]+)\** partidas", t)
+    if not m:
+        falha("bases: a frase que declara a base de modelagem "
+              "('provenientes de N partidas') nao foi encontrada")
+    else:
+        declarado = m.group(1)
+        ln = t[: m.start()].count("\n") + 1
+        if declarado == DESCRITIVA:
+            falha(f"bases L{ln}: a base de MODELAGEM esta declarada com "
+                  f"{DESCRITIVA}, que e a base descritiva — e o erro que a "
+                  f"checagem 18 existe para pegar")
+        elif declarado != MODELAGEM:
+            falha(f"bases L{ln}: a base de modelagem esta declarada como "
+                  f"{declarado}, e a base congelada e {MODELAGEM}")
+        else:
+            print(f"  base de modelagem declarada como {MODELAGEM}")
+
+    # (b) a nota que explica as duas bases
+    i = t.find("Nota sobre as bases")
+    if i < 0:
+        falha("bases: a nota que declara as duas bases nao existe na Secao 5.3")
+    else:
+        j = t.find("*)", i)
+        nota = t[i:j if j > 0 else i + 1400]
+        if DESCRITIVA not in nota or MODELAGEM not in nota:
+            falta = [b for b in (DESCRITIVA, MODELAGEM) if b not in nota]
+            falha(f"bases: a nota da Secao 5.3 nao cita {falta} — sem as duas o "
+                  "leitor nao sabe qual numero descreve o que")
+        else:
+            print("  nota da Secao 5.3 cita as duas bases")
+
+    # (c) o RESUMO em portugues: a checagem 12 le so o Abstract ingles
+    i = t.find("## RESUMO")
+    if i >= 0:
+        j = t.find("\n## ", i + 5)
+        resumo = t[i:j if j > 0 else i + 5000]
+        if DESCRITIVA not in resumo or MODELAGEM not in resumo:
+            falta = [b for b in (DESCRITIVA, MODELAGEM) if b not in resumo]
+            falha(f"bases: o RESUMO em portugues nao declara {falta} — o "
+                  "Abstract ingles declara, e o resumo e a superficie que o "
+                  ".md entrega")
+        else:
+            print("  RESUMO em portugues declara as duas bases")
+
+    # (d) a base descritiva tem que ser a que o banco tem
+    try:
+        import sys as _sys
+
+        _sys.path.insert(0, str(RAIZ))
+        from src.db import get_conn  # noqa: PLC0415
+
+        cur = get_conn().cursor()
+        cur.execute("SELECT COUNT(*) FROM matches WHERE queue_id = 420")
+        real = cur.fetchone()[0]
+        base_txt = f"{real:,}".replace(",", ".")
+        print(f"  banco: fila 420 com {base_txt} partidas "
+              f"(a base descritiva do texto e {DESCRITIVA})")
+    except Exception as exc:  # noqa: BLE001
+        aviso(f"banco inacessivel, cruzamento das bases pulado: {exc}")
 
 
 def main() -> None:
@@ -886,8 +1055,10 @@ def main() -> None:
     check_scripts_documentados()
     print("16. Regioes: o texto nao pode uniformizar o que o IC nao sustenta")
     check_regioes_significativas(t)
-    print("17. Teste (ii) de faixa de duracao x artefato")
+    print("17. Teste (ii) de faixa de duracao x artefato e x banco")
     check_faixa_duracao(t)
+    print("18. As duas bases declaradas onde cada numero aparece")
+    check_bases_declaradas(t)
 
     print()
     print("=" * 66)

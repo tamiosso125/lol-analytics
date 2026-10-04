@@ -620,6 +620,17 @@ def ajustar_tabela(tabela, larguras_cm: list[float]) -> None:
     denunciou o Quadro 3 (benchmark NLQ), em que a coluna de SQL devolvia a
     largura que as outras não precisavam e as linhas ficavam altíssimas.
     """
+    # A contagem de larguras tem que bater com a contagem de colunas. Sem
+    # esta guarda o `zip` abaixo trunca em silencio: o Quadro 1 estava com
+    # 5 larguras declaradas para 3 colunas e saia com 7,2 cm dos 16 cm
+    # uteis, sem nenhuma falha em lugar nenhum.
+    n_colunas = len(tabela.columns)
+    if len(larguras_cm) != n_colunas:
+        raise SystemExit(
+            f"largura de tabela divergente: {len(larguras_cm)} declaradas para "
+            f"{n_colunas} colunas. O `zip` trunca em silencio e a tabela sai "
+            f"estreita sem erro. Corrija LARGURAS_QUADROS."
+        )
     tabela.autofit = False
     tabela.alignment = WD_TABLE_ALIGNMENT.CENTER
     for linha in tabela.rows:
@@ -643,8 +654,11 @@ def ajustar_tabela(tabela, larguras_cm: list[float]) -> None:
 
 # Larguras por quadro, em cm (soma ~16 cm = área útil entre margens 3+2).
 # O que o texto usa como legenda define a ordem das colunas.
+# A contagem de entradas tem que ser a de colunas do quadro: `ajustar_tabela`
+# levanta se divergir, porque o `zip` trunca em silencio e a falha não aparece
+# em nenhuma checagem. Foi assim que o Quadro 1 saiu com 5 larguras e 3 colunas.
 LARGURAS_QUADROS = {
-    0: [1.4, 3.6, 2.2, 2.6, 6.2],              # vitória do vermelho por região
+    0: [2.8, 4.2, 9.0],                         # vitória do vermelho por região
     1: [3.4, 2.5, 2.3, 2.1, 2.3, 3.4],         # comparação entre modelos
     2: [0.8, 4.4, 7.4, 3.4],                    # benchmark NLQ (o problema)
     3: [1.6, 1.6, 2.0, 2.4, 1.8, 1.8, 1.4, 1.4, 1.8],   # métricas por corte

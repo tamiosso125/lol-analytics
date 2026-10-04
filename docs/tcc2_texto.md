@@ -46,7 +46,10 @@ com *machine learning* e mecanismos de visualização e consulta em
 linguagem natural. Foram coletadas e organizadas 41.063 partidas
 ranqueadas de elo alto (cinco regiões) via Riot Games API, e
 incorporadas 96.716 partidas profissionais (2014-2026, Oracle's
-Elixir). Três modelos — XGBoost, *Random Forest* e uma rede neural
+Elixir). A análise descritiva usa a base completa; os modelos foram
+treinados sobre as 39.426 partidas disponíveis quando o conjunto de
+*features* foi congelado, diferença registrada como limitação na Seção 5.8.
+Três modelos — XGBoost, *Random Forest* e uma rede neural
 (MLP) — foram treinados e comparados para predizer o vencedor a partir
 do estado da partida em quatro cortes temporais (10, 15, 20 e 25
 minutos), com o XGBoost alcançando o melhor desempenho no corte de 15
@@ -806,9 +809,10 @@ duplicar dados já salvos.
 
 A base usada para treinar e comparar os modelos preditivos (Seção 5.4)
 reúne **39.188 partidas** de *solo queue* no corte de 15 minutos,
-provenientes de **41.063 partidas** normalizadas em cinco regiões
-(BR1/EUW1/KR/NA1/EUN1), com JSON bruto de partida e linha do tempo
-preservados para reprocessamento, e **96.716 jogos profissionais**
+provenientes das **39.426 partidas** que o banco tinha quando o
+conjunto de *features* foi congelado (BR1/EUW1/KR/NA1/EUN1), com JSON
+bruto de partida e linha do tempo preservados para reprocessamento, e
+**96.716 jogos profissionais**
 (2014-2026, Oracle's Elixir). O esquema relacional contempla partidas,
 times, participantes, jogadores, banimentos, eventos de item (com
 desfazimento de compras/vendas aplicado) e um catálogo de itens para
@@ -825,15 +829,18 @@ viés de lado (Seção 5.3).
 ### 5.3 Análise exploratória: padrões identificados (objetivo d)
 
 *(Nota sobre as bases usadas nesta seção e na modelagem: a análise
-descritiva — este quadro, o viês de lado e o teste de duração — foi
-medida sobre as **41.063 partidas** que o banco tem ao fim da coleta. As
-*features* e os modelos foram construídos antes da última rodada de KR e
-usam as **39.426 partidas** da base anterior; por isso a Seção 5.4 e o
-Apêndice C citam 39.426, e a diferença de 1.637 partidas é da KR. Os
-modelos não foram retreinados sobre a base nova: a 1.637 partidas a mais
-alterariam a amostra de treino em cerca de 4%, o que é dentro do que a
-própria discussão de volume mediu como ganho real, mas não justifica
-descartar um modelo cujo desempenho já foi medido e validado. E uma
+descritiva — este quadro, o viés de lado e o teste de faixa de duração —
+foi medida sobre as **41.063 partidas** que o banco tem ao fim da coleta.
+As *features* e os modelos foram construídos antes da última rodada da
+KR e usam a base anterior de **39.426 partidas**, das quais 39.309 geraram
+*features* e 39.188 chegam ao corte de 15 minutos. Por isso a Seção 5.4,
+os Apêndices B e C e o Anexo A citam 39.426. A diferença são 1.637
+partidas, quase todas da KR: das 1.754 partidas do banco que ainda não
+geraram *features*, 1.647 são da KR e 107 são de três outras regiões.
+Os modelos não foram retreinados sobre a base nova — as 1.637 partidas a
+mais alterariam a amostra de treino em cerca de 4%, dentro do que a
+própria discussão de volume mediu como ganho real, e não justificam
+descartar um modelo cujo desempenho já foi medido e validado. É uma
 limitação declarada, registrada na Seção 5.8.)*
 
 
@@ -905,8 +912,8 @@ viés, não o viés.
 Os quatro testes de robustez definidos na Seção 4.5 se aplicam todos aqui,
 com o desfecho de cada um. O teste (i), de replicação regional, restringe a
 análise à BR1 isoladamente e reproduz a assimetria, descartando mistura
-regional como explicação. O teste (ii), de faixa de duração, confirma que a
-taxa de vitória incondicional por faixa de duração total de partida
+O teste (ii), de faixa de duração, confirma que a taxa de vitória
+incondicional do **azul** por faixa de duração total de partida
 permaneceu estável (medido em 2026-10-04 sobre as 41.063 partidas: 45,6%
 a 47,3% entre as faixas de duração, amplitude de 1,7 ponto percentual,
 todas abaixo de 50%), o que descarta a hipótese de que "partidas
@@ -964,10 +971,10 @@ que a estimativa de 16 pontos que a primeira versão deste texto apresentava
 comparação das duas proporções), de modo que a direção do efeito não
 depende da amostra.
 
-*(Todas as taxas acima foram remedidas sobre a base atual, pelo script
-`docs/confere_conversao_advantagem.py`, que lê `data/features_phases.csv`
-para o *solo queue* e os CSVs do Oracle's Elixir para o profissional,
-usando a mesma definição de faixa dos dois lados. A faixa de +4.000 a
+*(Todas as taxas acima foram remedidas sobre a base de *features*
+congelada — 39.309 partidas distintas, 39.188 no corte de 15 minutos —
+pelo script `docs/confere_conversao_advantagem.py`, que lê
+`data/features_phases.csv`
 +6.000 no cenário profissional apoia-se em apenas 72 jogos e deve ser lida
 como indicativa; a conclusão sobre conversão de vantagem se apoia na faixa
 de +2.000 a +4.000.)*
@@ -1164,8 +1171,13 @@ reconhecida e discutida na próxima subseção.
   Comando e artefato: `docs/experimento_calibracao.py` e
   `reports/experimento_calibracao_veredito.json`.
 - **O modelo não viu a última rodada de coleta.** As *features* e a
-  modelagem foram construídas sobre 39.426 partidas, e a base do banco tem
-  41.063 — uma diferença de 1.637 partidas, todas da KR. A discussão de
+  modelagem foram construídas sobre 39.426 partidas, e a base do banco
+  tem 41.063 — 1.637 partidas a mais, quase todas da KR (das 1.754
+  partidas do banco que não geraram *features*, 1.647 são da KR e 107
+  são de BR1, EUW1 e NA1). O conjunto que de fato alimentou o modelo
+  são 39.309 partidas distintas, das quais 39.188 chegam ao corte de 15
+  minutos; as outras 117 da base congelada não produziram linha em
+  `features_phases.csv`. A discussão de
   volume da Seção 5.4 mediu que o ganho de AUC por volume é da ordem de
   0,001 por acréscimo relevante, o que situa o efeito desta diferença
   abaixo do que aquela discussão mediu como ganho real, mas não nulo.
@@ -1730,7 +1742,7 @@ acima e não se repetem aqui.
 
 Antes de entregar, a suíte completa passa:
 `tests/smoke_test.py` (exit 0), `tests/validate_predictions.py`
-(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (12 checagens de
+(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (18 checagens de
 consistência do texto contra o banco e os artefatos, exit 0),
 `docs/confere_docx.py` (conformidade formal do `.docx`, exit 0), e
 `cd frontend; npm run lint; npm run test` (31/31).

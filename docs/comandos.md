@@ -218,7 +218,7 @@ Antes de fechar o TCC, duas checagens automáticas. Ambas saem com exit 1
 quando algo diverge, e ambas devem passar.
 
 ```powershell
-# 12 checagens de consistência do texto contra o banco e os artefatos:
+# 18 checagens de consistência do texto contra o banco e os artefatos:
 # CJK, referências cruzadas, tabelas, ordem alfabética de referências,
 # números de modelo contra metricas_corte.json, Quadro 1 contra o banco,
 # dataset profissional contra o banco, guard de resíduo (valores
@@ -369,7 +369,7 @@ texto existam de verdade. Ver **5b**, **5c** e **5d**.
 ```
 15. python -m src.models.multi_cutoff_metrics  # Apêndice C + metricas_corte.json
 16. python -m src.models.tune_models_full     # lastro da 5.8
-17. python docs/verifica_tcc.py               # 12 checagens, exit 0
+17. python docs/verifica_tcc.py               # 18 checagens, exit 0
 18. python docs/build_tcc_docx.py             # gera o .docx
 19. powershell -File docs/finalize-fields.ps1  # Word preenche os campos
 20. python docs/confere_docx.py               # conformidade formal, exit 0

@@ -28,6 +28,8 @@ Legends com DOIS datasets complementares:
    1, viés de lado, teste de faixa de duração) usa as 41.063;
    *features* e modelos foram congelados nas 39.426 e não foram
    retreinados — a diferença de 1.637 partidas é limitação declarada
+   (das 1.754 partidas sem *features*, 1.647 são da KR e 107 são de
+   BR1, EUW1 e NA1; as features cobrem 39.309 partidas distintas)
    na Seção 5.8 do TCC. JSON bruto + timelines guardados para
    reprocessamento.
 2. **Competitivo** (Oracle's Elixir): **96.716 jogos** profissionais de

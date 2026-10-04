@@ -3,7 +3,7 @@
 **Data:** 2026-10-04
 **Estado do entregável:** 57 páginas, corpo 29 (faixa 25-30), 5 Quadros,
 6 Figuras, 18 referências. `smoke`, `validate_predictions`, `verifica_tcc`
-(12 checagens), `confere_docx` e `npm run test` (31/31) passam.
+(18 checagens), `confere_docx` e `npm run test` (31/31) passam.
 
 Este plano lista o que **ainda está aberto**, com o critério de aceitação de
 cada item. Todos os itens foram verificados no arquivo antes de entrarem
@@ -30,7 +30,7 @@ Verificado por busca literal: **todos os 8 ausentes**.
 |---|---|
 | `src/models/multi_cutoff_metrics.py` | quadro do Apêndice C + `reports/metricas_corte.json` |
 | `src/models/tune_models_full.py` | grid completo na base final + artefato do tuning |
-| `docs/verifica_tcc.py` | 12 checagens de consistência do texto |
+| `docs/verifica_tcc.py` | 18 checagens de consistência do texto |
 | `docs/confere_docx.py` | conformidade formal do `.docx` |
 | `docs/recapturar_anexo_a.py` | regrava as 6 capturas |
 | `docs/taxa_base_por_corte.py` | taxa de vitória por corte |

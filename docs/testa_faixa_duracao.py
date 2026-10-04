@@ -3,9 +3,15 @@
 POR QUE ESTE SCRIPT: o teste (ii) da Seção 4.5/5.3 sustenta que a
 assimetria por lado não é confundida com "partidas longas são um tipo
 diferente de jogo". O número que o texto citava — "44%-47%" — é de
-2026-07-08, medido sobre 23.133 partidas. A base hoje é 39.426, quase o
+2026-07-08, medido sobre 23.133 partidas. A base hoje é 41.063, quase o
 dobro, e a região NA1 foi de 1.446 para 7.159. Um teste de robustez citado
 sem data e sem base é um teste que ninguém pode reproduzir.
+
+O número que este script imprime mudou com a base, e o TCC teve de mudar
+junto: a rodada final da KR levou a amplitude de 1,6 para 1,7 pp e deslocou o
+máximo da faixa 25-30 de 47,2% para 47,3%. A checagem 17 de
+`docs/verifica_tcc.py` amarra o que o texto cita à soma das contagens deste
+JSON, justamente para essa troca não voltar a passar em silêncio.
 
 O que mede: taxa de vitória do time AZUL, **incondicional** (sem filtro de
 empate), por faixa de duração total da partida — a definição que o diário

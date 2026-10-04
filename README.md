@@ -150,7 +150,7 @@ portal da Riot (limites maiores, sem expiração diária).
       cinco regiões + **96.716 jogos** profissionais). A análise
       descritiva usa a base completa; os modelos foram construídos sobre
       as **39.426 partidas** disponíveis quando o *feature set* foi
-      congelado — a última rodada da KR (1.637 partidas) não entrou no
+      congelado — a última rodada da KR (1.549 partidas) não entrou no
       retreino, e a diferença está registrada como limitação na Seção
       5.8 do TCC. Métricas do modelo de produção (XGBoost, corte de 15
       min, 39.188 linhas): acurácia **0,7621**,
