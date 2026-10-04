@@ -755,6 +755,99 @@ def check_scripts_documentados() -> None:
               "documentados em comandos.md")
 
 
+def check_faixa_duracao(t: str) -> None:
+    """O teste (ii) de robustez no texto tem de bater com o artefato.
+
+    O teste (ii) pergunta se o vies de lado e confundido com partida longa.
+    O texto afirma as taxas por faixa de duracao total; `testa_faixa_duracao.py`
+    grava `reports/faixa_duracao.json` com as mesmas taxas e com a contagem
+    de partidas de cada faixa.
+
+    A soma das contagens do artefato e a base da medicao. Usar isso em vez de
+    uma constante escrita a mao e o que impede o texto de continuar citando
+    a base antiga depois que o banco cresce — que foi exatamente o que
+    aconteceu: a base foi atualizada para 41.063 e as taxas ficaram nas de
+    39.426, produzindo uma frase que citava a base certa com os numeros
+    errados.
+    """
+    import json
+    import re as _re
+
+    caminho = RAIZ / "reports" / "faixa_duracao.json"
+    try:
+        artefato = json.loads(caminho.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        aviso(f"faixa_duracao.json inacessivel, teste (ii) pulado: {exc}")
+        return
+
+    faixas = artefato.get("faixas") or artefato.get("faixa") or []
+    if not faixas:
+        aviso("faixa_duracao.json sem faixas, teste (ii) pulado")
+        return
+
+    pct_artefato = [f"{f['pct_azul']:.1f}".replace(".", ",") for f in faixas]
+    n_artefato = [f"{f['jogos']:,}".replace(",", ".") for f in faixas]
+    amplitude = f"{artefato['amplitude_pp']:.1f}".replace(".", ",")
+    base = f"{sum(f['jogos'] for f in faixas):,}".replace(",", ".")
+    rotulo = " / ".join(f"{p}% ({n})" for p, n in zip(pct_artefato, n_artefato))
+    print(f"    artefato: {rotulo} | base {base} | amplitude {amplitude} pp")
+
+    # (a) frase-sintese: base, faixa de valores e amplitude
+    r1 = _re.search(
+        r"medido em \S+ sobre as ([\d.]+) partidas: ([\d,]+)%\s*a\s*([\d,]+)%"
+        r" entre as faixas de dura\u00e7\u00e3o,\s*amplitude de ([\d,]+) ponto",
+        t)
+    if not r1:
+        falha("teste (ii): a frase-sintese da faixa de duracao nao foi "
+              "encontrada com base, faixa de valores e amplitude")
+    else:
+        base_txt, lo_txt, hi_txt, amp_txt = r1.groups()
+        if base_txt != base:
+            falha(f"teste (ii): o texto diz que mediu sobre {base_txt} partidas, "
+                  f"e o artefato soma {base}")
+        if {lo_txt, hi_txt} != {min(pct_artefato, key=lambda s: float(s.replace(",", "."))),
+                                max(pct_artefato, key=lambda s: float(s.replace(",", ".")))}:
+            falha(f"teste (ii): o texto cita a faixa {lo_txt}%-{hi_txt}%, "
+                  f"e o artefato mede {min(pct_artefato, key=lambda s: float(s.replace(chr(44), chr(46))))}"
+                  f"-{max(pct_artefato, key=lambda s: float(s.replace(chr(44), chr(46))))}")
+        if amp_txt != amplitude:
+            falha(f"teste (ii): amplitude de {amp_txt} pp no texto, "
+                  f"{amplitude} pp no artefato")
+
+    # (b) paragrafode detalhe: a serie de taxas com a contagem de cada faixa
+    r2 = _re.search(r"taxas por faixa de dura\u00e7\u00e3o total s\u00e3o (.+?)\.\s*"
+                    r"A amplitude \u00e9 de ([\d,]+) ponto", t, _re.S)
+    if not r2:
+        falha("teste (ii): o paragrafo de detalhe das faixas nao foi encontrado")
+    else:
+        serie, amp2 = r2.groups()
+        # a contagem e o ULTIMO numero do parenteses ("(0 a 25 min, 15.944
+        # partidas)"); casar o primeiro pega o "0" do rotulo da faixa.
+        achados = _re.findall(r"([\d,]+)%\s*\(([^)]*)\)", serie)
+        pct_txt = [a for a, _ in achados]
+        n_txt = [
+            m.group(0) for m in (_re.search(r"[\d.]+(?=[\s]*partidas?\b|$)", dentro)
+                                 for _, dentro in achados) if m
+        ]
+        if pct_txt != pct_artefato:
+            falha(f"teste (ii): taxas no texto {pct_txt} diferem do artefato "
+                  f"{pct_artefato}")
+        if n_txt != n_artefato:
+            falha(f"teste (ii): contagens no texto {n_txt} diferem do artefato "
+                  f"{n_artefato}")
+        if amp2 != amplitude:
+            falha(f"teste (ii): amplitude de {amp2} pp no paragrafo de detalhe, "
+                  f"{amplitude} pp no artefato")
+
+    # (c) o veredito so pode ser afirmativo se o artefato sustenta
+    if not artefato.get("todos_abaixo_de_50") and "todas abaixo de 50%" in t:
+        falha("teste (ii): o texto afirma que todas as faixas ficam abaixo de "
+              "50%, e o artefato registra que nao")
+    if not any("teste (ii)" in f for f in FALHAS):
+        print(f"  [OK] teste (ii) bate com o artefato: base {base}, "
+              f"amplitude {amplitude} pp")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -793,6 +886,8 @@ def main() -> None:
     check_scripts_documentados()
     print("16. Regioes: o texto nao pode uniformizar o que o IC nao sustenta")
     check_regioes_significativas(t)
+    print("17. Teste (ii) de faixa de duracao x artefato")
+    check_faixa_duracao(t)
 
     print()
     print("=" * 66)

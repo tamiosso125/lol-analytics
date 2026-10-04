@@ -919,9 +919,17 @@ da partida, **incondicional** (sem filtro de empate).
 ```
 
 Responde se o viés de lado é confundido com "partidas longas são um tipo
-diferente de jogo". Medido em 2026-10-04 sobre as 39.426 partidas: 46,4% /
-47,2% / 46,4% / 45,6% / 46,4% nas faixas de 0-25 a 40+ minutos, amplitude
-de 1,6 pp, todas abaixo de 50%.
+diferente de jogo". Medido em 2026-10-04 sobre as 41.063 partidas: 46,5% /
+47,3% / 46,4% / 45,6% / 47,0% nas faixas de 0-25 a 40+ minutos, amplitude
+de 1,7 pp, todas abaixo de 50%.
+
+Na base de 39.426 a leitura era 46,4% / 47,2% / 46,4% / 45,6% / 46,4%,
+amplitude de 1,6 pp: a conclusão não muda com a rodada final da KR, e
+é a segunda medição do teste a sair igual — o que reforça que a
+amplitude de ~1,7 pp é propriedade do sinal e não amostragem. A
+checagem 17 de `docs/verifica_tcc.py` amarra os números que o TCC
+cita à soma das contagens deste JSON, para que texto e artefato não
+possam divergir em silêncio.
 
 O texto citava "44%-47%" sem data e sem base, de uma medição de 2026-07-08
 sobre 23.133 partidas. Teste de robustez citado sem base não é

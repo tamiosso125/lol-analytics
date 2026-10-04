@@ -908,7 +908,7 @@ análise à BR1 isoladamente e reproduz a assimetria, descartando mistura
 regional como explicação. O teste (ii), de faixa de duração, confirma que a
 taxa de vitória incondicional por faixa de duração total de partida
 permaneceu estável (medido em 2026-10-04 sobre as 41.063 partidas: 45,6%
-a 47,2% entre as faixas de duração, amplitude de 1,6 ponto percentual,
+a 47,3% entre as faixas de duração, amplitude de 1,7 ponto percentual,
 todas abaixo de 50%), o que descarta a hipótese de que "partidas
 longas são um tipo diferente de jogo". O teste (iii), o intervalo de Wilson,
 está aplicado acima: mostra que nenhum dos quatro cortes admite 50%. E o
@@ -919,9 +919,9 @@ deixando de ser aplicável quando a forma deixou de existir.
 
 O teste (ii) foi **remedido** em 2026-10-04 sobre a base atual, porque a
 medição que o texto usava era de 2026-07-08 e de uma base quase metade
-desta: as taxas por faixa de duração total são 46,4% (0 a 25 min, 15.122
-partidas), 47,2% (25 a 30, 12.836), 46,4% (30 a 35, 8.120), 45,6% (35 a 40,
-2.613) e 46,4% (acima de 40, 735). A amplitude é de 1,6 ponto percentual e
+desta: as taxas por faixa de duração total são 46,5% (0 a 25 min, 15.944
+partidas), 47,3% (25 a 30, 13.314), 46,4% (30 a 35, 8.364), 45,6% (35 a 40,
+2.684) e 47,0% (acima de 40, 757). A amplitude é de 1,7 ponto percentual e
 todas as faixas ficam abaixo de 50% — o teste se sustenta, agora com data,
 base e amplitude explícitas.
 

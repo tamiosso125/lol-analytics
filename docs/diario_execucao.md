@@ -3729,9 +3729,91 @@ faixa. Condensada a duplicata da 5.8 e a propria ressalva, voltou a 30 —
 o teto, sem folga. Detalhe em `docs/plano_fechamento.md`.
 
 
+### Rodada final da KR: a pergunta da coleta, respondida
+
+A entrada anterior deixou a KR como **medição de risco** e a pergunta aberta:
+ampliar fecha o intervalo em torno de 50%, ou confirma o viés? Coletei
+**1.637 partidas** da KR (8.567 para 10.204 no relacional) e a resposta é a
+primeira:
+
+| região | antes | depois | IC antes | IC depois |
+|---|---:|---:|---|---|
+| KR | 8.567 | 10.204 | [49,2%, 51,3%] | [49,5%, 51,4%] |
+
+A taxa foi de 50,3% para **50,4%**. O intervalo continua incluindo 50%. Mais
+1.637 partidas custaram 0,1 ponto percentual de deslocamento e o intervalo
+continua abertos — exatamente o que um teste de poder previa.
+
+**O CÁLCULO QUE FECHA A QUESTÃO.** Para o IC da KR excluir 50% mantendo a
+taxa observada de 50,4%, seriam necessárias **~106.700 partidas**: 12× a
+amostra de KR e 3× toda a base do projeto. Se a taxa real da KR fosse 51,0%,
+bastariam 9.600 — mas não sabemos qual é, e é exatamente isso que o intervalo
+expressa. A afirmação qualificada da Seção 5.3 **não é uma ressalva temporária
+esperando coleta: é a resposta final.** Registrar isso é o que separa
+"faltou dados" de "o dado não sustenta".
+
+**DECISÃO: MANTER AS 1.637, NÃO REVERTER.** Duas bases passaram a coexistir,
+e a alternativa era escolher um número e esconder o outro:
+
+- **base descritiva** (Quadro 1, viés de lado, teste de duração): **41.063**
+- **base de modelagem** (features e modelos): **39.426**
+
+Não houve troca em bloco: das 20 ocorrências de 39.426 no texto, 13 viraram
+41.063 e **7 continuam 39.426** — a série de AUC por corte, o Apêndice C, o
+benchmark do NLQ e as capturas do Anexo A foram medidos na base congelada, e
+dizer 41.063 neles seria falso. A nota que explica as duas entrou no início da
+5.3, e a limitação que ela prometeu foi registrada na 5.8: **o modelo não viu
+a rodada final.** Retreinar foi deixado de fora porque o desempenho atual já
+está medido e validado contra o Apêndice C e a bateria comportamental, e
+refazê-lo invalidaria as duas coisas sem ganho apurado.
+
+### Dois erros meus nesta rodada, um deles chegou ao entregável
+
+**1. Troquei a base e deixei os números.** Ao atualizar 39.426 para 41.063 na
+5.3, a substituição levou o número da base mas **não** as taxas por faixa de
+duração, que tinham sido medidas sobre 39.426. O texto afirmava, com
+credibilidade sintática impecável, "medido em 2026-10-04 sobre as 41.063
+partidas: 45,6% a 47,2%, amplitude de 1,6 ponto percentual" — número medido
+sobre a base antiga. Passaria em qualquer revisão humana, porque a frase tem
+data, base e amplitude, e nada nela é visivelmente errado.
+
+**CHECAGEM 17, criada por causa disso.** As checagens existentes comparam
+*métricas do modelo* com o artefato; nenhuma comparava as taxas do teste de
+robustez. A nova amarra o texto ao `reports/faixa_duracao.json`: compara a
+série de taxas, a contagem de cada faixa, a amplitude nos dois parágrafos e —
+o ponto que fecha o loophole — **a soma das contagens do artefato contra a
+base que o texto afirma**. Usar a soma em vez de uma constante escrita à mão é
+o que impede o número de sobreviver a uma ampliação. Testada nos dois sentidos
+com 5 mutações (base, taxa, contagem e as duas amplitudes): todas reprovam
+com a mensagem certa, e o arquivo do entregável é restaurado byte a byte no
+fim. A soma é 41.063, que é a base certa por construção, não por coincidência.
+
+**2. A checagem 12 nunca checou o Abstract.** Quando passei a exigir as duas
+bases no Abstract, a checagem reprovou — mas por um motivo que não era o
+aparente. A extração usava uma alternância cujo primeiro ramo casava de
+`## RESUMO` até `**Abstract`, devolvia o **RESUMO em português** e nunca o
+trecho em inglês, que é o que vai para o pré-textual do `.docx`. A checagem
+validava o resumo, não o abstract, e vinha passando porque o número que ela
+exigia estava no resumo. Corrigida para extrair de `**Abstract:**` até a
+próxima seção de primeiro nível; agora exige as duas bases **e** que a
+diferença seja declarada como limitação.
+
+Erro menor, na mesma linha: um script escrito via here-string do PowerShell
+colou `FFFFF` no lugar de `1.637` dentro do texto que ia gravar. O arquivo que
+existia para corrigir um *typo* não tinha acento correto. Refeito pelo editor.
+
+**DOCUMENTAÇÃO.** README, `handoff.md` e `scripts.md` ficaram com o número
+antigo. O `scripts.md` era o mais grave, porque descreve o que o script
+imprime e o script já imprime outra coisa: quem rodar o comando e comparar
+com a doc encontra divergência. Os três foram corrigidos — o `scripts.md` agora
+registra também que a medição deu o mesmo resultado nas duas bases, o que é
+evidência a favor de a amplitude de ~1,7 pp ser propriedade do sinal e não
+amostragem.
+
+
 ### Ferramenta que evita a repetição
 
-`docs/verifica_tcc.py` roda 8 checagens antes de qualquer commit: CJK,
+`docs/verifica_tcc.py` roda 17 checagens antes de qualquer commit: CJK,
 referências cruzadas, consistência de tabela, ordem alfabética de
 referências, números de modelo contra `reports/metricas_corte.json`, Quadro 1
 contra o banco, dataset profissional contra o banco, e um **guard de

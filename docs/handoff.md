@@ -17,13 +17,19 @@ Legends com DOIS datasets complementares:
 
 1. **Solo queue** (Riot API): partidas ranqueadas Challenger/GM
    multi-região (BR1/EUW1/KR/NA1, mais um resíduo EUN1, fila 420) —
-   **39.426 partidas** no banco (BR1 11.936, EUW1 11.744, KR 8.567,
+   **41.063 partidas** no banco (BR1 11.936, EUW1 11.744, KR 10.204,
    NA1 7.159, EUN1 20) e **39.188 linhas** na base do modelo preditivo
    (corte de 15 min, retreino de 2026-10-04). A coleta foi retomável ao
    longo de todo o projeto: 10.295 em julho, 23.133 em 2026-07-06,
    24.154 em 2026-09-28, 33.713 em 2026-10-03 e 39.426 em 2026-10-04,
-   quando a NA1 foi de 1.446 para 7.159. JSON bruto + timelines
-   guardados para reprocessamento.
+   quando a NA1 foi de 1.446 para 7.159, fechando em 41.063 com a
+   última rodada da KR.
+   **Dois números coexistem de propósito:** a análise descritiva (Quadro
+   1, viés de lado, teste de faixa de duração) usa as 41.063;
+   *features* e modelos foram congelados nas 39.426 e não foram
+   retreinados — a diferença de 1.637 partidas é limitação declarada
+   na Seção 5.8 do TCC. JSON bruto + timelines guardados para
+   reprocessamento.
 2. **Competitivo** (Oracle's Elixir): **96.716 jogos** profissionais de
    2014-2026 (LCK/LPL/LEC/LTA/CBLOL etc.), carregados de CSVs anuais.
    Contagem por `game_id` distinto — `pro_games` guarda duas linhas por

@@ -146,9 +146,14 @@ portal da Riot (limites maiores, sem expiração diária).
 - [x] (e) Tuning de hiperparâmetros (GridSearchCV) — `src/models/tune_models.py`,
       e `src/models/tune_models_full.py` para a base final com artefato em
       `reports/tune_models_39k.json`
-- [x] Rodar tudo com dados reais (**39.426 partidas** de *solo queue* em cinco
-      regiões + **96.716 jogos** profissionais). Métricas do modelo de
-      produção (XGBoost, corte de 15 min, 39.188 linhas): acurácia **0,7621**,
+- [x] Rodar tudo com dados reais (**41.063 partidas** de *solo queue* em
+      cinco regiões + **96.716 jogos** profissionais). A análise
+      descritiva usa a base completa; os modelos foram construídos sobre
+      as **39.426 partidas** disponíveis quando o *feature set* foi
+      congelado — a última rodada da KR (1.637 partidas) não entrou no
+      retreino, e a diferença está registrada como limitação na Seção
+      5.8 do TCC. Métricas do modelo de produção (XGBoost, corte de 15
+      min, 39.188 linhas): acurácia **0,7621**,
       AUC-ROC **0,8473** — em `docs/diario_execucao.md`, entrada de 2026-10-04,
       e reproduzível com `python -m src.models.multi_cutoff_metrics`
 - [x] (f) Front end React como interface principal — `frontend/`
