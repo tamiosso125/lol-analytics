@@ -42,6 +42,23 @@ try {
   $tabelas = $doc.Tables.Count
   $imagens = $doc.InlineShapes.Count
 
+  # Corpo do TCC = da Seção 1 até o fim da Referências. O limite
+  # institucional é 25-30 páginas e NÃO conta apêndices nem anexos, então o
+  # total do documento não serve: até 2026-10-04 o "21" que aparecia no
+  # `tcc2_texto.md` era derivação manual (total menos pré-textual menos
+  # anexos), sem artefato — o que viola a regra do projeto de número que
+  # sempre vem de medição.
+  $pgInicio = $null; $pgFim = $null
+  foreach ($p in $doc.Paragraphs) {
+    if ($p.Style.NameLocal -notlike 'T*tulo 1*') { continue }
+    $t = $p.Range.Text.Trim()
+    if ($pgInicio -eq $null -and $t -match '^1\s+INTRODU') {
+      $pgInicio = $p.Range.Information(3)
+    }
+    if ($t -match '^REFER') { $pgFim = $p.Range.Information(3); break }
+  }
+  $corpo = if ($pgInicio -and $pgFim) { $pgFim - $pgInicio + 1 } else { $null }
+
   $doc.Save()
   Write-Output "campos atualizados: $Caminho"
   Write-Output "  paginas:  $paginas"
@@ -49,6 +66,14 @@ try {
   Write-Output "  tabelas:  $tabelas"
   Write-Output "  imagens:  $imagens"
   Write-Output "  TOCs:     $($doc.TablesOfContents.Count) sumario + $($doc.TablesOfFigures.Count) lista(s)"
+  if ($corpo) {
+    $situacao = if ($corpo -lt 25) { 'ABAIXO do minimo de 25' }
+                elseif ($corpo -gt 30) { 'ACIMA do maximo de 30' }
+                else { 'dentro da faixa 25-30' }
+    Write-Output "  CORPO:    paginas $pgInicio ate $pgFim = $corpo paginas ($situacao)"
+  } else {
+    Write-Output "  CORPO:    nao Localizado (verificar os titulos de 1o nivel)"
+  }
   $doc.Close($false)
 }
 finally {

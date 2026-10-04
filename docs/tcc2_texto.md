@@ -50,12 +50,12 @@ Elixir). Três modelos — XGBoost, *Random Forest* e uma rede neural
 (MLP) — foram treinados e comparados para predizer o vencedor a partir
 do estado da partida em quatro cortes temporais (10, 15, 20 e 25
 minutos), com o XGBoost alcançando o melhor desempenho no corte de 15
-minutos (acurácia de 0,7573; AUC-ROC de 0,8393). A análise exploratória
+minutos (acurácia de 0,7621; AUC-ROC de 0,8473). A análise exploratória
 identificou que o time vermelho é favorecido no *solo queue* de elo
-alto (56,3% de vitórias na região com maior amostra), um padrão que se
-enfraquece ao longo da partida e que se inverte no cenário profissional
-(onde o time azul vence cerca de 53% das partidas, de forma estável
-entre 2014 e 2026) — achado sustentado por testes de robustez
+alto (56,3% de vitórias na região com maior amostra), um padrão de
+magnitude estável ao longo da partida e que se inverte no cenário
+profissional (onde o time azul vence cerca de 53% das partidas, de forma
+estável entre 2014 e 2026) — achado sustentado por testes de robustez
 estatística. Uma interface em linguagem natural (*text-to-SQL* com
 validação estrutural da consulta) atingiu 88% de acurácia de execução
 em um benchmark de 26 perguntas de referência. A plataforma foi
@@ -320,36 +320,115 @@ Birant (2023) destacam a importância da modelagem centrada no time,
 enquanto Bahrololloomi et al. (2022) evidenciam a relação entre
 métricas de jogadores, funções em jogo e desempenho competitivo.
 
-### 2.2 MACHINE LEARNING APLICADO A LEAGUE OF LEGENDS E ESPORTS
+### 2.2 FAMÍLIAS DE MODELOS PREDITIVOS E SUA APLICAÇÃO EM ESPORTS
 
 A aplicação de *machine learning* em esports tem se mostrado promissora
 em tarefas como predição de vitória, avaliação de desempenho e
 identificação de padrões competitivos. Em *League of Legends*, Birant e
-Birant (2023) indicam que a modelagem centrada no time é uma abordagem
-relevante para compreender os resultados das partidas. Bahrololloomi et
-al. (2022), por outro lado, analisam o desempenho dos jogadores a
-partir de funções e métricas individuais, ampliando a compreensão
-sobre diferentes fatores associados à vitória. Este trabalho utilizou e
-comparou os modelos XGBoost, *Random Forest* e redes neurais (MLP),
-analisando diferentes estratégias para dados competitivos e verificando
-como abordagens baseadas em árvores e modelos neurais contribuem para
-a análise preditiva proposta — os resultados dessa comparação são
-apresentados na Seção 5.
+Birant (2023) indicam que a modelagem centrada no time — e não no
+jogador isolado — é uma abordagem relevante para compreender os
+resultados das partidas. Bahrololloomi et al. (2022) percorrem caminho
+distinto, analisando o desempenho dos jogadores a partir de funções
+(*roles*) em jogo e de métricas individuais de desempenho.
 
-### 2.3 EXPLICABILIDADE E ANÁLISE PREDITIVA
+As duas leituras delimitam o espaço de escolha da modelagem preditiva,
+mas não decidem qual família de modelos é adequada a este problema. Este
+trabalho comparou três famílias, e o critério dessa escolha é de
+natureza técnica, não de preferência.
+
+A primeira são os ensembles de árvores de decisão, e em particular a
+*Random Forest* (Breiman, 2001). A construção combina *bagging* — cada
+árvore é treinada sobre uma amostra *bootstrapeada* do conjunto — com a
+seleção de um subconjunto aleatório de variáveis em cada nó de partição.
+A segunda restrição é a que dá origem ao nome: ela força as árvores a
+divergirem entre si, o que reduz a correlação dos erros individuais e,
+com isso, a variância do conjunto final. Para um problema como o deste
+trabalho, em que as variáveis preditoras são agregados de desempenho
+fortemente correlacionados entre si — ouro, abates e torres evoluem
+juntos ao longo da partida —, essa decorrelação é diretamente relevante.
+
+A segunda família é o *gradient boosting*, representado aqui pelo
+XGBoost (Chen e Guestrin, 2016). Em vez de construir árvores de forma
+independente e combinar suas respostas, o método constrói árvores
+sequencialmente, cada uma ajustada ao resíduo acumulado das anteriores. O
+XGBoost formaliza esse procedimento como otimização de segunda ordem —
+cada passo usa tanto o gradiente quanto a curvatura da função de perda — e
+introduz controles explícitos de regularização, que são o que torna o
+método utilizável com árvores profundas sem sobreajustar. Para dados
+tabulares, que é o formato que as *features* deste trabalho produzem,
+essa família costuma apresentar desempenho superior ao de ensembles por
+agregação.
+
+A terceira são as redes neurais *feedforward*, ou perceptrons multicamada
+(MLP). Compostas por camadas de transformações não lineares, têm
+capacidade de aproximação universal e capturam interações complexas
+entre variáveis sem que essas interações precisem ser especificadas. Em
+troca, exigem mais dados e mais cuidado com escala e regularização para
+não sobrarjetar — restrição que se mostra determinante quando a amostra
+disponível é da ordem de dezenas de milhares de observações e não de
+milhões.
+
+As três famílias foram comparadas sob o mesmo desenho experimental: os
+mesmos dados, o mesmo particionamento e os mesmos cortes temporais. O
+resultado da comparação é reportado na Seção 5, e o que se pode afirmar
+nesta seção é apenas o critério adotado — a escolha entre elas não foi
+feita por preferência, e sim mediante medição.
+
+### 2.3 EXPLICABILIDADE E AVALIAÇÃO DE MODELOS PREDITIVOS
 
 Além de produzir previsões, sistemas analíticos voltados a esports
 precisam oferecer mecanismos que favoreçam a interpretação dos
 resultados gerados. García-Méndez e Arriba-Pérez (2025) mostram que
 abordagens de predição explicável podem combinar classificação e
 interpretação, tornando *dashboards*, descrições e fatores relevantes
-da previsão mais compreensíveis para o usuário final. A explicabilidade
-assumiu papel importante neste projeto, tendo sido implementada por
-meio de valores SHAP (*SHapley Additive exPlanations*), curvas de
-calibração e explicações textuais geradas a partir dos próprios fatores
-identificados como relevantes — não a partir de conhecimento genérico
-de um modelo de linguagem, mas ancoradas nos dados e nos coeficientes
-calculados (ver Seção 4).
+da previsão mais compreensíveis para o usuário final.
+
+Explicar a decisão de um ensemble, porém, não é uma tarefa trivial: a
+saída final resulta da soma de centenas de árvores, e a contribuição
+individual de cada variável não é diretamente legível. Duas famílias de
+métodos endereçam essa questão, e é útil nomeá-las porque elas respondem
+a perguntas diferentes.
+
+A primeira aproxima o comportamento do modelo por perturbações locais da
+entrada. LIME (Ribeiro, Singh e Guestrin, 2016) é o exemplo de
+referência: constrói um modelo linear local, e portanto simples de
+interpretar, que aproxima o classificador complexo na vizinhança de cada
+instância. A vantagem é a simplicidade do resultado; o custo é que a
+explicação descreve um comportamento local, e a escolha da vizinhança
+influencia o que se vê.
+
+A segunda recorre à teoria dos jogos e ao valor de Shapley, e define a
+importância de cada variável como sua contribuição média para a
+previsão, calculada sobre todas as combinações possíveis das demais
+variáveis. Lundberg e Lee (2017) unificam essa família de medidas e
+mostram que existe uma solução única dentro dela com um conjunto de
+propriedades desejáveis — entre elas a consistência e a imposibilidade
+de atribuir importância a uma variável ausente da entrada. SHAP
+(*SHapley Additive exPlanations*) é a implementação dessa unificação, e
+foi o mecanismo adotado neste trabalho. A escolha se justifica por uma
+razão prática: como a atribuição é sempre somada à previsão e o
+resultado é explicável em linguagem aditiva, os valores de SHAP
+permitem montar a explicação textual da plataforma a partir dos
+contribuições efetivamente calculados — e não a partir de conhecimento
+genérico sobre o jogo. A honestidade dessa separação é tratada na
+Seção 4.
+
+A avaliação dos modelos apresentados na seção anterior exige ainda
+uma escolha metodológica sobre a métrica. Em um problema binário
+desequilibrado como a predição de vitória, a acurácia isolada é
+enganosa: um classificador que sempre responde "vitória do time azul"
+alcança acurácia próxima de 50% sem qualquer poder preditivo, porque
+as partidas terminadas em empate são naturalmente balanceadas. Por esse
+motivo a avaliação deste trabalho se apoia na área sob a curva da
+característica operacional do receptor (AUC-ROC), que mede a capacidade
+de discriminação do modelo em todos os limiares de decisão e,
+consequentemente, independe da escolha de um limiar específico. Hanley e
+McNeil (1982) demonstram que essa medida é equivalente à probabilidade
+de que um caso positivo receba uma pontuação maior que a de um caso
+negativo, o que a torna interpretável diretamente como proporção de
+pares corretamente ordenados. AUC-ROC e acurácia são reportados
+conjuntamente na Seção 5 justamente para tornar essa distinção visível
+nos números.
 
 ### 2.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
 
@@ -360,12 +439,28 @@ observam que soluções de *Business Intelligence* apoiadas por modelos
 de linguagem podem favorecer a exploração de dados estruturados. Guo et
 al. (2024) também destacam que mecanismos de diálogo, decomposição de
 perguntas e análise visual podem tornar a exploração dos dados mais
-intuitiva e eficiente. Este trabalho implementou uma interface de
-linguagem natural (*text-to-SQL*) capaz de traduzir perguntas em
-português para consultas SQL validadas contra o esquema real do banco
-de dados, integrando visualização, recuperação de informações e geração
-de *insights* em uma mesma plataforma — os resultados de acurácia dessa
-interface são apresentados na Seção 5.
+intuitiva e eficiente.
+
+O problema técnico central dessa interface é a geração de consultas.
+Um modelo de linguagem produz texto, e o banco exige SQL sintaticamente
+válido e semanticamente correto sobre um esquema específico — dois
+requisitos que falham de maneiras diferentes. O modelo pode escrever uma
+consulta gramaticalmente correta que referencia uma tabela inexistente, e
+também pode produzir uma estrutura válida que responde à pergunta
+errada. Wang et al. (2020) tratam esse segundo caso, que é o mais
+difícil, mostrando que representações do esquema que incorporate os
+relacionamentos entre tabelas — e não apenas os nomes das colunas —
+melhoram de forma consistente a precisão da conversão, inclusive quando
+o esquema é amplo ou as perguntas ambíguas.
+
+Este trabalho implementou uma interface de linguagem natural capaz de
+traduzir perguntas em português para consultas SQL validadas contra o
+esquema real do banco de dados, integrando visualização, recuperação de
+informações e geração de *insights* em uma mesma plataforma. A
+validação não é delegada ao modelo: a consulta gerposta é submetida a
+uma checagem em quatro camadas antes de tocar o banco, descrita na
+Seção 4. Os resultados de acurácia dessa interface são apresentados na
+Seção 5.
 
 ### 2.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
 
@@ -469,18 +564,56 @@ plataforma (Seção 5.5).
 
 ### 3.6 SÍNTESE E POSIÇÃO DESTE TRABALHO
 
-Lidas em conjunto, as referências acima cubrem quatro frentes
+Lidas em conjunto, as referências acima cobrem quatro frentes
 isoladas: predição de resultados (Hodge et al.; Birant e Birant;
 Bahrololloomi et al.), interpretabilidade da predição (García-Méndez e
 Arriba-Pérez), interação em linguagem natural (Jiang et al.; Guo et
-al.) e visualização espaço-temporal (Wallner, Wang e Dormann). Cada
-frente é tratada em um trabalho, e nenhuma delas é entregue como uma
-plataforma integrada que reuni coleta, tratamento, modelagem,
-explicabilidade, visualização e consulta em linguagem natural sobre a
-mesma base de dados. É essa lacuna de integração que este trabalho
-propõe ocupar; a confrontação entre os resultados aqui obtidos e os
-resultados relatados na literatura é apresentada na Seção 5.7.
+al.) e visualização espaço-temporal (Wallner, Wang e Dormann). Nenhuma
+delas, isoladamente, é entregue como uma plataforma integrada que reúna
+coleta, tratamento, modelagem, explicabilidade, visualização e consulta
+em linguagem natural sobre a mesma base de dados. É essa lacuna de
+integração que este trabalho propõe ocupar.
 
+A distinção em relação a cada trabalho, porém, não se resume a esse
+degrau de integração. Convém explicitar em que eixos o presente trabalho
+difere, porque a diferença não está apenas no escopo e sim em decisões
+de projeto que alteram o que é possível concluir.
+
+O primeiro eixo é o horizonte da predição. Hodge et al. (2021) operam
+sobre partidas profissionais em andamento, e García-Méndez e
+Arriba-Pérez (2025) sobre o cenário de transmissão; ambos tratam a
+predição como um problema que se resolve enquanto a partida acontece. Este
+trabalho também constrói o estado em jogo, mas de forma explícita: a
+tarefa é estimar o vencedor a partir de um corte temporal artificial, o
+que torna a pergunta mensurável e comparável entre cortes. A diferença
+prática é que o modelo deixa de depender de um relógio e passa a depender
+de um parâmetro controlável pelo experimento.
+
+O segundo eixo é a natureza da fonte de dados. Os estudos de
+*League of Legends* citados partem de bases já estruturadas por
+terceiros. Este trabalho coletou a base diretamente da *timeline-v5* da
+Riot Games, que é a única fonte que expõe a posição dos eventos e a
+evolução minuto a minuto dos recursos em cada partida. Essa granularidade
+é o que torna possível a análise espaço-temporal da Seção 5.5, e também
+o que confere peso ao achado do viés de lado, calculado sobre a posição
+real dos cinco jogadores de cada time ao longo da partida.
+
+O terceiro eixo é o recorte de população. Os trabalhos de predição
+analisados atuam sobre o cenário profissional. Parte da contribuição
+deste trabalho é justamente contrapor a ele o *solo queue* de elo alto, e
+mostrar que o padrão de viés de lado observado entre jogadores de rank
+não se reproduz no circuito profissional. Sem essa comparação, o achado
+seria descrito como uma peculiaridade sem base comparativa.
+
+O quarto eixo é a transparência da camada preditiva. Nenhum dos trabalhos
+citados avalia a interface de consulta em linguagem natural contra um
+benchmark de perguntas de referência. A implementação aqui descrita é
+avaliada com um conjunto fixo de 26 perguntas cuja resposta esperada foi
+conferida diretamente contra o banco, o que torna o erro de conversão
+mensurável em vez de ilustrativo.
+
+A confrontação entre os resultados aqui obtidos e os resultados relatados
+na literatura é apresentada na Seção 5.7.
 ---
 
 ## 4 METODOLOGIA
@@ -700,23 +833,53 @@ artefato de uma região com pouca amostra. BR1 não se alterou em nenhum
 dos três levantamentos. NA1 segue com volume pequeno mesmo após as
 coletas adicionais — ver Seção 5.8.)*
 
-**O viés de lado não é constante ao longo da partida.** Investigando a
-probabilidade-base do modelo (estado de empate total) em cada corte
-temporal, observou-se: 10min 47,8% de vitória azul → 15min 46,3% (ponto
-mais favorável ao vermelho) → 20min 49,1% → 25min 51,1%. O mesmo padrão
-apareceu na taxa de vitória bruta (sem modelo) entre partidas
-genuinamente empatadas (diferença de ouro menor que 500): 46,1% → 46,4%
-→ 47,3% → 48,6% de vitória azul, do corte de 10 ao de 25 minutos. Três
-testes de robustez foram aplicados: (i) restrição a uma única região
-(BR1) reproduziu e até intensificou o padrão, descartando mistura
-regional como explicação; (ii) a taxa de vitória incondicional por
-faixa de duração total de partida manteve-se estável (44%-47%),
-descartando a hipótese de que "partidas longas são um tipo diferente de
-jogo"; (iii) o intervalo de confiança de Wilson a 95% no ponto de 25
-minutos (BR1, n=458) foi [46,5%–55,6%] — inclui 50%, mas também inclui
-valores ainda favoráveis ao vermelho, o que sustenta a tendência de
-enfraquecimento do viés sem sustentar uma alegação de inversão completa
-e confirmada.
+**O viés de lado é estável ao longo da partida — e essa constância é o
+resultado.** Uma primeira versão deste texto afirmava que o viés atingia um
+pico no meio do jogo e se enfraqueceria até o fim. A medição sobre a base
+ampliada de 39.426 partidas **não confirma essa forma**, e o resultado
+negativo é relatado aqui em vez de omitido.
+
+Entre as partidas genuinamente empatadas em cada corte (diferença de ouro
+menor que 500), a taxa de vitória do time azul foi de 46,4% aos 10
+minutos (n = 7.349), 47,9% aos 15 (n = 3.970), 46,7% aos 20 (n = 2.423)
+e 47,1% aos 25 (n = 1.430). A dispersão entre os quatro cortes é de 1,4
+ponto percentual, e **nenhuma diferença entre pares sobrevive ao ajuste
+para múltiplas comparações**: o menor valor-p corrigido é 0,83, para o par
+de 10 contra 15 minutos. Os intervalos de confiança de 95% se sobrepõem em
+todos os casos. Em outras palavras, as quatro taxas são estatisticamente
+indistinguíveis, e o corte mais favorável ao vermelho é o de 10 minutos,
+não o de 15.
+
+A mesma conclusão aparece na taxa-base dos modelos, medida no estado de
+empate total: 49,2% de probabilidade de vitória azul aos 10 minutos,
+49,6% aos 15, 51,4% aos 20 e 49,0% aos 25. A série é plana e não
+apresenta o pico vermelho do meio de jogo.
+
+O que sobrevive é o achado principal, e ele é forte: o viés de lado
+existe e favorece o time vermelho em magnitude praticamente constante. O
+intervalo de confiança do corte de 10 minutos, o de maior amostra, é
+[45,3%, 47,6%] e exclui 50% com folga — o viés não é casual em nenhum dos
+quatro cortes. O que a base ampliada desfez foi a *evolução* atribuída ao
+viés, não o viés.
+
+Dois testes de robustez foram mantidos quanto à explicação do achado. O
+primeiro restringe a análise à região BR1 isoladamente e reproduz a
+assimetria, descartando mistura regional como explicação. O segundo
+confirma que a taxa de vitória incondicional por faixa de duração total
+de partida permaneceu estável (44%-47%), o que descarta a hipótese de que
+"partidas longas são um tipo diferente de jogo". Um terceiro teste, antes
+usado para sustentar a alegação de enfraquecimento, deixou de ser
+aplicável e foi substituído pela comparação de pares com correção de Holm
+descrita acima — é esse teste que hoje sustenta a afirmação de
+constância.
+
+Este resultado negativo tem valor próprio. Um padrão que se dissolve ao
+aumentar a amostra era, em verdade, um artefato de tamanho de amostra: as
+quatro taxas sempre ficaram próximas umas das outras, mas a amostra menor
+permitia que o ruído se desenhasse como tendência. Registrar isso é mais
+honesto do que manter a versão anterior, e reforça a principal ressalva
+metodológica do trabalho: em corpus de esports, diferença de um ponto
+percentual em subamostras de mil partidas não é diferença.
 
 **Comparação com o cenário profissional.** No dataset competitivo
 (Oracle's Elixir), o time azul venceu aproximadamente 53% das partidas,
@@ -732,19 +895,25 @@ primeira escolha é valorizada o suficiente para influenciar decisões
 de lado em *playoffs*.
 
 **Conversão de vantagem.** Com uma vantagem de ouro entre +2.000 e
-+4.000 aos 15 minutos, o time azul venceu 84,0% das partidas no cenário
-profissional contra aproximadamente 68% no *solo queue* (com vantagem
-de +4.000 a +6.000, ~95% contra ~81%). Esse resultado quantifica a
-noção de que "macro ganha jogo": a mesma vantagem material aos 15
-minutos vale mais nas mãos de um time coordenado.
++4.000 aos 15 minutos, o time azul venceu 81,5% das partidas no cenário
+profissional (n = 3.294) contra 73,7% no *solo queue* (n = 5.166). Na faixa
+de +4.000 a +6.000, as taxas são de 91,7% no profissional (n = 72) e 86,3%
+no *solo queue* (n = 3.343). Esse resultado quantifica a noção de que
+"macro ganha jogo": a mesma vantagem material aos 15 minutos vale mais nas
+mãos de um time coordenado. A diferença na faixa com amostra suficiente é
+de 7,8 pontos percentuais, e é pequena em termos absolutos — bem menor do
+que a estimativa de 16 pontos que a primeira versão deste texto apresentava
+— mas permanece altamente significativa (z = 8,3, p < 0,001 para a
+comparação das duas proporções), de modo que a direção do efeito não
+depende da amostra.
 
-*(Ressalva de volume: as taxas do *solo queue* desta comparação foram
-medidas em 2026-07-04 sobre aproximadamente 12 mil partidas — a base
-disponível na ocasião, não as 39.188 usadas nos modelos. São estimativas
-de apoio a um achado qualitativo (a diferença de ~16 pontos percentuais
-entre os dois cenários é grande demais para ser artefato de amostra), e
-não medidas sobre a base de treino. A tabela por região da Seção 5.3 e
-as taxas do profissional são de faixas posteriores.)*
+*(Todas as taxas acima foram remedidas sobre a base atual, pelo script
+`docs/confere_conversao_advantagem.py`, que lê `data/features_phases.csv`
+para o *solo queue* e os CSVs do Oracle's Elixir para o profissional,
+usando a mesma definição de faixa dos dois lados. A faixa de +4.000 a
++6.000 no cenário profissional apoia-se em apenas 72 jogos e deve ser lida
+como indicativa; a conclusão sobre conversão de vantagem se apoia na faixa
+de +2.000 a +4.000.)*
 
 ### 5.4 Modelagem preditiva e comparação entre modelos (objetivo e)
 
@@ -756,13 +925,14 @@ Quadro — Comparação entre modelos (corte de 15 minutos)
 
 | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
 |---|---:|---:|---:|---:|---:|
-| **XGBoost (produção)** | **0,7573** | 0,7444 | 0,7133 | 0,7285 | **0,8393** |
-| MLP | 0,7550 | 0,7457 | 0,7034 | 0,7238 | 0,8385 |
-| *Random Forest* | 0,7409 | 0,7237 | 0,6997 | 0,7115 | 0,8219 |
+| **XGBoost (produção)** | **0,7621** | 0,7561 | 0,7228 | 0,7391 | **0,8473** |
+| MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
+| *Random Forest* | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
 
-*(taxa de vitória do time azul na amostra: 45,6%; medição confirmada em
-medida na base do retreino de 2026-10-04, sobre as 39.188 partidas do
-corte de 15 min.)*
+*(taxa de vitória do time azul na amostra: 46,6%; medição do retreino de
+2026-10-04, sobre as 39.188 partidas do corte de 15 min, com validação
+cruzada estratificada de 5 *folds* e semente 42. Reproduzível por
+`python -m src.models.multi_cutoff_metrics`.)*
 
 Os três modelos performaram de forma próxima entre si, com o XGBoost
 adotado como modelo de produção. Modelos independentes foram treinados
@@ -890,20 +1060,20 @@ reconhecida e discutida na próxima subseção.
   frágeis mesmo com 39.426 partidas — mitigado, onde aplicável, por
   encolhimento estatístico (*shrinkage*) em direção à média do grupo
   maior, mas não eliminado.
-- **Taxa-base do modelo em estado de empate não reproduz o assimetria
-  por fase documentada com dados brutos.** Com o retreino de 39.188
-  partidas, a probabilidade prevista para o estado "tudo empatado" ficou
-  em 49,2% (10 min), 49,6% (15 min), 51,4% (20 min) e 49,0% (25 min) —
-  sem o pico de favorecimento ao vermelho no meio de jogo que os dados
-  brutos mostram (46,3% aos 15 min, Seção 5.3). A assimetria por fase foi
-  estabelecida por medição direta sobre os dados, com três testes de
-  robustez independentes; a taxa-base do modelo é um ponto de calibração
-  em estado degenerado e não é a medida dessa assimetria. A discrepância
-  é atribuída ao ajuste do modelo sobre uma base quatro vezes maior com
-  hiperparâmetros fixados: um novo *GridSearchCV* sobre as 39 mil
-  partidas retornou os mesmos valores de profundidade e um ajuste
-  equivalente de árvores e taxa de aprendizado, o que indica que o
-  deslocamento não decorre de subajuste.
+- **A taxa-base do modelo em estado de empate subestima o viés de lado.**
+  Com o retreino de 39.188 partidas, a probabilidade prevista para o
+  estado "tudo empatado" ficou em 49,2% (10 min), 49,6% (15 min), 51,4%
+  (20 min) e 49,0% (25 min). A medição direta sobre os dados brutos, entre
+  partidas genuinamente empatadas, dá 46,4% a 47,9% de vitória azul nos
+  mesmos cortes (Seção 5.3). As duas séries são planas e consistentes entre
+  si quanto à forma, mas o modelo projeta o empate para perto de 50% e
+  portanto **subestima o viés em cerca de três pontos percentuais**. A
+  discrepância não decorre de subajuste: um novo *GridSearchCV* sobre as 39
+  mil partidas retornou os mesmos valores de profundidade e um ajuste
+  equivalente de árvores e taxa de aprendizado. Trata-se de calibração em
+  estado degenerado — um ponto que o jogo real não produz com frequência
+  suficiente para ser bem Representado na treino —, e não de erro na
+  leitura da assimetria, que é medida diretamente dos dados.
 - **Desequilíbrio de amostra por região**: após as rodadas adicionais de
   coleta (Seção 5.3), BR1 e EUW1 concentram a maior parte dos dados
   (11.936 e 11.744 partidas) e KR cresceu para 8.567; NA1, que permanecia
@@ -966,7 +1136,7 @@ observação pontual;
 
 e) três modelos de *machine learning* (XGBoost, *Random Forest* e MLP)
 foram comparados, com o XGBoost adotado como modelo de produção
-(acurácia 0,7573, AUC-ROC 0,8393 no corte de 15 minutos, com modelos
+(acurácia 0,7621, AUC-ROC 0,8473 no corte de 15 minutos, com modelos
 adicionais para os cortes de 10, 20 e 25 minutos);
 
 f) *dashboards* foram entregues em seis páginas de visualização,
@@ -977,6 +1147,20 @@ g) uma interface em linguagem natural foi implementada e avaliada,
 atingindo 88% de acurácia de execução sobre um benchmark de 26
 perguntas de referência.
 
+O achado que merece destaque, por não ter sido o objeto anunciado do
+trabalho, é o viés de lado. A hipótese inicial era que a modelagem
+preditiva operaria sobre um sinal qualquer de desempenho; o que a análise
+descritiva revelou é uma assimetria estrutural entre os dois lados do
+mapa, presente nas quatro regiões coletadas e com sinal inverso no
+jogo profissional. O valor disso para a comunidade é duplo. Por um
+lado, é um fator de confusão que qualquer modelo preditivo sobre *solo
+queue* precisa controlar, porque uma variável que distingue time azul
+de time vermelho sem nenhuma propriedade حقوقa do jogo é,
+necessariamente, um atalho. Por outro lado, a inversão observada no
+circuito profissional sugere que o mesmo fenômeno tem outra origem no
+*solo queue* — uma hipótese que este trabalho não comprova, mas que
+delimita o problema de forma útil.
+
 Como contribuição além do escopo originalmente delimitado no TCC I, a
 incorporação do dataset competitivo profissional (Oracle's Elixir)
 permitiu uma comparação direta entre dois contextos institucionalmente
@@ -985,17 +1169,66 @@ potencial de contribuição à literatura: a inversão do viés de lado entre
 *solo queue* de elo alto e jogo profissional, e a diferença na conversão
 de vantagem material em vitória entre os dois contextos.
 
-Como trabalhos futuros, ficam registrados: a ampliação adicional da
-amostra da região NA1 especificamente (as demais regiões já foram
-reforçadas ao longo deste trabalho, ver Seção 5.3); a extensão da
-predição para o cenário de partidas ao vivo (não
-implementada nesta versão, mas considerada na arquitetura desde o
-início — a camada de predição aceita estado de jogo arbitrário por
-fase, não apenas dados pré-processados de um conjunto fixo); a inclusão
-de seleção de campeão competitiva no simulador de time; e a investigação
-de restrições de monotonicidade formal no modelo, caso avaliada como
-necessária.
+### 6.1 LIMITAÇÕES E AMEAÇAS À VALIDADE
 
+Registrar o que o trabalho não sustenta é parte da conclusão, e não uma
+disclaimer ritual. As limitações a seguir não invalidam os achados
+apresentados, mas delimitam o alcance em que podem ser generalizados.
+
+A primeira limitação é de validade de construto, e decorre da própria
+fonte de dados. A *timeline-v5* não registra a posição dos campanhas
+nem o estado das ondas de minions, de modo que o modelo de predição
+trabalha sem as variáveis que um analista humano consideraria mais
+informativas sobre o momento da partida. Isso significa que a acurácia
+relatada é um piso, não uma medição do teto atingível: parte do que o
+modelo erra é informação que ele jamais recebeu. A consequência prática
+é que nenhuma orientação exibida pela plataforma cuja fundamentação
+dependa de posição, itemização ou estado de ondas é aquela que o modelo
+produziu, e a interface marca essa orientação como inferência geral em
+vez de resultado calculado.
+
+A segunda limitação é de validade externa. Todos os resultados de
+*solo queue* vêm da fila ranqueada, nas faixas Challenger e Grandmaster,
+em quatro regiões. Não há base para estender as taxas de vitória por
+lado, nem a acurácia do modelo, a outras filas, a outros níveis de elo
+ou a outros jogos, ainda que a arquitetura seja reaproveitável.
+
+A terceira limitação é de validade interna, e é de natureza temporal.
+As partidas foram coletadas em janelas de tempo delimitadas, e não
+amostradas aleatoriamente ao longo de todo o histórico disponível. Um
+padrío sazonal — mudanças de patch, eventos do cenário competitivo — pode
+portanto estar parcialmente confundido com o que os dados descrevem.
+
+Há ainda uma limitação técnica em aberto, que não foi resolvida e não
+deveria ser omitida. O modelo retreinado sobre a base ampliada
+reproduz a direção dos achados, mas apresenta uma taxa-base mais plana do
+que os dados brutos: em cortes de tempo em que o jogo estava empatado,
+os dados mostram leve predominância do time vermelho, enquanto o modelo
+projeta-se para rates próximos de 50%. A investigação realizada com três
+testes de robustez não sustenta a hipótese de subajuste — uma busca de
+hiperparâmetros sobre as 39 mil linhas devolveu ajuste equivalente ao de
+produção. O padrão é, portanto, uma limitação da função de decisão
+aprendida nesse recorte, e não um defeito de ajuste. A descrição
+completa está na Seção 5.8.
+
+Uma fragilidade declarada na primeira versão deste texto foi resolvida e
+não permanece como limitação: a amostra da região NA1, então reduzida a
+1.446 partidas, foi ampliada para 7.159, e a taxa de vitória do time
+vermelho passou de 51,9% para 52,2%, sem mudança de direção do achado.
+
+### 6.2 TRABALHOS FUTUROS
+
+Ficam registrados quatro caminhos. O primeiro é a extensão da predição
+para o cenário de partidas ao vivo, não implementada nesta versão mas
+considerada na arquitetura desde o início — a camada de predição aceita
+estado de jogo arbitrário por fase, não apenas dados pré-processados de
+um conjunto fixo, de modo que a barreira é de dados em tempo real, não
+de modelo. O segundo é a inclusão de seleção de campeão competitiva no
+simulador de time. O terceiro é a investigação de restrições de
+monotonicidade formal no modelo, caso avaliada como necessária. O quarto
+é a extensão do recorte de validade externa, que passaria por coletar
+outras filas e, eventualmente, outro jogo, de modo a testar se o viés
+de lado descreva o jogo ou o modo de jogar de uma população específica.
 ---
 
 ## REFERÊNCIAS
@@ -1014,6 +1247,14 @@ BIRANT, Kokten Ulas; BIRANT, Derya. Multi-Objective Multi-Instance Learning: a
 new approach to machine learning for eSports. **Entropy**, [S. l.], v. 25, n. 1, art. 28,
 2023. DOI: 10.3390/e25010028. Disponível em: https://www.mdpi.com/1099-
 4300/25/1/28. Acesso em: 10 jun. 2026.
+
+BREIMAN, Leo. Random Forests. **Machine Learning**, [S. l.], v. 45, n. 1, p. 5-32,
+2001. DOI: 10.1023/A:1010933404324.
+
+CHEN, Tianqi; GUESTRIN, Carlos. XGBoost: a scalable tree boosting system. In:
+Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge
+Discovery and Data Mining. New York: ACM, 2016. p. 785-794. DOI:
+10.1145/2939672.2939785.
 
 CRESWELL, John W.; CRESWELL, J. David. **Research design: qualitative,
 quantitative, and mixed methods approaches**. 6. ed. Thousand Oaks: SAGE
@@ -1034,6 +1275,10 @@ Talk2Data: a natural language interface for exploratory visual analysis via ques
 decomposition. **ACM Transactions on Interactive Intelligent Systems**, New York,
 v. 14, n. 2, art. 8, p. 1-24, 2024. DOI: 10.1145/3643894.
 
+HANLEY, James A.; MCNEIL, Bernard J. The meaning and use of the area under a
+receiver operating characteristic (ROC) curve. **Radiology**, [S. l.], v. 143,
+n. 1, p. 29-36, 1982. DOI: 10.1148/radiology.143.1.7063747.
+
 HODGE, Victoria J.; DEVLIN, Sam Michael; SEPHTON, Nicholas John; BLOCK,
 Florian Oliver; COWLING, Peter I.; DRACHEN, Anders. Win prediction in multi-player
 e-sports: live professional match prediction. **IEEE Transactions on Games**, [S. l.], v.
@@ -1046,9 +1291,19 @@ powered solution for data analytics in business intelligence. **Proceedings of t
 VLDB Endowment**, [S. l.], v. 18, n. 12, p. 4860-4873, 2025. DOI:
 10.14778/3750601.3750610.
 
+LUNDBERG, Scott M.; LEE, Su-In. A unified approach to interpreting model
+predictions. In: Advances in Neural Information Processing Systems 30 (NIPS
+2017). 2017. p. 4765-4774. Disponível em: https://arxiv.org/abs/1705.07874.
+Acesso em: 4 out. 2026.
+
 PRODANOV, Cleber Cristiano; FREITAS, Ernani Cesar de. **Metodologia do
 trabalho científico: métodos e técnicas da pesquisa e do trabalho acadêmico**.
 2. ed. Novo Hamburgo: Feevale, 2013.
+
+RIBEIRO, Marco Tulio; SINGH, Scott; GUESTRIN, Carlos. "Why should I trust you?":
+explaining the predictions of any classifier. In: Proceedings of the 22nd ACM
+SIGKDD International Conference on Knowledge Discovery and Data Mining. New
+York: ACM, 2016. p. 1135-1144. DOI: 10.1145/2939672.2939778.
 
 RIOT GAMES. **APIs**. [S. l.], [s. d.]. Disponível em:
 https://developer.riotgames.com/apis. Acesso em: 12 maio 2026.
@@ -1057,6 +1312,12 @@ WALLNER, Günter; WANG, Letian; DORMANN, Claire. Visualizing the spatio-
 temporal evolution of gameplay using storyline visualization: a study with League of
 Legends. **Proceedings of the ACM on Human-Computer Interaction**, New York, v.
 7, n. CHI PLAY, art. 412, p. 1002-1024, 2023. DOI: 10.1145/3611058.
+
+WANG, Chuhan; SHIN, Yitao; LIU, Bing; POLOZOV, Alexander; RICHARDSON, Sarah.
+RAT-SQL: relation-aware schema encoding and linking for text-to-SQL. In:
+Proceedings of the 58th Annual Meeting of the Association for Computational
+Linguistics. Association for Computational Linguistics, 2020. p. 7567-7578.
+DOI: 10.18653/v1/2020.acl-main.677.
 
 YIN, Robert K. **Case study research and applications: design and methods**. 6.
 ed. Thousand Oaks: SAGE Publications, 2018.
@@ -1287,10 +1548,12 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
 4. **Formatação final — FEITA (2026-10-03).** O texto foi vertido para
    `.docx` institucional por script, não à mão. Pipeline em
    `docs/build_tcc_docx.py` + `docs/finalize-fields.ps1`, produzindo
-   `docs/tcc2_final.docx` (49 páginas; corpo = 21 páginas, dentro do
-   limite de 25-30). A formatação (A4, margens 3/2/3/2 cm, Arial 12,
-   entrelinha 1,5, capa, folha de rosto, identidade) é **herdada do
-   TCC I** via `--reference-doc`, não reescrita.
+   `docs/tcc2_final.docx` (55 páginas; corpo = **28 páginas**, medido por
+   `docs/finalize-fields.ps1`, que localiza a Seção 1 e o fim das
+   Referências e reporta a diferença — a faixa institucional é 25 a 30).
+   A formatação (A4, margens 3/2/3/2 cm, Arial 12, entrelinha 1,5, capa,
+   folha de rosto, identidade) é **herdada do TCC I** via
+   `--reference-doc`, não reescrita.
 
    As duas correções do Prof. Elvandi aplicadas no TCC I foram
    conferidas no documento gerado:

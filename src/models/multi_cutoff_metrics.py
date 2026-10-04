@@ -12,8 +12,14 @@ modelos seja feita em igualdade de condições — é o mesmo desenho do quadro
 anterior, agora reproduzível.
 
 Uso:  python -m src.models.multi_cutoff_metrics
-Gera: imprime o quadro em markdown, pronto para o Apêndice C
+Gera: imprime o quadro em markdown, pronto para o Apêndice C, e grava
+      reports/metricas_corte.json — artefato que `docs/verifica_tcc.py`
+      confronta com os números citados no texto do TCC.
 """
+import json
+from datetime import date
+from pathlib import Path
+
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (accuracy_score, f1_score, precision_score,
@@ -35,6 +41,7 @@ PROD = dict(n_estimators=500, learning_rate=0.01, max_depth=3, eval_metric="logl
 def main() -> None:
     df = pd.read_csv("data/features_phases.csv")
     linhas = []
+    resultado: dict[str, dict] = {}
     for cutoff in CUTOFFS:
         part = df[df["cutoff_min"] == cutoff]
         X, y = part[FEATURES], part["blue_win"]
@@ -62,11 +69,27 @@ def main() -> None:
             pred = (proba >= 0.5).astype(int)
             bold = "**" if nome == "XGBoost" else ""
             fim = "**" if nome == "XGBoost" else ""
+            acc = accuracy_score(y, pred)
+            auc = roc_auc_score(y, proba)
+            # artefato JSON: e o que `docs/verifica_tcc.py` confronta com os
+            # numeros citados no texto. Sem ele, o quadro do Apendice C e o
+            # texto do TCC nao tem nenhuma ligacao automatica — foi assim que
+            # numeros de um retreino antigo sobreviveram a dois ciclos de
+            # coleta sem ninguem perceber.
+            resultado.setdefault(str(cutoff), {})[nome] = {
+                "n": int(n),
+                "taxa_vitoria_azul": round(float(wr), 4),
+                "acuracia": round(float(acc), 4),
+                "precisao": round(float(precision_score(y, pred)), 4),
+                "recall": round(float(recall_score(y, pred)), 4),
+                "f1": round(float(f1_score(y, pred)), 4),
+                "auc": round(float(auc), 4),
+            }
             linhas.append(
                 f"| {cutoff}min | {n:,} | {wr:.3f}".replace(",", ".")
-                + f" | {bold}{nome}{fim} | {accuracy_score(y, pred):.4f}"
+                + f" | {bold}{nome}{fim} | {acc:.4f}"
                 + f" | {precision_score(y, pred):.4f} | {recall_score(y, pred):.4f}"
-                + f" | {f1_score(y, pred):.4f} | {roc_auc_score(y, proba):.4f} |"
+                + f" | {f1_score(y, pred):.4f} | {auc:.4f} |"
             )
     print("| Corte | n | Taxa vitória azul | Modelo | Acurácia | Precisão | "
           "Recall | F1 | AUC-ROC |")
@@ -77,6 +100,24 @@ def main() -> None:
     print(f"Base: {len(df):,} linhas em data/features_phases.csv".replace(",", "."))
     print("Hiperparâmetros: PRODUÇÃO (500/0,01/3) para os três modelos, "
           "CV 5-fold estratificada, seed 42.")
+
+    destino = Path("reports") / "metricas_corte.json"
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    destino.write_text(
+        json.dumps(
+            {
+                "gerado_em": date.today().isoformat(),
+                "base_linhas": int(len(df)),
+                "hiperparametros": "PRODUCAO (500/0.01/3)",
+                "cv": "5-fold estratificada, seed 42",
+                "resultados": resultado,
+            },
+            indent=2,
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    print(f"Artefato JSON: {destino}")
 
 
 if __name__ == "__main__":

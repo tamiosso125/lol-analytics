@@ -104,60 +104,47 @@ conformidade. Custo: 2 min.
 
 ---
 
-## Bloco 2 — Opcional, usa o espaço que sobrou
+## Bloco 2 — Fechar o corpo (agora é obrigatório, não opcional)
 
-O corpo tem **21 páginas** num limite de **25–30**. Sobram 4 a 9. Nada abaixo
-é obrigatório; os dois existem porque há espaço e porque ambos têm retorno
-real, não porque o documento esteja incompleto.
+O corpo tem **22 páginas** num limite de **25–30**: está **abaixo do mínimo**,
+faltam pelo menos 3. Medido por `docs/finalize-fields.ps1`, que localiza a
+Seção 1 e o fim das Referências e reporta a diferença — antes o número era
+derivado à mão e não tinha artefato.
 
-### 2.1 Ampliar a amostra da NA1 — 🟢 maior retorno sobre esforço
+Isto **inverteu** a situação que o plano registrava: quando o corpo tinha 21
+páginas e a faixa era 25–30, sobrar espaço era luxury. Agora é lacuna.
 
-**Por que:** a Seção 5.2 do próprio TCC declara a NA1 como o elo mais frágil
-do achado de viés de lado. Está em **1.446 partidas** — cerca de um décimo da
-BR1 (11.936) — e **não avançou** nas duas últimas rodadas de coleta, enquanto
-EUW1 e KR quase dobraram.
+### 2.1 Ampliar a amostra da NA1 — ✅ feito
 
-É a **única** pendência da lista que adiciona *evidência* em vez de fechar
-burocracia. E o achado é o pilar mais forte do trabalho: as quatro regiões com
-amostra relevante pendem para o vermelho, e a NA1 é a única cujo volume não
-sustenta a generalização.
+**Por que era o maior retorno:** a Seção 5.8 do próprio TCC declarava a NA1
+como o elo mais frágil do achado de viés de lado, com 1.446 partidas —
+cerca de um décimo da BR1 (11.936).
 
-**Custo:** roda em background, sem blocking. Chave de dev da Riot expira em
-24h — se expirar, pedir **Personal API Key** no portal (sem expiração diária).
-O banco está de pé com 33.713 partidas.
+**Resolvido em 2026-10-04:** a NA1 foi de 1.446 para **7.159 partidas**, e a
+taxa de vitória do vermelho foi de 51,9% para 52,2% — a direção não mudou. A
+limitação saiu da Seção 5.8.
 
-**Efeito no documento:** se entrar coleta nova, **os números do TCC
-envelhecem**. Escolher **antes** de coletar:
+Os números de modelo também foram atualizados para a base nova (39.188
+partidas no corte de 15 min), com AUC do XGBoost de 0,8393 para **0,8473**, e
+o Apêndice C passou a ser reproduzível por
+`python -m src.models.multi_cutoff_metrics`.
 
-| Opção | Consequência |
-|---|---|
-| Congelar em 33.713 (data de hoje) | nada a fazer; só escrever que a coleta continuou depois |
-| Atualizar para o número novo | Atualizar Seção 4.3 (tabela regional), 4.2 (volume), 5.2 (limitação), e a entrada de diário. ~30 min de trabalho de consistência |
+### 2.2 Retreinar o modelo — ✅ feito
 
-**Recomendação:** coletar, e atualizar. A NA1 é o único ponto onde o TCC admite
-fragilidade, e é barato resolver.
+**Era:** o modelo de produção estava treinado em **23.133** partidas, com
+hiperparâmetros tunados em 10k e **reaplicados** ao volume maior — sem
+`GridSearchCV` completo no volume final.
 
-### 2.2 Retreinar o modelo em 33.713 partidas — 🟡 retorno duvidoso
+**Resolvido em 2026-10-04:** retreino sobre a base nova.
 
-**Estado:** o modelo de produção foi treinado em **23.133** partidas. Os
-hiperparâmetros foram tunados em 10k e **reaplicados** ao volume maior — não
-houve `GridSearchCV` completo no volume final.
+| Métrica (corte 15 min) | Antes (23 mil) | Agora (39.188) |
+|---|---:|---:|
+| Acurácia | 0,7573 | **0,7621** |
+| AUC-ROC | 0,8393 | **0,8473** |
 
-**A favor:** o próprio TCC registra que volume é o **único** lever que
-funcionou (AUC 0,8214 → 0,8393 num ciclo). E há 10 mil partidas novas.
-
-**Contra:** o diário registra que tuning por fase deu hiperparâmetros
-**idênticos** aos de produção em 3 de 4 cortes — o ganho tende a ser
-marginal. E reescrever a Seção 4.4 inteira + Apêndice C invalidaria trabalho
-já conferido.
-
-**Custo:** ~10 min de `tune_models` + `export_model` + bateria, **ou** ~2 h se
-exigir reescrever Seção 4.4, Apêndice C e `handoff.md` com os números novos.
-
-**Recomendação:** só se o orientador pedir tuning completo. É a mudança com
-maior raio de-diff e menor retorno esperado.
-
----
+O `GridSearchCV` sobre as 39 mil linhas devolveu ajuste equivalente (200
+árvores a taxa 0,05), o que confirma que a limitação registrada na Seção 5.8
+**não é subajuste** — é limitação de taxa-base do estado em empate.
 
 ## Bloco 3 — Fechamento
 
@@ -184,16 +171,20 @@ Executar quando os Blocos 1 e 2 estiverem resolvidos.
 ## Ordem sugerida
 
 ```
-1. Confirmar o título do Quadro 4 (2 min) — único item que bloqueia
-2. Disparar a coleta da NA1 em background (2.1), se quiser o achado mais forte
-3. Quando a coleta terminar: atualizar 4.3/4.2/5.2 + entrada de diário
-4. Regerar o .docx e fazer a revisão visual no Word
-5. Testes + commit
+1. [feito]  Confirmar o título do Quadro 4
+2. [feito]  Ampliar a NA1 e retreinar (2.1 e 2.2)
+3. Regerar o .docx e fazer a revisão visual no Word
+4. Testes + commit
 ```
+
+**O Bloco 2 mudou de natureza.** Era opcional porque o corpo tinha folga; com
+22 páginas num limite de 25–30, fechar o corpo virou obrigatório. O que
+sobra é a questão de *conteúdo*: escrever mais 3 páginas que não sejam
+enchimento.
 
 **Nada no Bloco 1 exige escrever texto novo.** As duas decisões de escopo já
 estão tomadas e aplicadas — a numeração do corpo já é a do modelo
-institucional. O Bloco 2 é opcional por completo.
+institucional.
 
 ---
 

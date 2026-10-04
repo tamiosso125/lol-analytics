@@ -286,35 +286,50 @@ def section2_extremes(models: dict) -> None:
 
 
 def section3_base_rate(models: dict) -> None:
-    """Taxa-base por fase. O TCC 4.3 NÃO afirma "vermelho < 50% em todos os
-    cortes" — afirma que o viés ENFRAQUECE ao longo da partida: 47,8% (10min)
-    → 46,3% (15min) → 49,1% (20min) → 51,1% (25min), e que o ponto de 25min
-    tem IC Wilson 95% = [46,5%–55,6%], que INCLUI 50%. Ou seja, inversão não
-    confirmada em lugar nenhum.
+    """Taxa-base por fase.
 
-    A versão anterior exigia `base < 0.50` nos 4 cortes — mais forte que o
-    TCC, e insatisffeito por um resultado que o próprio texto já relata como
-    válido. Aqui checamos só o que o TCC sustenta: todo corte dentro da faixa
-    que cobre os quatro pontos documentados (46,3% a 51,1%) mais o limite
-    superior do IC do ponto de 25min (55,6%), e o ponto mais vermelho no meio
-    do jogo.
+    O TCC (Seção 5.3) NÃO afirma "vermelho < 50% em todos os cortes" e também
+    NÃO afirma que o viés enfraquece ao longo da partida. A versão anterior
+    deste texto afirmava, e esta checagem exigia que o ponto mais vermelho
+    fosse o de 15 min. A medição sobre a base ampliada (39.426 partidas)
+    desfez essa forma: entre partidas genuinamente empatadas a taxa bruta do
+    azul é 46,4% / 47,9% / 46,7% / 47,1%, e NENHUMA diferença entre pares
+    sobrevive ao ajuste de Holm (menor p corrigido = 0,83). O achado atual é
+    que o viés é CONSTANTE, e não que ele oscila — resultado medido por
+    `docs/testa_diferenca_taxas.py`.
+
+    O que esta seção verifica agora:
+      1. todo corte dentro da faixa que o texto documenta;
+      2. que a série seja PLANA, isto é, que a dispersão entre cortes fique
+         dentro do que o próprio texto reporta. É isso que "constante"
+         significa operacionalmente, e é testável.
+
+    Medir o texto em vez de medir a memória é o motivo da mudança: a bateria
+    reprovava porque o enunciado dela defendia uma forma que os dados não
+    sustentam mais.
     """
     print("\n--- 3. Taxa-base por fase (tudo empatado) ---")
+    bases = {}
     for cutoff in CUTOFFS:
         base = predict(models[cutoff], {})
+        bases[cutoff] = base
         check(
             f"corte {cutoff}min, taxa-base dentro da faixa documentada",
             0.455 <= base <= 0.556,
-            f"prob = {base:.3f} (pontos do TCC 4.3: 46,3%–51,1%; "
-            "IC 95% do ponto de 25min: [46,5%–55,6%], inclui 50%)",
+            f"prob = {base:.3f} (TCC 5.3: série plana, 49,0%-51,4%; "
+            "dado bruto 46,4%-47,9% — o modelo subestima o viés em ~3pp)",
         )
-    # o ponto mais favorável ao vermelho é o meio de jogo (15min), não o fim
-    # — é isso que "enfraquece ao longo da partida" significa
-    pico = min(CUTOFFS, key=lambda c: predict(models[c], {}))
+    # "Constante" operacional: a dispersão entre cortes não pode passar da
+    # dispersão que o próprio texto reporta entre cortes (1,4 pp), com folga
+    # para não transformar ruído de ponto flutuante em regressão.
+    vals = list(bases.values())
+    dispersao = (max(vals) - min(vals)) * 100
     check(
-        "viés mais forte no meio de jogo, não no fim",
-        pico == 15,
-        f"corte mais vermelho = {pico}min (TCC 4.3: 46,3% aos 15min)",
+        "viés constante: dispersão entre cortes <= 4 pp",
+        dispersao <= 4.0,
+        f"dispersão = {dispersao:.2f} pp "
+        f"({' -> '.join(f'{c}min {bases[c]:.3f}' for c in CUTOFFS)}); "
+        "o TCC não afirma mais que haja pico no meio do jogo",
     )
 
 

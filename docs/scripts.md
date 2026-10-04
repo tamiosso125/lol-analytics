@@ -825,3 +825,87 @@ powershell -ExecutionPolicy Bypass -File docs\finalize-fields.ps1
 ### Dependências
 
 `pandoc` (winget install JohnMacFarlane.Pandoc) e `python-docx` (já no venv).
+
+### `docs/recapturar_anexo_a.py`
+
+Regrava as seis capturas do Anexo A contra a API e o frontend de produção.
+
+```powershell
+# API em :8000 e o build do frontend servido na porta LIBERADA NO CORS
+Push-Location frontend; npx vite preview --port 5173; Pop-Location
+$env:FRONT_URL = "http://localhost:5173"
+.venv\Scripts\python.exe docs\recapturar_anexo_a.py
+```
+
+Duas armadilhas que o script contorna e que custaram uma rodada inteira em
+2026-10-04:
+
+- **A porta tem de ser a que a API libera em CORS** (`localhost:5173`). Servir
+  o build em `:4173` funciona no navegador até a página fazer `fetch`: aí o
+  navegador bloqueia e renderiza o banner "Erro no servidor". Navegar direto
+  pela URL da API funciona, o que engana — o bloqueio é cross-origin e só
+  aparece no `fetch` do JavaScript da página.
+- **`full_page=True` com Recharts produz eixos sem as barras.** A animação não
+  completa antes do corte. Esperar o seletor `.recharts-bar-rectangle path`
+  **não resolve**, porque o elemento existe na altura 0 durante a animação. A
+  solução é viewport alta o bastante para a página inteira caber, sem
+  `full_page`.
+
+O script recusa a captura se a página mostrar "Erro no servidor" ou se o
+arquivo sair com menos de 60 KB. Sem essa trava, ele reportava `ok` e gravava
+telas de erro — o sintoma é um PNG de 24 KB, idêntico entre páginas.
+
+### `docs/verifica_tcc.py`
+
+Confere o texto do TCC contra o que ele afirma. Existe porque números
+envelhecidos sobreviveram a dois ciclos de coleta sem ninguém perceber: as
+checagens eram feitas a olho.
+
+```powershell
+.venv\Scripts\python.exe docs\verifica_tcc.py   # exit 0 = consistente
+```
+
+Verifica: caractere CJK/cirílico escapado; referência cruzada "Seção N.M"
+sem seção correspondente; coluna inconsistente em tabela markdown; ordem
+alfabética e duplicata em referência ABNT; e — o mais importante — se a
+acurácia e o AUC do XGBoost citados no texto batem com
+`reports/metricas_corte.json`.
+
+### `docs/taxa_base_por_corte.py` e `docs/testa_diferenca_taxas.py`
+
+Medem a taxa de vitória do azul por corte, no estado de empate, e testam se a
+diferença entre cortes é real ou ruído.
+
+```powershell
+.venv\Scripts\python.exe docs\taxa_base_por_corte.py   # grava reports/taxa_base_por_corte.json
+.venv\Scripts\python.exe docs\testa_diferenca_taxas.py # Wilson + Holm
+```
+
+O segundo é o que sustenta a afirmação da Seção 5.3. A versão anterior do
+texto afirmava que o viés de lado *enfraquecia* ao longo da partida, com
+pico aos 15 minutos; ao triplicar a amostra isso se desfez — nenhuma
+diferença entre pares sobrevive ao ajuste de Holm (menor p = 0,83). O
+achado correto é que o viés é **constante**, não que ele oscila.
+
+Duas armadilhas de formato, das duasregistradas no código: o
+`features_phases.csv` está em formato **longo** (`cutoff_min` é coluna, não
+sufixo do nome da feature), e o XGBoost recusa `predict_proba({})` — o
+estado de empate tem de ser um `DataFrame` com as cinco features zeradas.
+
+### `docs/confere_conversao_advantagem.py`
+
+Remede a comparação de conversão de vantagem material entre *solo queue* e
+jogo profissional, nos dois lados, com a mesma definição de faixa.
+
+```powershell
+.venv\Scripts\python.exe docs\confere_conversao_advantagem.py
+```
+
+O TCC afirmava 84,0% contra ~68% na faixa de +2.000 a +4.000, medido sobre
+~12 mil partidas. Na base atual são 81,5% (profissional, n = 3.294) contra
+73,7% (*solo queue*, n = 5.166) — o efeito é real (z = 8,3) mas tem cerca de
+metade do tamanho antes declarado.
+
+A coluna de ouro do Oracle's Elixir é `golddiffat15`, não `gold_diff`, e há
+cinco linhas de lado azul por jogo: sem deduplicar por `gameid` o script
+conta cinco vezes.
