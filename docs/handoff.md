@@ -155,7 +155,7 @@ perguntas de referência (22 solo queue + 4 competitivo).
   insuficiente. Ou seja: **não é um fato do Brasil**, é um padrão de elo
   muito alto em geral — a formulação antiga ("vermelho vence 56,3% no
   BR") foi superada por esta leitura regionalizada e não deve voltar ao
-  texto (o próprio TCC adverte, Seção 4.3). A direção do achado se
+  texto (o próprio TCC adverte, Seção 5.3). A direção do achado se
   manteve idêntica à leitura original de 2026-07-06; ver diário
   2026-09-28.
 - **E o viés NEM É CONSTANTE POR FASE** (achado 2026-07-08, não

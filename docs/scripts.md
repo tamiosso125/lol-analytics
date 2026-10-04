@@ -727,7 +727,7 @@ como acerto infla o número (foi o que mascarou `tower_diff`/15min como
 
 Classificação dos não-OK, por **propriedade** e não por lista de casos:
 - `LIMITADO` (1): `kill_diff`/15min — direção em 60%, SHAP 0,070. A
-  Seção 5.2 do TCC nomeia explicitamente "abates e torres" ao declarar
+  Seção 5.8 do TCC nomeia explicitamente "abates e torres" ao declarar
   a não-garantia de monotonicidade isolada.
 - `NEUTRO` (3): `tower_diff`/10min (SHAP 0,004), `tower_diff`/15min
   (0,014) e `kill_diff`/25min (0,009) — abaixo do limiar de 0,05, ou
@@ -749,7 +749,7 @@ havendo ressalvas listadas acima.
 (`export_model.py` faz `fit` sem split). Não há vazamento — o alvo não
 entra na entrada — mas isto é **sondagem de sanidade, não avaliação de
 generalização**: a seção 1 não detecta overfitting. As métricas de
-generalização são as do CV 5-fold, na Seção 4.4 do TCC.
+generalização são as do CV 5-fold, na Seção 5.4 do TCC.
 
 **Limiares (escolha de implementação, não derivação do TCC):**
 `SHAP_RELEVANTE = 0,05` (≈5 pontos percentuais de efeito médio na

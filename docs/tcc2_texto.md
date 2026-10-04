@@ -2,21 +2,31 @@
 
 > **Este arquivo é a fonte do entregável.** O documento formatado é gerado a
 > partir dele por `docs/build_tcc_docx.py` + `docs/finalize-fields.ps1`, na
-> ordem do modelo institucional (capa → folha de rosto → Resumo/Abstract →
-> 1 Introdução → 2 Referencial Teórico → 3 Material(is) e Métodos →
-> 4 Resultados → 5 Discussão → 6 Conclusão → Referências → Apêndices/Anexos).
+> ordem das seções de primeiro nível (capa → folha de rosto → Resumo/Abstract
+> → 1 Introdução → 2 Fundamentação Teórica → 3 Trabalhos Relacionados →
+> 4 Metodologia → 5 Resultados e Análise → 6 Conclusão → Referências →
+> Apêndices/Anexos).
 > **Não edite o `.docx` diretamente** — edite aqui e regere, senão texto e
 > entregável divergem.
 >
-> **Decisões de escopo já tomadas (2026-10-03):**
-> - **Título acadêmico não cita Bellestraiko.** Mantido igual ao TCC I, por
->   ser o mesmo trabalho. O nome do produto aparece no corpo do texto, na
->   Seção 1.1.
-> - **Trabalhos Relacionados não são seção de primeiro nível**, porque o
->   modelo institucional do TCC II não prevê essa seção. A referência
->   teórica fica na Seção 2 e a comparação com os resultados na Seção 5.1.
-> - O TCC I tem "3 TRABALHOS RELACIONADOS" como seção, mas o modelo do TCC II
->   (2026-09-28) não inclui — prevalecou o modelo do TCC II.
+> **Decisões de escopo já tomadas:**
+> - **Título acadêmico não cita Bellestraiko.** Decidido em 2026-10-03;
+>   mantido igual ao TCC I, por ser o mesmo trabalho. O nome do produto
+>   aparece no corpo do texto, na Seção 1.1.
+> - **A estrutura do corpo segue os TCC II aprovados da UNISINOS**
+>   (decidido em 2026-10-04; **inverte** o registro de 2026-10-03). Evidência
+>   medida por `pypdf` nos 10 PDFs de aprovados da pasta "TCC II - EXEMPLOS E
+>   MATERIAIS" da UNISINOS: 10 de 10 têm INTRODUÇÃO na posição 1; 10 de 10 têm
+>   seção de fundamentação na posição 2 (9 intituladas FUNDAMENTAÇÃO TEÓRICA e
+>   1 REFERENCIAL TEÓRICO); **10 de 10 têm TRABALHOS RELACIONADOS como seção
+>   de primeiro nível, na posição 3**; 10 de 10 têm METODOLOGIA na posição 4;
+>   **10 de 10 fundem a discussão nos resultados** (RESULTADOS E ANÁLISE) na
+>   posição 5; e CONCLUSÃO/CONSIDERAÇÕES FINAIS na posição 6. A decisão
+>   anterior ("não é seção de primeiro nível") atendia ao modelo institucional
+>   genérico de 2026-09-28 — template em branco, sem exemplar de banca. Um
+>   template em branco não diz o que a banca efetivamente aprova; prevaileceram
+>   os dez aprovados. A Seção 3 existe, a referência conceitual fica na
+>   Seção 2 e a confrontação com os resultados obtidos fica na Seção 5.7.
 > - ~~Resumo/Abstract~~ — escrito.
 
 ---
@@ -147,15 +157,17 @@ conjunto de dados profissionais (Oracle's Elixir, ~99 mil partidas de
 queue* com os do cenário competitivo profissional.
 
 Este trabalho está organizado em cinco seções, além desta introdução.
-A Seção 2 apresenta o referencial teórico, reunindo os principais
+A Seção 2 apresenta a fundamentação teórica, reunindo os principais
 conceitos relacionados a esports, análise de dados, *machine
 learning*, explicabilidade, interfaces em linguagem natural e
-visualização analítica. A Seção 3 descreve o material e os métodos
-utilizados no desenvolvimento da plataforma. A Seção 4 apresenta os
-resultados obtidos. A Seção 5 discute esses resultados à luz da
-literatura e das limitações identificadas. A Seção 6 apresenta as
-considerações finais. Por fim, são apresentadas as referências
-utilizadas na construção deste trabalho.
+visualização analítica. A Seção 3 descreve os trabalhos relacionados
+que sustentam a pesquisa, identificando o objeto, a abordagem e o que
+cada um deixa em aberto. A Seção 4 descreve a metodologia
+utilizada no desenvolvimento da plataforma. A Seção 5 apresenta os
+resultados obtidos e os analisa à luz da literatura e das limitações
+identificadas. A Seção 6 apresenta as considerações finais. Por fim,
+são apresentadas as referências utilizadas na construção deste
+trabalho.
 
 ### 1.1 TEMA
 
@@ -216,7 +228,7 @@ informações.
 
 Para alcançar o objetivo geral proposto, foram definidos os seguintes
 objetivos específicos — todos alcançados, conforme apresentado na
-Seção 4:
+Seção 5:
 
 a) mapear os dados e os recursos disponibilizados pela Riot Games API
 relevantes para a análise competitiva em *League of Legends*;
@@ -271,12 +283,12 @@ acadêmicos quanto em aplicações práticas.
 
 ---
 
-## 2 REFERENCIAL TEÓRICO
+## 2 FUNDAMENTAÇÃO TEÓRICA
 
 A fundamentação teórica deste trabalho reúne os principais conceitos
 necessários para compreender a proposta de uma plataforma inteligente
 para análise de dados de esports com foco em *League of Legends*.
-Considerando a natureza interdisciplinar do tema, o capítulo articula
+Considerando a natureza interdisciplinar do tema, a seção articula
 contribuições da análise de dados, do *machine learning*, da
 explicabilidade de modelos, das interfaces em linguagem natural e da
 visualização analítica, buscando estabelecer uma base conceitual
@@ -290,6 +302,11 @@ No campo da interpretação e da interação com dados, García-Méndez e
 Arriba-Pérez (2025) apoiam a discussão sobre explicabilidade, enquanto
 Jiang et al. (2025) fundamentam o uso de modelos de linguagem em
 soluções analíticas.
+
+Esta seção é conceitual: define os conceitos e os termos usados no
+restante do trabalho. Os estudos que dão origem a esses conceitos —
+com seu objeto, sua abordagem e seus resultados — são descritos,
+autor a autor, na Seção 3.
 
 ### 2.1 ESPORTS E ANÁLISE DE DADOS
 
@@ -317,7 +334,7 @@ comparou os modelos XGBoost, *Random Forest* e redes neurais (MLP),
 analisando diferentes estratégias para dados competitivos e verificando
 como abordagens baseadas em árvores e modelos neurais contribuem para
 a análise preditiva proposta — os resultados dessa comparação são
-apresentados na Seção 4.
+apresentados na Seção 5.
 
 ### 2.3 EXPLICABILIDADE E ANÁLISE PREDITIVA
 
@@ -332,7 +349,7 @@ meio de valores SHAP (*SHapley Additive exPlanations*), curvas de
 calibração e explicações textuais geradas a partir dos próprios fatores
 identificados como relevantes — não a partir de conhecimento genérico
 de um modelo de linguagem, mas ancoradas nos dados e nos coeficientes
-calculados (ver Seção 3).
+calculados (ver Seção 4).
 
 ### 2.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
 
@@ -348,7 +365,7 @@ linguagem natural (*text-to-SQL*) capaz de traduzir perguntas em
 português para consultas SQL validadas contra o esquema real do banco
 de dados, integrando visualização, recuperação de informações e geração
 de *insights* em uma mesma plataforma — os resultados de acurácia dessa
-interface são apresentados na Seção 4.
+interface são apresentados na Seção 5.
 
 ### 2.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
 
@@ -364,24 +381,116 @@ em jogo e para a identificação de padrões relevantes ao desempenho
 competitivo, especialmente quando conseguem integrar tempo e
 localização em uma única representação visual. Esse referencial
 fundamentou o desenvolvimento do mapa de calor de posicionamento
-apresentado na análise de partida da plataforma (Seção 4).
+apresentado na análise de partida da plataforma (Seção 5.5).
 
-A comparação direta entre estes trabalhos e os resultados obtidos neste
-trabalho é apresentada na Seção 5.1. O modelo institucional do TCC II não
-prevê uma seção própria de trabalhos relacionados — a referência teórica é
-descrita aqui e a confrontação com os resultados fica na discussão, que é
-onde a leitura crítica faz sentido.
+Os estudos citados nesta seção são apresentados, autor a autor, na
+Seção 3. A confrontação direta entre eles e os resultados obtidos
+neste trabalho é feita na Seção 5.7 — é lá que a leitura crítica faz
+sentido, porque só há o que confrontar depois que os resultados estão
+apresentados.
 
 ---
 
-## 3 MATERIAL(IS) E MÉTODOS
+## 3 TRABALHOS RELACIONADOS
+
+A seção anterior define os conceitos mobilizados por esta pesquisa;
+esta seção descreve os estudos que os sustentam. Para cada um, são
+apresentados o objeto, a abordagem adotada e a contribuição
+relevante para o problema aqui tratado. Os sete estudos listados são
+todos citados ao longo do trabalho — nenhum foi incluído apenas para
+preencher esta seção.
+
+### 3.1 ESPORTS COMO FENÔMENO DE PRODUÇÃO E ANÁLISE DE DADOS
+
+Hodge et al. (2021) tratam da predição de vitória em esports com
+múltiplos jogadores (*multi-player*), em partidas profissionais e em
+tempo real, e relatam que o desempenho preditivo é favorecido pelo uso
+de análise estruturada dos dados de partida. O trabalho estabelece,
+portanto, a viabilidade da predição de resultados em esports como
+problema tratável por modelagem estatística, e é a referência que
+sustenta, no domínio de *League of Legends*, o tratamento dos dados
+de partida como objeto de análise neste trabalho.
+
+### 3.2 MACHINE LEARNING APLICADO A LEAGUE OF LEGENDS E ESPORTS
+
+Birant e Birant (2023) apresentam uma abordagem de aprendizado
+multi-objetivo e multi-instância (*Multi-Objective Multi-Instance
+Learning*) aplicada a esports, e destacam a modelagem centrada no time —
+e não no jogador isolado — como caminho para compreender resultados de
+partidas. É a abordagem que este trabalho adotou diretamente ao
+construir as variáveis preditoras como diferenças agregadas entre os
+dois times (ouro, experiência, abates, torres, dragões), em vez de
+métricas individuais de jogador.
+
+Bahrololloomi et al. (2022) percorrem caminho distinto: analisam o
+desempenho de jogadores de *League of Legends* com técnicas de
+*machine learning*, tomando como entrada as funções (*roles*) em
+jogo e as métricas individuais de desempenho, com foco na predição
+de vitória.
+
+Os dois estudos são complementares e delimitam o espaço de escolha da
+modelagem preditiva em *League of Legends*: um nível de agregação
+por time e um nível de agregação por jogador. Este trabalho
+adota o primeiro como eixo da modelagem preditiva, e usa o segundo
+apenas na camada de perfis de jogador, conforme descrito na Seção 5.7.
+
+### 3.3 EXPLICABILIDADE E ANÁLISE PREDITIVA
+
+García-Méndez e Arriba-Pérez (2025) abordam a predição de vitória em
+esports sob a perspectiva da explicabilidade, combinando
+classificação por *machine learning* com mecanismos de interpretação,
+inclusive em cenário de transmissão (*streaming*). A contribuição
+relevante para este trabalho é o argumento de que um sistema
+preditivo só é útil ao usuário final quando acompanha a previsão de
+uma explicação dos fatores que a sustentam — pressuposto que orienta
+a camada de explicabilidade da plataforma descrita na Seção 5.5.
+
+### 3.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
+
+Jiang et al. (2025) apresentam o SiriusBI, solução de *Business
+Intelligence* apoiada por modelos de linguagem para análise de dados
+em contextos corporativos. Guo et al. (2024) apresentam o Talk2Data,
+interface em linguagem natural para análise visual exploratória,
+baseada em decomposição de perguntas. Ambos exploram o uso de modelos
+de linguagem como camada de interação sobre dados estruturados, e
+ambos são citados aqui como fundamento para o *text-to-SQL*
+implementado neste trabalho (Seção 4.7), que estende a abordagem ao
+domínio competitivo de *League of Legends*.
+
+### 3.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
+
+Wallner, Wang e Dormann (2023) estudam a evolução espaço-temporal do
+gameplay em *League of Legends* por meio da técnica de *storyline
+visualization*, e mostram o valor de representações que integram
+tempo e localização em uma única visualização para a interpretação
+pós-jogo. O estudo é a referência para a representação de
+posicionamento minuto a minuto adotada na análise de partida da
+plataforma (Seção 5.5).
+
+### 3.6 SÍNTESE E POSIÇÃO DESTE TRABALHO
+
+Lidas em conjunto, as referências acima cubrem quatro frentes
+isoladas: predição de resultados (Hodge et al.; Birant e Birant;
+Bahrololloomi et al.), interpretabilidade da predição (García-Méndez e
+Arriba-Pérez), interação em linguagem natural (Jiang et al.; Guo et
+al.) e visualização espaço-temporal (Wallner, Wang e Dormann). Cada
+frente é tratada em um trabalho, e nenhuma delas é entregue como uma
+plataforma integrada que reuni coleta, tratamento, modelagem,
+explicabilidade, visualização e consulta em linguagem natural sobre a
+mesma base de dados. É essa lacuna de integração que este trabalho
+propõe ocupar; a confrontação entre os resultados aqui obtidos e os
+resultados relatados na literatura é apresentada na Seção 5.7.
+
+---
+
+## 4 METODOLOGIA
 
 Esta seção descreve os procedimentos metodológicos efetivamente
 empregados no desenvolvimento da pesquisa e da plataforma, detalhando a
 natureza do estudo, a coleta e o tratamento dos dados, a modelagem
 preditiva e os recursos de visualização e consulta construídos.
 
-### 3.1 NATUREZA E ABORDAGEM DA PESQUISA
+### 4.1 NATUREZA E ABORDAGEM DA PESQUISA
 
 O presente trabalho caracteriza-se, quanto à sua natureza, como uma
 pesquisa aplicada: Prodanov e Freitas (2013) explicam que a pesquisa
@@ -399,14 +508,14 @@ bibliográfica e na interpretação dos achados; o componente quantitativo
 esteve associado à coleta e ao tratamento dos dados, à análise
 exploratória e à comparação entre os modelos de *machine learning*.
 
-### 3.2 ESTRATÉGIAS DE PESQUISA
+### 4.2 ESTRATÉGIAS DE PESQUISA
 
 O trabalho foi desenvolvido por meio de pesquisa bibliográfica (GIL,
 2002), pesquisa documental sobre a documentação oficial da Riot Games
 API (PRODANOV; FREITAS, 2013) e estudo aplicado com recorte de caso no
 domínio de *League of Legends* (YIN, 2018).
 
-### 3.3 COLETA DE DADOS
+### 4.3 COLETA DE DADOS
 
 A coleta foi realizada a partir de duas fontes complementares — a
 segunda delas incorporada durante a execução do TCC II, ampliando o
@@ -429,13 +538,13 @@ principais ligas mundiais (LCK, LPL, LEC, LTA, CBLOL, entre outras), a
 partir de arquivos CSV anuais publicados publicamente. Essa fonte não
 estava prevista no recorte original do TCC I e foi adicionada para
 permitir a comparação entre o padrão observado no *solo queue* de elo
-alto e o padrão do cenário competitivo profissional (ver Seção 4).
+alto e o padrão do cenário competitivo profissional (ver Seção 5.3).
 
 Como o TCC I já delimitava o uso de dados secundários e públicos, não
 houve participação direta de sujeitos humanos como fonte de dados em
 nenhuma etapa.
 
-### 3.4 ORGANIZAÇÃO E TRATAMENTO DE DADOS
+### 4.4 ORGANIZAÇÃO E TRATAMENTO DE DADOS
 
 Os dados foram estruturados em um banco de dados relacional PostgreSQL,
 com entidades para partidas, times, participantes, jogadores, banimentos
@@ -450,7 +559,7 @@ do tempo (com desfazimento de `ITEM_UNDO` aplicado) e reconciliação de
 nomes de campeão entre a Riot API e o Oracle's Elixir (que usam
 convenções de nomenclatura diferentes).
 
-### 3.5 ANÁLISE EXPLORATÓRIA DE DADOS
+### 4.5 ANÁLISE EXPLORATÓRIA DE DADOS
 
 A análise exploratória buscou identificar distribuições, padrões
 iniciais e relações entre variáveis relevantes ao problema de pesquisa,
@@ -464,9 +573,9 @@ descartar efeito de mistura regional), comparação contra a duração total
 da partida (para descartar confusão com "jogos longos") e cálculo de
 intervalo de confiança de Wilson sobre a proporção observada (para
 avaliar a significância estatística do efeito em amostras menores). Os
-resultados dessa análise são apresentados na Seção 4.3.
+resultados dessa análise são apresentados na Seção 5.3.
 
-### 3.6 MODELAGEM PREDITIVA E COMPARAÇÃO ENTRE MODELOS
+### 4.6 MODELAGEM PREDITIVA E COMPARAÇÃO ENTRE MODELOS
 
 Foram treinados e comparados três modelos de classificação binária
 (vitória do time azul: sim/não) — XGBoost, *Random Forest* e uma rede
@@ -483,12 +592,12 @@ baseline inicial, foi realizado ajuste de hiperparâmetros por
 geração de curva de calibração e de explicações SHAP (importância
 global e por instância) sobre o modelo de produção. Adicionalmente,
 foram conduzidos nove experimentos exploratórios de enriquecimento de
-*features* (ver Seção 4.4) para avaliar se sinais adicionais da linha do
+*features* (ver Seção 5.4) para avaliar se sinais adicionais da linha do
 tempo (visão, itens, dispersão espacial do time, objetivos neutros)
 melhoravam o poder preditivo além das cinco variáveis de estado já
 utilizadas.
 
-### 3.7 PROPOSTA DE VISUALIZAÇÃO E INTERFACE EM LINGUAGEM NATURAL
+### 4.7 PROPOSTA DE VISUALIZAÇÃO E INTERFACE EM LINGUAGEM NATURAL
 
 A camada de apresentação foi construída como uma aplicação web (React +
 TypeScript no *frontend*, consumindo uma API própria em FastAPI),
@@ -510,7 +619,7 @@ modelo sobre o domínio. A acurácia dessa interface foi medida por um
 benchmark de 26 perguntas de referência com SQL esperado, cobrindo tanto
 o dataset de *solo queue* quanto o competitivo.
 
-### 3.8 MATERIAIS E MÉTODOS UTILIZADOS
+### 4.8 MATERIAIS E MÉTODOS UTILIZADOS
 
 Foram utilizados Python (coleta, ETL, modelagem — bibliotecas *pandas*,
 *NumPy*, *scikit-learn*, *XGBoost*, *SHAP*), PostgreSQL (armazenamento
@@ -526,12 +635,12 @@ durante o desenvolvimento.
 
 ---
 
-## 4 RESULTADOS
+## 5 RESULTADOS E ANÁLISE
 
 Esta seção apresenta os resultados obtidos, organizados de acordo com
 os objetivos específicos definidos na Seção 1.4.2.
 
-### 4.1 Mapeamento de dados e recursos da Riot Games API (objetivo a)
+### 5.1 Mapeamento de dados e recursos da Riot Games API (objetivo a)
 
 Foram mapeados e utilizados os endpoints *league-v4*, *account-v1*,
 *match-v5* e *timeline-v5* da Riot Games API, além da documentação
@@ -541,9 +650,9 @@ mapeamento orientou o desenho de um coletor resumível, capaz de operar
 dentro dos limites de taxa e de retomar a coleta entre sessões sem
 duplicar dados já salvos.
 
-### 4.2 Estruturação da base de dados (objetivos b e c)
+### 5.2 Estruturação da base de dados (objetivos b e c)
 
-A base usada para treinar e comparar os modelos preditivos (Seção 4.4)
+A base usada para treinar e comparar os modelos preditivos (Seção 5.4)
 reúne **23.133 partidas** de *solo queue* (24.999 jogadores distintos,
 173 campeões), com JSON bruto de partida e linha do tempo preservados
 para reprocessamento, e **99.259 jogos profissionais** (2014-2026,
@@ -554,15 +663,15 @@ resolução de nome/ícone sem depender de conhecimento genérico de
 modelo de linguagem. A coleta de *solo queue* continuou após esse
 corte especificamente para ampliar as regiões com amostra menor
 (EUW1/KR/NA1), chegando a 33.713 partidas em 2026-10-03 — volume
-usado na análise de viés de lado por região (Seção 4.3), mas não
+usado na análise de viés de lado por região (Seção 5.3), mas não
 usado para retreinar os modelos preditivos nesta versão do trabalho.
 O ganho potencial de um novo ciclo de treino é da ordem de ~45%
 sobre as 23.133 partidas do corte; ele não foi priorizado porque
-exigiria rever integralmente a Seção 4.4 e o Apêndice C, e o texto
+exigiria rever integralmente a Seção 5.4 e o Apêndice C, e o texto
 estava em fase de consolidação. Os números de modelo relatados adiante
 são, portanto, os de 23.133 partidas.
 
-### 4.3 Análise exploratória: padrões identificados (objetivo d)
+### 5.3 Análise exploratória: padrões identificados (objetivo d)
 
 **Viés de lado no *solo queue* de elo alto.** No agregado das cinco
 regiões coletadas, o time vermelho venceu com mais frequência que o
@@ -590,7 +699,7 @@ regiões com amostra relevante pendem para o vermelho, entre 50,3% e
 fortalece a leitura de "padrão de elo altíssimo em geral", não
 artefato de uma região com pouca amostra. BR1 não se alterou em nenhum
 dos três levantamentos. NA1 segue com volume pequeno mesmo após as
-coletas adicionais — ver Seção 5.2.)*
+coletas adicionais — ver Seção 5.8.)*
 
 **O viés de lado não é constante ao longo da partida.** Investigando a
 probabilidade-base do modelo (estado de empate total) em cada corte
@@ -635,10 +744,10 @@ medidas em 2026-07-04 sobre aproximadamente 12 mil partidas — a base
 disponível na ocasião, não as 23.133 usadas nos modelos. São estimativas
 de apoio a um achado qualitativo (a diferença de ~16 pontos percentuais
 entre os dois cenários é grande demais para ser artefato de amostra), e
-não medidas sobre a base de treino. A tabela por região da Seção 4.3 e
+não medidas sobre a base de treino. A tabela por região da Seção 5.3 e
 as taxas do profissional são de faixas posteriores.)*
 
-### 4.4 Modelagem preditiva e comparação entre modelos (objetivo e)
+### 5.4 Modelagem preditiva e comparação entre modelos (objetivo e)
 
 Após ajuste de hiperparâmetros (*GridSearchCV*, validação cruzada
 estratificada de 5 *folds*) sobre o corte de 15 minutos, no conjunto
@@ -699,7 +808,7 @@ estado agregado atualmente disponíveis via API, o teto de desempenho é
 limitado mais pelo volume de dados do que pela engenharia de novas
 variáveis a partir da mesma fonte.
 
-### 4.5 Dashboards (objetivo f)
+### 5.5 Dashboards (objetivo f)
 
 Foram entregues seis páginas de visualização (Início, Dashboard,
 Campeões, Partidas, Competitivo e Simulador), incluindo KPIs agregados,
@@ -711,7 +820,7 @@ sinalizada como tal na interface para não ser confundida com predição
 por modelo), estado de jogo (predição pelo modelo de produção) e
 explicabilidade (SHAP).
 
-### 4.6 Interface em linguagem natural (objetivo g)
+### 5.6 Interface em linguagem natural (objetivo g)
 
 O *pipeline* de linguagem natural para consulta ao banco (*text-to-SQL*
 com validação estrutural antes da execução) atingiu **88% de acurácia de
@@ -724,9 +833,8 @@ de SQL incorreto.
 
 ---
 
-## 5 DISCUSSÃO
 
-### 5.1 Os resultados frente à literatura
+### 5.7 Os resultados frente à literatura
 
 Hodge et al. (2021) demonstraram a viabilidade de modelos preditivos
 para partidas profissionais de esports em tempo real; este trabalho
@@ -776,7 +884,7 @@ de forma mais simples (posição agregada por minuto, sem a técnica de
 *storyline visualization* proposta pelos autores) — uma limitação
 reconhecida e discutida na próxima subseção.
 
-### 5.2 Limitações
+### 5.8 Limitações
 
 - **Amostras pequenas em recortes finos** (combinações específicas de
   jogador e campeão, ou de matchup de rota) seguem estatisticamente
@@ -784,7 +892,7 @@ reconhecida e discutida na próxima subseção.
   encolhimento estatístico (*shrinkage*) em direção à média do grupo
   maior, mas não eliminado.
 - **Desequilíbrio de amostra por região**: após as rodadas adicionais de
-  coleta (Seção 4.3), BR1 e EUW1 concentram a maior parte dos dados
+  coleta (Seção 5.3), BR1 e EUW1 concentram a maior parte dos dados
   (11.936 e 11.744 partidas) e KR cresceu para 8.567, mas NA1 não avançou
   na última rodada e permanece em 1.446 — cerca de um décimo da amostra
   de BR1. O achado de viés de lado "generalizado ao elo alto, não
@@ -823,7 +931,7 @@ inteligente para análise de dados de esports com foco em *League of
 Legends*, integrando coleta, organização e exploração de dados
 competitivos, modelagem preditiva com técnicas de *machine learning* e
 mecanismos de visualização e consulta em linguagem natural. Os
-resultados apresentados na Seção 4 indicam que o objetivo geral foi
+resultados apresentados na Seção 5 indicam que o objetivo geral foi
 alcançado, com evidência para cada objetivo específico:
 
 a) os dados e recursos da Riot Games API foram mapeados e utilizados de
@@ -867,7 +975,7 @@ de vantagem material em vitória entre os dois contextos.
 
 Como trabalhos futuros, ficam registrados: a ampliação adicional da
 amostra da região NA1 especificamente (as demais regiões já foram
-reforçadas ao longo deste trabalho, ver Seção 4.3); a extensão da
+reforçadas ao longo deste trabalho, ver Seção 5.3); a extensão da
 predição para o cenário de partidas ao vivo (não
 implementada nesta versão, mas considerada na arquitetura desde o
 início — a camada de predição aceita estado de jogo arbitrário por
@@ -1052,11 +1160,11 @@ do mesmo benchmark.
 ## APÊNDICE C — Métricas completas por corte temporal
 
 Quadro cruzado gerado em 2026-09-28 (mesmo desenho experimental da
-Seção 4.4: validação cruzada estratificada de 5 *folds*, hiperparâmetros
+Seção 5.4: validação cruzada estratificada de 5 *folds*, hiperparâmetros
 base — não os tunados de produção — para manter a comparação entre os
 3 modelos em igualdade de condições, conforme o objetivo específico e).
 Os valores do corte de 15 min reproduzem exatamente os já citados na
-Seção 4.4.
+Seção 5.4.
 
 | Corte | n | Taxa vitória azul | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
 |---|---:|---:|---|---:|---:|---:|---:|---:|
@@ -1073,14 +1181,14 @@ Seção 4.4.
 | 25min | 16.179 | 0,458 | **XGBoost** | 0,8216 | 0,8128 | 0,7930 | 0,8028 | 0,9031 |
 | 25min | 16.179 | 0,458 | MLP | 0,8209 | 0,8102 | 0,7952 | 0,8026 | 0,9026 |
 
-Nota: os valores de AUC-ROC por fase citados na Seção 4.4
+Nota: os valores de AUC-ROC por fase citados na Seção 5.4
 (0,767/0,842/0,872/0,907) usam os hiperparâmetros *tunados* de produção
 do XGBoost (500 árvores, *learning rate* 0,01), diferentes dos
 hiperparâmetros base usados neste quadro para a comparação entre os 3
 modelos — por isso os números não são idênticos, embora a mesma
 tendência (desempenho crescente com o corte) apareça nos dois casos.
 Com os hiperparâmetros base, o XGBoost superou os demais modelos em
-AUC-ROC nos 4 cortes; com os hiperparâmetros tunados (Seção 4.4, corte
+AUC-ROC nos 4 cortes; com os hiperparâmetros tunados (Seção 5.4, corte
 de 15 min), a diferença entre XGBoost e MLP fica marginal (0,8393 vs.
 0,8385).
 
@@ -1150,15 +1258,16 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
    batizada Bellestraiko, constitui a materialização do sistema
    desenvolvido e implementado ao longo deste trabalho". A interface já
    usa esse nome em produção (ver capturas do Anexo A).
-3. **Trabalhos Relacionados — DECIDIDO (2026-10-03): não é seção de
-   primeiro nível.** Seguindo o modelo institucional do TCC 2 (2026-09-28),
-   que não prevê essa seção, a referência teórica fica na Seção 2 e a
-   comparação direta com os resultados obtidos fica na Seção 5.1. Note que
-   o TCC 1 tem "3 TRABALHOS RELACIONADOS" como seção de primeiro nível,
-   aprovada naquele documento — mas o modelo do TCC 2 difere, e prevalecceu
-   o do TCC 2. Efeito colateral vantajoso: a numeração do corpo segue
-   exatamente a do modelo (1 Introdução … 6 Conclusão).
-3. ~~Apêndices/Anexos~~ — **feitos**: A (schema), B (26 perguntas NLQ,
+3. **Trabalhos Relacionados — DECIDIDO (2026-10-04): É seção de primeiro
+   nível.** A decisão anterior (2026-10-03, "não é seção") seguia o modelo
+   institucional de 2026-09-28, que não prevê a seção. Ao medir os **10 TCC II
+   aprovados** da UNISINOS (cinco com "Aprov. Destição", três "Pos Banca"),
+   em 2026-10-04, verificou-se que **10 de 10** a têm como seção de primeiro
+   nível — é o padrão que a banca efetivamente aprovou. A decisão foi
+   invertida: o trabalho segue o padrão dos aprovados, não o do modelo.
+   A referência conceitual dos estudos fica na Seção 2 e a comparação
+   direta com os resultados obtidos, na Seção 5.7.
+4. ~~Apêndices/Anexos~~ — **feitos**: A (schema), B (26 perguntas NLQ,
    88% confirmado com dados frescos), C (quadro cruzado 4 cortes × 3
    modelos), D (9 experimentos negativos), Anexo A (6 capturas de tela
    reais em `reports/anexo_a/`), Anexo B (referência da API).
@@ -1193,27 +1302,26 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
      Ilustrações.
    - Confirmado também: a estrutura de seções do corpo (além de
      Introdução/Referencial Teórico obrigatórios) é **livre, por
-     acordo com o orientador** — não há seção "Trabalhos Relacionados"
-     obrigatória no template genérico, o que dá mais folga à pendência
-     nº 3 acima (não é mais um bloqueio estrutural, só uma preferência
-     a confirmar). Limite de páginas do TCC II: **25 a 30 páginas**,
-     não contando apêndices/anexos — o corpo do documento gerado tem
-     21 páginas.
+     acordo com o orientador**. Em 2026-10-04, a medição dos **10 TCC II
+     aprovados** mostrou que 10 de 10 usam "Trabalhos Relacionados" como
+     seção de primeiro nível e "Metodologia" (não "Material(is) e
+     Métodos"), o que reverte a pendência nº 3 (item 3 acima).
+     Limite de páginas do TCC II: **25 a 30 páginas**, não contando
+     apêndices/anexos.
 5. ~~Ampliar a coleta EUW1/KR/NA1~~ — **feito**: EUW1 1.307→11.744
    partidas, KR 1.308→8.567 (NA1 ficou em 1.446 mesmo após duas novas
    rodadas — anotado como limitação, não re-executado de novo). Quadro
    de viés de lado por região remedido com dados de 2026-10-03
-   (Seção 4.3) e verificado por SQL direto contra o valor mostrado no
+   (Seção 5.3) e verificado por SQL direto contra o valor mostrado no
    *dashboard* (metodologia registrada em memória do projeto:
    `feedback_verify_dashboard_numbers`).
 
-**Status (2026-10-03):** de 6 pendências, **5 estão fechadas** (Resumo,
-Apêndices/Anexos, formatação `.docx`, ampliação da coleta, e agora as duas
-decisões de escopo). **Nenhuma pendência depende do orientador.**
+**Status (2026-10-04):** de 6 pendências, **6 estão fechadas**. **Nenhuma
+depende do orientador.**
 
 1. **Título acadêmico** — decidido: não cita Bellestraiko (item 2 acima).
-2. **Trabalhos Relacionados** — decidido: não é seção de primeiro nível,
-   segue o modelo do TCC 2 (item 3 acima).
+2. **Trabalhos Relacionados** — decidido em 2026-10-04: **é** seção de
+   primeiro nível, seguindo os 10 TCC II aprovados (item 3 acima).
 
 **Resta 1 item, já resolvido:** o título do Quadro 4 (Apêndice C), que no
 rascunho só tinha nota de método — o que viola a regra da instituição, já
@@ -1221,9 +1329,12 @@ que tabela sem legenda não é permitida. O título foi escrito na conversão e
 **confirmado pelo autor em 2026-10-03**: "Métricas completas por corte temporal
 — comparação entre os três modelos".
 
-**Nenhuma pendência em aberto.** As 6 estão fechadas.
+**Nenhuma pendência em aberto.**
 
-**Consequência prática:** com as duas decisões fechadas, a numeração do corpo
-fica exatamente igual à do modelo institucional (1 Introdução, 2 Referencial
-Teórico, 3 Material(is) e Métodos, 4 Resultados, 5 Discussão, 6 Conclusão) e
-não há mais nada a regenerar por causa delas.
+**Estrutura final do corpo (2026-10-04), seguindo os 10 TCC II aprovados:**
+1 Introdução · 2 Fundamentação Teórica · 3 Trabalhos Relacionados ·
+4 Metodologia · 5 Resultados e Análise · 6 Conclusão. Note que difere do
+modelo institucional de 2026-09-28 (Referencial Teórico em vez de
+Fundamentação, sem Trabalhos Relacionados, Material(is) e Métodos em vez de
+Metodologia, Resultados e Discussão separados): prevalece o padrão que a banca
+aprovou.

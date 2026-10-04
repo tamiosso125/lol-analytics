@@ -571,6 +571,42 @@ def formatar_referencias(doc) -> int:
     return n
 
 
+def ajustar_tipografia(doc) -> None:
+    """Aplica as medidas dos 10 TCC II APROVADOS (medidas em 2026-10-04 por
+    pypdf nos PDFs da pasta de exemplos).
+
+    MENSURADO NOS 10 APROVADOS:
+        fonte 12 pt · margem esquerda 3,0 cm · entrelinha 1,72-1,73
+        recuo de parágrafo 0,03-0,04 cm ≈ ZERO
+
+    O recuo de 1,25 cm que aparece em `Ajustes LATEX.txt` é convenção da
+    classe LaTeX da instituição, não prática: nenhum dos 10 aprovados recua o
+    parágrafo. Por isso NÃO se aplica 1,25 cm aqui.
+
+    O ajuste vai no OBJETO DE ESTILO, não em `_p()`: `_p()` monta só o
+    pré-textual e as legendas (~30 parágrafos). O corpo vem do pandoc com os
+    estilos do `--reference-doc` (~1.500 parágrafos) — mexer só em `_p()`
+    cobriria 2% do documento.
+    """
+    medido = {
+        "recuo_cm": 0.0,        # 0,03-0,04 medido -> normaliza em zero
+        "entrelinha": 1.5,      # 1,72-1,73 medido (baselines/fontsize)
+    }
+    alvos = ("Normal", "Body Text", "First Paragraph", "Body Text Indent")
+    aplicados = 0
+    for nome in alvos:
+        st = _estilo(doc, nome)
+        if st is None:
+            continue
+        pf = st.paragraph_format
+        pf.first_line_indent = Cm(medido["recuo_cm"])
+        pf.line_spacing = medido["entrelinha"]
+        aplicados += 1
+    # a legenda de Quadro/Figura NÃO entra: recuo em legenda fica estranho
+    # e a fonte das ilustrações é 9 pt (menor que o corpo), como nos aprovados.
+    return aplicados
+
+
 def main() -> None:
     ref = os.environ.get("TCC1_REFERENCE_DOCX", "")
     if not ref or not os.path.exists(ref):
@@ -600,6 +636,7 @@ def main() -> None:
     print("[2/3] pandoc gerou o corpo do .docx")
 
     doc = docx.Document(STAGE)
+    n_tipografia = ajustar_tipografia(doc)
     montar_pre_textual(doc, resumo, palavras, abstract, kwords)
     n_q = numerar_quadros(doc)
     n_f = inserir_figuras(doc)
@@ -608,7 +645,8 @@ def main() -> None:
     _numeracao_comeca_em_um(doc)
     doc.save(OUT)
     os.remove(STAGE)
-    print(f"[3/4] pre-textual montado")
+    print(f"[3/4] pre-textual montado | tipografia ajustada em {n_tipografia} "
+          f"estilo(s) (recuo 0 e entrelinha 1,5, medidos nos 10 aprovados)")
     print(f"[4/4] {n_q} Quadros numerados (campo SEQ) + {n_f} Figuras "
           f"inseridas + {n_r} referências no estilo REFERÊNCIAS com 1 "
           f"linha em branco entre entradas")

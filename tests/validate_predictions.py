@@ -10,7 +10,7 @@ em cenários que não estão necessariamente no dataset de teste:
      percentil observado) move a probabilidade na direção certa? Mede
      "vantagem REAL sobe a chance", não "toda feature é monotônica" — o
      XGBoost deste projeto NÃO garante monotonicidade isolada por fator
-     (declarado na Seção 5.2 do TCC; ver NOTA sobre o porquê desta
+     (declarado na Seção 5.8 do TCC; ver NOTA sobre o porquê desta
      reformulação em section1_direcionalidade).
   2. Casos extremos: uma vantagem enorme em tudo deve dar probabilidade
      muito alta (não 100% cravado — o modelo não deveria ser overconfident
@@ -60,7 +60,7 @@ FAIL = []
 NEUTRO = []
 LIMITADO = []
 
-# Fatores que a Seção 5.2 do TCC NOMEIA ao declarar a limitação: "não garante
+# Fatores que a Seção 5.8 do TCC NOMEIA ao declarar a limitação: "não garante
 # formalmente que aumentar isoladamente a diferença de abates OU DE TORRES nunca
 # reduza a probabilidade prevista". A categoria é definida por PROPRIEDADE
 # (fator nomeado pelo TCC), não por tupla (feature, corte) — assim não é uma
@@ -93,7 +93,7 @@ def _shap_medio(model, X: pd.DataFrame, feat: str) -> float:
 
 def _emit(name: str, status: str, detail: str) -> None:
     """Imprime uma checagem. NEUTRO = modelo insensível ao fator nos estados
-    testados (informação). LIMITADO = não-monotonicidade que o TCC 5.2
+    testados (informação). LIMITADO = não-monotonicidade que o TCC 5.8
     declara. Nenhum dos dois é FALHA: tratá-los como falha seria reportar o
     oposto do que o modelo faz, ou reprovar um comportamento documentado."""
     print(f"[{status}] {name} — {detail}")
@@ -150,7 +150,7 @@ def section1_direcionalidade(models: dict, n_linhas: int = 400, n_passos: int = 
     não-monotonicidade. E o `nan` do corte 25min em kill_diff era "modelo
     insensível ao fator neste contexto", reportado como se fosse o oposto.
 
-    O que o projeto REALMENTE afirma (TCC 5.2) é que o XGBoost não garante
+    O que o projeto REALMENTE afirma (TCC 5.8) é que o XGBoost não garante
     monotonicidade isolada por fator. A versão nova mede a afirmação correta:
     partindo de linhas reais do dataset de treino, valores inteiros dentro do
     percentil observado, a probabilidade vai na direção esperada? A
@@ -256,7 +256,7 @@ def section1_direcionalidade(models: dict, n_linhas: int = 400, n_passos: int = 
                     nome,
                     "LIMITADO",
                     f"{detalhe_base} — direção em {frac:.0%} e não-monotonicidade "
-                    f"ISOLADA de {feat}, que a Seção 5.2 do TCC nomeia "
+                    f"ISOLADA de {feat}, que a Seção 5.8 do TCC nomeia "
                     "explicitamente (abates e torres). Reportado, não reprovado.",
                 )
             else:
@@ -416,7 +416,7 @@ def main() -> int:
     if LIMITADO:
         print(
             f"{len(LIMITADO)} caso(s) de não-monotonicidade ISOLADA — "
-            "limitação DECLARADA na Seção 5.2 do TCC, reportada e não "
+            "limitação DECLARADA na Seção 5.8 do TCC, reportada e não "
             "reprovada:"
         )
         for n in LIMITADO:
