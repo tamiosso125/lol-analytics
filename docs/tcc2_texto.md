@@ -1265,52 +1265,41 @@ de vantagem material em vitória entre os dois contextos.
 ### 6.1 LIMITAÇÕES E AMEAÇAS À VALIDADE
 
 Registrar o que o trabalho não sustenta é parte da conclusão, e não uma
-fórmula de cortesia. As limitações a seguir não invalidam os achados
-apresentados, mas delimitam o alcance em que podem ser generalizados.
+fórmula de cortesia. As três limitações a seguir delimitam o alcance em
+que os achados podem ser generalizados; nenhuma delas os invalida.
 
-A primeira limitação é de validade de construto, e decorre da própria
-fonte de dados. A *timeline-v5* não registra o estado das ondas de
-*minions*, de modo que o modelo de predição trabalha sem uma variável que
-um analista humano consideraria informativa sobre o momento da partida. É
-razoável supor que parte do que o modelo erra é informação que ele jamais
-recebeu — mas essa é uma hipótese, e não um resultado medido: nenhum
-experimento deste trabalho isola o efeito de acrescentar essa variável,
-porque ela não existe na fonte. O que se pode afirmar é o que a
-consequência prática mostra: nenhuma orientação exibida pela plataforma
-cuja fundamentação A consequência prática
-é que nenhuma orientação exibida pela plataforma cuja fundamentação
-dependa de posição, itemização ou estado de ondas é aquela que o modelo
-produziu, e a interface marca essa orientação como inferência geral em
-vez de resultado calculado.
+**Validade de construto.** A *timeline-v5* não registra o estado das ondas
+de *minions*, de modo que o modelo de predição trabalha sem uma variável
+que um analista humano consideraria informativa sobre o momento da
+partida. É razoável supor que parte do que o modelo erra é informação que
+ele jamais recebeu — mas essa é uma hipótese, e não um resultado medido:
+nenhum experimento deste trabalho isola o efeito de acrescentar essa
+variável, porque ela não existe na fonte. A consequência prática é
+observável: nenhuma orientação exibida pela plataforma cuja fundamentação
+dependa de itemização ou de estado de ondas foi produzida pelo modelo, e a
+interface marca essa orientação como inferência geral em vez de resultado
+calculado.
 
-A segunda limitação é de validade externa. Todos os resultados de
-*solo queue* vêm da fila ranqueada, nas faixas Challenger e Grandmaster,
-em cinco regiões coletadas, quatro delas com amostra suficiente para a
-leitura. Não há base para estender as taxas de vitória por
-lado, nem a acurácia do modelo, a outras filas, a outros níveis de elo
-ou a outros jogos, ainda que a arquitetura seja reaproveitável.
+**Validade externa.** Todos os resultados de *solo queue* vêm da fila
+ranqueada, nas faixas Challenger e Grandmaster, em cinco regiões
+coletadas, quatro delas com amostra suficiente para a leitura. Não há base
+para estender as taxas de vitória por lado nem a acurácia do modelo a
+outras filas, a outros níveis de elo ou a outros jogos, ainda que a
+arquitetura seja reaproveitável.
 
-A terceira limitação é de validade interna, e é de natureza temporal.
-As partidas foram coletadas em janelas de tempo delimitadas, e não
-amostradas aleatoriamente ao longo de todo o histórico disponível. Um
-padrão sazonal — mudanças de *patch*, eventos do cenário competitivo — pode
-portanto estar parcialmente confundido com o que os dados descrevem.
+**Validade interna.** As partidas foram coletadas em janelas de tempo
+delimitadas, e não amostradas aleatoriamente ao longo de todo o histórico
+disponível. Um padrão sazonal — mudanças de *patch*, eventos do cenário
+competitivo — pode portanto estar parcialmente confundido com o que os
+dados descrevem.
 
 Há ainda uma limitação técnica em aberto, que não foi resolvida e não
-deveria ser omitida. O modelo retreinado sobre a base ampliada
-reproduz a direção dos achados, mas subestima o viés de lado: nos cortes
-em que o jogo estava empatado, os dados brutos indicam predominância do
-time vermelho e o modelo projeta-se para taxas próximas de 50%. A
-investigação realizada não sustenta a hipótese de subajuste — a busca em
-grade completa sobre as 39 mil linhas escolheu a mesma profundidade de
-produção e ficou 0,0001 de AUC acima dela, e o teste das três alavancas
-que a grade não cobre (calibração, regularização alternativa e troca de
-família de modelo) só fecha a discrepância com a troca, ao custo de
-0,0005 de AUC (detalhado na Seção 5.8).
-O padrão é, portanto, uma limitação da função de decisão
-aprendida nesse recorte por esta família de modelo, e não um defeito de
-ajuste. A descrição
-completa está na Seção 5.8.
+deveria ser omitida: o modelo de produção subestima o viés de lado nos
+cortes em que o jogo estava empatado, projetando taxas próximas de 50%
+onde o dado bruto dá entre 46% e 48%. A investigação descartou subajuste e
+apontou a troca de família de modelo como a única correção, ao custo de
+0,0005 de AUC. Por ser uma questão de modelo e não de dado, ela está
+detalhada na Seção 5.8, onde também estão os números e o experimento.
 
 Uma fragilidade declarada na primeira versão deste texto foi resolvida e
 não permanece como limitação: a amostra da região NA1, então reduzida a

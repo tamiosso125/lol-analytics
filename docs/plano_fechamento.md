@@ -101,7 +101,7 @@ triplicou. Se o número mudou, atualizar; se não, citar a data.
 
 ## Bloco C — Polish
 
-### C1. Sobreposição entre 5.8 e 6.1 — ⏳ adiado
+### C1. Sobreposição entre 5.8 e 6.1 — ✅ feito (6.1: 527 → 412 palavras)
 
 A 5.8 tem **1.126 palavras**; a 6.1, **488**. O termo "subajuste" aparece
 nas duas. A 6.1 declara a sobreposição (*"A descrição completa está na
@@ -114,7 +114,7 @@ interna) e deixar a limitação técnica só na 5.8. Libera ~1 página.
 **Escolha sua:** com o corpo em 29 de 25–30, a folga não é urgente. Fazer
 só se o orientador pedir encurtar.
 
-### C2. Saída do Quadro 1 não arquivada — ⏳ adiado
+### C2. Saída do Quadro 1 não arquivada — ⏳ adiado (10 min)
 
 `docs/verifica_tcc.py` checagem 6 confronta o Quadro 1 com o banco, mas não
 salva a saída. O diário já apontava isso como pendência em 2026-10-03: *"não
@@ -140,7 +140,7 @@ sobrevive, o log não. Está correto — o log é derivado e regenerável.
 > Aqui não é-consertar. É trabalho novo, e a decisão é sobre o escopo do
 > TCC, não sobre o texto.
 
-### D1. Calibração forçada nunca foi testada — ⏳ AINDA ABERTO
+### D1. Calibração e regularização alternativa — ✅ medido em 2026-10-04
 
 É a lacuna real que eu mesmo abri ao medir o grid. A limitação da 5.8 é:
 o modelo projeta o empate para perto de 50% quando o dado bruto dá 46-48%.
