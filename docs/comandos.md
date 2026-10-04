@@ -65,6 +65,16 @@ preenchido (`RIOT_API_KEY`, `DATABASE_URL`, `ANTHROPIC_API_KEY`).
 # Coletar só de regiões específicas (N jogadores POR plataforma):
 .venv\Scripts\python.exe -m src.collect.collect_matches --platforms kr euw1 na1 --players 100 --matches-per-player 20
 
+# AMPLIAR uma região que já foi coletada — USE --skip-collected:
+.venv\Scripts\python.exe -m src.collect.collect_matches --platforms kr --players 500 --matches-per-player 20 --skip-collected
+
+#   Sem a flag, a rodada re-percorre o TOPO do ladder (ORDER BY
+#   league_points DESC), que já está inteiro, e cada partida é descartada
+#   por já estar no banco. Medido em 2026-10-04: 150 jogadores rendem 88
+#   partidas novas em 15 minutos. Com a flag, o filtro age ANTES do corte e
+#   desce no ladder até achar 500 jogadores que ainda não têm partida — que
+#   é o que amplia uma região de verdade.
+
 # Preencher nomes (game_name/tag_line) de quem tem >= N jogos:
 .venv\Scripts\python.exe -m src.collect.backfill_names --min-games 20
 ```
