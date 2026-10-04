@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -205,6 +206,32 @@ def check_quadro_regioes(t: str) -> None:
             """
         )
         real = {r[0]: (r[1], f"{r[2]:.1f}") for r in cur.fetchall()}
+        # ARQUIVA a saida. O diario apontou em 2026-10-03 que a medicao
+        # anterior "nao teve segunda execucao independente e a saida nao foi
+        # arquivada". Sem arquivo, o Quadro 1 so tem lastro em prosa — e foi
+        # assim que ele ficou com a NA1 desatualizada por duas rodadas de
+        # coleta sem ninguem perceber.
+        destino = RAIZ / "reports" / "stats_regions.txt"
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        # `linhas` JÁ é usada acima para as linhas do Quadro 1 lidas do
+        # texto — reutilizar o nome aqui sobrescreve e o `for` seguinte
+        # desempacota a lista errada. Por isso `saida`.
+        saida = [
+            "VITORIA DO TIME VERMELHO POR REGIAO — fila ranqueada 420",
+            f"medido em: {date.today().isoformat()}",
+            "",
+            "team_id = 200 (vermelho), agregado por partida antes de contar:",
+            "'win' e por jogador, cinco por partida, entao a media direta sobre",
+            "'participants' daria 50,0% em toda regiao por simetria.",
+            "",
+            f"{'regiao':<8}{'partidas':>10}{'vermelho':>12}",
+        ]
+        for nome, (n, p) in sorted(real.items(), key=lambda x: -x[1][0]):
+            saida.append(f"{nome:<8}{n:>10}{p + '%':>12}")
+        total = sum(n for n, _ in real.values())
+        saida.append(f"{'TOTAL':<8}{total:>10}")
+        destino.write_text("\n".join(saida) + "\n", encoding="utf-8")
+        print(f"  [OK] saida arquivada em {destino.name} ({total} partidas)")
     except Exception as exc:  # noqa: BLE001
         aviso(f"consulta regional falhou: {exc}")
         return

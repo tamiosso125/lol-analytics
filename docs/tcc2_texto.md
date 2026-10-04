@@ -1120,65 +1120,32 @@ reconhecida e discutida na próxima subseção.
   frágeis mesmo com 39.426 partidas — mitigado, onde aplicável, por
   encolhimento estatístico (*shrinkage*) em direção à média do grupo
   maior, mas não eliminado.
-- **A taxa-base do modelo em estado de empate subestima o viés de lado.**
+- **A taxa-base do modelo em estado de empate subestima o viês de lado.**
   Com o retreino de 39.188 partidas, a probabilidade prevista para o
   estado "tudo empatado" ficou em 49,2% (10 min), 49,6% (15 min), 51,4%
-  (20 min) e 49,0% (25 min). A medição direta sobre os dados brutos, entre
-  partidas genuinamente empatadas, dá 46,4% a 47,9% de vitória azul nos
-  mesmos cortes (Seção 5.3). As duas séries são planas, mas não concordam apenas em magnitude: aos 20
-  minutos o modelo projeta 51,4% de vitória azul, favorecendo o azul,
-  enquanto o dado bruto dá 46,7%, favorecendo o vermelho — é neste corte
-  que a inversão de sentido aparece. O modelo projeta o empate para perto
-  de 50%, e portanto **subestima o viés em todos os cortes (a diferença é de 1,7 a 4,7 pontos percentuais conforme o corte)**. A
-  discrepância não decorre de subajuste: uma busca em grade completa — 27
-  combinações de número de árvores, taxa de aprendizado e profundidade,
-  com validação cruzada estratificada de 5 *folds* — sobre as 39 mil
-  linhas escolheu a **mesma profundidade** de produção (3) e terminou
-  0,0001 de AUC acima dela, de 0,8473 para 0,8475, colocando a combinação
-  de produção em 2º lugar entre as 27. A diferença é uma casa decimal que
-  a própria variação entre *folds* produz.
-
-  A discrepância foi então submetida a um teste adicional, porque a grade
-  acima variou apenas número de árvores, taxa de aprendizado e
-  profundidade — e a discrepância é justamente de taxa-base, que esses
-  três eixos não alcançam. Três alavancas foram testadas no corte de 15
-  minutos, o de **menor** discrepância entre os quatro (1,7 pp), de modo
-  que é o caso mais favorável a uma correção: **calibração** da saída
-  (sigmoidal e isotônica), **regularização alternativa** do XGBoost
-  (`min_child_weight`, `gamma`, `subsample`) e **troca de família de
-  modelo**. O resultado é contra-intuitivo e vale ser relatado com
-  precisão. A calibração **piora** a discrepância (de 1,7 para 2,3 pp na
-  sigmoidal, que é justamente a técnica que se esperaria resolver um erro
-  de taxa-base), porque o estado de empate total fica fora da distribuição
-  observada e o calibrador extrapola para perto de 50%. A regularização
-  alternativa move o desvio dentro do ruído (1,6 a 1,8 pp). A única
-  variante que o fecha é a **troca de família**: uma *Random Forest* com
-  500 árvores e profundidade 6 leva a taxa-base de 49,6% para 48,5%,
-  reduzindo o desvio ao dado bruto de 1,7 para **0,6 pp**, ao custo de
-  0,0005 de AUC (0,8473 → 0,8468). A conclusão que a 5.8 registra é
-  então mais específica do que "não achou ajuste melhor": a discrepância
-  **não é um déficit de ajuste do XGBoost**, e sim uma propriedade da
-  função que essa família aprende neste recorte. Corrigi-la exige trocar de
-  modelo, e o custo medido é pequeno mas real — o que faz da troca uma
-  decisão de escopo, não um ajuste de parâmetro. O experimento está em
-  `docs/experimento_calibracao.py` e o veredito em
-  relatório em `reports/experimento_calibracao_veredito.json`.
-
-  Resta registrar por que a troca não foi adotada, já que ela está
-  disponível e é barata em desempenho: o critério de escolha do modelo de
-  produção foi a acurácia no corte de 15 minutos, e nela a *Random Forest*
-  fica em 0,7617 contra 0,7621 do XGBoost — diferença pequena, mas no
-  critério adotado a troca representaria perder o modelo de produção por
-  um ganho em um estado de jogo que a plataforma quase nunca exibe. A
-  manutenção do XGBoost é, portanto, uma decisão consciente e reversível: se a
-  taxa-base projetada passar a importar mais que a acurácia formal, o
-  modelo pode ser trocado sem retreinar nada, bastando reexecutar
-  `export_model` com a *Random Forest* de profundidade 6.
-
-  Trata-se de calibração em
-  estado degenerado — um ponto que o jogo real não produz com frequência
-  suficiente para ser bem Representado no treino —, e não de erro na
-  leitura da assimetria, que é medida diretamente dos dados.
+  (20 min) e 49,0% (25 min), enquanto a medição direta sobre os dados
+  brutos, entre partidas genuinamente empatadas, dá 46,4% a 47,9%
+  (Seção 5.3): uma diferença de **1,7 a 4,7 pontos percentuais
+  conforme o corte**. As duas séries não concordam apenas em magnitude —
+  aos 20 minutos o modelo projeta 51,4% de vitória azul, favorecendo o
+  azul, enquanto o dado bruto dá 46,7%, favorecendo o vermelho. A
+  discrepância não decorre de subajuste: uma busca em grade completa
+  (27 combinações, 5 *folds*) escolheu a **mesma profundidade** de
+  produção (3) e terminou 0,0001 de AUC acima dela, de 0,8473 para
+  0,8475, em 2º lugar entre as 27. Testadas as três alavancas que a grade
+  não cobre, a conclusão é contraintuitiva: a **calibração piora** a
+  discrepância (de 1,7 para 2,3 pp na sigmoidal), porque o estado de empate
+  total fica fora da distribuição observada e o calibrador o extrapola
+  para perto de 50%; a regularização alternativa move o desvio dentro do
+  ruído; e só a **troca de família** o fecha — uma *Random Forest* com
+  500 árvores e profundidade 6 leva o desvio a **0,6 pp** ao custo de
+  0,0005 de AUC. A discrepância é, portanto, uma propriedade da função que
+  o XGBoost aprende neste recorte, e não um défict de ajuste. A troca
+  não foi adotada porque o critério de escolha do modelo foi a
+  acurácia no corte de 15 min, e nela a *Random Forest* fica em 0,7617
+  contra 0,7621 — decisão consciente e reversível, sem retreino.
+  Comando e artefato: `docs/experimento_calibracao.py` e
+  `reports/experimento_calibracao_veredito.json`.
 - **Desequilíbrio de amostra por região**: após as rodadas adicionais de
   coleta (Seção 5.3), BR1 e EUW1 concentram a maior parte dos dados
   (11.936 e 11.744 partidas) e KR cresceu para 8.567; NA1, que permanecia

@@ -1,0 +1,14 @@
+VITORIA DO TIME VERMELHO POR REGIAO — fila ranqueada 420
+medido em: 2026-10-04
+
+team_id = 200 (vermelho), agregado por partida antes de contar:
+'win' e por jogador, cinco por partida, entao a media direta sobre
+'participants' daria 50,0% em toda regiao por simetria.
+
+regiao    partidas    vermelho
+BR1          11936       56.3%
+EUW1         11744       53.4%
+KR            8655       50.3%
+NA1           7159       52.2%
+EUN1            20       50.0%
+TOTAL        39514
