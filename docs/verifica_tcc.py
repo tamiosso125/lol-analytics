@@ -8,10 +8,7 @@ TEXTO E FORMATACAO
   2. toda referencia cruzada "Seção N.M" aponta para uma seção que existe;
   3. nenhuma tabela tem coluna com contagem incompatível com o cabeçalho;
   4. as referências ABNT estão em ordem alfabética e sem entradas duplicadas;
-  8. guard de RESÍDUO: nenhum valor substituído e nenhuma forma refutada
-     sobrou no texto — inclui o Abstract em inglês, que é montado no
-     pré-textual do .docx e vai impresso sem passar por revisão em português;
-  9. toda figura citada no corpo existe como legenda (NBR 14724);
+   9. toda figura citada no corpo existe como legenda (NBR 14724);
  10. a fonte declarada de cada figura bate com o Anexo A;
  11. nenhum anglicismo de prosa;
  13. nenhuma citação autor-data em caixa alta (NBR 10520).
@@ -21,8 +18,10 @@ NUMERO CONTRA ARTEFATO — a regra de ouro do projeto
      partida: `win` em `participants` é por jogador);
   7. o dataset profissional contra o banco (`pro_games` guarda duas linhas
      por jogo, então `COUNT(*)` devolve o dobro);
- 12. Abstract e Resumo contra os artefatos de métrica, exigindo as DUAS bases
-     que coexistem desde a rodada da KR;
+  8. o Abstract em inglês, no pré-textual do .docx, contra os artefatos de
+     métrica — exigindo as DUAS bases que coexistem desde a rodada da KR;
+ 12. a afirmação de não-subajuste contra `reports/tune_models_39k.json`
+     (delta de AUC e profundidade de árvore);
  14. a discrepância de taxa-base contra `reports/experimento_calibracao_veredito.json`;
  16. o intervalo de Wilson de cada região: o texto não pode uniformizar o que
      o intervalo não sustenta (a KR não exclui 50%);
@@ -395,8 +394,18 @@ def check_residuos(t: str) -> None:
         # Reserva: sem ela, um "**ABSTRACT:**" ou "**Abstract**:" desliga
         # silenciosamente as sete asercoes do Abstract e ainda sai com
         # exit 0. Cobertura que se pode desligar sem erro nao e cobertura.
-        m = _re.search(r"(?is)\babstract\b[^*\n]*\*{0,2}\s*(.{0,4000})", t)
-        if m:
+        #
+        # A reserva comeca DEPOIS do "## RESUMO" de proposito. Casar a
+        # primeira ocorrencia de "abstract" no arquivo pegava a linha 5, que
+        # e o bloco de instrucoes do editor ("-> Resumo/Abstract"): as
+        # asercoes disparavam contra o resumo em portugues e o diagnostico
+        # apontava para o texto errado.
+        pos = t.find("## RESUMO")
+        cauda = t[pos:] if pos >= 0 else t
+        achado = _re.search(r"(?is)\babstract\b[^*\n]*\*{0,2}\s*(.{0,4000})",
+                            cauda)
+        if achado:
+            abstrato = achado.group(1)
             aviso("Abstract encontrado por reserva, nao por '**Abstract:**' — "
                   "conferir a marcacao")
     if m is None:
@@ -834,6 +843,16 @@ def check_faixa_duracao(t: str) -> None:
               f"teste (ii) pulado: {exc}")
         return
 
+    # `amplitude_pp` tem de ser coerente com as faixas. Sem esta conferencia
+    # o JSON pode ter a amplitude editada e o texto acompanhar a edicao, e a
+    # 17 fica verde: ela amarrava as CONTAGENS ao banco, mas nao as TAXAS.
+    amplitude_calc = max(f["pct_azul"] for f in faixas) - min(
+        f["pct_azul"] for f in faixas)
+    if abs(round(amplitude_calc, 1) - float(artefato["amplitude_pp"])) > 0.05:
+        falha(f"teste (ii): o artefato declara amplitude "
+              f"{artefato['amplitude_pp']} pp, e as faixas medem "
+              f"{amplitude_calc:.1f} pp")
+
     base = f"{sum(int(f['jogos']) for f in faixas):,}".replace(",", ".")
     base_digitos = base.replace(".", "")
     rotulo = " / ".join(f"{p}% ({n})" for p, n in zip(pct_artefato, n_artefato))
@@ -868,7 +887,8 @@ def check_faixa_duracao(t: str) -> None:
     # (b) TODAS as frases-sintese, nao so a primeira
     padrao_sintese = (
         r"medido em \S+ sobre as ([\d.]+) partidas: ([\d,]+)%\s*a\s*([\d,]+)%"
-        r" entre as faixas de dura\u00e7\u00e3o,\s*amplitude de ([\d,]+) ponto")
+        r"\s+entre\s+as\s+faixas\s+de\s+dura\u00e7\u00e3o,\s*amplitude\s+de\s+"
+        r"([\d,]+)\s+ponto")
     sintetese = list(_re.finditer(padrao_sintese, t))
     if not sintetese:
         falha("teste (ii): nenhuma frase-sintese da faixa de duracao foi "
@@ -928,12 +948,21 @@ def check_faixa_duracao(t: str) -> None:
               f"{base}, amplitude {amplitude} pp")
 
 
+def _secao(t: str, titulo: str) -> str:
+    """Devolve o texto de uma secao de primeiro nivel, ate a proxima."""
+    i = t.find(titulo)
+    if i < 0:
+        return ""
+    prox = re.search(r"(?m)^#{1,3} ", t[i + len(titulo):])
+    return t[i:i + len(titulo) + prox.start()] if prox else t[i:]
+
+
 def check_bases_declaradas(t: str) -> None:
     """As DUAS bases tem que estar declaradas onde cada numero aparece.
 
     A checagem 17 protege o teste (ii). Esta protege o invariant que a rodada
-    da KR criou: a base descritiva (41.063) e a base de modelagem (39.426)
-    coexistem, e cada frase tem que dizer de qual base fala.
+    da KR criou: a base descritiva (41.063) e a base de modelagem coexistem,
+    e cada frase tem que dizer de qual base fala.
 
     O bug que a motivou: a Secao 5.2 abria com "A base usada para treinar e
     comparar os modelos preditivos (Secao 5.4) reune 39.188 partidas [...]
@@ -942,36 +971,45 @@ def check_bases_declaradas(t: str) -> None:
     explica as duas. Passava em qualquer revisao humana, porque 41.063 e o
     total real do banco.
 
-    Por isso a checagem amarra tres coisas: a frase que declara a base de
-    modelagem tem que citar 39.426 e nao 41.063; a nota das duas bases tem que
-    existir e citar as duas; e o RESUMO em portugues tambem — o Abstract
-    ingles ja e verificado pela 12, e um resumo que so declara uma das bases
-    encadeia "41.063 coletadas" com "os modelos foram treinados".
+    A base de modelagem e aceita em qualquer uma das duas formas verdadeiras:
+    39.426 (o banco no congelamento) ou 39.309 (as que viraram linha de
+    feature). O que nao pode aparecer ali e 41.063. Exigir o literal 39.426
+    obrigaria o texto a afirmar que 39.426 partidas alimentaram o modelo, o
+    que e verdade mais grosseira do que a que o modelo mediu.
+
+    O regex casa DENTRO da 5.2 e da 5.3, nao na primeira ocorrencia do
+    arquivo: uma frase nova com essa construcao antes da 5.2 — na
+    Introducao, por exemplo - passaria a ser a validada e a 5.2 ficaria
+    sem cobertura.
     """
     import re as _re
 
-    MODELAGEM = "39.426"
     DESCRITIVA = "41.063"
+    MODELAGEM = ("39.426", "39.309")
 
-    # (a) a frase que declara a base de modelagem
-    # o \** antes e depois: no markdown a base vem em negrito, e um padrao
-    # que nao admite o asterisco deixa de casar com a frase que quer vigiar
-    m = _re.search(r"provenientes d(?:e|as) \**([\d.]+)\** partidas", t)
-    if not m:
+    # (a) a frase que declara a base de modelagem, na 5.2 e na 5.3
+    declarada = None
+    for titulo in ("### 5.2", "### 5.3"):
+        bloco = _secao(t, titulo)
+        achado = _re.search(r"provenientes d(?:e|as) \**([\d.]+)\** partidas", bloco)
+        if achado:
+            declarada = (achado.group(1), t.find(bloco) + achado.start())
+    if declarada is None:
         falha("bases: a frase que declara a base de modelagem "
-              "('provenientes de N partidas') nao foi encontrada")
+              "('provenientes de N partidas') nao foi encontrada na 5.2 nem na 5.3")
     else:
-        declarado = m.group(1)
-        ln = t[: m.start()].count("\n") + 1
-        if declarado == DESCRITIVA:
+        numero, pos = declarada
+        ln = t[:pos].count("\n") + 1
+        if numero == DESCRITIVA:
             falha(f"bases L{ln}: a base de MODELAGEM esta declarada com "
                   f"{DESCRITIVA}, que e a base descritiva — e o erro que a "
                   f"checagem 18 existe para pegar")
-        elif declarado != MODELAGEM:
+        elif numero not in MODELAGEM:
             falha(f"bases L{ln}: a base de modelagem esta declarada como "
-                  f"{declarado}, e a base congelada e {MODELAGEM}")
+                  f"{numero}, e ela e {DESCRITIVA} (descritiva) ou uma de "
+                  f"{MODELAGEM} (modelagem)")
         else:
-            print(f"  base de modelagem declarada como {MODELAGEM}")
+            print(f"  base de modelagem declarada como {numero}")
 
     # (b) a nota que explica as duas bases
     i = t.find("Nota sobre as bases")
@@ -980,27 +1018,33 @@ def check_bases_declaradas(t: str) -> None:
     else:
         j = t.find("*)", i)
         nota = t[i:j if j > 0 else i + 1400]
-        if DESCRITIVA not in nota or MODELAGEM not in nota:
-            falta = [b for b in (DESCRITIVA, MODELAGEM) if b not in nota]
+        if DESCRITIVA not in nota or not any(b in nota for b in MODELAGEM):
+            falta = [b for b in (DESCRITIVA, *MODELAGEM) if b not in nota]
             falha(f"bases: a nota da Secao 5.3 nao cita {falta} — sem as duas o "
                   "leitor nao sabe qual numero descreve o que")
         else:
             print("  nota da Secao 5.3 cita as duas bases")
 
-    # (c) o RESUMO em portugues: a checagem 12 le so o Abstract ingles
+    # (c) o RESUMO em portugues, e SO ele: a varredura precisa parar no
+    # Abstract ingles, senao apagar o numero do resumo em portugues nao
+    # reprova nada — que e o bug que esta checagem existe para pegar
     i = t.find("## RESUMO")
-    if i >= 0:
-        j = t.find("\n## ", i + 5)
-        resumo = t[i:j if j > 0 else i + 5000]
-        if DESCRITIVA not in resumo or MODELAGEM not in resumo:
-            falta = [b for b in (DESCRITIVA, MODELAGEM) if b not in resumo]
+    if i < 0:
+        falha("bases: o RESUMO nao existe no texto")
+    else:
+        corte = t.find("**Abstract", i)
+        resumo = t[i:corte if corte > 0 else t.find("\n## ", i + 5)]
+        if DESCRITIVA not in resumo or not any(b in resumo for b in MODELAGEM):
+            falta = [b for b in (DESCRITIVA, *MODELAGEM) if b not in resumo]
             falha(f"bases: o RESUMO em portugues nao declara {falta} — o "
                   "Abstract ingles declara, e o resumo e a superficie que o "
                   ".md entrega")
         else:
             print("  RESUMO em portugues declara as duas bases")
 
-    # (d) a base descritiva tem que ser a que o banco tem
+    # (d) a base descritiva tem que SER a que o banco tem — comparar, e nao so
+    # imprimir. Sem esta comparacao a checagem avisaria nada na proxima rodada
+    # de coleta, que e quando o numero do texto envelhece.
     try:
         import sys as _sys
 
@@ -1011,8 +1055,13 @@ def check_bases_declaradas(t: str) -> None:
         cur.execute("SELECT COUNT(*) FROM matches WHERE queue_id = 420")
         real = cur.fetchone()[0]
         base_txt = f"{real:,}".replace(",", ".")
-        print(f"  banco: fila 420 com {base_txt} partidas "
-              f"(a base descritiva do texto e {DESCRITIVA})")
+        if base_txt != DESCRITIVA:
+            falha(f"bases: a base descritiva do texto e {DESCRITIVA} e a fila "
+                  f"420 do banco tem {base_txt} — ou o texto envelheceu, ou a "
+                  f"constante desta checagem envelheceu")
+        else:
+            print(f"  banco: fila 420 com {base_txt} partidas, que e a base "
+                  f"descritiva declarada")
     except Exception as exc:  # noqa: BLE001
         aviso(f"banco inacessivel, cruzamento das bases pulado: {exc}")
 

@@ -48,7 +48,8 @@ ranqueadas de elo alto (cinco regiões) via Riot Games API, e
 incorporadas 96.716 partidas profissionais (2014-2026, Oracle's
 Elixir). A análise descritiva usa a base completa; os modelos foram
 treinados sobre as 39.426 partidas disponíveis quando o conjunto de
-*features* foi congelado, diferença registrada como limitação na Seção 5.8.
+*features* foi congelado (39.309 delas chegaram a gerar linha de *feature*),
+diferença registrada como limitação na Seção 5.8.
 Três modelos — XGBoost, *Random Forest* e uma rede neural
 (MLP) — foram treinados e comparados para predizer o vencedor a partir
 do estado da partida em quatro cortes temporais (10, 15, 20 e 25
@@ -85,8 +86,9 @@ mechanisms. A total of 41,063 high-elo ranked matches (five regions)
 were collected and organized through the Riot Games API, complemented
 by 96,716 professional matches (2014-2026, Oracle's Elixir). The
 exploratory analysis uses all 41,063; the predictive models were built
-on the 39,426 matches available when the feature set was frozen, a
-difference registered as a limitation in Section 5.8. Three
+on the 39,426 matches available when the feature set was frozen, of
+which 39.309 produced a feature row, a difference registered as a
+limitation in Section 5.8. Three
 models — XGBoost, Random Forest and a neural network (MLP) — were
 trained and compared to predict the winning team from the match state
 at four time cutoffs (10, 15, 20 and 25 minutes), with XGBoost
@@ -912,7 +914,8 @@ viés, não o viés.
 Os quatro testes de robustez definidos na Seção 4.5 se aplicam todos aqui,
 com o desfecho de cada um. O teste (i), de replicação regional, restringe a
 análise à BR1 isoladamente e reproduz a assimetria, descartando mistura
-O teste (ii), de faixa de duração, confirma que a taxa de vitória
+regional como explicação. O teste (ii), de faixa de duração, confirma que a
+taxa de vitória
 incondicional do **azul** por faixa de duração total de partida
 permaneceu estável (medido em 2026-10-04 sobre as 41.063 partidas: 45,6%
 a 47,3% entre as faixas de duração, amplitude de 1,7 ponto percentual,

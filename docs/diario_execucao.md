@@ -3753,7 +3753,7 @@ contra a base de modelagem de 39.426, e não o rendimento da rodada.
 
 **O CÁLCULO QUE FECHA A QUESTÃO.** Para o IC da KR excluir 50% mantendo a
 taxa observada de 50,4%, seriam necessárias **60.025 partidas**
-(5.9× a amostra de KR, 1.5× toda a base do projeto),
+(5,9× a amostra de KR, 1,5× toda a base do projeto),
 pela mesma fórmula da Seção 5.8 — n = z²·0,25/(p−0,5)² com z de 95%. Se a
 taxa real da KR fosse 51,0%, bastariam 9.604 — menos que a amostra que já
 existe. Não sabemos qual das duas é, e é exatamente isso que o intervalo
@@ -3766,9 +3766,10 @@ o número estava 1,8× alto, e o multiplicador "12× a amostra de KR" saía 5,9�
 O erro não veio de fórmula errada, e sim de eu ter calculado com o número
 antigo e redigido com o novo — a mesma classe de erro que a frase "medido
 sobre as 41.063" com taxas de 39.426. Um número colado ao lado de outro
-número recém-alterado precisa ser recalculado, não reescrito. A afirmação qualificada da Seção 5.3 **não é uma ressalva temporária
-esperando coleta: é a resposta final.** Registrar isso é o que separa
-"faltou dados" de "o dado não sustenta".
+número recém-alterado precisa ser recalculado, não reescrito. A afirmação
+qualificada da Seção 5.3 **não é uma ressalva temporária esperando coleta: é a
+resposta final.** Registrar isso é o que separa "faltou dados" de "o dado não
+sustenta".
 
 **A CONCILIAÇÃO DOS QUATRO NÚMEROS, QUE ESTAVA INCOERENTE.** Durante a
 revisão do diff, o `stats_regions.txt` arquivado em `045fdc0` — que a checagem
@@ -3776,21 +3777,29 @@ revisão do diff, o `stats_regions.txt` arquivado em `045fdc0` — que a checage
 usava 8.567 e 39.426. Os dois não estavam errados: mediam coisas diferentes.
 Conciliando:
 
-| | partidas |
+| momento | partidas |
 |---|---:|
-| `matches` no congelamento das *features* | 39.514 |
+| `matches` quando as *features* foram congeladas (10:45) | 39.426 |
 | das quais produziram linha em `features_phases.csv` | 39.309 |
-| sem *features* naquela altura | 205 |
+| **sem *features* naquela altura** | **117** |
+| coletadas entre o congelamento e a medição de `045fdc0` | 88 |
+| `matches` na medição de `045fdc0` | 39.514 |
 | rodada da KR depois | 1.549 |
 | **`matches` hoje** | **41.063** |
 | **`features_phases.csv` hoje** (distintas) | **39.309** |
 | **sem *features* hoje** | **1.754** |
 
-205 + 1.549 = 1.754, e 1.647 (KR) + 59 (BR1) + 29 (EUW1) + 19 (NA1) = 1.754.
-Era esta reconciliação que faltava para o texto poder dizer com segurança
-"quase todas da KR" em vez de "todas", e para a limitação da 5.8 declarar que
-o modelo viu 39.309 partidas — e não 39.426, que é o total do banco na altura
-do congelamento e não o conjunto que virou linha de feature.
+117 + 88 + 1.549 = 1.754, e 1.647 (KR) + 59 (BR1) + 29 (EUW1) + 19 (NA1) =
+1.754.
+
+**A tabela precisou das duas âncoras porque há dois totais legítimos, e na
+primeira versão eu misturei os dois.** O TCC fala em 39.426, que é o banco no
+congelamento; o `stats_regions.txt` de `045fdc0` fala em 39.514, que é o banco
+quando aquela medição rodou — 88 partidas depois. Publicar a reconciliação
+só com o segundo númerointroduzia um terceiro valor para a mesma grandeza,
+que é exatamente a classe do bug crítico. As features nunca foram
+regeneradas depois das 10:45, então 39.309 é constante nas duas pontas: é ele
+que fecha as duas contas.
 
 **DECISÃO: MANTER A RODADA, NÃO REVERTER.** Duas bases passaram a coexistir,
 e a alternativa era escolher um número e esconder o outro:
@@ -3799,8 +3808,10 @@ e a alternativa era escolher um número e esconder o outro:
 - **base de modelagem** (features e modelos): **39.426**, das quais 39.309
   geraram *features* e 39.188 chegam ao corte de 15 minutos
 
-Não houve troca em bloco: das 20 ocorrências de 39.426 no texto, 13 viraram
-41.063 e **7 continuam 39.426** — a série de AUC por corte, o Apêndice C, o
+Não houve troca em bloco: das 20 ocorrências de 39.426 que o texto tinha antes
+desta rodada, 13 viraram 41.063. Sobraram **11 em português e 1 no Abstract em
+inglês**, todas em contexto legitimamente congelado — a série de AUC por corte,
+o Apêndice C, o
 benchmark do NLQ e as capturas do Anexo A foram medidos na base congelada, e
 dizer 41.063 neles seria falso. A nota que explica as duas entrou no início da
 5.3, e a limitação que ela prometeu foi registrada na 5.8: **o modelo não viu
