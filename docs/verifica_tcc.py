@@ -579,6 +579,90 @@ def check_calibracao(t: str) -> None:
               f"AUC {num(melhor['auc'])}")
 
 
+def check_regioes_significativas(t: str) -> None:
+    """Nenhuma região pode ser declarada pendente sem teste estatístico.
+
+    A Seção 5.3 afirmava que "as QUATRO regiões com amostra relevante
+    PENDEM para o vermelho, entre 50,3% e 56,3%". A KR fica em 50,3% com
+    intervalo de Wilson de 95% em [49,2%, 51,3%] — que INCLUI 50%. Na KR o
+    viés não é distinguível de zero, e "pende" está errado.
+
+    Isto é mais grave que os outros números corrigidos nesta rodada: é a
+    sustentação da generalização do achado. A pergunta "o viés é do elo alto
+    ou é do Brasil?" se responde pela consistência entre regiões, e a KR é
+    justamente a que não sustenta a resposta.
+
+    A checagem calcula os intervalos e falha se o texto afirmar uniforme
+    quando o dado não é.
+    """
+    import math
+    import re as _re
+
+    try:
+        import sys
+
+        sys.path.insert(0, str(RAIZ))
+        from src.db import get_conn  # noqa: PLC0415
+    except Exception as exc:  # noqa: BLE001
+        aviso(f"banco inacessivel,ICs por regiao pulados: {exc}")
+        return
+
+    def wilson(x: int, n: int, z: float = 1.96) -> tuple[float, float]:
+        p = x / n
+        d = 1 + z * z / n
+        c = (p + z * z / (2 * n)) / d
+        m = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+        return c - m, c + m
+
+    try:
+        cur = get_conn().cursor()
+        # team_id 200 = vermelho, agregado por partida: `win` é por jogador
+        cur.execute(
+            """
+            SELECT split_part(match_id,'_',1), COUNT(*),
+                   SUM(CASE WHEN v_red > 0 THEN 1 ELSE 0 END)
+            FROM (SELECT match_id, SUM(CASE WHEN win THEN 1 ELSE 0 END) AS v_red
+                  FROM participants WHERE team_id = 200 GROUP BY match_id) t
+            GROUP BY 1 HAVING COUNT(*) > 100
+            """
+        )
+        regioes = {r[0]: (r[1], r[2]) for r in cur.fetchall()}
+    except Exception as exc:  # noqa: BLE001
+        aviso(f"consulta regional falhou: {exc}")
+        return
+
+    nao_signif = []
+    for nome, (n, v) in sorted(regioes.items()):
+        lo, hi = wilson(v, n)
+        firme = (lo * 100 > 50) or (hi * 100 < 50)
+        if not firme:
+            nao_signif.append(nome)
+        marca = "exclui 50%" if firme else "**inclui 50%**"
+        print(f"    {nome:<6} {100*v/n:>5.1f}%  IC [{lo*100:.1f}%, {hi*100:.1f}%]  {marca}")
+
+    if not nao_signif:
+        print("  [OK] todas as regiões com amostra suficiente excluem 50%")
+        return
+
+    # Se alguma região não é significativa, o texto não pode dizer que todas
+    # "pendem" nem que a direção é "consistente nas quatro" sem qualificar.
+    uniforme = _re.findall(
+        r"as quatro regi\u00f5es[^.]*pendem|"
+        r"dire\u00e7\u00e3o\s+consistente nas quatro regi\u00f5es|"
+        r"as quatro regi\u00f5es com amostra relevante pendem",
+        t, _re.I)
+    if uniforme:
+        for m in uniforme:
+            falha(f"texto afirma as quatro regioes de forma uniforme, mas "
+                  f"{nao_signif} nao exclui 50%: {m[:64]!r}")
+    # E a ressalva tem de estar presente, com o número da região culpada.
+    if not any(r in t for r in nao_signif) or "inclui 50%" not in t:
+        falha(f"nenhuma ressalva no texto de que {nao_signif} tem intervalo "
+              "que inclui 50%")
+    if not any("KR" in f for f in FALHAS):
+        print(f"  [OK] texto qualifica: {nao_signif} tem IC que inclui 50%")
+
+
 def check_scripts_documentados() -> None:
     """Todo script executável do projeto tem de estar em `docs/comandos.md`.
 
@@ -668,6 +752,8 @@ def main() -> None:
     check_calibracao(t)
     print("15. Scripts que produzem medida estao em comandos.md")
     check_scripts_documentados()
+    print("16. Regioes: o texto nao pode uniformizar o que o IC nao sustenta")
+    check_regioes_significativas(t)
 
     print()
     print("=" * 66)

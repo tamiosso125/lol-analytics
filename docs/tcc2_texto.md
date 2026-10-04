@@ -842,12 +842,17 @@ Quadro — Vitória do time vermelho por região
 uma segunda rodada de coleta destinada especificamente a ampliar
 EUW1/KR/NA1, e depois por esta medição de 2026-10-04, quando EUW1 e
 KR já haviam quase dobrado novamente e a NA1 também foi ampliada. A
-direção do achado (as quatro
-regiões com amostra relevante pendem para o vermelho, entre 50,3% e
-56,3%) se manteve idêntica em todas as quatro medições — o que
-fortalece a leitura de "padrão de elo altíssimo em geral", não
-artefato de uma região com pouca amostra. BR1 não se alterou em nenhum
-dos quatro levantamentos. A NA1, que era o elo mais frágil da
+direção do achado (todas as quatro regiões com amostra relevante ficam
+do lado do vermelho, entre 50,3% e 56,3%) se manteve idêntica em todas as
+quatro medições. A força da evidência, porém, não é uniforme: **três das
+quatro** (BR1, EUW1 e NA1) têm taxa de vitória do vermelho cujo intervalo
+de 95% exclui 50%, e a KR fica em 50,3% com intervalo [49,2%, 51,3%],
+que o inclui — lá o viés não é estatisticamente distinguível de zero. É a
+BR1, que sozinha sustenta a assimetria com folga ([55,4%, 57,2%]), que
+carrega o argumento de que o padrão não é especificamente brasileiro. Isso
+fortalece a leitura de "padrão de elo altíssimo em geral" sem permitir
+afirmar que as quatro regiões o demonstram com a mesma força. BR1 não se
+alterou em nenhum dos quatro levantamentos. A NA1, que era o elo mais frágil da
 generalização, foi ampliada de 1.446 para 7.159 partidas na rodada final
 e a taxa do vermelho passou de 51,9% para 52,2% — a direção do achado não
 mudou, e a limitação saiu da Seção 5.8.)*
@@ -1180,8 +1185,10 @@ reconhecida e discutida na próxima subseção.
   em 1.446, foi ampliada para 7.159 na rodada final, o que reduz a assimetria
   entre regiões sem eliminá-la. O achado de viés de lado "generalizado ao
   elo alto, não específico do Brasil" é sustentado pela direção
-  consistente nas quatro regiões com amostra relevante, e a NA1 deixa de
-  ser o elo mais frágil da generalização.
+  consistente nas três regiões com evidência estatística firme, e a NA1 deixa de
+  ser o elo mais frágil da generalização. A ressalva é que a força da evidência não é uniforme: três
+  das quatro regiões têm taxa cujo intervalo de 95% exclui 50% e a KR fica
+  em 50,3%, com intervalo que a inclui.
 - **Cobertura desigual por versão do jogo** (*patch*): um único *patch*
   concentra a maior parte das partidas coletadas, o que limita a
   generalização dos achados para versões do jogo com balanceamento
@@ -1256,7 +1263,10 @@ trabalho, é o viés de lado. A hipótese inicial era que a modelagem
 preditiva operaria sobre um sinal qualquer de desempenho; o que a análise
 descritiva revelou é uma assimetria estrutural entre os dois lados do
 mapa, presente nas quatro regiões coletadas e com sinal inverso no
-jogo profissional. O valor disso para a comunidade é duplo. Por um
+jogo profissional — com a ressalva de que é estatisticamente firme
+em três delas (BR1, EUW1 e NA1) e apenas consistente em direção na KR,
+cuja taxa de 50,3% tem intervalo de confiança que inclui 50%. O valor
+disso para a comunidade é duplo. Por um
 lado, é um fator de confusão que qualquer modelo preditivo sobre *solo
 queue* precisa controlar, porque uma variável que distingue time azul
 de time vermelho sem nenhuma propriedade حقوقa do jogo é,

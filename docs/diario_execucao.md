@@ -3680,6 +3680,55 @@ custo de AUC < 0,001, e a reavaliacao esta em
 atual como sucesso nao e limiar, e noise floor.
 
 
+### A KR não sustenta o que o texto afirmava sobre ela
+
+Pergunta de encerramento: "só falta coletar mais?". A resposta foi não, e a
+verificação encontrou coisa mais séria que coleta.
+
+A Seção 5.3 afirmava que "as **quatro** regiões com amostra relevante
+**pendem** para o vermelho, entre 50,3% e 56,3%". Calculando o intervalo de
+Wilson de 95% de cada região:
+
+| região | partidas | vermelho | IC 95% | exclui 50% |
+|---|---:|---:|---|---|
+| BR1 | 11.936 | 56,3% | [55,4%, 57,2%] | sim |
+| EUW1 | 11.744 | 53,4% | [52,5%, 54,3%] | sim |
+| KR | 8.567 | 50,3% | [49,2%, 51,3%] | **não** |
+| NA1 | 7.159 | 52,2% | [51,1%, 53,4%] | sim |
+
+**Na KR o viês NÃO é estatisticamente distinguível de zero.** "Pende" está
+errado, e a direção consistente não pode ser tratada como evidência
+de que o padrão é do elo alto.
+
+Isto é mais grave que os outros numeros corrigidos nesta rodada porque é a
+**sustentação da generalização do achado**. A pergunta "o vies e do elo alto
+ou e do Brasil?" se responde pela consistência entre regiões, e a KR é
+justamente a que não sustenta a resposta. Tres regioes excluem 50% com
+folga; a quarta nao.
+
+Corrigido em tres lugares — nota de metodo do Quadro 1, Secao 5.8 e
+Conclusao. O texto agora diz que tres das quatro tem intervalo que exclui
+50%, nomeia a KR como a excecao, e atribui a BR1 ([55,4%, 57,2%]) o
+argumento de que o padrao nao e especificamente brasileiro. Isso NAO
+enfraquece o achado: BR1 sozinha ja o sustenta com folga, e afirmar
+"quatro de quatro" sem intervalo era o que estava errado.
+
+**O QUE ISSO MUDA SOBRE COLETAR MAIS.** A coleta na KR deixa de ser
+reforço e passa a ser **medição de risco**: com 8.567 partidas o intervalo
+tem ±1,1 pp, e ampliar pode fechar em torno de 50% — isto e, revelar que
+o vies nao existe na KR. Nao e reforço de evidencia, e um teste que pode
+sair negativo. Quemampliar a KR deve saber disso antes, e o objetivo
+declarado tem que ser fechar a questão, nao confirmar.
+
+**CHECAGEM 16.** `docs/verifica_tcc.py` calcula os intervalos por regiao e
+falha se o texto uniformizar o que o intervalo nao sustenta. Pegou uma
+formulacao residual na 5.8 que escapou da correcao manual.
+
+**LIMITE DE PAGINAS.** A ressalva empurrou o corpo para 31 paginas, fora da
+faixa. Condensada a duplicata da 5.8 e a propria ressalva, voltou a 30 —
+o teto, sem folga. Detalhe em `docs/plano_fechamento.md`.
+
+
 ### Ferramenta que evita a repetição
 
 `docs/verifica_tcc.py` roda 8 checagens antes de qualquer commit: CJK,
