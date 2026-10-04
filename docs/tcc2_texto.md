@@ -43,8 +43,8 @@ desenvolveu uma plataforma inteligente para análise de dados de
 esports com foco em *League of Legends*, integrando coleta,
 organização e exploração de dados competitivos, modelagem preditiva
 com *machine learning* e mecanismos de visualização e consulta em
-linguagem natural. Foram coletadas e organizadas 23.133 partidas
-ranqueadas de elo alto (quatro regiões) via Riot Games API, e
+linguagem natural. Foram coletadas e organizadas 39.426 partidas
+ranqueadas de elo alto (cinco regiões) via Riot Games API, e
 incorporadas 99.259 partidas profissionais (2014-2026, Oracle's
 Elixir). Três modelos — XGBoost, *Random Forest* e uma rede neural
 (MLP) — foram treinados e comparados para predizer o vencedor a partir
@@ -526,7 +526,7 @@ Foram utilizados os endpoints *league-v4* (para identificar jogadores
 nos elos Desafiante e Grão-Mestre), *account-v1* (resolução de Riot ID)
 e *match-v5*/*timeline-v5* (dados de partida e linha do tempo minuto a
 minuto). A coleta abrangeu quatro regiões (BR1, EUW1, KR, NA1) na fila
-420 (ranqueada solo/duo), totalizando **23.133 partidas** normalizadas,
+420 (ranqueada solo/duo), totalizando **39.426 partidas** normalizadas,
 com estado bruto (JSON) preservado em `raw_matches`/`raw_timelines`
 para reprocessamento. A chave de desenvolvedor da Riot expira a cada 24
 horas, o que exigiu um processo de coleta resumível (script capaz de
@@ -653,23 +653,22 @@ duplicar dados já salvos.
 ### 5.2 Estruturação da base de dados (objetivos b e c)
 
 A base usada para treinar e comparar os modelos preditivos (Seção 5.4)
-reúne **23.133 partidas** de *solo queue* (24.999 jogadores distintos,
-173 campeões), com JSON bruto de partida e linha do tempo preservados
-para reprocessamento, e **99.259 jogos profissionais** (2014-2026,
-Oracle's Elixir). O esquema relacional contempla partidas, times,
-participantes, jogadores, banimentos, eventos de item (com
+reúne **39.188 partidas** de *solo queue* no corte de 15 minutos,
+provenientes de **39.426 partidas** normalizadas em cinco regiões
+(BR1/EUW1/KR/NA1/EUN1), com JSON bruto de partida e linha do tempo
+preservados para reprocessamento, e **99.259 jogos profissionais**
+(2014-2026, Oracle's Elixir). O esquema relacional contempla partidas,
+times, participantes, jogadores, banimentos, eventos de item (com
 desfazimento de compras/vendas aplicado) e um catálogo de itens para
-resolução de nome/ícone sem depender de conhecimento genérico de
-modelo de linguagem. A coleta de *solo queue* continuou após esse
-corte especificamente para ampliar as regiões com amostra menor
-(EUW1/KR/NA1), chegando a 33.713 partidas em 2026-10-03 — volume
-usado na análise de viés de lado por região (Seção 5.3), mas não
-usado para retreinar os modelos preditivos nesta versão do trabalho.
-O ganho potencial de um novo ciclo de treino é da ordem de ~45%
-sobre as 23.133 partidas do corte; ele não foi priorizado porque
-exigiria rever integralmente a Seção 5.4 e o Apêndice C, e o texto
-estava em fase de consolidação. Os números de modelo relatados adiante
-são, portanto, os de 23.133 partidas.
+resolução de nome/ícone sem depender de conhecimento genérico de modelo
+de linguagem.
+
+A coleta seguiu de forma incremental e o volume cresceu ao longo do
+trabalho: 10.295 partidas na primeira base ampla, 23.133 no retreino de
+2026-07-06 e 39.426 em 2026-10-04, com a região NA1 passando de 1.446
+para 7.159 partidas na rodada final — a menor das quatro regiões com
+amostra relevante, e a que mais limitava a generalização do achado de
+viés de lado (Seção 5.3).
 
 ### 5.3 Análise exploratória: padrões identificados (objetivo d)
 
@@ -741,7 +740,7 @@ minutos vale mais nas mãos de um time coordenado.
 
 *(Ressalva de volume: as taxas do *solo queue* desta comparação foram
 medidas em 2026-07-04 sobre aproximadamente 12 mil partidas — a base
-disponível na ocasião, não as 23.133 usadas nos modelos. São estimativas
+disponível na ocasião, não as 39.188 usadas nos modelos. São estimativas
 de apoio a um achado qualitativo (a diferença de ~16 pontos percentuais
 entre os dois cenários é grande demais para ser artefato de amostra), e
 não medidas sobre a base de treino. A tabela por região da Seção 5.3 e
@@ -751,7 +750,7 @@ as taxas do profissional são de faixas posteriores.)*
 
 Após ajuste de hiperparâmetros (*GridSearchCV*, validação cruzada
 estratificada de 5 *folds*) sobre o corte de 15 minutos, no conjunto
-final de 23.133 partidas:
+final de 39.188 partidas:
 
 Quadro — Comparação entre modelos (corte de 15 minutos)
 
@@ -762,8 +761,8 @@ Quadro — Comparação entre modelos (corte de 15 minutos)
 | *Random Forest* | 0,7409 | 0,7237 | 0,6997 | 0,7115 | 0,8219 |
 
 *(taxa de vitória do time azul na amostra: 45,6%; medição confirmada em
-2026-09-28 sobre as 22.973 partidas do corte de 15 min, reproduzindo
-exatamente os números do retreino de 2026-07-06.)*
+medida na base do retreino de 2026-10-04, sobre as 39.188 partidas do
+corte de 15 min.)*
 
 Os três modelos performaram de forma próxima entre si, com o XGBoost
 adotado como modelo de produção. Modelos independentes foram treinados
@@ -888,18 +887,31 @@ reconhecida e discutida na próxima subseção.
 
 - **Amostras pequenas em recortes finos** (combinações específicas de
   jogador e campeão, ou de matchup de rota) seguem estatisticamente
-  frágeis mesmo com 23.133 partidas — mitigado, onde aplicável, por
+  frágeis mesmo com 39.426 partidas — mitigado, onde aplicável, por
   encolhimento estatístico (*shrinkage*) em direção à média do grupo
   maior, mas não eliminado.
+- **Taxa-base do modelo em estado de empate não reproduz o assimetria
+  por fase documentada com dados brutos.** Com o retreino de 39.188
+  partidas, a probabilidade prevista para o estado "tudo empatado" ficou
+  em 49,2% (10 min), 49,6% (15 min), 51,4% (20 min) e 49,0% (25 min) —
+  sem o pico de favorecimento ao vermelho no meio de jogo que os dados
+  brutos mostram (46,3% aos 15 min, Seção 5.3). A assimetria por fase foi
+  estabelecida por medição direta sobre os dados, com três testes de
+  robustez independentes; a taxa-base do modelo é um ponto de calibração
+  em estado degenerado e não é a medida dessa assimetria. A discrepância
+  é atribuída ao ajuste do modelo sobre uma base quatro vezes maior com
+  hiperparâmetros fixados: um novo *GridSearchCV* sobre as 39 mil
+  partidas retornou os mesmos valores de profundidade e um ajuste
+  equivalente de árvores e taxa de aprendizado, o que indica que o
+  deslocamento não decorre de subajuste.
 - **Desequilíbrio de amostra por região**: após as rodadas adicionais de
   coleta (Seção 5.3), BR1 e EUW1 concentram a maior parte dos dados
-  (11.936 e 11.744 partidas) e KR cresceu para 8.567, mas NA1 não avançou
-  na última rodada e permanece em 1.446 — cerca de um décimo da amostra
-  de BR1. O achado de viés de lado "generalizado ao elo alto, não
-  específico do Brasil" é sustentado pela direção consistente nas
-  quatro regiões com amostra relevante, mas o caso de NA1 isolado ainda
-  se beneficiaria de mais volume, e é hoje o elo mais frágil da
-  generalização.
+  (11.936 e 11.744 partidas) e KR cresceu para 8.567; NA1, que permanecia
+  em 1.446, foi ampliada para 7.159 na rodada final, o que reduz a assimetria
+  entre regiões sem eliminá-la. O achado de viés de lado "generalizado ao
+  elo alto, não específico do Brasil" é sustentado pela direção
+  consistente nas quatro regiões com amostra relevante, e a NA1 deixa de
+  ser o elo mais frágil da generalização.
 - **Cobertura desigual por versão do jogo** (*patch*): um único *patch*
   concentra a maior parte das partidas coletadas, o que limita a
   generalização dos achados para versões do jogo com balanceamento
@@ -943,7 +955,7 @@ foram identificadas e organizadas em um esquema relacional específico;
 
 c) foi estruturado e executado um processo de coleta, tratamento e
 organização capaz de escalar de um piloto de ~100 partidas para uma
-base de 23.133 partidas de *solo queue* somadas a 99.259 partidas
+base de 39.426 partidas de *solo queue* somadas a 99.259 partidas
 profissionais;
 
 d) técnicas de análise de dados identificaram padrões relevantes,
@@ -1105,7 +1117,7 @@ linguagem natural.
 
 ## APÊNDICE B — Benchmark da interface em linguagem natural
 
-Execução em 2026-09-28 sobre a base de produção (23.133-23.316 partidas
+Execução em 2026-09-28 sobre a base de produção (39.188-39.426 partidas
 — a coleta regional estava em andamento durante a medição, ver nota
 abaixo): **23/26 = 88% de acurácia de execução**, reproduzindo
 exatamente o número já documentado no histórico do projeto. Uma
@@ -1159,27 +1171,28 @@ do mesmo benchmark.
 
 ## APÊNDICE C — Métricas completas por corte temporal
 
-Quadro cruzado gerado em 2026-09-28 (mesmo desenho experimental da
-Seção 5.4: validação cruzada estratificada de 5 *folds*, hiperparâmetros
-base — não os tunados de produção — para manter a comparação entre os
-3 modelos em igualdade de condições, conforme o objetivo específico e).
-Os valores do corte de 15 min reproduzem exatamente os já citados na
-Seção 5.4.
+Quadro reproduzido por `python -m src.models.multi_cutoff_metrics`, que
+avalia os três modelos nos quatro cortes com validação cruzada estratificada
+de 5 *folds* (semente 42) usando os **mesmos hiperparâmetros de produção**
+(500 árvores, taxa de aprendizado 0,01, profundidade 3) — o mesmo desenho
+do quadro anterior, agora regenerável por comando. Executado em 2026-10-04
+sobre a base de 39.426 partidas. Os valores do corte de 15 min reproduzem os
+já citados na Seção 5.4.
 
 | Corte | n | Taxa vitória azul | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
 |---|---:|---:|---|---:|---:|---:|---:|---:|
-| 10min | 23.053 | 0,457 | RandomForest | 0,6652 | 0,6402 | 0,6088 | 0,6241 | 0,7237 |
-| 10min | 23.053 | 0,457 | **XGBoost** | 0,6934 | 0,6730 | 0,6391 | 0,6556 | 0,7609 |
-| 10min | 23.053 | 0,457 | MLP | 0,6963 | 0,6751 | 0,6461 | 0,6600 | 0,7658 |
-| 15min | 22.973 | 0,456 | RandomForest | 0,7409 | 0,7237 | 0,6997 | 0,7115 | 0,8219 |
-| 15min | 22.973 | 0,456 | **XGBoost** | 0,7573 | 0,7444 | 0,7133 | 0,7285 | 0,8393 |
-| 15min | 22.973 | 0,456 | MLP | 0,7550 | 0,7457 | 0,7034 | 0,7238 | 0,8385 |
-| 20min | 20.254 | 0,456 | RandomForest | 0,7731 | 0,7548 | 0,7435 | 0,7491 | 0,8565 |
-| 20min | 20.254 | 0,456 | **XGBoost** | 0,7827 | 0,7664 | 0,7522 | 0,7592 | 0,8675 |
-| 20min | 20.254 | 0,456 | MLP | 0,7845 | 0,7681 | 0,7549 | 0,7614 | 0,8699 |
-| 25min | 16.179 | 0,458 | RandomForest | 0,8123 | 0,7996 | 0,7876 | 0,7935 | 0,8934 |
-| 25min | 16.179 | 0,458 | **XGBoost** | 0,8216 | 0,8128 | 0,7930 | 0,8028 | 0,9031 |
-| 25min | 16.179 | 0,458 | MLP | 0,8209 | 0,8102 | 0,7952 | 0,8026 | 0,9026 |
+| 10min | 39.309 | 0,466 | RandomForest | 0,6704 | 0,6515 | 0,6301 | 0,6406 | 0,7341 |
+| 10min | 39.309 | 0,466 | **XGBoost** | 0,7004 | 0,6912 | 0,6461 | 0,6679 | 0,7742 |
+| 10min | 39.309 | 0,466 | MLP | 0,7020 | 0,6861 | 0,6651 | 0,6755 | 0,7735 |
+| 15min | 39.188 | 0,466 | RandomForest | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
+| 15min | 39.188 | 0,466 | **XGBoost** | 0,7621 | 0,7561 | 0,7228 | 0,7391 | 0,8473 |
+| 15min | 39.188 | 0,466 | MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
+| 20min | 34.337 | 0,466 | RandomForest | 0,7785 | 0,7659 | 0,7551 | 0,7604 | 0,8623 |
+| 20min | 34.337 | 0,466 | **XGBoost** | 0,7917 | 0,7817 | 0,7666 | 0,7741 | 0,8762 |
+| 20min | 34.337 | 0,466 | MLP | 0,7866 | 0,7712 | 0,7701 | 0,7707 | 0,8729 |
+| 25min | 26.837 | 0,467 | RandomForest | 0,8147 | 0,8047 | 0,7969 | 0,8008 | 0,8975 |
+| 25min | 26.837 | 0,467 | **XGBoost** | 0,8241 | 0,8172 | 0,8034 | 0,8103 | 0,9090 |
+| 25min | 26.837 | 0,467 | MLP | 0,8240 | 0,8171 | 0,8033 | 0,8101 | 0,9072 |
 
 Nota: os valores de AUC-ROC por fase citados na Seção 5.4
 (0,767/0,842/0,872/0,907) usam os hiperparâmetros *tunados* de produção

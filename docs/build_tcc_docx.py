@@ -26,6 +26,7 @@ import sys
 
 import docx
 from docx.enum.section import WD_SECTION
+from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -414,6 +415,9 @@ def numerar_quadros(doc) -> int:
                 corpo.remove(anterior)
         leg = _legenda(doc, "Quadro", titulo)
         tb.addprevious(leg._p)
+        larguras = LARGURAS_QUADROS.get(n)
+        if larguras:
+            ajustar_tabela(Table(tb, doc), larguras)
         fonte = _fonte(doc, FONTE_QUADROS)
         tb.addnext(fonte._p)
         n += 1
@@ -605,6 +609,46 @@ def ajustar_tipografia(doc) -> None:
     # a legenda de Quadro/Figura NÃO entra: recuo em legenda fica estranho
     # e a fonte das ilustrações é 9 pt (menor que o corpo), como nos aprovados.
     return aplicados
+
+
+def ajustar_tabela(tabela, larguras_cm: list[float]) -> None:
+    """Fixa larguras de coluna e reduz o corpo da tabela.
+
+    Sem isto o Word distribui as colunas por conteúdo e a coluna `#` de um
+    número de 1 dígito fica com um terço da largura da tabela — foi o que
+    denunciou o Quadro 3 (benchmark NLQ), em que a coluna de SQL devolvia a
+    largura que as outras não precisavam e as linhas ficavam altíssimas.
+    """
+    tabela.autofit = False
+    tabela.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for linha in tabela.rows:
+        for celula, larg in zip(linha.cells, larguras_cm):
+            celula.width = Cm(larg)
+            for p in celula.paragraphs:
+                p.paragraph_format.space_before = Pt(1)
+                p.paragraph_format.space_after = Pt(1)
+                p.paragraph_format.line_spacing = 1.0
+                for r in p.runs:
+                    r.font.name = "Arial"
+                    # 9 pt no corpo da tabela: 12 pt deixava o Quadro 3 com
+                    # 27 páginas de tabela, o que estourava o limite de 25-30
+                    r.font.size = Pt(9)
+    # repetem a largura no grid, que é o que o Word usa para renderizar
+    grid = tabela._tbl.find(qn("w:tblGrid"))
+    if grid is not None:
+        for col, larg in zip(grid.findall(qn("w:gridCol")), larguras_cm):
+            col.set(qn("w:w"), str(int(larg * 567)))  # cm -> twips
+
+
+# Larguras por quadro, em cm (soma ~16 cm = área útil entre margens 3+2).
+# O que o texto usa como legenda define a ordem das colunas.
+LARGURAS_QUADROS = {
+    0: [1.4, 3.6, 2.2, 2.6, 6.2],              # vitória do vermelho por região
+    1: [3.4, 2.5, 2.3, 2.1, 2.3, 3.4],         # comparação entre modelos
+    2: [0.8, 4.4, 7.4, 3.4],                    # benchmark NLQ (o problema)
+    3: [1.6, 1.6, 2.0, 2.4, 1.8, 1.8, 1.4, 1.4, 1.8],   # métricas por corte
+    4: [0.9, 6.1, 9.0],                         # experimentos negativos
+}
 
 
 def main() -> None:
