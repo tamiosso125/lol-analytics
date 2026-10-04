@@ -354,14 +354,15 @@ def check_residuos(t: str) -> None:
     # que vem logo apos o RESUMO como texto em ingles, e o monta no
     # pre-textual do .docx — ou seja, o que esta la vai impresso. Por isso
     # uma checagem so do corpo em portugues nao pega o Abstract.
-    m = _re.search(r"(?s)##\s*RESUMO(.*?)\n\*\*?Abstract\b|\*\*Abstract\b(.*)",
-                   t, _re.I)
-    abstrato = ""
-    if m:
-        abstrato = m.group(0)
-    else:
-        m2 = _re.search(r"(?s)Abstract\b(.{0,3000})", t)
-        abstrato = m2.group(0) if m2 else ""
+    # O Abstract comeca em "**Abstract:**" e termina na proxima secao de
+    # primeiro nivel. A extracao anterior usava uma alternancia cujo
+    # primeiro ramo casava de "## RESUMO" ate "**Abstract" — devolvia
+    # o RESUMO em PORTUGUES e nunca o trecho em ingles, que e o que vai
+    # para o pre-textual do .docx. Foi por isso que a checagem aceitava
+    # 39.426 (que estava no RESUMO) e rejeitava 41.063: ela checava o
+    # resumo, nao o abstract.
+    m = _re.search(r"(?s)\*\*Abstract:?\*\*(.*?)(?=\n##\s|\Z)", t)
+    abstrato = m.group(1) if m else ""
     if not abstrato:
         aviso("trecho do Abstract nao encontrado")
         return
@@ -371,8 +372,19 @@ def check_residuos(t: str) -> None:
     for pt, porque in PADROES_REFUTADOS:
         if _re.search(pt, abstrato, _re.I):
             falha(f"ABSTRACT repete a {porque}")
+    # O Abstract tem que declarar AS DUAS bases. Depois da rodada final de
+    # coleta da KR o banco tem 41.063 e os modelos foram construidos sobre
+    # 39.426; citar so uma deixa o leitor sem saber qual numero descreve o
+    # que. Exigir as duas e o que impede o Abstract de escolher o mais
+    # redondo e esconder o outro.
+    if not _re.search(r"41[.,]063", abstrato):
+        falha("ABSTRACT nao menciona a base descritiva (41.063)")
     if not _re.search(r"39[.,]426", abstrato):
-        falha("ABSTRACT nao menciona a base atual (39.426)")
+        falha("ABSTRACT nao menciona a base de modelagem (39.426) - sem ela "
+              "o leitor nao sabe que os dois numeros coexistem")
+    if not _re.search(r"limitation|limita", abstrato, _re.I):
+        falha("ABSTRACT declara as duas bases mas nao diz que a diferenca e "
+              "uma limitacao registrada")
     if not _re.search(r"0[.,]7621", abstrato):
         falha("ABSTRACT nao menciona a acuracia atual (0,7621)")
     if not _re.search(r"0[.,]8473", abstrato):

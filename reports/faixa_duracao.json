@@ -6,39 +6,39 @@
       "faixa": "0-25",
       "min": 0,
       "max": 25,
-      "jogos": 15122,
-      "pct_azul": 46.4
+      "jogos": 15944,
+      "pct_azul": 46.5
     },
     {
       "faixa": "25-30",
       "min": 25,
       "max": 30,
-      "jogos": 12836,
-      "pct_azul": 47.2
+      "jogos": 13314,
+      "pct_azul": 47.3
     },
     {
       "faixa": "30-35",
       "min": 30,
       "max": 35,
-      "jogos": 8120,
+      "jogos": 8364,
       "pct_azul": 46.4
     },
     {
       "faixa": "35-40",
       "min": 35,
       "max": 40,
-      "jogos": 2613,
+      "jogos": 2684,
       "pct_azul": 45.6
     },
     {
       "faixa": "40+",
       "min": 40,
       "max": null,
-      "jogos": 735,
-      "pct_azul": 46.4
+      "jogos": 757,
+      "pct_azul": 47.0
     }
   ],
-  "amplitude_pp": 1.6,
+  "amplitude_pp": 1.7,
   "todos_abaixo_de_50": true,
   "amplitude_ate_5pp": true
 }

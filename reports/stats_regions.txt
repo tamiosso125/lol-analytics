@@ -8,7 +8,7 @@ team_id = 200 (vermelho), agregado por partida antes de contar:
 regiao    partidas    vermelho
 BR1          11936       56.3%
 EUW1         11744       53.4%
-KR            8655       50.3%
+KR           10204       50.4%
 NA1           7159       52.2%
 EUN1            20       50.0%
-TOTAL        39514
+TOTAL        41063

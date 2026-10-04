@@ -43,7 +43,7 @@ desenvolveu uma plataforma inteligente para análise de dados de
 esports com foco em *League of Legends*, integrando coleta,
 organização e exploração de dados competitivos, modelagem preditiva
 com *machine learning* e mecanismos de visualização e consulta em
-linguagem natural. Foram coletadas e organizadas 39.426 partidas
+linguagem natural. Foram coletadas e organizadas 41.063 partidas
 ranqueadas de elo alto (cinco regiões) via Riot Games API, e
 incorporadas 96.716 partidas profissionais (2014-2026, Oracle's
 Elixir). Três modelos — XGBoost, *Random Forest* e uma rede neural
@@ -78,9 +78,12 @@ developed an intelligent platform for esports data analysis focused on
 *League of Legends*, integrating the collection, organization and
 exploration of competitive data, predictive modeling with *machine
 learning* techniques, and visualization and natural language query
-mechanisms. A total of 39,426 high-elo ranked matches (five regions)
+mechanisms. A total of 41,063 high-elo ranked matches (five regions)
 were collected and organized through the Riot Games API, complemented
-by 96,716 professional matches (2014-2026, Oracle's Elixir). Three
+by 96,716 professional matches (2014-2026, Oracle's Elixir). The
+exploratory analysis uses all 41,063; the predictive models were built
+on the 39,426 matches available when the feature set was frozen, a
+difference registered as a limitation in Section 5.8. Three
 models — XGBoost, Random Forest and a neural network (MLP) — were
 trained and compared to predict the winning team from the match state
 at four time cutoffs (10, 15, 20 and 25 minutes), with XGBoost
@@ -666,7 +669,7 @@ nos elos Desafiante e Grão-Mestre), *account-v1* (resolução de Riot ID)
 e *match-v5*/*timeline-v5* (dados de partida e linha do tempo minuto a
 minuto). A coleta abrangeu cinco regiões (BR1, EUW1, KR, NA1 e EUN1, esta
 última com amostra insuficiente e excluída da leitura) na fila
-420 (ranqueada solo/duo), totalizando **39.426 partidas** normalizadas,
+420 (ranqueada solo/duo), totalizando **41.063 partidas** normalizadas,
 com estado bruto (JSON) preservado em `raw_matches`/`raw_timelines`
 para reprocessamento. A chave de desenvolvedor da Riot expira a cada 24
 horas, o que exigiu um processo de coleta resumível (script capaz de
@@ -803,7 +806,7 @@ duplicar dados já salvos.
 
 A base usada para treinar e comparar os modelos preditivos (Seção 5.4)
 reúne **39.188 partidas** de *solo queue* no corte de 15 minutos,
-provenientes de **39.426 partidas** normalizadas em cinco regiões
+provenientes de **41.063 partidas** normalizadas em cinco regiões
 (BR1/EUW1/KR/NA1/EUN1), com JSON bruto de partida e linha do tempo
 preservados para reprocessamento, e **96.716 jogos profissionais**
 (2014-2026, Oracle's Elixir). O esquema relacional contempla partidas,
@@ -814,17 +817,30 @@ de linguagem.
 
 A coleta seguiu de forma incremental e o volume cresceu ao longo do
 trabalho: 10.295 partidas na primeira base ampla, 23.133 no retreino de
-2026-07-06 e 39.426 em 2026-10-04, com a região NA1 passando de 1.446
+2026-07-06, 39.426 em 2026-10-04 e 41.063 ao fim do dia, com a região NA1 passando de 1.446
 para 7.159 partidas na rodada final — a menor das quatro regiões com
 amostra relevante, e a que mais limitava a generalização do achado de
 viés de lado (Seção 5.3).
 
 ### 5.3 Análise exploratória: padrões identificados (objetivo d)
 
+*(Nota sobre as bases usadas nesta seção e na modelagem: a análise
+descritiva — este quadro, o viês de lado e o teste de duração — foi
+medida sobre as **41.063 partidas** que o banco tem ao fim da coleta. As
+*features* e os modelos foram construídos antes da última rodada de KR e
+usam as **39.426 partidas** da base anterior; por isso a Seção 5.4 e o
+Apêndice C citam 39.426, e a diferença de 1.637 partidas é da KR. Os
+modelos não foram retreinados sobre a base nova: a 1.637 partidas a mais
+alterariam a amostra de treino em cerca de 4%, o que é dentro do que a
+própria discussão de volume mediu como ganho real, mas não justifica
+descartar um modelo cujo desempenho já foi medido e validado. E uma
+limitação declarada, registrada na Seção 5.8.)*
+
+
 **Viés de lado no *solo queue* de elo alto.** No agregado das cinco
 regiões coletadas, o time vermelho venceu com mais frequência que o
 azul, com intensidade variável por região. Medição direta em SQL,
-2026-10-04, sobre as 39.426 partidas da base final (o volume foi ampliado
+2026-10-04, sobre as 41.063 partidas da base final (o volume foi ampliado
 especificamente para fortalecer este quadro — ver nota de método abaixo):
 
 Quadro — Vitória do time vermelho por região
@@ -833,7 +849,7 @@ Quadro — Vitória do time vermelho por região
 |---|---:|---:|
 | BR1 | 11.936 | 56,3% |
 | EUW1 | 11.744 | 53,4% |
-| KR | 8.567 | 50,3% |
+| KR | 10.204 | 50,4% |
 | NA1 | 7.159 | 52,2% |
 | EUN1 | 20 | 50,0% (amostra insuficiente, não considerada) |
 
@@ -843,10 +859,10 @@ uma segunda rodada de coleta destinada especificamente a ampliar
 EUW1/KR/NA1, e depois por esta medição de 2026-10-04, quando EUW1 e
 KR já haviam quase dobrado novamente e a NA1 também foi ampliada. A
 direção do achado (todas as quatro regiões com amostra relevante ficam
-do lado do vermelho, entre 50,3% e 56,3%) se manteve idêntica em todas as
+do lado do vermelho, entre 50,4% e 56,3%) se manteve idêntica em todas as
 quatro medições. A força da evidência, porém, não é uniforme: **três das
 quatro** (BR1, EUW1 e NA1) têm taxa de vitória do vermelho cujo intervalo
-de 95% exclui 50%, e a KR fica em 50,3% com intervalo [49,2%, 51,3%],
+de 95% exclui 50%, e a KR fica em 50,4% com intervalo [49,5%, 51,4%],
 que o inclui — lá o viés não é estatisticamente distinguível de zero. É a
 BR1, que sozinha sustenta a assimetria com folga ([55,4%, 57,2%]), que
 carrega o argumento de que o padrão não é especificamente brasileiro. Isso
@@ -860,7 +876,7 @@ mudou, e a limitação saiu da Seção 5.8.)*
 **O viés de lado é estável ao longo da partida — e essa constância é o
 resultado.** Uma primeira versão deste texto afirmava que o viés atingia um
 pico no meio do jogo e se enfraqueceria até o fim. A medição sobre a base
-ampliada de 39.426 partidas **não confirma essa forma**, e o resultado
+ampliada de 41.063 partidas **não confirma essa forma**, e o resultado
 negativo é relatado aqui em vez de omitido.
 
 Entre as partidas genuinamente empatadas em cada corte (diferença de ouro
@@ -891,7 +907,7 @@ com o desfecho de cada um. O teste (i), de replicação regional, restringe a
 análise à BR1 isoladamente e reproduz a assimetria, descartando mistura
 regional como explicação. O teste (ii), de faixa de duração, confirma que a
 taxa de vitória incondicional por faixa de duração total de partida
-permaneceu estável (medido em 2026-10-04 sobre as 39.426 partidas: 45,6%
+permaneceu estável (medido em 2026-10-04 sobre as 41.063 partidas: 45,6%
 a 47,2% entre as faixas de duração, amplitude de 1,6 ponto percentual,
 todas abaixo de 50%), o que descarta a hipótese de que "partidas
 longas são um tipo diferente de jogo". O teste (iii), o intervalo de Wilson,
@@ -983,7 +999,8 @@ escolha não decorre de vantagem em todos os cortes, e sim de comportamento
 consistente na faixa em que a previsão é usada. Modelos independentes
 foram treinados para os quatro cortes temporais, com desempenho crescente
 conforme a partida avança (medido com os hiperparâmetros de produção, sobre
-a base de 39.426 partidas): AUC-ROC de 0,774 (10min), 0,847 (15min), 0,876
+a base de 39.426 partidas, congelada antes da rodada final): AUC-ROC de
+  0,774 (10min), 0,847 (15min), 0,876
 (20min) e 0,909 (25min) — resultado
 esperado, já que mais informação está disponível em cortes mais
 tardios, mas que só se sustenta porque um modelo *por fase* foi
@@ -1117,7 +1134,7 @@ reconhecida e discutida na próxima subseção.
 
 - **Amostras pequenas em recortes finos** (combinações específicas de
   jogador e campeão, ou de matchup de rota) seguem estatisticamente
-  frágeis mesmo com 39.426 partidas — mitigado, onde aplicável, por
+  frágeis mesmo com 41.063 partidas — mitigado, onde aplicável, por
   encolhimento estatístico (*shrinkage*) em direção à média do grupo
   maior, mas não eliminado.
 - **A taxa-base do modelo em estado de empate subestima o viês de lado.**
@@ -1146,16 +1163,27 @@ reconhecida e discutida na próxima subseção.
   contra 0,7621 — decisão consciente e reversível, sem retreino.
   Comando e artefato: `docs/experimento_calibracao.py` e
   `reports/experimento_calibracao_veredito.json`.
+- **O modelo não viu a última rodada de coleta.** As *features* e a
+  modelagem foram construídas sobre 39.426 partidas, e a base do banco tem
+  41.063 — uma diferença de 1.637 partidas, todas da KR. A discussão de
+  volume da Seção 5.4 mediu que o ganho de AUC por volume é da ordem de
+  0,001 por acréscimo relevante, o que situa o efeito desta diferença
+  abaixo do que aquela discussão mediu como ganho real, mas não nulo.
+  Retreinar foi deixado de fora porque o desempenho do modelo atual já
+  está medido e validado contra o Apêndice C e a bateria comportamental, e
+  refazê-lo invalidaria as duas coisas sem ganho apurado. Fica registrado
+  como limitação, e não escondido: quem quiser o modelo treinado sobre a
+  base completa reexecuta `train_baseline` e `export_model`.
 - **Desequilíbrio de amostra por região**: após as rodadas adicionais de
   coleta (Seção 5.3), BR1 e EUW1 concentram a maior parte dos dados
-  (11.936 e 11.744 partidas) e KR cresceu para 8.567; NA1, que permanecia
+  (11.936 e 11.744 partidas) e KR cresceu para 10.204; NA1, que permanecia
   em 1.446, foi ampliada para 7.159 na rodada final, o que reduz a assimetria
   entre regiões sem eliminá-la. O achado de viés de lado "generalizado ao
   elo alto, não específico do Brasil" é sustentado pela direção
   consistente nas três regiões com evidência estatística firme, e a NA1 deixa de
   ser o elo mais frágil da generalização. A ressalva é que a força da evidência não é uniforme: três
   das quatro regiões têm taxa cujo intervalo de 95% exclui 50% e a KR fica
-  em 50,3%, com intervalo que a inclui.
+  em 50,4%, com intervalo que a inclui.
 - **Cobertura desigual por versão do jogo** (*patch*): um único *patch*
   concentra a maior parte das partidas coletadas, o que limita a
   generalização dos achados para versões do jogo com balanceamento
@@ -1203,7 +1231,7 @@ foram identificadas e organizadas em um esquema relacional específico;
 
 c) foi estruturado e executado um processo de coleta, tratamento e
 organização capaz de escalar de um piloto de ~100 partidas para uma
-base de 39.426 partidas de *solo queue* somadas a 96.716 partidas
+base de 41.063 partidas de *solo queue* somadas a 96.716 partidas
 profissionais;
 
 d) técnicas de análise de dados identificaram padrões relevantes,
@@ -1232,7 +1260,7 @@ descritiva revelou é uma assimetria estrutural entre os dois lados do
 mapa, presente nas quatro regiões coletadas e com sinal inverso no
 jogo profissional — com a ressalva de que é estatisticamente firme
 em três delas (BR1, EUW1 e NA1) e apenas consistente em direção na KR,
-cuja taxa de 50,3% tem intervalo de confiança que inclui 50%. O valor
+cuja taxa de 50,4% tem intervalo de confiança que inclui 50%. O valor
 disso para a comunidade é duplo. Por um
 lado, é um fator de confusão que qualquer modelo preditivo sobre *solo
 queue* precisa controlar, porque uma variável que distingue time azul
@@ -1688,12 +1716,12 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
      Limite de páginas do TCC II: **25 a 30 páginas**, não contando
      apêndices/anexos.
 6. ~~Ampliar a coleta EUW1/KR/NA1~~ — **feito**: EUW1 1.307→11.744
-   partidas, KR 1.308→8.567 e **NA1 1.446→7.159** (a NA1 foi ampliada na
+   partidas, KR 1.308→10.204 e **NA1 1.446→7.159** (a NA1 foi ampliada na
    rodada final de 2026-10-04; a limitação que ela representava saiu da
    Seção 5.8). Quadro de viés de lado por região remedido com dados de
    2026-10-04 (Seção 5.3) e verificado por SQL direto contra o valor
-   mostrado no *dashboard*: BR1 56,3%, EUW1 53,4%, KR 50,3%, NA1 52,2% de
-   vitória do time vermelho, sobre 39.426 partidas.
+   mostrado no *dashboard*: BR1 56,3%, EUW1 53,4%, KR 50,4%, NA1 52,2% de
+   vitória do time vermelho, sobre 41.063 partidas.
 
 **Status (2026-10-04):** de 6 pendências, **6 estão fechadas**. **Nenhuma
 depende do orientador.** As duas decisões de escopo (título acadêmico e
