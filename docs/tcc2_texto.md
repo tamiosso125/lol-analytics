@@ -808,8 +808,8 @@ viés de lado (Seção 5.3).
 **Viés de lado no *solo queue* de elo alto.** No agregado das cinco
 regiões coletadas, o time vermelho venceu com mais frequência que o
 azul, com intensidade variável por região. Medição direta em SQL,
-2026-10-03, sobre 33.713 partidas (volume ampliado especificamente
-para fortalecer este quadro — ver nota de método abaixo):
+2026-10-04, sobre as 39.426 partidas da base final (o volume foi ampliado
+especificamente para fortalecer este quadro — ver nota de método abaixo):
 
 Quadro — Vitória do time vermelho por região
 
@@ -818,7 +818,7 @@ Quadro — Vitória do time vermelho por região
 | BR1 | 11.936 | 56,3% |
 | EUW1 | 11.744 | 53,4% |
 | KR | 8.567 | 50,3% |
-| NA1 | 1.446 | 51,9% |
+| NA1 | 7.159 | 52,2% |
 | EUN1 | 20 | 50,0% (amostra insuficiente, não considerada) |
 
 *(Nota de método: quadro original — medido em 2026-07-06 com BR1
@@ -1494,11 +1494,15 @@ de *feature*.
 
 ## ANEXO A — Capturas de tela da plataforma
 
-Geradas em 2026-09-28 via Playwright (Chromium, 1440×900, página
-inteira) contra a API e o *frontend* rodando localmente com dados de
-produção (24.154 partidas no momento da captura). Arquivos em
-`reports/anexo_a/` (não versionados neste Markdown — inserir como
-figura ao converter para o `.docx` final):
+Geradas em 2026-10-04 via Playwright (Chromium, 1440 px de largura, altura
+ajustada à página, sem `full_page`) contra a API e o *frontend* rodando
+localmente com dados de produção — 39.426 partidas no momento da captura,
+as mesmas da Seção 5.3. As capturas anteriores, de 2026-09-28, foram feitas
+com 24.154 partidas e foram substituídas: o Dashboard anterior exibia a
+tabela regional com NA1 = 1.446, em contradição com os 7.159 que o texto
+afirma. Arquivos em `reports/anexo_a/` (não versionados neste Markdown —
+inserir como figura ao converter para o `.docx` final). O comando que as
+regera é `python docs/recapturar_anexo_a.py`.
 
 | Arquivo | Página |
 |---|---|
@@ -1585,12 +1589,12 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
      Limite de páginas do TCC II: **25 a 30 páginas**, não contando
      apêndices/anexos.
 5. ~~Ampliar a coleta EUW1/KR/NA1~~ — **feito**: EUW1 1.307→11.744
-   partidas, KR 1.308→8.567 (NA1 ficou em 1.446 mesmo após duas novas
-   rodadas — anotado como limitação, não re-executado de novo). Quadro
-   de viés de lado por região remedido com dados de 2026-10-03
-   (Seção 5.3) e verificado por SQL direto contra o valor mostrado no
-   *dashboard* (metodologia registrada em memória do projeto:
-   `feedback_verify_dashboard_numbers`).
+   partidas, KR 1.308→8.567 e **NA1 1.446→7.159** (a NA1 foi ampliada na
+   rodada final de 2026-10-04; a limitação que ela representava saiu da
+   Seção 5.8). Quadro de viés de lado por região remedido com dados de
+   2026-10-04 (Seção 5.3) e verificado por SQL direto contra o valor
+   mostrado no *dashboard*: BR1 56,3%, EUW1 53,4%, KR 50,3%, NA1 52,2% de
+   vitória do time vermelho, sobre 39.426 partidas.
 
 **Status (2026-10-04):** de 6 pendências, **6 estão fechadas**. **Nenhuma
 depende do orientador.**

@@ -155,6 +155,69 @@ def check_numeros_modelo(t: str) -> None:
         print(f"  [OK] AUC do XGBoost ({auc_txt}) confere com o relatorio")
 
 
+def check_quadro_regioes(t: str) -> None:
+    """O Quadro 1 (vitória do vermelho por região) tem que bater com o banco.
+
+    Já aconteceu: a tabela ficou com NA1 = 1.446 / 51,9% enquanto o banco
+    já tinha 7.159 / 52,2%. Duas rodadas de coleta depois, a tabela ainda
+    descrevia a base antiga — e era o único lugar do documento onde a
+    fragilidade da NA1 continuava visível ao leitor. Se o banco não estiver
+    acessível, isso vira aviso e não falha: a checagem é adicional.
+    """
+    import re as _re
+
+    linhas = _re.findall(r"(?m)^\| (BR1|EUW1|KR|NA1|EUN1) \| ([\d.]+) \| ([\d,]+)%", t)
+    if not linhas:
+        aviso("Quadro 1 por regiao nao encontrado no texto")
+        return
+    try:
+        import sys
+
+        sys.path.insert(0, str(RAIZ))
+        from src.db import get_conn  # noqa: PLC0415
+    except Exception as exc:  # noqa: BLE001
+        aviso(f"banco inacessivel, comparacao regional pulada: {exc}")
+        return
+    try:
+        cur = get_conn().cursor()
+        # team_id 200 = vermelho. Filtrar por ele e testar v_red > 0 e o que
+        # faz a taxa cair a 50,0% em toda regiao quando se mede sobre
+        # `participants` direto: `win` e por jogador, e a media de uma coluna
+        # que soma cinco por partida e sempre 50% por simetria.
+        cur.execute(
+            """
+            SELECT split_part(match_id,'_',1),
+                   COUNT(*),
+                   ROUND(100.0*AVG(CASE WHEN v_red > 0 THEN 1 ELSE 0 END)::numeric, 1)
+            FROM (SELECT match_id, SUM(CASE WHEN win THEN 1 ELSE 0 END) AS v_red
+                  FROM participants WHERE team_id = 200 GROUP BY match_id) t
+            GROUP BY 1
+            """
+        )
+        real = {r[0]: (r[1], f"{r[2]:.1f}") for r in cur.fetchall()}
+    except Exception as exc:  # noqa: BLE001
+        aviso(f"consulta regional falhou: {exc}")
+        return
+
+    for regiao, n_txt, pct_txt in linhas:
+        if regiao not in real:
+            aviso(f"Quadro 1 cita {regiao}, que nao existe no banco")
+            continue
+        n_real, pct_real = real[regiao]
+        n_txt = n_txt.replace(".", "")
+        # o texto escreve "56,3%" e o banco devolve 56.3 — normalizar os dois
+        # para float, senao a comparacao quebra em ValueError e a checagem
+        # morre em vez de dizer o que divergiu.
+        if abs(float(pct_txt.replace(",", ".")) - float(pct_real)) > 0.05:
+            falha(f"Quadro 1: {regiao} com {pct_txt}% no texto, "
+                  f"{pct_real}% no banco")
+        if int(n_txt) != int(n_real):
+            falha(f"Quadro 1: {regiao} com {int(n_txt)} partidas no texto, "
+                  f"{n_real} no banco")
+    if not any("Quadro 1" in f for f in FALHAS):
+        print(f"  [OK] Quadro 1 confere com o banco ({len(linhas)} regioes)")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -171,6 +234,8 @@ def main() -> None:
     check_ordem_referencias(t)
     print("5. Numeros de modelo x relatorio")
     check_numeros_modelo(t)
+    print("6. Quadro 1 (regioes) x banco")
+    check_quadro_regioes(t)
 
     print()
     print("=" * 66)
