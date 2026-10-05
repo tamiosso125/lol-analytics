@@ -1,5 +1,14 @@
 # Plano de fechamento — o que falta
 
+> **DOCUMENTO HISTÓRICO — datado de 2026-10-04, superseded no mesmo dia.**
+> Os números de estado abaixo (57 páginas, corpo 29, base de 39.426) eram
+> verdade quando o plano foi escrito e **não descrevem o entregável atual**,
+> que está em 58 páginas, corpo 30 e duas bases declaradas (41.063
+> descritiva, 39.426 de modelagem). O plano foi mantido como registro do que
+> foi fechado e de como, não como lista de pendências: os itens marcados
+> ✅ estão feitos e os que não estão foram resolvidos por outros caminhos.
+> Para o estado atual, ver `docs/diario_execucao.md` e `docs/handoff.md`.
+
 **Data:** 2026-10-04
 **Estado do entregável:** 57 páginas, corpo 29 (faixa 25-30), 5 Quadros,
 6 Figuras, 18 referências. `smoke`, `validate_predictions`, `verifica_tcc`

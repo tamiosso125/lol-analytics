@@ -8,7 +8,19 @@ texto, pois SQLs diferentes podem ser equivalentes).
 Métrica: taxa de acerto (execution accuracy), reportável no TCC II.
 
 Uso:  python -m src.nlq.evaluate_nlq
+
+Grava: reports/nlq_benchmark.json
+
+O arquivo passou a ser gravado em 2026-10-04 porque o Apêndice B do TCC
+publicava 23/26 sem artefato nenhum: o script so imprimia, e o numero vivia
+na saida de console e no diario. O JSON carrega a contagem de partidas da
+fila 420 porque um benchmark sem base declarada nao diz sobre o que ele
+mediu.
 """
+import json
+from datetime import date
+from pathlib import Path
+
 from src.nlq.nl_to_sql import generate_sql, run_query, validate_sql
 
 # >= 20 perguntas (exigência da banca), cobrindo agregações simples,
@@ -156,9 +168,25 @@ def normalize(rows: list[tuple]) -> set:
     return out
 
 
+def _contagem_partidas() -> int:
+    """Partidas na fila ranqueada, que e a base que o TCC declara.
+
+    Sem isto o artefato nao diz sobre quantas partidas o benchmark rodou, e
+    um benchmark sem base declarada e o problema que a nota de duas bases do
+    TCC acabou de passar a vida inteira evitando.
+    """
+    from src.db import get_conn
+
+    cur = get_conn().cursor()
+    cur.execute("SELECT COUNT(*) FROM matches WHERE queue_id = 420")
+    return int(cur.fetchone()[0])
+
+
 def main() -> None:
     hits = 0
-    for question, gold_sql in BENCHMARK:
+    detalhe = []
+    for i, (question, gold_sql) in enumerate(BENCHMARK, 1):
+        erro = ""
         try:
             gen_sql = generate_sql(question)
             validate_sql(gen_sql)
@@ -167,10 +195,37 @@ def main() -> None:
             ok = normalize(gen_rows) == normalize(gold_rows)
         except Exception as exc:
             print(f"[ERRO] {question} -> {exc}")
+            erro = str(exc)
             ok = False
         hits += ok
+        detalhe.append({"n": i, "pergunta": question,
+                        "sql_referencia": " ".join(gold_sql.split()),
+                        "ok": bool(ok), "erro": erro})
         print(f"[{'OK' if ok else 'FALHA'}] {question}")
     print(f"\nExecution accuracy: {hits}/{len(BENCHMARK)} = {hits/len(BENCHMARK):.0%}")
+
+    # Arquiva o resultado. O script antes so imprimia, e o Apêndice B do TCC
+    # publicava um numero sem artefato — a mesma lacuna que o diario
+    # registrou para o tune_models em 2026-10-04 e que la foi resolvida
+    # criando um script que grava. Um numero de TCC que so vive na saida de
+    # console nao e reproduzivel por ninguem que nao esteja na minha sessao.
+    destino = Path(__file__).resolve().parent.parent.parent / "reports"
+    destino.mkdir(parents=True, exist_ok=True)
+    arquivo = destino / "nlq_benchmark.json"
+    base = _contagem_partidas()
+    arquivo.write_text(
+        json.dumps({
+            "medido_em": date.today().isoformat(),
+            "base_partidas_fila_420": base,
+            "total_perguntas": len(BENCHMARK),
+            "acertos": hits,
+            "execution_accuracy": round(hits / len(BENCHMARK), 4),
+            "metodo": "comparacao do RESULTADO da query gerada com o da query "
+                      "de referencia (execution accuracy), nao do texto da SQL",
+            "detalhe": detalhe,
+        }, indent=2, ensure_ascii=False),
+        encoding="utf-8")
+    print(f"gravado: {arquivo}")
 
 
 if __name__ == "__main__":

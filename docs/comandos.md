@@ -257,12 +257,17 @@ grava a tela de erro e reporta sucesso.
 .venv\Scripts\python.exe -m src.nlq.nl_to_sql "qual campeão tem maior win rate?"
 
 # Benchmark de execution accuracy (exigência da banca):
+# grava reports/nlq_benchmark.json (accuracy, base e desfecho por pergunta)
 .venv\Scripts\python.exe -m src.nlq.evaluate_nlq
 ```
 
 > **Regra da casa**: sempre rode `evaluate_nlq` de novo depois de
 > QUALQUER mudança em `src/nlq/schema_context.py` — já regrediu
 > silenciosamente 2×.
+>
+> O comando exige `ANTHROPIC_API_KEY`. Sem ela o Apêndice B fica sem
+> artefato: em 2026-10-04 o número publicado (23/26) vinha da saída de
+> console e não de `reports/`.
 
 ---
 

@@ -1,6 +1,6 @@
 """Verificacao de consistencia do texto do TCC II.
 
-18 checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e que
+19 checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e que
 antes eram feitas a mao (e por isso falhavam). Exit code 0 = tudo consistente.
 
 TEXTO E FORMATACAO
@@ -33,7 +33,10 @@ NUMERO CONTRA ARTEFATO — a regra de ouro do projeto
      tem que citar as duas, e o RESUMO em português também.
 
 PROCESSO
- 15. todo script que produz medida está documentado em `docs/comandos.md`.
+ 15. todo script que produz medida está documentado em `docs/comandos.md`;
+ 19. a accuracy do Apêndice B: ou `reports/nlq_benchmark.json` existe e o
+     número do texto é o do artefato, ou o texto declara que o número não tem
+     artefato. Numbero publicado sem artefato e sem aviso reprova.
 
 Uso:
     .venv\\Scripts\\python.exe docs\\verifica_tcc.py
@@ -1066,6 +1069,85 @@ def check_bases_declaradas(t: str) -> None:
         aviso(f"banco inacessivel, cruzamento das bases pulado: {exc}")
 
 
+def check_benchmark_nlq(t: str) -> None:
+    """O numero do Apendice B ou tem artefato, ou declara que nao tem.
+
+    O Apendice B publica a execution accuracy do benchmark de linguagem
+    natural. Ate 2026-10-04 esse numero nao tinha artefato: `evaluate_nlq.py`
+    so imprimia, e o valor vivia na saida de console e no diario de execucao.
+    Isso e a falha que o projeto vem fechando ha meses — o mesmo formato do
+    `tune_models` que imprimia sem guardar, com a metrica do TCC citando o
+    resultado.
+
+    A guarda aceita as duas situacoes legitimas e reprova a terceira:
+
+    - o artefato existe e o accuracy do texto bate com o do JSON; ou
+    - o texto declara que o numero nao tem artefato arquivado.
+
+    O que reprova e numero publicado, sem artefato e sem a declaracao. Uma
+    checagem que exigisse o artefato unconditionally reprovaria hoje, porque
+    `ANTHROPIC_API_KEY` nao esta no ambiente e o benchmark nao roda — e uma
+    suite vermelha por um item que ninguem consegue fechar no ambiente atual
+    e um invite a ignorar a suite, que e o noise floor que o diario proibe.
+
+    Quando o benchmark rodar com a chave, o artefato passa a existir e esta
+    checagem passa a exigir igualdade entre o numero do JSON e o do texto.
+    """
+    import json
+    import re as _re
+
+    i = t.find("## APÊNDICE B")
+    if i < 0:
+        return
+    prox = _re.search(r"(?m)^## ", t[i + 10:])
+    apendice = t[i:i + 10 + prox.start()] if prox else t[i:]
+
+    artefato = RAIZ / "reports" / "nlq_benchmark.json"
+    tem_artefato = artefato.exists()
+    # `\s+` e obrigatorio: o markdown e quebrado a ~76 colunas e a
+    # declaracao "nao tem artefato arquivado" cai exatamente na quebra, entao
+    # um espaco literal nao casava. Foi o que aconteceu na primeira rodada
+    # desta checagem — reprovou um texto que declarava a lacuna.
+    declara_lacuna = bool(
+        _re.search(r"n[aã]o\s+tem\s+artefato|sem\s+artefato|"
+                   r"n[aã]o\s+possui\s+artefato|n[aã]o\s+foi\s+arquiv",
+                   apendice, _re.I))
+
+    if tem_artefato:
+        try:
+            dados = json.loads(artefato.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            falha(f"Apendice B: nlq_benchmark.json ilegivel: {exc}")
+            return
+        acc = f"{float(dados['execution_accuracy']):.0%}"
+        base = f"{int(dados['base_partidas_fila_420']):,}".replace(",", ".")
+        print(f"  artefato: {dados['acertos']}/{dados['total_perguntas']} "
+              f"= {acc} sobre {base} partidas, medido em {dados['medido_em']}")
+        m = _re.search(r"(\d+)/(\d+)\s*=\s*(\d+)%", apendice)
+        if not m:
+            falha("Apendice B: o artefato do benchmark existe mas o texto "
+                  "nao cita o accuracy no formato N/M = P%")
+            return
+        acertos, total, pct = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        if (acertos, total) != (dados["acertos"], dados["total_perguntas"]) \
+                or pct != round(float(dados["execution_accuracy"]) * 100):
+            falha(f"Apendice B: o texto cita {acertos}/{total} = {pct}%, e o "
+                  f"artefato mede {dados['acertos']}/{dados['total_perguntas']} "
+                  f"= {acc}")
+            return
+        if base not in apendice:
+            aviso(f"Apendice B: o benchmark mediu sobre {base} partidas e o "
+                  "apendice nao declara a base")
+        print("  [OK] accuracy do Apendice B bate com o artefato")
+    elif declara_lacuna:
+        print("  [OK] Apendice B declara que o numero nao tem artefato "
+              "(reports/nlq_benchmark.json ainda nao existe)")
+    else:
+        falha("Apendice B: publica accuracy sem artefato em "
+              "reports/nlq_benchmark.json e sem declarar a lacuna — ou rode o "
+              "benchmark, ou diga no texto que o numero nao tem artefato")
+
+
 def main() -> None:
     if not TEXTO.exists():
         print(f"ERRO: {TEXTO} nao existe")
@@ -1108,6 +1190,8 @@ def main() -> None:
     check_faixa_duracao(t)
     print("18. As duas bases declaradas onde cada numero aparece")
     check_bases_declaradas(t)
+    print("19. Accuracy do NLQ: artefato ou declaracao de lacuna")
+    check_benchmark_nlq(t)
 
     print()
     print("=" * 66)

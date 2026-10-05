@@ -1500,7 +1500,13 @@ linguagem natural.
 
 Execução em 2026-10-04 sobre a base de produção de 39.426 partidas:
 **23/26 = 88% de acurácia de execução**, com o comando
-`python -m src.nlq.evaluate_nlq`. O mesmo número havia sido obtido em
+`python -m src.nlq.evaluate_nlq`. Este é o único número do trabalho que não
+tem artefato arquivado em `reports/`: a versão anterior do script imprimia o
+resultado sem gravá-lo, e a medição foi registrada no diário de execução. O
+script passou a gravar `reports/nlq_benchmark.json` para que a próxima
+execução deixe rastro; com a chave da API de linguagem natural ausente no
+ambiente em que este texto foi fechado, a reexecução ficou pendente e o
+número publicado é o da saída de console. O mesmo número havia sido obtido em
 execuções anteriores — a de 2026-09-28, sobre a base de então (24.154
 partidas), e uma de 2026-07-13 —, o que dá alguma estabilidade ao
 resultado. Uma
@@ -1630,10 +1636,14 @@ e cerca de 26× o menor deles (0,001).
 
 ## ANEXO A — Capturas de tela da plataforma
 
-Geradas em 2026-10-04 via Playwright (Chromium, 1440 px de largura, altura
-ajustada à página, sem `full_page`) contra a API e o *frontend* rodando
-localmente com dados de produção — 39.426 partidas no momento da captura,
-as mesmas da Seção 5.3. As capturas anteriores, de 2026-09-28, foram feitas
+Geradas em 2026-10-04 às 11:58 via Playwright (Chromium, 1440 px de largura,
+altura ajustada à página, sem `full_page`) contra a API e o *frontend* rodando
+localmente com dados de produção — 39.426 partidas no momento da captura. **Não
+são as mesmas da Seção 5.3**: o Quadro 1 daquela seção é medido sobre as
+41.063 partidas da base final, e a captura é anterior à última rodada de
+coleta da KR, que só fechou depois. O que as capturas têm em comum com a 5.3
+é a direção do achado, não o volume. As capturas anteriores, de 2026-09-28,
+foram feitas
 com 24.154 partidas e foram substituídas: o Dashboard anterior exibia a
 tabela regional com NA1 = 1.446, em contradição com os 7.159 que o texto
 afirma. Arquivos em `reports/anexo_a/` (não versionados neste Markdown —

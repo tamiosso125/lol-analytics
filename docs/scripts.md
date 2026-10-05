@@ -359,7 +359,23 @@ jogos", documentada no diário).
 **Uso:** `python -m src.nlq.evaluate_nlq`
 **Requer:** `ANTHROPIC_API_KEY`.
 **Lê:** banco; Claude API.
-**Escreve:** stdout (OK/FALHA por pergunta + accuracy final).
+**Escreve:** `reports/nlq_benchmark.json` — accuracy, contagem de
+perguntas, data, `base_partidas_fila_420` e o desfecho por pergunta; e
+stdout (OK/FALHA por pergunta + accuracy final).
+
+**Por que passou a gravar.** Até 2026-10-04 o script só imprimia, e o
+Apêndice B do TCC publicava 23/26 sem artefato: o número vivia na saída de
+console e no diário. É a mesma lacuna que o diário registrou para o
+`train_baseline`/`tune_models`, que se resolveu criando artefato em vez de
+reler console. O `base_partidas_fila_420` entra porque um benchmark que não
+declara a base não diz sobre o que mediu — foi exatamente o que aconteceu
+com o Apêndice B, que citava 39.426 sem meio de conferir.
+
+**Pendência:** com `ANTHROPIC_API_KEY` ausente do ambiente em 2026-10-04, o
+benchmark não foi reexecutado e `reports/nlq_benchmark.json` ainda não
+existe. Quem tiver a chave roda o comando acima uma vez e o Apêndice B passa
+a ter artefato; se a accuracy mudar, o número do TCC tem de mudar junto, e a
+checagem 19 falha até isso acontecer.
 
 ---
 
