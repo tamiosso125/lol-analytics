@@ -12,9 +12,17 @@ Como funciona (3 etapas):
   1. preprocessa o Markdown: remove cabecalho de trabalho, bloco de
      pendencias internas e a secao "Pendencias finais antes da entrega";
   2. pandoc gera o corpo do .docx com `--reference-doc` = TCC 1, para herdar
-     os estilos;
-  3. python-docx monta capa e folha de rosto (que o pandoc nao faz), insere
-     o campo SUMARIO e comeca a numeracao de paginas no corpo.
+     margens/fonte/espacamento de base (ja aprovados pela instituicao);
+  3. python-docx monta capa e folha de rosto (que o pandoc nao faz) e
+     resumo/abstract, comeca a numeracao de paginas no corpo (SEM sumario
+     nem lista de ilustracoes/quadros — nenhum dos 10 TCC II aprovados
+     usados como referencia tem qualquer um dos tres, confirmado em
+     2026-10-05), e sobrescreve os 2 detalhes onde o TCC 1 diverge do
+     modelo OFICIAL de artigo do
+     Prof. Elvandi (`ajustar_tipografia`: recuo 1,25cm; `aplicar_negrito_
+     titulos`: titulos em negrito+caixa alta) — ver os docstrings de cada
+     funcao para a medicao exata (2026-10-05, XML do .doc convertido via
+     automacao do Word).
 
 Uso:  .venv\\Scripts\\python.exe docs\\build_tcc_docx.py
 Depende de pandoc no PATH (winget install JohnMacFarlane.Pandoc).
@@ -31,6 +39,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt
+from lxml import etree
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MD = os.path.join(ROOT, "docs", "tcc2_texto.md")
@@ -42,10 +51,26 @@ STAGE = os.path.join(ROOT, "docs", ".build_tcc_stage.md")
 # a cidade, o ano, o orientador e o formato de capa/folha foram lidos dos
 # arquivos citados.
 ALUNO = "GUILHERME RIBEIRO LEMOS TAMIOSSO"
+ALUNO_NOME_PROPRIO = "Guilherme Ribeiro Lemos Tamiosso"
 CURSO = "GRADUAÇÃO EM CIÊNCIA DA COMPUTAÇÃO"
 UNIVERSIDADE = "UNIVERSIDADE DO VALE DO RIO DOS SINOS (UNISINOS)"
 ORIENTADOR = "Orientador: Prof. Dr. Elvandi da Silva Júnior"
+ORIENTADOR_NOME_PROPRIO = "Elvandi da Silva Júnior"
 LOCAL_ANO = ("Porto Alegre", "2026")
+
+# Rodapé de autor/orientador no título do artigo (Bloco D da revisão,
+# 2026-10-05): elemento presente nos 10 TCC II aprovados e no .doc oficial
+# do Prof. Elvandi, ausente até aqui no nosso .docx. E-mail institucional
+# do aluno fornecido pelo usuário (2026-10-05) — não é inventado; o do
+# orientador é o mesmo em TODOS os 10 aprovados (verificado, não suposto).
+NOTA_ALUNO = (
+    "Graduando em Ciência da Computação na Universidade do Vale do Rio "
+    "dos Sinos (UNISINOS). E-mail: Gtamiosso@edu.unisinos.br."
+)
+NOTA_ORIENTADOR = (
+    "Orientador, Professor Dr. da Escola Politécnica da UNISINOS. "
+    "E-mail: elvandi@unisinos.br."
+)
 TITULO_PT = (
     "PLATAFORMA INTELIGENTE PARA ANÁLISE DE DADOS DE ESPORTS: "
     "Uma proposta para League of Legends com uso de machine learning "
@@ -72,6 +97,7 @@ _RE_NAO_NUMERAR = re.compile(
 QUADROS = [
     "Vitória do time vermelho por região",
     "Comparação entre modelos (corte de 15 minutos)",
+    "Esquema relacional do banco de dados",
     "Benchmark de 26 perguntas de referência (NLQ)",
     # A 4ª tabela (Apêndice C) não tem título no markdown — só uma nota de
     # método, o que viola a regra da instituição (tabela sem legenda).
@@ -93,7 +119,8 @@ FIGURAS = [
 FONTE_IMAGENS = (
     "Fonte: Elaborado pelo autor (2026). Capturas de tela geradas via Playwright "
     "(Chromium, largura de 1440 px, altura ajustada à página, sem captura de "
-    "página inteira) contra a API e o frontend locais."
+    "página inteira, tema escuro — maior contraste contra o fundo branco da "
+    "página impressa) contra a API e o frontend locais."
 )
 FONTE_QUADROS = "Fonte: Elaborado pelo autor (2026)."
 
@@ -175,6 +202,58 @@ def _p(doc, texto="", *, bold=False, align=None, size=12, space_after=None):
     return p
 
 
+def _ref_rodape(paragrafo, footnote_id: int) -> None:
+    """Insere a marca de chamada de rodapé real (w:footnoteReference),
+    sobrescrita em superscrito — não um "*" literal, para o Word numerar/
+    renumerar sozinho se a ordem mudar."""
+    r = paragrafo.add_run()
+    rpr = OxmlElement("w:rPr")
+    rstyle = OxmlElement("w:rStyle")
+    rstyle.set(qn("w:val"), "Refdenotaderodap")
+    rpr.append(rstyle)
+    r._r.append(rpr)
+    ref = OxmlElement("w:footnoteReference")
+    ref.set(qn("w:id"), str(footnote_id))
+    r._r.append(ref)
+
+
+def _adicionar_rodapes(doc, notas: dict[int, str]) -> None:
+    """Grava o TEXTO dos rodapés em word/footnotes.xml (a chamada no corpo
+    é inserida por `_ref_rodape`, separadamente — os dois lados do rodapé
+    moram em partes XML diferentes do .docx).
+
+    `python-docx` 1.2.0 não tem API de alto nível pra rodapé (só pra nota
+    de fim é que não existe NENHUMA); a parte já existe no documento
+    (herdada do --reference-doc, com os ids -1/0 de separador padrão do
+    Word) — só falta ACRESCENTAR os `<w:footnote>` reais. `Part.blob` é
+    somente-leitura por fora (expõe só o getter); `_blob` é o atributo que
+    o `save()` de fato serializa, e é assim que o python-docx grava
+    qualquer parte sem wrapper dedicado (confirmado lendo o fonte de
+    `docx.opc.part.Part`).
+    """
+    rel = next(r for r in doc.part.rels.values() if r.reltype.endswith("footnotes"))
+    part = rel.target_part
+    raiz = etree.fromstring(part.blob)
+    ns = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+    for fid, texto in notas.items():
+        fn = etree.SubElement(raiz, f"{ns}footnote")
+        fn.set(f"{ns}id", str(fid))
+        p = etree.SubElement(fn, f"{ns}p")
+        pPr = etree.SubElement(p, f"{ns}pPr")
+        pStyle = etree.SubElement(pPr, f"{ns}pStyle")
+        pStyle.set(f"{ns}val", "Textodenotaderodap")
+        r1 = etree.SubElement(p, f"{ns}r")
+        rPr1 = etree.SubElement(r1, f"{ns}rPr")
+        rStyle = etree.SubElement(rPr1, f"{ns}rStyle")
+        rStyle.set(f"{ns}val", "Refdenotaderodap")
+        etree.SubElement(r1, f"{ns}footnoteRef")
+        r2 = etree.SubElement(p, f"{ns}r")
+        t = etree.SubElement(r2, f"{ns}t")
+        t.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+        t.text = " " + texto
+    part._blob = etree.tostring(raiz, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+
 def _campo(paragrafo, instrucao: str) -> None:
     """Insere um campo do Word (SUMARIO, PAGE, ...) que o Word atualiza."""
     r1 = paragrafo.add_run()
@@ -250,6 +329,24 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     ult = novos[-1].add_run()
     ult.add_break(WD_BREAK.PAGE)
 
+    # --- TÍTULO DO ARTIGO + AUTOR*/ORIENTADOR** ----------------------------
+    # Elemento presente nos 10 TCC II aprovados e no .doc oficial do
+    # Prof. Elvandi, ausente até 2026-10-05 (Bloco D da revisão completa).
+    # Vai na página do Resumo, antes dele — mesmo padrão dos 10 aprovados
+    # (confirmado em 3, estruturalmente idêntico nos demais).
+    novos.append(_p(doc, TITULO_PT, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER,
+                    space_after=12))
+    p_aluno = _p(doc, align=WD_ALIGN_PARAGRAPH.CENTER)
+    r = p_aluno.add_run(ALUNO_NOME_PROPRIO)
+    r.font.name, r.font.size = "Arial", Pt(12)
+    _ref_rodape(p_aluno, 1)
+    novos.append(p_aluno)
+    p_orient = _p(doc, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+    r = p_orient.add_run(ORIENTADOR_NOME_PROPRIO)
+    r.font.name, r.font.size = "Arial", Pt(12)
+    _ref_rodape(p_orient, 2)
+    novos.append(p_orient)
+
     # --- RESUMO / ABSTRACT ------------------------------------------------
     p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     r = p.add_run("Resumo: ")
@@ -279,14 +376,13 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     r.font.name, r.font.size = "Arial", Pt(12)
     novos.append(p)
 
-    # --- SUMÁRIO ----------------------------------------------------------
-    ult = novos[-1].add_run()
-    ult.add_break(WD_BREAK.PAGE)
-    novos.append(_p(doc, "SUMÁRIO", bold=True,
-                    align=WD_ALIGN_PARAGRAPH.CENTER, space_after=18))
-    p = _p(doc)
-    _campo(p, r'TOC \o "1-3" \h \z \u')
-    novos.append(p)
+    # SEM SUMÁRIO / LISTA DE ILUSTRAÇÕES / LISTA DE QUADROS — removido em
+    # 2026-10-05 (Bloco B da revisão): os 10 TCC II aprovados usados como
+    # referência (pasta "TCC II - EXEMPLOS E MATERIAIS") NÃO têm nenhum dos
+    # três — em todos, a Introdução começa na página 3 ou 4, logo após
+    # capa+folha de rosto+resumo/abstract, sem sumário nem listas no meio.
+    # Confirmado nos 10, não só na maioria. O pré-textual deste artigo
+    # termina no Abstract/Key-words; só falta a quebra de página pro corpo.
     ult = novos[-1].add_run()
     ult.add_break(WD_BREAK.PAGE)
 
@@ -364,6 +460,10 @@ def _legenda(doc, tipo: str, titulo: str) -> "docx.text.paragraph.Paragraph":
     except KeyError:
         pass
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    # achado da Bloco E (2026-10-05): sem isto, a paginação do Word pode
+    # separar a legenda do quadro/figura que ela descreve (visto na Figura 1,
+    # legenda sobrando sozinha no fim de uma página e a imagem na seguinte).
+    p.paragraph_format.keep_with_next = True
     r = p.add_run(f"{tipo} ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(10), True
     _campo_seq(p, tipo)
@@ -425,6 +525,32 @@ def numerar_quadros(doc) -> int:
     return n
 
 
+# página útil mede ~24,7cm de altura (A4 29,7cm - margens 3cm/2cm, ABNT) e
+# as capturas do Anexo A são verticais (até 2812px de altura x 1440px de
+# largura — telas de app, não paisagem): em largura fixa de 15cm elas davam
+# 25-29cm de altura, MAIORES que a página inteira. Resultado (achado da
+# Bloco E, 2026-10-05): a Figura 1 forçava quebra no meio da imagem e sua
+# legenda ficava órfã na página anterior. 19cm de altura máxima deixa folga
+# para legenda+fonte (~1-1,5cm) dentro dos 24,7cm úteis.
+_FIGURA_LARGURA_MAX_CM = 15.0
+_FIGURA_ALTURA_MAX_CM = 19.0
+
+
+def _tamanho_figura(caminho: str):
+    """Largura/altura (Cm) preservando proporção, sem estourar a página."""
+    from PIL import Image
+    from docx.shared import Cm
+
+    with Image.open(caminho) as im:
+        w_px, h_px = im.size
+    largura = _FIGURA_LARGURA_MAX_CM
+    altura = largura * h_px / w_px
+    if altura > _FIGURA_ALTURA_MAX_CM:
+        altura = _FIGURA_ALTURA_MAX_CM
+        largura = altura * w_px / h_px
+    return Cm(largura), Cm(altura)
+
+
 def inserir_figuras(doc) -> int:
     """Troca a tabela-de-arquivos do Anexo A pelas 6 capturas com legenda.
 
@@ -454,9 +580,13 @@ def inserir_figuras(doc) -> int:
     for arquivo, titulo in FIGURAS:
         leg = _legenda(doc, "Figura", titulo)
         alvo.addprevious(leg._p)
+        largura, altura = _tamanho_figura(os.path.join(pasta, arquivo))
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p_img.add_run().add_picture(os.path.join(pasta, arquivo), width=Cm(15))
+        p_img.paragraph_format.keep_with_next = True
+        p_img.add_run().add_picture(
+            os.path.join(pasta, arquivo), width=largura, height=altura
+        )
         alvo.addprevious(p_img._p)
         fonte = _fonte(doc, FONTE_IMAGENS)
         alvo.addprevious(fonte._p)
@@ -477,50 +607,6 @@ def inserir_figuras(doc) -> int:
                 r._r.getparent().remove(r._r)
             p_intro.add_run(novo + ".")
     return n
-
-
-def listas_de_ilustracoes(doc, resumos: dict) -> None:
-    """Lista de Ilustrações + Lista de Quadros no pre-textual.
-
-    São campos TOC \\c — dependem dos campos SEQ das legendas. O Word
-    preenche quando os campos são atualizados (finalize-fields.ps1).
-    """
-    corpo = doc.element.body
-    # insere logo após o campo do SUMÁRIO, que é o penúltimo parágrafo do
-    # pre-textual montado no passo 3
-    paras = [el for el in corpo.iterchildren() if el.tag.endswith("}p")]
-    ancora = None
-    for el in reversed(paras):
-        tem_sumario = el.findall(".//" + qn("w:instrText"))
-        if any("TOC" in (i.text or "") for i in tem_sumario):
-            ancora = el
-            break
-    if ancora is None:
-        sys.exit("campo do SUMÁRIO não encontrado — listas não inseridas")
-
-    def bloco(titulo: str, ident: str, instrucao: str, depois_de):
-        """Monta título + campo TOC e reinsere logo após `depois_de`.
-
-        A âncora é passada explicitamente porque `addnext` inserir sempre
-        na mesma âncora inverte a ordem das listas.
-        """
-        t = _p(doc, titulo, bold=True, align=WD_ALIGN_PARAGRAPH.LEFT,
-               space_after=12)
-        corpo.remove(t._p)
-        depois_de.addnext(t._p)
-        p = doc.add_paragraph()
-        _campo(p, instrucao)
-        corpo.remove(p._p)
-        t._p.addnext(p._p)
-        p.paragraph_format.line_spacing = 1.0
-        p.add_run().add_break(WD_BREAK.PAGE)
-        return p._p
-
-    # ordem do modelo: Lista de Ilustrações antes da Lista de Quadros
-    l1 = bloco("LISTA DE ILUSTRAÇÕES", "Figura",
-               r'TOC \h \z \c "Figura"', ancora)
-    bloco("LISTA DE QUADROS", "Quadro", r'TOC \h \z \c "Quadro"', l1)
-    resumos["listas"] = 2
 
 
 def formatar_referencias(doc) -> int:
@@ -577,16 +663,24 @@ def formatar_referencias(doc) -> int:
 
 
 def ajustar_tipografia(doc) -> None:
-    """Aplica as medidas dos 10 TCC II APROVADOS (medidas em 2026-10-04 por
-    pypdf nos PDFs da pasta de exemplos).
+    """Aplica as medidas do MODELO OFICIAL do Prof. Elvandi (`TCC II - Modelo
+    de artigo científico da UNISINOS - Exemplo Prof. Elvandi.doc`, convertido
+    para .docx via automação do Word e lido direto do XML em 2026-10-05).
 
-    MENSURADO NOS 10 APROVADOS:
-        fonte 12 pt · margem esquerda 3,0 cm · entrelinha 1,72-1,73
-        recuo de parágrafo 0,03-0,04 cm ≈ ZERO
+    MEDIDO NO XML DO ESTILO 'Normal' DO MODELO OFICIAL:
+        fonte Arial 12 pt · margens 3,0/2,0/3,0/2,0 cm · entrelinha 1,5
+        (`w:spacing w:line="360" w:lineRule="auto"`)
+        recuo de parágrafo = 709 twips = 1,2506 cm ≈ **1,25 cm**
+        (`w:ind w:firstLine="709"`) · justificado (`w:jc w:val="both"`)
 
-    O recuo de 1,25 cm que aparece em `Ajustes LATEX.txt` é convenção da
-    classe LaTeX da instituição, não prática: nenhum dos 10 aprovados recua o
-    parágrafo. Por isso NÃO se aplica 1,25 cm aqui.
+    CORRIGE uma medição anterior (2026-10-04, pypdf sobre os 10 TCC II
+    aprovados) que tinha concluído recuo ≈ 0 e descartado a regra de 1,25 cm
+    do `Ajustes LATEX.txt`. Essa medição estava certa sobre o texto, mas o
+    próprio plano que a gerou já avisava: "pypdf extrai texto, não layout; pra
+    verificar recuo precisa-se gerar o .docx e conferir". O arquivo oficial do
+    orientador, lido direto do XML (não por inferência de PDF), é a fonte que
+    prevalece — é o documento que ele mesmo redigiu como modelo, e o usuário
+    marcou seguir seu formato como obrigatório (2026-10-05).
 
     O ajuste vai no OBJETO DE ESTILO, não em `_p()`: `_p()` monta só o
     pré-textual e as legendas (~30 parágrafos). O corpo vem do pandoc com os
@@ -594,8 +688,8 @@ def ajustar_tipografia(doc) -> None:
     cobriria 2% do documento.
     """
     medido = {
-        "recuo_cm": 0.0,        # 0,03-0,04 medido -> normaliza em zero
-        "entrelinha": 1.5,      # 1,72-1,73 medido (baselines/fontsize)
+        "recuo_cm": 1.25,       # 709 twips no XML do modelo oficial
+        "entrelinha": 1.5,      # w:line="360" lineRule="auto" no modelo oficial
     }
     alvos = ("Normal", "Body Text", "First Paragraph", "Body Text Indent")
     aplicados = 0
@@ -609,6 +703,44 @@ def ajustar_tipografia(doc) -> None:
         aplicados += 1
     # a legenda de Quadro/Figura NÃO entra: recuo em legenda fica estranho
     # e a fonte das ilustrações é 9 pt (menor que o corpo), como nos aprovados.
+    return aplicados
+
+
+def aplicar_negrito_titulos(doc) -> int:
+    """Força negrito + caixa alta nos estilos de título (Heading 1/2/3),
+    seguindo o XML do estilo 'heading 1' do modelo oficial do Prof. Elvandi:
+
+        <w:rPr><w:rFonts w:ascii="Arial Negrito".../><w:b/><w:caps/></w:rPr>
+
+    Isto REVERTE a escolha anterior (2026-10-04, "sem negrito"), que vinha de
+    um comentário manual do orientador numa revisão do TCC I — um sinal real,
+    mas pontual e mais antigo. O modelo oficial de artigo (este arquivo) é a
+    fonte que o usuário marcou como obrigatória em 2026-10-05, e define
+    negrito+caixa alta como regra do estilo, não como exceção pontual. Entre
+    os dois sinais do mesmo orientador, prevalece o mais explícito e atual.
+
+    `w:caps` é só exibição (maiúsculas visuais) — não precisa alterar o texto
+    literal, que já é digitado em caixa alta nos títulos do markdown-fonte.
+
+    ACHADO DO BLOCO E (leitura humana ponta a ponta, 2026-10-05): o estilo
+    'Heading 1' herdado do TCC I tem `space_before=None` (sem espaço ANTES
+    do título) enquanto 'Heading 2'/'Heading 3' já tinham 18pt — visível na
+    revisão visual como "4 METODOLOGIA" colado no parágrafo anterior,
+    diferente de toda subseção. O modelo oficial do professor define
+    before=after=360 twips (18pt) nos TRÊS níveis; já tínhamos o "depois"
+    certo nos três e o "antes" certo só em H2/H3 — gap que nenhuma
+    checagem anterior cobria (conferi "depois" nos três, não o "antes"
+    de H1 especificamente). Corrigido aqui, não só em H2/H3.
+    """
+    aplicados = 0
+    for nome in ("Heading 1", "Heading 2", "Heading 3"):
+        st = _estilo(doc, nome)
+        if st is None:
+            continue
+        st.font.bold = True
+        st.font.all_caps = True
+        st.paragraph_format.space_before = Pt(18)
+        aplicados += 1
     return aplicados
 
 
@@ -660,9 +792,10 @@ def ajustar_tabela(tabela, larguras_cm: list[float]) -> None:
 LARGURAS_QUADROS = {
     0: [2.8, 4.2, 9.0],                         # vitória do vermelho por região
     1: [3.4, 2.5, 2.3, 2.1, 2.3, 3.4],         # comparação entre modelos
-    2: [0.8, 4.4, 7.4, 3.4],                    # benchmark NLQ (o problema)
-    3: [1.6, 1.6, 2.0, 2.4, 1.8, 1.8, 1.4, 1.4, 1.8],   # métricas por corte
-    4: [0.9, 6.1, 9.0],                         # experimentos negativos
+    2: [3.0, 9.5, 3.5],                         # esquema relacional do banco
+    3: [0.8, 4.4, 7.4, 3.4],                    # benchmark NLQ (o problema)
+    4: [1.6, 1.6, 2.0, 2.4, 1.8, 1.8, 1.4, 1.4, 1.8],   # métricas por corte
+    5: [0.9, 6.1, 9.0],                         # experimentos negativos
 }
 
 
@@ -696,23 +829,27 @@ def main() -> None:
 
     doc = docx.Document(STAGE)
     n_tipografia = ajustar_tipografia(doc)
+    n_titulos = aplicar_negrito_titulos(doc)
     montar_pre_textual(doc, resumo, palavras, abstract, kwords)
+    _adicionar_rodapes(doc, {1: NOTA_ALUNO, 2: NOTA_ORIENTADOR})
     n_q = numerar_quadros(doc)
     n_f = inserir_figuras(doc)
     n_r = formatar_referencias(doc)
-    listas_de_ilustracoes(doc, {})
     _numeracao_comeca_em_um(doc)
     doc.save(OUT)
     os.remove(STAGE)
-    print(f"[3/4] pre-textual montado | tipografia ajustada em {n_tipografia} "
-          f"estilo(s) (recuo 0 e entrelinha 1,5, medidos nos 10 aprovados)")
+    print(f"[3/4] pre-textual montado (sem sumario/listas, ver nota em "
+          f"montar_pre_textual) | tipografia ajustada em {n_tipografia} "
+          f"estilo(s) (recuo 1,25cm e entrelinha 1,5, medidos no .doc oficial "
+          f"do Prof. Elvandi) | {n_titulos} estilo(s) de titulo em negrito+caixa "
+          f"alta (idem)")
     print(f"[4/4] {n_q} Quadros numerados (campo SEQ) + {n_f} Figuras "
           f"inseridas + {n_r} referências no estilo REFERÊNCIAS com 1 "
           f"linha em branco entre entradas")
     print(f"       -> {OUT}")
     print(f"       paragrafos: {len(doc.paragraphs)} | tabelas: {len(doc.tables)}")
-    print("       falta: docs/finalize-fields.ps1 (Word atualiza SUMARIO, "
-          "LISTA DE QUADROS e a numeracao dos campos SEQ)")
+    print("       falta: docs/finalize-fields.ps1 (Word atualiza a "
+          "numeracao dos campos SEQ)")
 
 
 if __name__ == "__main__":

@@ -98,6 +98,15 @@ class RiotClient:
         url = f"https://{self.platform}.api.riotgames.com/lol/league/v4/masterleagues/by-queue/{queue}"
         return self._get(url)
 
+    def challenges_by_puuid(self, puuid: str) -> dict:
+        """lol-challenges-v1 — progressão vitalícia do jogador (totalPoints,
+        categoryPoints com percentil por categoria: EXPERTISE, TEAMWORK,
+        VETERANCY, COLLECTION, IMAGINATION). Estado ATUAL, não da época de
+        uma partida passada — ver experiment_challenges_pilot.py pra como
+        isso é tratado (gap temporal registrado, não ignorado)."""
+        url = f"https://{self.platform}.api.riotgames.com/lol/challenges/v1/player-data/{puuid}"
+        return self._get(url)
+
     # ---------------- endpoints (por região de roteamento) ----------------
     def account_by_puuid(self, puuid: str) -> dict:
         """gameName/tagLine de um jogador (account-v1) — o endpoint de

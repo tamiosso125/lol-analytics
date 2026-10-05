@@ -4018,6 +4018,296 @@ no texto?"), que passa mesmo com 0,7573 ainda lá. Foi o agente `doc-tcc` que
 apontou esse buraco.
 
 
+## 2026-10-05 — 10º experimento negativo: placas de torre
+
+Pedido do usuário: validar se havia informação na própria Riot API — não só
+na documentação, no payload bruto real já coletado — que pudesse melhorar o
+modelo além dos 9 experimentos já registrados. Em vez de ler a documentação
+oficial (exige login pra ver schema, só lista nomes de endpoint sem
+detalhe), inspecionei direto o JSON de `raw_matches`/`raw_timelines` já no
+banco.
+
+**Achado:** `TURRET_PLATE_DESTROYED` é um tipo de evento próprio na
+timeline, nunca referenciado em `build_features.py` nem em nenhum dos 9
+experimentos anteriores (confirmado por grep antes de escrever o
+experimento). Hipótese concreta: o SHAP por fase (Seção 5.4 do TCC) mostra
+`tower_diff` ~0 antes dos 20 min porque torres raramente morrem cedo — mas
+as placas de torre (bônus de ouro por dano, somem aos 14 min) são batidas o
+jogo inteiro nessa janela, e nenhuma *feature* hoje enxerga esse sinal de
+pressão de rota pré-15min.
+
+Semântica do evento verificada com dados reais antes de confiar nela: o
+campo `teamId` é o DONO da torre (quem sofre o dano), não quem destrói — o
+time beneficiado é sempre o oposto, confirmado cruzando `killerId` contra
+`teamId` em várias partidas reais (mesma armadilha já documentada para
+`killerTeamId` em `ELITE_MONSTER_KILL`, 2026-07-08).
+
+`plate_diff` = (placas do azul) − (placas do vermelho) até o corte, testado
+nos cortes 10 e 15 min (aos 20/25 a feature satura, placas já sumiram).
+Script: `src/models/experiment_turret_plates.py`. Artefato:
+`reports/experimento_placas_torre.json`.
+
+| Corte | n | baseline AUC | + plate_diff | delta |
+|---|---:|---:|---:|---:|
+| 10 min | 39.309 | 0,7702 | 0,7700 | -0,0002 |
+| 15 min | 39.188 | 0,8450 | 0,8448 | -0,0002 |
+
+**Negativo, mesma ordem de grandeza de ruído dos outros 9.** A hipótese era
+boa — cobre exatamente a janela cega de `tower_diff` — mas o sinal de
+pressão de rota que as placas captam já deve estar redundante com
+`gold_diff`/`xp_diff`: a mesma pressão que derruba placa é a mesma que gera
+a vantagem de ouro que o modelo já vê. Reforça o achado da Seção 5.8: o teto
+não é falta de ideia de *feature* a partir da *timeline*, é o tipo de dado
+que falta (ordem de *draft*, estado de onda de *minion*) — e isso não é mais
+hipótese, é o décimo candidato real testado e saturado.
+
+**Validação dos demais endpoints da Riot não usados pelo projeto** (mesmo
+pedido): testados ao vivo (chave nova, a anterior tinha expirado — 24h,
+comportamento normal da chave de dev, não bug) contra `champion-mastery-v4`,
+`lol-challenges-v1`, `league-exp-v4`, `champion-v3`, `clash-v1`,
+`summoner-v4`. Achado de método, não só resultado: `champion-mastery-v4` e
+`lol-challenges-v1` retornam o estado VITALÍCIO atual do jogador, não o
+estado dele na época de cada partida histórica — aplicá-los ao banco atual
+seria vazamento de dado (violaria a regra nº 1 do `AGENTS.md`), então ficam
+descartados para o dataset já coletado, só viáveis se capturados no
+instante de uma coleta futura. `league-exp-v4` é o único com valor direto
+sem essa armadilha: confirma que dá pra puxar jogadores de elo abaixo de
+Challenger/GM/Master (testado em GOLD II, retornou jogadores reais) — é o
+caminho real para a extensão "o viés de lado se sustenta fora do elo
+altíssimo?" já registrada como trabalho futuro. Os demais (`champion-v3`:
+só rotação semanal; `clash-v1`: modo torneio, baixo volume; `summoner-v4`:
+já coberto por `account-v1`) sem valor analítico identificado.
+
+**Nota de revisão (mesma sessão):** o usuário questionou se `mastery`
+realmente modificaria o cenário. Resposta concordada e registrada: não —
+maestria é redundante com o *shrinkage* de WR-por-campeão já em produção
+(ambos aproximam familiaridade com o campeão; o *shrinkage* é baseado em
+resultado, maestria só em volume) e é um sinal comprimido na população
+Challenger/GM/Master (todo mundo já jogou muito os campeões que joga).
+`teamwork_pct_diff`/`expertise_pct_diff` do `lol-challenges-v1` ficou como
+único candidato — é eixo comportamental que não existe em nenhuma feature
+já testada, não redundante com nada.
+
+
+## 2026-10-05 (continuação) — 11º experimento negativo: teamwork/expertise
+
+Decisão sobre o vazamento de `lol-challenges-v1` (que a entrada anterior
+descartava "para o dataset já coletado"): existe uma saída — as partidas
+MAIS RECENTES da KR têm gap de horas/dias entre a coleta e hoje, pequeno o
+bastante pra consultar o estado "atual" do `lol-challenges-v1` sem vazar
+praticamente nada. Script `src/models/experiment_challenges_pilot.py`
+recalcula as 5 *features*-base direto de `raw_timelines` (reaproveitando
+`features_from_timeline`, a mesma função de produção) em vez de usar
+`data/features_phases.csv` — esse arquivo é o snapshot CONGELADO que o TCC
+já documenta e verifica (Seção 5.8: "o modelo não viu a última rodada de
+coleta" é decisão deliberada), e as partidas usadas aqui são posteriores a
+esse congelamento.
+
+**Piloto (200 partidas, n=199 após junção): resultado enganoso.**
+`teamwork_pct_diff` isolado deu delta +0,0090 — maior que qualquer um dos
+10 experimentos anteriores. Mas com amostra 200x menor que a usual
+(~39 mil), e o próprio *baseline* já oscilando 1,8pp do AUC de produção só
+por tamanho de amostra, não dava pra confiar. Pedido do usuário: mais
+amostra antes de aceitar.
+
+**Escala (3.000 partidas, n=2.987 após junção, gap 0-16 dias, média 7,8):
+o sinal sumiu.** `teamwork_pct_diff` delta -0,0031, `expertise_pct_diff`
+delta +0,0007, os dois juntos -0,0023 — mesma ordem de grandeza de ruído
+dos outros 10 experimentos. Confirma que o +0,0090 do piloto era
+regressão à média de amostra pequena, não sinal real. Script reaproveita
+cache de consulta (`reports/_cache_challenges_kr.json`, 4.373 jogadores
+únicos, zero vazamento de API já consultada ao escalar). Artefato:
+`reports/experimento_challenges_piloto.json`.
+
+**11 experimentos negativos agora.** O eixo "comportamento/coordenação do
+jogador" (distinto de estado de jogo e de desempenho histórico) foi o
+único tipo de sinal genuinamente novo cogitado desde os 10 primeiros — e
+também não superou o modelo de 5 *features*. Reforça ainda mais o teto
+documentado na Seção 5.8: não é falta de ideia, é teto de tipo de dado.
+
+
+## 2026-10-05 (continuação) — Revisão completa, Bloco A: reconfirmação + ortografia
+
+Com o conteúdo fechado (nada mais a adicionar), início da revisão de
+forma em 5 blocos (plano registrado na conversa, não neste diário). Bloco
+A — reconfirmação automática + camada que nenhum script cobre:
+
+- `smoke_test`, `validate_predictions` (aprovado com ressalvas),
+  `verifica_tcc` (20/20), `confere_docx` (conforme), `frontend` lint+test
+  (31/31) — todos verdes, os 11 experimentos não quebraram nada.
+- **Corretor ortográfico/gramatical do Word via automação COM sobre o
+  `.docx` inteiro** — primeira vez que essa camada roda; os scripts do
+  projeto conferem número e consistência, nenhum confere português.
+  567 "erros" de ortografia, 0 de gramática. A esmagadora maioria é
+  falso-positivo esperado (termos técnicos/inglês em itálico — esports,
+  queue, XGBoost —, sobrenomes de autor citados, identificadores de
+  código). Deduplicados em 207 palavras únicas e revisados um a um: **2
+  erros reais achados e corrigidos** — "viês" (grafado errado numa das 17
+  ocorrências; as outras 16 já estavam certas) e "défict" (faltava o "i",
+  devia ser "déficit"). Confirmado: 567 → 565 após a correção, exatamente
+  os 2 fixados. Nenhum dos dois mudava número ou achado, só grafia —
+  mas é exatamente o tipo de erro que nenhuma das 20 checagens do
+  `verifica_tcc.py` pega, porque elas conferem fato contra artefato, não
+  ortografia.
+
+
+## 2026-10-05 (continuação) — Revisão completa, Bloco B: achado grande, sumário e listas removidos
+
+Bloco B: cruzar Sumário/Lista de Figuras/Lista de Quadros contra os 10
+TCC II aprovados de verdade (`Downloads/TCC II - EXEMPLOS E MATERIAIS/`),
+item que o `plano_modelos_tcc2.md` de 2026-10-04 tinha deixado pendente —
+até aqui só o `.doc` genérico do professor tinha sido usado como fonte.
+
+**Achado: nenhum dos 10 aprovados tem Sumário, Lista de Figuras ou Lista
+de Quadros.** Medido via `pypdf`, não suposto: em todos os 10, o título
+"1 INTRODUÇÃO" aparece na página 3 ou 4 do PDF — direto após
+capa+folha de rosto+resumo/abstract, sem nada no meio. Unânime, não
+maioria. Faz sentido retrospectivamente: são artigos curtos (25-30
+páginas de corpo), não monografias — sumário/listas são convenção de
+documento longo, não deste formato.
+
+**Correção aplicada:** removido de `build_tcc_docx.py` — o bloco SUMÁRIO
+em `montar_pre_textual()` e a função inteira `listas_de_ilustracoes()`
+(ficou sem chamador, removida por completo, não só desligada). O
+`finalize-fields.ps1` não precisou de nenhuma mudança: já reportava
+"N sumario + M lista(s)" genericamente, e reporta "0 + 0" sem erro agora.
+
+**Efeito medido:** documento caiu de 59 para 55 páginas totais (4
+páginas de pré-textual a menos). O **corpo não mudou** — continua 30
+páginas — porque a regra institucional mede Introdução→Referências, uma
+distância relativa, não a posição absoluta na numeração; tirar páginas
+ANTES do corpo desloca onde ele começa e termina igualmente, não o
+tamanho dele. Achado de método registrado: remover pré-textual não é
+alavanca pra abrir folga no teto de 30 páginas — só serve pra bater com
+o formato real. `verifica_tcc` (20/20) e `confere_docx` (conforme)
+confirmados depois da mudança.
+
+
+## 2026-10-05 (continuação) — Revisão completa, Bloco C: formatação de referências confirmada
+
+Bloco C: cruzar a formatação de REFERÊNCIAS contra os 10 aprovados —
+mesma motivação do Bloco B (o item nunca tinha sido validado contra os
+aprovados de verdade, só contra a correção pontual do TCC I).
+
+**Linha em branco entre entradas:** extraído via `pypdf` das 10 seções
+REFERÊNCIAS (localizadas pelo heading isolado, não por substring, pra
+evitar falso-positivo em "referencial teórico"). Resultado: **7 de 10
+usam linha em branco** (Carolina, Henrique, Eduardo, Letícia, Pablo,
+Nicolas, Bruno) contra **3 sem** (Rodrigo, Vitor, Michel). Maioria, não
+unanimidade como no Bloco B — mas a maioria confirma a regra que já
+seguimos (correção do Prof. Elvandi no TCC I). **Sem mudança
+necessária.**
+
+**DOI e "Disponível em/Acesso em":** nosso formato (`DOI: 10.xxxx`;
+`Disponível em: URL. Acesso em: DD mês. YYYY.`) bate com o padrão
+observado nos 10 aprovados. **Sem mudança necessária.**
+
+**Não verificável por extração de texto:** negrito do título do
+periódico/livro na referência — `pypdf` não preserva formatação de
+fonte, só texto corrido. Mantido como está (segue NBR 6023, mesma
+convenção já usada no TCC I), mas fica registrado que esse item
+específico não foi confirmado contra os aprovados, só contra a norma.
+
+Bloco C fecha sem alteração no `.docx` — ao contrário do Bloco B, aqui a
+checagem contra os aprovados CONFIRMOU a escolha já feita, não a mudou.
+
+
+## 2026-10-05 (continuação) — Revisão completa, Bloco D: rodapé de autor/orientador faltando
+
+Bloco D: checklist de elementos da NBR 14724 contra o `.docx` gerado,
+cruzando com os 10 aprovados onde fazia sentido (não só com a norma em
+abstrato).
+
+**Folha de aprovação:** confirmado 0 de 10 aprovados têm — o PDF
+entregue não inclui (é anexada pela secretaria após a banca, com
+assinaturas). Nosso `.docx` também não tem. Sem ação.
+
+**Achado real: faltava o bloco "título do artigo + nome do autor* +
+nome do orientador**", com nota de rodapé de mini-currículo, entre a
+folha de rosto e o Resumo.** Confirmado em 3 dos 10 aprovados
+(estrutura idêntica: título, nome do aluno com `*`, nome do orientador
+com `**`, linha em branco, "Resumo:") e no `.doc` oficial do professor.
+Nosso `.docx` pulava direto da folha de rosto pro Resumo — elemento
+nunca construído em nenhuma sessão anterior.
+
+**E-mail institucional do aluno** (`Gtamiosso@edu.unisinos.br`) foi
+pedido ao usuário nesta sessão — não estava registrado em nenhum lugar
+do projeto (TCC I usa outro formato de pré-textual, sem esse bloco) e
+não é informação que se possa supor. O do orientador já estava
+confirmado: `elvandi@unisinos.br` aparece idêntico em todos os 10
+aprovados.
+
+**Implementação:** rodapé de Word DE VERDADE, não texto solto
+posicionado manualmente — `python-docx` 1.2.0 não tem API de alto
+nível pra isso, então a chamada (`w:footnoteReference`, superscrito) e
+o corpo da nota (`<w:footnote>` em `word/footnotes.xml`, que já existia
+vazio — herdado do `--reference-doc` com os ids -1/0 de separador
+padrão do Word) foram montados via XML direto (`lxml.etree`,
+`part._blob` — `Part.blob` do `python-docx` só expõe leitura por fora;
+`_blob` é o atributo que o `save()` de fato serializa, confirmado lendo
+o fonte da biblioteca). Verificado abrindo o `.docx` gerado via
+automação do Word: `doc.Footnotes.Count` = 2, texto de cada um conferido
+— não é só "não deu erro ao salvar", é a prova de que o Word reconhece
+os rodapés como rodapés de verdade, não como XML morto que o Word
+ignora silenciosamente.
+
+Documento foi de 55 para 56 páginas totais (o bloco novo). Corpo
+inalterado, 30 páginas (mesma razão do Bloco B: é medida relativa).
+`verifica_tcc` (20/20) e `confere_docx` (conforme) depois da mudança.
+
+
+## 2026-10-05 (continuação) — Revisão completa, Bloco E: leitura humana ponta a ponta
+
+Bloco E: renderizar o `.docx` final em PDF (via automação do Word,
+`ExportAsFixedFormat` — sem captura de tela do sistema operacional) e
+ler página por página com `pymupdf`, procurando o que nenhuma checagem
+automatizada pega: título sem espaço antes, quebra de página no meio
+de uma tabela, legenda separada do que ela legenda, parágrafo cortado
+de forma estranha.
+
+**Achado 1 — Heading 1 sem espaço antes.** Os títulos de seção
+("4 METODOLOGIA" etc.) vinham colados no parágrafo anterior, enquanto
+Heading 2/3 tinham o espaçamento correto. Uma checagem anterior desta
+sessão só tinha comparado o espaço *depois* do título entre os três
+níveis (os três batiam, 18pt) e nunca o espaço *antes* especificamente
+do H1 (vinha `None`). Corrigido em `aplicar_negrito_titulos()`
+(`docs/build_tcc_docx.py`): `space_before = Pt(18)` nos três níveis.
+
+**Achado 2 — a Figura 1 estava com a legenda órfã.** A legenda
+"Figura 1 — Página inicial..." ficava sozinha no fim de uma página e a
+imagem começava na página seguinte. Causa raiz, uma vez investigada,
+não era de paginação e sim de **tamanho**: as 6 capturas do Anexo A são
+verticais (até 1440×2812px) e eram inseridas com largura fixa de 15cm
+sem limite de altura — o que dava 25 a 29,3cm de imagem, MAIOR que a
+página inteira (24,7cm úteis, A4 menos margens ABNT 3cm/2cm). A imagem
+não cabia numa página de jeito nenhum, então o Word quebrava ela no
+meio e a legenda ficava pra trás.
+
+Primeira tentativa — `keep_with_next` na legenda e na imagem — tratou
+o sintoma errado: como a imagem continuava maior que a página, o Word
+só empurrava o bloco inteiro pra frente sem conseguir juntá-lo, e o
+resultado piorou (3 páginas tocadas por figura: uma quase vazia, uma só
+com a legenda, uma só com a imagem — documento foi de 56 para 62
+páginas). Abandonado em favor da causa raiz: `_tamanho_figura()` agora
+limita a captura a 15cm de largura **e** 19cm de altura (o que sobra
+depois de legenda+fonte dentro dos 24,7cm úteis), preservando a
+proporção — testado com a imagem mais alta do lote (partida individual,
+2812px) e com as outras 5 (2400px). `keep_with_next` na legenda ficou
+(não atrapalha mais, e é prática correta para quando a imagem cabe).
+
+Resultado: as 6 figuras agora ficam cada uma em 1 página só (legenda +
+imagem + fonte juntas), sem nenhuma vazia. Documento final: 51 páginas
+totais (contra 56 antes — as imagens gigantes estavam inflando o PDF
+sem ajudar a leitura). Corpo inalterado, 30 páginas.
+
+**Resto da leitura** (Quadro 1 da Seção 5.3, Apêndices, Referências,
+Anexo A completo): sem outros achados — quebras de página, tabelas e
+numeração consistentes.
+
+`verifica_tcc` (20/20) e `confere_docx` (conforme) depois da mudança.
+Fecha o planejamento de revisão completa (Blocos A-E).
+
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

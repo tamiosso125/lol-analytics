@@ -785,6 +785,8 @@ def check_scripts_documentados() -> None:
         ("docs/testa_faixa_duracao.py", "testa_faixa_duracao"),
         ("docs/experimento_calibracao.py", "experimento_calibracao"),
         ("docs/reavalia_calibracao.py", "reavalia_calibracao"),
+        ("src/models/experiment_turret_plates.py", "experiment_turret_plates"),
+        ("src/models/experiment_challenges_pilot.py", "experiment_challenges_pilot"),
     ]
     doc = RAIZ / "docs" / "comandos.md"
     if not doc.exists():

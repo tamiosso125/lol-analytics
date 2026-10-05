@@ -1,0 +1,35 @@
+{
+  "regiao": "KR",
+  "n_partidas_selecionadas": 3000,
+  "gap_dias": {
+    "min": 0,
+    "max": 16,
+    "media": 7.8
+  },
+  "n_jogadores_unicos": 4373,
+  "n_challenges_ok": 4373,
+  "n_partidas_times_completos": 3000,
+  "n_partidas_teste_final": 2987,
+  "resultado": {
+    "baseline (5 features)": {
+      "auc": 0.8627,
+      "acuracia": 0.7867,
+      "delta_auc": 0.0
+    },
+    "+ teamwork_pct_diff": {
+      "auc": 0.8596,
+      "acuracia": 0.7817,
+      "delta_auc": -0.0031
+    },
+    "+ expertise_pct_diff": {
+      "auc": 0.8634,
+      "acuracia": 0.781,
+      "delta_auc": 0.0007
+    },
+    "+ ambas": {
+      "auc": 0.8604,
+      "acuracia": 0.773,
+      "delta_auc": -0.0023
+    }
+  }
+}

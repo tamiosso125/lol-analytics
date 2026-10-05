@@ -202,16 +202,25 @@ perguntas de referência (22 solo queue + 4 competitivo).
   A série **não é monôtona** (20 min é menor que 10 e 15): é
   concentração tardia, não crescimento contínuo. As placas caem
   aos 14 min, razão de existir um modelo por fase.
-- **9 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
+- **11 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
   dispersão de time, tuning por fase, calibração extra, ouro em itens,
   split def/off, dragões por tipo, item_gold_diff refeito,
-  ward_diff/ward_kill_diff): a abordagem atual está no teto do que
-  features agregadas de estado permitem — material para a seção de
-  limitações. A contagem é 9 e não 8 porque o experimento de dragões por
-  tipo (`monsterSubType`, diário 2026-07-05) entrou na série e ficou de
+  ward_diff/ward_kill_diff, placas de torre, percentis comportamentais do
+  jogador): a abordagem atual está no teto do que features agregadas de
+  estado (e até um eixo comportamental de fonte diferente) permitem —
+  material para a seção de limitações. O 11º (`teamwork_pct_diff`/
+  `expertise_pct_diff`, diário 2026-10-05) é o único que não vem da
+  *timeline* — vem de `lol-challenges-v1`, testado sobre partidas KR
+  recentes pra evitar vazamento do estado vitalício do jogador; um piloto
+  pequeno (n=199) sugeriu sinal (+0,009 de delta) que não se sustentou ao
+  escalar para n=2.987 (-0,0031) — regressão à média, não achado. A
+  contagem é 11 e não 9 porque os experimentos de placas de torre
+  (`plate_diff`) e percentis comportamentais entraram na série por
+  último; e não é 8 porque o experimento de dragões por tipo
+  (`monsterSubType`, diário 2026-07-05) entrou antes deles e ficou de
   fora do Apêndice D do TCC até 2026-10-03; o "7º"/"8º" nos títulos das
-  entradas de 2026-07-06 do diário é renumeração local que ignora esse
-  experimento.
+  entradas de 2026-07-06 do diário é renumeração local que ignora esses
+  três experimentos.
 - Validação externa: o próprio Oracle's Elixir publica uma calculadora
   de win probability early-game com a mesma estrutura da nossa
   Predição.
@@ -254,16 +263,26 @@ de novo se `data/items.json` mudar de versão (não depende de coleta).
 
 `docs/planejamento_v2.md` está **100% entregue** (sprints 0-6, ver
 diário 2026-07-05/06) — mantido só como registro histórico da decisão
-de escopo, não uma lista de pendências ativas. Pendências reais atuais
-(ver "Próximos registros pendentes" no fim de `diario_execucao.md`,
-seção sempre mantida atualizada):
-- Escrever os capítulos do TCC a partir do diário (maior pendência
-  real) — inclui atualizar as tabelas de métrica com os números de
-  23k partidas (2026-07-06) e o achado de viés de lado por fase
-  (2026-07-08), não os números antigos de 10k.
+de escopo, não uma lista de pendências ativas.
+
+**O TCC II está escrito e fechado (2026-10-04), revisado ponta a ponta
+em 2026-10-05 (Blocos A-E, ver diário).** `docs/tcc2_texto.md`
+→ `docs/build_tcc_docx.py` → `docs/tcc2_final.docx` (51 páginas, corpo
+30, dentro da faixa institucional 25-30 — **sem folga**, qualquer
+acréscimo de texto no corpo estoura o teto). Suíte completa verde:
+`tests/smoke_test.py`, `tests/validate_predictions.py` (aprovado com
+ressalvas), `docs/verifica_tcc.py` (20 checagens, consistente),
+`docs/confere_docx.py` (conforme), `frontend` lint + 31/31 testes.
+Nenhuma pendência de texto em aberto — ver a seção "Pendências finais
+antes da entrega" no fim de `docs/tcc2_texto.md` para o histórico
+completo das decisões (título acadêmico, posição de "Trabalhos
+Relacionados", formatação herdada do TCC I).
+
+Pendências reais atuais, nenhuma delas bloqueando a entrega do TCC
+(ver "Próximos registros pendentes" no fim de `diario_execucao.md`):
 - Champion select competitivo no Team Builder (única feature da visão
-  original ainda não iniciada).
-- Ampliar mais a amostra por região (KR/EUW1/NA1 ainda bem menores
-  que BR1) se quiser reforçar o achado de viés de lado.
+  original ainda não iniciada — é produto, não é exigência do TCC).
 - `monotone_constraints` no XGBoost — só se a banca cobrar
   monotonicidade formal; não é bug, é característica documentada.
+- Competitivo/pro-play: enriquecimentos adicionais adiados (opções já
+  levantadas em `project_scope_decisions.md` na memória do assistente).

@@ -1,0 +1,32 @@
+{
+  "hipotese": "TURRET_PLATE_DESTROYED (evento da timeline nunca testado) como feature plate_diff — candidato a preencher a janela onde tower_diff fica ~0 porque torres raramente morrem antes dos 15min, mas placas sao batidas o jogo inteiro nessa janela.",
+  "n_linhas_match_x_cutoff": 81758,
+  "cortes": {
+    "10": {
+      "n": 39309,
+      "baseline (5 features)": {
+        "auc": 0.7702,
+        "acuracia": 0.6977,
+        "delta_auc": 0.0
+      },
+      "+ plate_diff": {
+        "auc": 0.77,
+        "acuracia": 0.6978,
+        "delta_auc": -0.0002
+      }
+    },
+    "15": {
+      "n": 39188,
+      "baseline (5 features)": {
+        "auc": 0.845,
+        "acuracia": 0.7609,
+        "delta_auc": 0.0
+      },
+      "+ plate_diff": {
+        "auc": 0.8448,
+        "acuracia": 0.7613,
+        "delta_auc": -0.0002
+      }
+    }
+  }
+}

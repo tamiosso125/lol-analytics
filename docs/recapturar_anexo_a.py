@@ -66,6 +66,9 @@ TELAS = [
 ]
 
 
+TEMA = os.environ.get("ANEXO_TEMA", "dark")  # "dark" ou "light"
+
+
 def main() -> None:
     SAIDA.mkdir(parents=True, exist_ok=True)
     erros = []
@@ -76,8 +79,17 @@ def main() -> None:
         # do Windows está 0, mas o Chromium ainda herda a configuração de
         # `<local>` e o fetch falha. Confirmado: com a flag, HTTP 200.
         nav = p.chromium.launch(args=["--no-proxy-server"])
+        contexto = nav.new_context(viewport={"width": 1440, "height": ALTURA})
+        # index.html lê localStorage.theme ANTES do React montar (evita
+        # flash) — por isso o tema entra via init_script, que roda antes de
+        # qualquer script da própria página, e não via toggle na UI depois
+        # de carregada (a troca manual re-renderiza com estado já montado e
+        # alguns gráficos Recharts não recalculam cor em troca de tema).
+        contexto.add_init_script(
+            f"window.localStorage.setItem('theme', '{TEMA}');"
+        )
         for nome, rota, espera in TELAS:
-            pagina = nav.new_page(viewport={"width": 1440, "height": ALTURA})
+            pagina = contexto.new_page()
             try:
                 pagina.goto(f"{FRONT}{rota}", wait_until="networkidle", timeout=45000)
                 pagina.wait_for_selector(espera, timeout=25000)

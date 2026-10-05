@@ -87,7 +87,7 @@ were collected and organized through the Riot Games API, complemented
 by 96,716 professional matches (2014-2026, Oracle's Elixir). The
 exploratory analysis uses all 41,063; the predictive models were built
 on the 39,426 matches available when the feature set was frozen, of
-which 39.309 produced a feature row, a difference registered as a
+which 39,309 produced a feature row, a difference registered as a
 limitation in Section 5.8. Three
 models — XGBoost, Random Forest and a neural network (MLP) — were
 trained and compared to predict the winning team from the match state
@@ -311,13 +311,11 @@ Arriba-Pérez (2025) apoiam a discussão sobre explicabilidade, enquanto
 Jiang et al. (2025) fundamentam o uso de modelos de linguagem em
 soluções analíticas.
 
-Esta seção é conceitual: define os conceitos e os termos usados no
-restante do trabalho. Duas famílias de referência são usadas aqui, com
-papéis distintos. As obras originais dos métodos que este trabalho aplica
-— Random Forest, XGBoost, AUC-ROC, SHAP, LIME e conversão de linguagem
-natural em SQL — são citadas no ponto em que o método é introduzido, nas
-subseções 2.2 a 2.4, porque o que importa ali é a propriedade técnica que
-justifica o uso. Os estudos de contexto do domínio, estes sim com objeto,
+Esta seção é conceitual: define os termos usados no restante do
+trabalho. As obras originais dos métodos aplicados — *Random Forest*,
+XGBoost, AUC-ROC, SHAP, LIME e conversão de linguagem natural em SQL —
+são citadas nas subseções 2.2 a 2.4, pela propriedade técnica que
+justifica o uso; os estudos de contexto do domínio, com objeto,
 abordagem e resultados, são descritos autor a autor na Seção 3.
 
 ### 2.1 ESPORTS E ANÁLISE DE DADOS
@@ -344,47 +342,36 @@ distinto, analisando o desempenho dos jogadores a partir de funções
 (*roles*) em jogo e de métricas individuais de desempenho.
 
 As duas leituras delimitam o espaço de escolha da modelagem preditiva,
-mas não decidem qual família de modelos é adequada a este problema. Este
-trabalho comparou três famílias, e o critério dessa escolha é de
-natureza técnica, não de preferência.
+mas não decidem qual família é adequada a este problema. Este trabalho
+comparou três, por critério técnico, não preferência.
 
-A primeira são os ensembles de árvores de decisão, e em particular a
-*Random Forest* (Breiman, 2001). A construção combina *bagging* — cada
-árvore é treinada sobre uma amostra *bootstrapeada* do conjunto — com a
-seleção de um subconjunto aleatório de variáveis em cada nó de partição.
-A segunda restrição é a que dá origem ao nome: ela força as árvores a
-divergirem entre si, o que reduz a correlação dos erros individuais e,
-com isso, a variância do conjunto final. Para um problema como o deste
-trabalho, em que as variáveis preditoras são agregados de desempenho
-fortemente correlacionados entre si — ouro, abates e torres evoluem
-juntos ao longo da partida —, essa decorrelação é diretamente relevante.
+A primeira são os *ensembles* de árvores de decisão, em particular a
+*Random Forest* (Breiman, 2001): combina *bagging* — cada árvore treinada
+sobre uma amostra *bootstrapeada* — com a seleção de um subconjunto
+aleatório de variáveis por nó, o que força as árvores a divergirem entre
+si e reduz a variância do conjunto. Para variáveis preditoras fortemente
+correlacionadas entre si — ouro, abates e torres evoluem juntos ao longo
+da partida —, essa decorrelação é diretamente relevante.
 
-A segunda família é o *gradient boosting*, representado aqui pelo
-XGBoost (Chen e Guestrin, 2016). Em vez de construir árvores de forma
-independente e combinar suas respostas, o método constrói árvores
-sequencialmente, cada uma ajustada ao resíduo acumulado das anteriores. O
-XGBoost formaliza esse procedimento como otimização de segunda ordem —
-cada passo usa tanto o gradiente quanto a curvatura da função de perda — e
-introduz controles explícitos de regularização, que são o que torna o
-método utilizável com árvores profundas sem sobreajustar. Para dados
-tabulares, que é o formato que as *features* deste trabalho produzem,
-essa família costuma apresentar desempenho superior ao de ensembles por
-agregação.
+A segunda é o *gradient boosting*, representado pelo XGBoost (Chen e
+Guestrin, 2016): em vez de árvores independentes, constrói-as
+sequencialmente, cada uma ajustada ao resíduo acumulado das anteriores,
+com otimização de segunda ordem (gradiente e curvatura da perda) e
+regularização explícita — o que torna o método utilizável com árvores
+profundas sem sobreajustar. Para dados tabulares, o formato que as
+*features* deste trabalho produzem, essa família costuma superar
+*ensembles* por agregação.
 
-A terceira são as redes neurais *feedforward*, ou perceptrons multicamada
-(MLP). Compostas por camadas de transformações não lineares, têm
-capacidade de aproximação universal e capturam interações complexas
-entre variáveis sem que essas interações precisem ser especificadas. Em
-troca, exigem mais dados e mais cuidado com escala e regularização para
-não sobrarjetar — restrição que se mostra determinante quando a amostra
-disponível é da ordem de dezenas de milhares de observações e não de
+A terceira são as redes neurais *feedforward*, ou perceptrons
+multicamada (MLP): capacidade de aproximação universal, capturam
+interações complexas sem que precisem ser especificadas, mas exigem mais
+dados e mais cuidado com escala e regularização — restrição relevante
+numa amostra da ordem de dezenas de milhares de observações, não
 milhões.
 
-As três famílias foram comparadas sob o mesmo desenho experimental: os
-mesmos dados, o mesmo particionamento e os mesmos cortes temporais. O
-resultado da comparação é reportado na Seção 5, e o que se pode afirmar
-nesta seção é apenas o critério adotado — a escolha entre elas não foi
-feita por preferência, e sim mediante medição.
+As três famílias foram comparadas sob o mesmo desenho experimental
+(mesmos dados, particionamento e cortes temporais); o resultado está na
+Seção 5 — aqui fica só o critério: medição, não preferência.
 
 ### 2.3 EXPLICABILIDADE E AVALIAÇÃO DE MODELOS PREDITIVOS
 
@@ -395,51 +382,42 @@ abordagens de predição explicável podem combinar classificação e
 interpretação, tornando *dashboards*, descrições e fatores relevantes
 da previsão mais compreensíveis para o usuário final.
 
-Explicar a decisão de um ensemble, porém, não é uma tarefa trivial: a
-saída final resulta da soma de centenas de árvores, e a contribuição
-individual de cada variável não é diretamente legível. Duas famílias de
-métodos endereçam essa questão, e é útil nomeá-las porque elas respondem
-a perguntas diferentes.
+Explicar a decisão de um *ensemble*, porém, não é trivial: a saída final
+resulta da soma de centenas de árvores, e a contribuição individual de
+cada variável não é diretamente legível. Duas famílias de métodos
+endereçam essa questão, e respondem a perguntas diferentes.
 
 A primeira aproxima o comportamento do modelo por perturbações locais da
-entrada. LIME (Ribeiro, Singh e Guestrin, 2016) é o exemplo de
-referência: constrói um modelo linear local, e portanto simples de
-interpretar, que aproxima o classificador complexo na vizinhança de cada
-instância. A vantagem é a simplicidade do resultado; o custo é que a
-explicação descreve um comportamento local, e a escolha da vizinhança
+entrada — LIME (Ribeiro, Singh e Guestrin, 2016) constrói um modelo
+linear local, simples de interpretar, na vizinhança de cada instância; a
+vantagem é a simplicidade, o custo é que a escolha da vizinhança
 influencia o que se vê.
 
-A segunda recorre à teoria dos jogos e ao valor de Shapley, e define a
-importância de cada variável como sua contribuição média para a
-previsão, calculada sobre todas as combinações possíveis das demais
-variáveis. Lundberg e Lee (2017) unificam essa família de medidas e
-mostram que existe uma solução única dentro dela com um conjunto de
-propriedades desejáveis — entre elas a consistência e a imposibilidade
-de atribuir importância a uma variável ausente da entrada. SHAP
-(*SHapley Additive exPlanations*) é a implementação dessa unificação, e
-foi o mecanismo adotado neste trabalho. A escolha se justifica por uma
-razão prática: como a atribuição é sempre somada à previsão e o
-resultado é explicável em linguagem aditiva, os valores de SHAP
-permitem montar a explicação textual da plataforma a partir dos
-contribuições efetivamente calculados — e não a partir de conhecimento
-genérico sobre o jogo. A honestidade dessa separação é tratada na
-Seção 4.
+A segunda recorre à teoria dos jogos e ao valor de Shapley: a
+importância de cada variável é sua contribuição média para a previsão,
+calculada sobre todas as combinações possíveis das demais variáveis.
+Lundberg e Lee (2017) unificam essa família e mostram uma solução única
+com propriedades desejáveis — consistência e a impossibilidade de
+atribuir importância a uma variável ausente. SHAP (*SHapley Additive
+exPlanations*), a implementação dessa unificação, foi o mecanismo
+adotado aqui: como a atribuição é sempre somada à previsão em linguagem
+aditiva, os valores de SHAP permitem montar a explicação textual da
+plataforma a partir de contribuições efetivamente calculadas — não de
+conhecimento genérico sobre o jogo (a honestidade dessa separação é
+tratada na Seção 4).
 
-A avaliação dos modelos apresentados na seção anterior exige ainda
-uma escolha metodológica sobre a métrica. Com classes praticamente
-balanceadas (46,6% de vitória azul contra 53,4%), a acurácia isolada é
-enganosa: um classificador que sempre responde "vitória do time azul"
-alcança 46,6% — a própria taxa-base da amostra — sem qualquer poder
-preditivo. Por esse motivo a avaliação deste trabalho se apoia na área
-sob a curva da característica operacional do receptor (AUC-ROC), que
-mede a capacidade de discriminação do modelo em todos os limiares de
-decisão e, consequentemente, independe da escolha de um limiar
-específico. Hanley e McNeil (1982) demonstram que essa medida é
-equivalente à probabilidade de que um caso positivo receba uma
-pontuação maior que a de um caso negativo, o que a torna interpretável
-diretamente como proporção de pares corretamente ordenados. AUC-ROC e
-acurácia são reportados conjuntamente na Seção 5 justamente para tornar
-essa distinção visível nos números.
+A avaliação exige ainda uma escolha metodológica sobre a métrica. Com
+classes praticamente balanceadas (46,6% de vitória azul contra 53,4%), a
+acurácia isolada é enganosa: um classificador que sempre responde
+"vitória do time azul" alcança 46,6% — a própria taxa-base da amostra —
+sem qualquer poder preditivo. Por isso a avaliação se apoia na área sob
+a curva da característica operacional do receptor (AUC-ROC), que mede a
+discriminação do modelo em todos os limiares e independe da escolha de
+um limiar específico. Hanley e McNeil (1982) mostram que essa medida
+equivale à probabilidade de um caso positivo receber pontuação maior que
+um negativo — proporção de pares corretamente ordenados. AUC-ROC e
+acurácia são reportados juntos na Seção 5 para tornar essa distinção
+visível.
 
 ### 2.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
 
@@ -452,26 +430,22 @@ al. (2024) também destacam que mecanismos de diálogo, decomposição de
 perguntas e análise visual podem tornar a exploração dos dados mais
 intuitiva e eficiente.
 
-O problema técnico central dessa interface é a geração de consultas.
-Um modelo de linguagem produz texto, e o banco exige SQL sintaticamente
-válido e semanticamente correto sobre um esquema específico — dois
-requisitos que falham de maneiras diferentes. O modelo pode escrever uma
-consulta gramaticalmente correta que referencia uma tabela inexistente, e
-também pode produzir uma estrutura válida que responde à pergunta
-errada. Wang et al. (2020) tratam esse segundo caso, que é o mais
-difícil, mostrando que representações do esquema que incorporate os
-relacionamentos entre tabelas — e não apenas os nomes das colunas —
-melhoram de forma consistente a precisão da conversão, inclusive quando
-o esquema é amplo ou as perguntas ambíguas.
+O problema técnico central é a geração de consultas: um modelo de
+linguagem produz texto, e o banco exige SQL sintaticamente válido e
+semanticamente correto sobre um esquema específico — requisitos que
+falham de formas diferentes (uma consulta gramaticalmente correta pode
+referenciar tabela inexistente, ou responder à pergunta errada). Wang et
+al. (2020) tratam esse segundo caso, mostrando que representações do
+esquema que incorporam os relacionamentos entre tabelas — não só os
+nomes das colunas — melhoram de forma consistente a precisão da
+conversão.
 
-Este trabalho implementou uma interface de linguagem natural capaz de
-traduzir perguntas em português para consultas SQL validadas contra o
-esquema real do banco de dados, integrando visualização, recuperação de
-informações e geração de descobertas em uma mesma plataforma. A
-validação não é delegada ao modelo: a consulta gerposta é submetida a
-uma checagem em quatro camadas antes de tocar o banco, descrita na
-Seção 4. Os resultados de acurácia dessa interface são apresentados na
-Seção 5.
+Este trabalho implementou uma interface de linguagem natural que traduz
+perguntas em português para SQL validado contra o esquema real do banco,
+integrando visualização, recuperação de informações e geração de
+descobertas numa mesma plataforma. A validação não é delegada ao
+modelo: a consulta gerada passa por checagem em quatro camadas antes de
+tocar o banco (Seção 4); os resultados de acurácia estão na Seção 5.
 
 ### 2.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
 
@@ -589,45 +563,38 @@ coleta, tratamento, modelagem, explicabilidade, visualização e consulta
 em linguagem natural sobre a mesma base de dados. É essa lacuna de
 integração que este trabalho propõe ocupar.
 
-A distinção em relação a cada trabalho, porém, não se resume a esse
-degrau de integração. Convém explicitar em que eixos o presente trabalho
-difere, porque a diferença não está apenas no escopo e sim em decisões
-de projeto que alteram o que é possível concluir.
+A distinção em relação a cada trabalho não se resume a esse degrau de
+integração — está em decisões de projeto que alteram o que é possível
+concluir, ao longo de quatro eixos.
 
-O primeiro eixo é o horizonte da predição. Hodge et al. (2021) operam
-sobre partidas profissionais em andamento, e García-Méndez e
-Arriba-Pérez (2025) sobre o cenário de transmissão; ambos tratam a
-predição como um problema que se resolve enquanto a partida acontece. Este
-trabalho também constrói o estado em jogo, mas de forma explícita: a
-tarefa é estimar o vencedor a partir de um corte temporal artificial, o
-que torna a pergunta mensurável e comparável entre cortes. A diferença
-prática é que o modelo deixa de depender de um relógio e passa a depender
-de um parâmetro controlável pelo experimento.
+**Horizonte da predição.** Hodge et al. (2021) e García-Méndez e
+Arriba-Pérez (2025) tratam a predição como problema que se resolve
+enquanto a partida acontece. Este trabalho estima o vencedor a partir de
+um corte temporal artificial, o que torna a pergunta mensurável e
+comparável entre cortes — o modelo deixa de depender de um relógio e
+passa a depender de um parâmetro controlável pelo experimento.
 
-O segundo eixo é a natureza da fonte de dados. Os estudos de
-*League of Legends* citados partem de bases já estruturadas por
-terceiros. Este trabalho coletou a base diretamente da *timeline-v5* da
-Riot Games, que é a única fonte que expõe a posição dos eventos e a
-evolução minuto a minuto dos recursos em cada partida. Essa granularidade
-é o que torna possível a análise espaço-temporal da Seção 5.5. O viés de
-lado em si é medido sobre o agregado de vitória por time e região — e, no
-recorte de empate, sobre a diferença de ouro —, sem usar coordenada
-alguma; o que a *timeline* acrescenta aqui é a análise de uma partida
-individual, não a medição do viés.
+**Fonte de dados.** Os estudos citados partem de bases já estruturadas
+por terceiros. Este trabalho coletou diretamente da *timeline-v5* da
+Riot Games, única fonte que expõe a posição dos eventos e a evolução
+minuto a minuto dos recursos — a granularidade que torna possível a
+análise espaço-temporal da Seção 5.5 (o viés de lado em si é medido
+sobre o agregado de vitória por time e região, sem coordenada alguma; a
+*timeline* acrescenta a análise de partida individual, não a medição do
+viés).
 
-O terceiro eixo é o recorte de população. Os trabalhos de predição
-analisados atuam sobre o cenário profissional. Parte da contribuição
-deste trabalho é justamente contrapor a ele o *solo queue* de elo alto, e
-mostrar que o padrão de viés de lado observado entre jogadores de rank
-não se reproduz no circuito profissional. Sem essa comparação, o achado
-seria descrito como uma peculiaridade sem base comparativa.
+**Recorte de população.** Os trabalhos de predição analisados atuam
+sobre o cenário profissional. Parte da contribuição deste trabalho é
+contrapor a ele o *solo queue* de elo alto e mostrar que o viés de lado
+observado entre jogadores de *rank* não se reproduz no circuito
+profissional — sem essa comparação, o achado seria uma peculiaridade
+sem base comparativa.
 
-O quarto eixo é a transparência da camada preditiva. Nenhum dos trabalhos
-citados avalia a interface de consulta em linguagem natural contra um
-benchmark de perguntas de referência. A implementação aqui descrita é
-avaliada com um conjunto fixo de 26 perguntas cuja resposta esperada foi
-conferida diretamente contra o banco, o que torna o erro de conversão
-mensurável em vez de ilustrativo.
+**Transparência da camada preditiva.** Nenhum dos trabalhos citados
+avalia a interface de consulta em linguagem natural contra um
+*benchmark* de referência. A implementação aqui descrita usa 26
+perguntas fixas, com resposta esperada conferida diretamente contra o
+banco — o erro de conversão fica mensurável, não ilustrativo.
 
 A confrontação entre os resultados aqui obtidos e os resultados relatados
 na literatura é apresentada na Seção 5.7.
@@ -743,11 +710,12 @@ baseline inicial, foi realizado ajuste de hiperparâmetros por
 *GridSearchCV* (otimizando AUC-ROC) para os três modelos, seguido de
 geração de curva de calibração e de explicações SHAP (importância
 global e por instância) sobre o modelo de produção. Adicionalmente,
-foram conduzidos nove experimentos exploratórios de enriquecimento de
-*features* (ver Seção 5.4) para avaliar se sinais adicionais da linha do
-tempo (visão, itens, dispersão espacial do time, objetivos neutros)
-melhoravam o poder preditivo além das cinco variáveis de estado já
-utilizadas.
+foram conduzidos onze experimentos exploratórios de enriquecimento de
+*features* (ver Seção 5.4) para avaliar se sinais adicionais — dez deles
+da linha do tempo da partida (visão, itens, dispersão espacial do time,
+objetivos neutros, placas de torre) e um de um endpoint de progressão do
+jogador (percentis de comportamento) — melhoravam o poder preditivo além
+das cinco variáveis de estado já utilizadas.
 
 ### 4.7 PROPOSTA DE VISUALIZAÇÃO E INTERFACE EM LINGUAGEM NATURAL
 
@@ -1035,16 +1003,22 @@ os modelos, especialmente o XGBoost, já produziam probabilidades bem
 calibradas sem necessidade de
 recalibração adicional.
 
-**Experimentos negativos.** Nove tentativas de enriquecer o conjunto de
+**Experimentos negativos.** Onze tentativas de enriquecer o conjunto de
 variáveis não produziram ganho de desempenho estatisticamente
 distinguível de ruído (deltas de AUC-ROC na ordem de ±0,001-0,003):
 diferença de abates de Barão/Arauto, dispersão espacial do time, ajuste
 de hiperparâmetros específico por fase, calibração adicional além da já
 obtida, ouro convertido em itens, separação de *features* defensivas e
 ofensivas, uma segunda tentativa de `item_gold_diff`, diferenças de
-visão (colocação/destruição de sentinelas) e o tipo do dragão
-(`monsterSubType`) — este último o único em que o desempenho piorou
-de forma mensurável (AUC-ROC de 0,8319 para 0,8295). Em contraste, o
+visão (colocação/destruição de sentinelas), o tipo do dragão
+(`monsterSubType`) — este o único em que o desempenho piorou
+de forma mensurável (AUC-ROC de 0,8319 para 0,8295) —, placas de torre
+(`plate_diff`, candidato a cobrir a janela onde `tower_diff` é pouco
+informativo antes dos 15 min; delta -0,0002 nos cortes 10 e 15 min) e
+percentis comportamentais do jogador (`teamwork_pct_diff`/
+`expertise_pct_diff`, via `lol-challenges-v1`; delta -0,0031/+0,0007 sobre
+2.987 partidas, após um piloto de 199 partidas sugerir sinal que não se
+sustentou com amostra maior — ver Apêndice D). Em contraste, o
 aumento do *volume* de partidas produziu ganhos reais e consistentes: o
 AUC-ROC do
 XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133 partidas) e
@@ -1147,7 +1121,7 @@ reconhecida e discutida na próxima subseção.
   frágeis mesmo com 41.063 partidas — mitigado, onde aplicável, por
   encolhimento estatístico (*shrinkage*) em direção à média do grupo
   maior, mas não eliminado.
-- **A taxa-base do modelo em estado de empate subestima o viês de lado.**
+- **A taxa-base do modelo em estado de empate subestima o viés de lado.**
   Com o retreino de 39.188 partidas, a probabilidade prevista para o
   estado "tudo empatado" ficou em 49,2% (10 min), 49,6% (15 min), 51,4%
   (20 min) e 49,0% (25 min), enquanto a medição direta sobre os dados
@@ -1167,7 +1141,7 @@ reconhecida e discutida na próxima subseção.
   ruído; e só a **troca de família** o fecha — uma *Random Forest* com
   500 árvores e profundidade 6 leva o desvio a **0,6 pp** ao custo de
   0,0005 de AUC. A discrepância é, portanto, uma propriedade da função que
-  o XGBoost aprende neste recorte, e não um défict de ajuste. A troca
+  o XGBoost aprende neste recorte, e não um déficit de ajuste. A troca
   não foi adotada porque o critério de escolha do modelo foi a
   acurácia no corte de 15 min, e nela a *Random Forest* fica em 0,7617
   contra 0,7621 — decisão consciente e reversível, sem retreino.
@@ -1203,12 +1177,16 @@ reconhecida e discutida na próxima subseção.
   concentra a maior parte das partidas coletadas, o que limita a
   generalização dos achados para versões do jogo com balanceamento
   diferente.
-- **Teto de desempenho das variáveis atuais**: nove experimentos de
-  enriquecimento de *features* a partir da mesma fonte de dados (linha
-  do tempo da partida) não superaram o modelo com as cinco variáveis
-  originais, sugerindo que o próximo ganho relevante depende de um tipo
-  de dado que a API atual não fornece — notadamente a ordem de escolha de
-  campeão (*draft*), que a API pública não expõe, e o estado das ondas de
+- **Teto de desempenho das variáveis atuais**: onze experimentos de
+  enriquecimento de *features* não superaram o modelo com as cinco
+  variáveis originais — dez a partir da mesma fonte de dados (linha do
+  tempo da partida) e um a partir de uma fonte diferente (percentis
+  comportamentais do jogador via `lol-challenges-v1`, Apêndice D), o que
+  descarta a hipótese de que o teto fosse só da *timeline* esgotada.
+  Sugere que o próximo ganho relevante depende de um tipo de dado que a
+  API atual não fornece de forma alguma — notadamente a ordem de escolha
+  de campeão (*draft*), que a API pública não expõe, e o estado das ondas
+  de
   *minions*. A posição em tempo real **existe** no payload da *timeline*
   (`participantFrames`) e já foi testada sem ganho mensurável (experimento 2
   do Apêndice D, dispersão espacial do time), de modo que ela não é o que
@@ -1269,21 +1247,15 @@ atingindo 88% de acurácia de execução sobre um benchmark de 26
 perguntas de referência.
 
 O achado que merece destaque, por não ter sido o objeto anunciado do
-trabalho, é o viés de lado. A hipótese inicial era que a modelagem
-preditiva operaria sobre um sinal qualquer de desempenho; o que a análise
-descritiva revelou é uma assimetria estrutural entre os dois lados do
-mapa, presente nas quatro regiões coletadas e com sinal inverso no
-jogo profissional — com a ressalva de que é estatisticamente firme
-em três delas (BR1, EUW1 e NA1) e apenas consistente em direção na KR,
-cuja taxa de 50,4% tem intervalo de confiança que inclui 50%. O valor
-disso para a comunidade é duplo. Por um
-lado, é um fator de confusão que qualquer modelo preditivo sobre *solo
-queue* precisa controlar, porque uma variável que distingue time azul
-de time vermelho sem nenhuma propriedade حقوقa do jogo é,
-necessariamente, um atalho. Por outro lado, a inversão observada no
-circuito profissional sugere que o mesmo fenômeno tem outra origem no
-*solo queue* — uma hipótese que este trabalho não comprova, mas que
-delimita o problema de forma útil.
+trabalho, é o viés de lado: uma assimetria estrutural entre os dois lados
+do mapa, estatisticamente firme em três das quatro regiões coletadas
+(BR1, EUW1, NA1; a KR tem intervalo de confiança que inclui 50%) e com
+sinal invertido no jogo profissional. O valor é duplo — é um fator de
+confusão que qualquer modelo preditivo sobre *solo queue* precisa
+controlar, já que uma variável que distingue os lados sem nenhuma
+propriedade intrínseca do jogo é, necessariamente, um atalho; e a
+inversão no circuito profissional sugere origem distinta no *solo
+queue*, hipótese que este trabalho delimita sem comprovar.
 
 Como contribuição além do escopo originalmente delimitado no TCC I, a
 incorporação do dataset competitivo profissional (Oracle's Elixir)
@@ -1324,18 +1296,9 @@ disponível. Um padrão sazonal — mudanças de *patch*, eventos do cenário
 competitivo — pode portanto estar parcialmente confundido com o que os
 dados descrevem.
 
-Há ainda uma limitação técnica em aberto, que não foi resolvida e não
-deveria ser omitida: o modelo de produção subestima o viés de lado nos
-cortes em que o jogo estava empatado, projetando taxas próximas de 50%
-onde o dado bruto dá entre 46% e 48%. A investigação descartou subajuste e
-apontou a troca de família de modelo como a única correção, ao custo de
-0,0005 de AUC. Por ser uma questão de modelo e não de dado, ela está
-detalhada na Seção 5.8, onde também estão os números e o experimento.
-
-Uma fragilidade declarada na primeira versão deste texto foi resolvida e
-não permanece como limitação: a amostra da região NA1, então reduzida a
-1.446 partidas, foi ampliada para 7.159, e a taxa de vitória do time
-vermelho passou de 51,9% para 52,2%, sem mudança de direção do achado.
+Há ainda uma limitação técnica de modelo, não de dado, em aberto — a
+subestimação do viés de lado nos cortes empatados — detalhada com números
+e experimento na Seção 5.8, e não repetida aqui.
 
 ### 6.2 TRABALHOS FUTUROS
 
@@ -1446,51 +1409,32 @@ ed. Thousand Oaks: SAGE Publications, 2018.
 
 ## APÊNDICE A — Esquema relacional do banco de dados
 
-O banco de dados (PostgreSQL) foi estruturado com as tabelas a seguir.
-Tabelas `raw_matches`/`raw_timelines` preservam o JSON bruto retornado
-pela Riot API (para reprocessamento sem nova coleta); as demais são a
-normalização relacional usada pela análise e pela modelagem.
+O banco de dados (PostgreSQL) foi estruturado com as tabelas listadas
+no Quadro a seguir. `raw_matches`/`raw_timelines` preservam o JSON
+bruto retornado pela Riot API (para reprocessamento sem nova coleta);
+as demais são a normalização relacional usada pela análise e pela
+modelagem.
 
-```sql
-players(puuid PK, game_name, tag_line, tier, division, league_points,
-        platform, updated_at)
+Quadro — Esquema relacional do banco de dados
 
-raw_matches(match_id PK, payload JSONB, collected_at)
-raw_timelines(match_id PK/FK→raw_matches, payload JSONB, collected_at)
+| Tabela | Campos | Chave |
+|---|---|---|
+| `players` | puuid, game_name, tag_line, tier, division, league_points, platform, updated_at | PK: puuid |
+| `raw_matches` | match_id, payload (JSONB), collected_at | PK: match_id |
+| `raw_timelines` | match_id, payload (JSONB), collected_at | PK/FK: match_id → raw_matches |
+| `matches` | match_id, platform_id, queue_id, game_version, game_creation, game_duration_s | PK: match_id |
+| `teams` | match_id, team_id, win, barons, dragons, heralds, towers, inhibitors | PK: match_id+team_id; FK: match_id → matches |
+| `participants` | match_id, puuid, team_id, team_position, champion_id, champion_name, kills, deaths, assists, gold_earned, cs_total, vision_score, dmg_to_champions, win | PK: match_id+puuid; FK: match_id → matches |
+| `bans` | match_id, team_id, pick_turn, champion_id | PK: match_id+team_id+pick_turn; FK: match_id → matches |
+| `item_events` | id, match_id, puuid, ts_ms, item_id, action | PK: id; FK: match_id → matches |
+| `items` | item_id, name, total_gold, purchasable, map_11 | PK: item_id |
+| `pro_games` | game_id, league, year, split, playoffs, game_date, patch, side, team_name, win, game_length_s, kills, deaths, dragons, barons, heralds, towers, inhibitors, gold_diff_at15, xp_diff_at15, cs_diff_at15, kill_diff_at15 | PK: game_id+side |
+| `pro_players` | game_id, side, position, player_name, team_name, champion, kills, deaths, assists, win | PK: game_id+side+position |
 
-matches(match_id PK, platform_id, queue_id, game_version,
-        game_creation, game_duration_s)
-
-teams(match_id FK, team_id, win, barons, dragons, heralds, towers,
-      inhibitors — PK: match_id+team_id)
-
-participants(match_id FK, puuid, team_id, team_position, champion_id,
-             champion_name, kills, deaths, assists, gold_earned,
-             cs_total, vision_score, dmg_to_champions, win
-             — PK: match_id+puuid)
-
-bans(match_id FK, team_id, pick_turn, champion_id
-     — PK: match_id+team_id+pick_turn)
-
-item_events(id PK, match_id FK, puuid, ts_ms, item_id, action)
-  -- compras/vendas efetivas (ITEM_UNDO já resolvido no ETL)
-
-items(item_id PK, name, total_gold, purchasable, map_11)
-  -- catálogo Data Dragon, usado para JOIN de nome/ícone de item
-
-pro_games(game_id, league, year, split, playoffs, game_date, patch,
-          side, team_name, win, game_length_s, kills, deaths, dragons,
-          barons, heralds, towers, inhibitors, gold_diff_at15,
-          xp_diff_at15, cs_diff_at15, kill_diff_at15
-          — PK: game_id+side)
-
-pro_players(game_id, side, position, player_name, team_name, champion,
-            kills, deaths, assists, win
-            — PK: game_id+side+position)
-```
-
-Índices B-tree foram criados sobre as colunas mais usadas em filtro
-(campeão, jogador, versão do jogo, liga) para suportar tanto os
+`item_events` guarda compras/vendas efetivas (`ITEM_UNDO` já resolvido
+no ETL); `items` é o catálogo Data Dragon, usado para JOIN de nome/ícone
+de item. Índices B-tree foram criados sobre as colunas mais usadas em
+filtro (campeão, jogador, versão do jogo, liga) para suportar tanto os
 endpoints da API quanto as consultas geradas pela interface em
 linguagem natural.
 
@@ -1607,6 +1551,8 @@ Quadro — Experimentos negativos de enriquecimento de *features*
 | 7 | `item_gold_diff` (segunda tentativa, refeita) | Δ AUC ≈ ruído |
 | 8 | Visão (ward_diff / ward_kill_diff) | Δ AUC ≈ ruído |
 | 9 | Dragões por tipo (`monsterSubType`) | **AUC piorou** (0,8319 → 0,8295), sobre a base de 23.133 partidas |
+| 10 | Placas de torre (`plate_diff`, `TURRET_PLATE_DESTROYED`) | Δ AUC -0,0002 (cortes 10 e 15 min, base de 39.188-39.309) |
+| 11 | Percentis comportamentais (`teamwork_pct_diff`/`expertise_pct_diff`, `lol-challenges-v1`) | Δ AUC -0,0031/+0,0007 (corte 15 min, n=2.987, piloto de n=199 sugeriu sinal que não se sustentou) |
 
 *Nota sobre o experimento 4.* A ausência de ganho de AUC da calibração foi
 reexaminada em 2026-10-04, quando a limitação de taxa-base da Seção 5.8
@@ -1621,32 +1567,61 @@ figura na tabela porque não é enriquecimento de *features*, e sim
 caracterização de uma limitação de modelo; o comando é
 `python docs/experimento_calibracao.py`.
 
+*Nota sobre o experimento 10.* Achado em 2026-10-05 ao inspecionar o
+payload bruto real da timeline em busca de evento ainda não testado (não
+pela documentação oficial, que exige login para detalhar *schema*).
+`TURRET_PLATE_DESTROYED` cobre exatamente a janela onde `tower_diff` é
+pouco informativo (torres raramente morrem antes dos 15 min, mas placas
+são batidas o jogo inteiro nessa janela) — hipótese concreta, mas o sinal
+de pressão de rota que capta já deve estar redundante com
+`gold_diff`/`xp_diff`. Comando e artefato: `python -m
+src.models.experiment_turret_plates` e
+`reports/experimento_placas_torre.json`.
+
+*Nota sobre o experimento 11.* Único entre os onze que não vem da
+*timeline* — `lol-challenges-v1` devolve o estado comportamental VITALÍCIO
+e ATUAL do jogador, não o estado dele na época de uma partida passada; um
+teste ingênuo sobre o histórico vazaria dado do futuro. Contornado medindo
+sobre as partidas mais recentes da KR (gap de horas/dias entre a coleta e
+a consulta, registrado, não suposto). Um piloto inicial (199 partidas)
+sugeriu `teamwork_pct_diff` com delta +0,0090 — maior que qualquer outro
+experimento —, mas a escala para 2.987 partidas (gap 0-16 dias, média 7,8)
+devolveu -0,0031, dentro do ruído dos demais. O piloto pequeno era
+regressão à média, não sinal: o próprio *baseline* já oscilava 1,8 pp do
+AUC de produção só pelo tamanho da amostra. Comando e artefato: `python -m
+src.models.experiment_challenges_pilot --n-matches 3000` e
+`reports/experimento_challenges_piloto.json`.
+
 Em contraste, o aumento de *volume* de partidas produziu ganho real:
 AUC-ROC do XGBoost (corte 15 min) subiu de 0,8214 (10.295 partidas)
 para 0,8393 (23.133 partidas) e para 0,8473 (39.188 partidas) ao longo
 da coleta incremental — um ganho acumulado de 0,0259, cerca de 6× maior
-que o maior ganho de qualquer um dos 9 experimentos de *feature* (0,003),
-e cerca de 26× o menor deles (0,001).
+que o maior ganho de qualquer um dos 11 experimentos de *feature* (0,003),
+e cerca de 130× o menor deles (0,0002).
 
 ---
 
 ## ANEXO A — Capturas de tela da plataforma
 
-Geradas em 2026-10-04 às 21:21 via Playwright (Chromium, 1440 px de largura,
-altura ajustada à página, sem `full_page`) contra a API e o *frontend* rodando
-localmente, com **41.063 partidas** na fila ranqueada — a mesma base do Quadro 1
-da Seção 5.3. O instante e a base não são afirmados por memória: estão em
-`reports/anexo_a/captura.json`, gravado pelo comando que produz as telas, e é
-esse arquivo que sustenta a afirmação.
+Geradas em 2026-10-04 às 22:37 via Playwright (Chromium, 1440 px de largura,
+altura ajustada à página, sem `full_page`, **tema escuro**) contra a API e o
+*frontend* rodando localmente, com **41.063 partidas** na fila ranqueada — a
+mesma base do Quadro 1 da Seção 5.3. O instante e a base não são afirmados por
+memória: estão em `reports/anexo_a/captura.json`, gravado pelo comando que
+produz as telas, e é esse arquivo que sustenta a afirmação.
 
-Substituíram-se duas gerações de capturas. As de 2026-09-28, feitas com 24.154
-partidas, mostravam no Dashboard a tabela regional com NA1 = 1.446, em
-contradição com os 7.159 que o texto afirma; as de 2026-10-04 pela manhã, feitas
-com 39.426, ficaram desatualizadas quando a última rodada de coleta da KR levou
-o banco a 41.063. Na Figura 2 a tabela regional já mostra KR com 10.204 partidas
-e 50,4% de vitória do vermelho. Arquivos em `reports/anexo_a/` (não
-versionados neste Markdown — inserir como figura ao converter para o `.docx`
-final). O comando que as regera é `python docs/recapturar_anexo_a.py`.
+Esta é a terceira geração de capturas. As de 2026-09-28 (24.154 partidas)
+ficaram desatualizadas na tabela regional (NA1 = 1.446, contra os 7.159 do
+texto); as de 2026-10-04 pela manhã (39.426, tema claro) ficaram
+desatualizadas quando a última rodada de coleta da KR levou o banco a 41.063 —
+e, à parte o número, o tema claro produzia capturas de fundo branco sobre a
+página branca do `.docx`, com baixo contraste visual. A geração atual resolve
+as duas coisas: usa `ANEXO_TEMA=dark` (variável de ambiente do comando, padrão
+`dark`) para capturar com o tema escuro da própria interface — aplicado via
+`localStorage` antes do React montar, não por filtro de imagem — e reflete o
+banco no instante da captura. Arquivos em `reports/anexo_a/` (não versionados
+neste Markdown — inserir como figura ao converter para o `.docx` final). O
+comando que as regera é `python docs/recapturar_anexo_a.py`.
 
 | Arquivo | Página |
 |---|---|
@@ -1691,7 +1666,7 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
    direta com os resultados obtidos, na Seção 5.7.
 4. ~~Apêndices/Anexos~~ — **feitos**: A (schema), B (26 perguntas NLQ,
    88% confirmado com dados frescos), C (quadro cruzado 4 cortes × 3
-   modelos), D (9 experimentos negativos), Anexo A (6 capturas de tela
+   modelos), D (11 experimentos negativos), Anexo A (6 capturas de tela
    reais em `reports/anexo_a/`), Anexo B (referência da API).
 5. **Formatação final — FEITA (2026-10-03).** O texto foi vertido para
    `.docx` institucional por script, não à mão. Pipeline em
@@ -1713,8 +1688,8 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
      estilo `REFERÊNCIAS` do TCC I, com a separação entre entradas.
 
    Todas as contagens acima são medidas por `python docs/confere_docx.py`,
-   que confere também legendas (6 Figuras, 5 Quadros), fontes de ilustração
-   (11), tabelas (5) e imagens (6). Ele falha com exit 1 se qualquer uma
+   que confere também legendas (6 Figuras, 6 Quadros), fontes de ilustração
+   (11), tabelas (6) e imagens (6). Ele falha com exit 1 se qualquer uma
    divergir — os números do checklist não são mais escritos à mão, que era
    como "41 títulos" e "12 referências" ficaram velhos sem ninguém perceber.
 
@@ -1723,13 +1698,25 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
    Markdown:
    - Palavras-chave separadas por **ponto final**, não ponto-e-vírgula
      — corrigido no Resumo/Abstract.
-   - Tabelas se chamam **"Quadro"** nesta instituição, com "Lista de
-     Quadros" — feito no `.docx`: 5 Quadros com numeração automática por
-     campo `SEQ` e página de Lista de Quadros montada.
+   - Tabelas se chamam **"Quadro"** nesta instituição — feito no `.docx`:
+     6 Quadros com numeração automática por campo `SEQ` (o Apêndice A
+     virou Quadro em 2026-10-05, ver pendência abaixo). **Sem** página de
+     Lista de Quadros — ver correção de 2026-10-05 logo abaixo.
    - Figuras: legenda no **topo**, fonte obrigatória **abaixo** (mesmo
      para figura de autoria própria) — feito: as 6 capturas do Anexo A
-     entraram como figuras com essa convenção, e há Lista de
-     Ilustrações.
+     entraram como figuras com essa convenção.
+   - **Correção 2026-10-05 (Bloco B da revisão, "modelos e exemplos do
+     TCC II"):** Sumário, Lista de Ilustrações e Lista de Quadros foram
+     REMOVIDOS do pré-textual. Os três vinham do modelo institucional
+     genérico (nunca cruzado contra os aprovados de verdade nesse item
+     específico). Ao extrair a estrutura dos 10 TCC II aprovados
+     (`Downloads/TCC II - EXEMPLOS E MATERIAIS/`), confirmou-se em
+     **10 de 10** que a Introdução começa na página 3 ou 4 — direto
+     após capa+folha de rosto+resumo/abstract, sem nenhum dos três
+     elementos no meio. Documento caiu de 59 para 55 páginas totais
+     (o corpo, Introdução→Referências, não muda — é medida relativa,
+     segue em 30). `listas_de_ilustracoes()` removida de
+     `build_tcc_docx.py` (função morta, sem mais uso).
    - Confirmado também: a estrutura de seções do corpo (além de
      Introdução/Referencial Teórico obrigatórios) é **livre, por
      acordo com o orientador**. Em 2026-10-04, a medição dos **10 TCC II
@@ -1776,3 +1763,49 @@ modelo institucional de 2026-09-28 (Referencial Teórico em vez de
 Fundamentação, sem Trabalhos Relacionados, Material(is) e Métodos em vez de
 Metodologia, Resultados e Discussão separados): prevalece o padrão que a banca
 aprovou.
+
+**Formatação — DECIDIDO (2026-10-05): segue o `.doc` oficial do
+Prof. Elvandi, não mais os 10 aprovados.** O usuário pediu que a
+formatação batesse com
+`TCC II - Modelo de artigo científico da UNISINOS - Exemplo Prof. Elvandi.doc`
+como requisito obrigatório. Convertido via automação do Word
+(`docs/modelo_elvandi.docx`) e medido direto do XML dos estilos — não por
+inferência de PDF:
+- **Recuo de parágrafo = 1,25 cm** (`w:firstLine="709"` twips no estilo
+  `Normal`) — reverte a medição de 2026-10-04 sobre os 10 aprovados (que
+  tinha achado ≈0 e descartado a regra do `Ajustes LATEX.txt`); aquela
+  medição vinha de texto extraído por `pypdf`, que o próprio plano já
+  avisava não bastar para aferir layout. O XML do estilo é a fonte que
+  prevalece.
+- **Títulos em negrito + caixa alta** (`<w:b/><w:caps/>` no estilo
+  `heading 1`) — reverte a decisão de "sem negrito" (que vinha de um
+  comentário manual pontual do orientador numa revisão do TCC I).
+  Decisão do usuário: entre os dois sinais do mesmo orientador, prevalece
+  o modelo oficial de artigo, mais explícito e mais recente.
+- Margens (3/2/3/2 cm), fonte (Arial 12), entrelinha (1,5) e
+  justificado já batiam — confirmados no XML, não só herdados do TCC I.
+
+Aplicado em `ajustar_tipografia()`/`aplicar_negrito_titulos()` (novo) em
+`docs/build_tcc_docx.py`; `docs/confere_docx.py` invertido para exigir
+negrito (era "regra: zero", virou "regra: zero título SEM negrito").
+
+**Efeito colateral e correção (2026-10-05):** o recuo de 1,25 cm sozinho
+empurrou o corpo de 30 para 31 páginas — acima do teto institucional.
+Cortado texto expositivo redundante (não achado) até voltar a 30: a
+sobreposição real entre 5.8/6.1 (~115 palavras), a comparação com a
+literatura na síntese da Seção 3.6 (~160 palavras) e a exposição técnica
+de RF/XGBoost/MLP e LIME/SHAP na Seção 2 (~400 palavras, sem perder
+nenhuma citação). No processo, 3 bugs de texto reais foram encontrados e
+corrigidos: um trecho da Conclusão com caracteres árabes corrompidos
+misturados no meio da frase, "gerposta" (não é palavra, na Seção 2.4) e
+"incorporate" (inglês, não português, mesma seção). Resultado: 30
+páginas de corpo, no teto da faixa 25-30, sem folga — qualquer edição
+futura do corpo precisa remedir com `docs/finalize-fields.ps1`.
+
+**Apêndice A reformatado (2026-10-05):** o esquema relacional saiu de um
+bloco de código SQL (ilegível no `.docx` — sem quebra de linha
+inteligente, texto cru) para um Quadro de verdade (Tabela × Campos ×
+Chave, 11 linhas), consistente com a convenção "Quadro" já usada no
+resto do documento. Isso subiu a contagem de 5 para **6 Quadros** — todas
+as referências a "5 Quadros"/"tabelas (5)" acima foram atualizadas, e
+`docs/confere_docx.py` também.

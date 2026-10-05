@@ -193,6 +193,25 @@ resultado está em `reports/`.**
 .venv\Scripts\python.exe docs\reavalia_calibracao.py
 ```
 
+```powershell
+# Experimento 10 (Apêndice D): placas de torre (TURRET_PLATE_DESTROYED)
+# como feature plate_diff — ~10 min, varre 41 mil timelines. Grava
+# reports/experimento_placas_torre.json:
+.venv\Scripts\python.exe -m src.models.experiment_turret_plates
+```
+
+```powershell
+# Experimento 11 (Apêndice D): percentis comportamentais do jogador
+# (teamwork_pct_diff/expertise_pct_diff via lol-challenges-v1), sobre as
+# partidas KR mais recentes (minimiza o gap entre a coleta e a consulta —
+# lol-challenges-v1 devolve estado VITALÍCIO atual, não da época da
+# partida). ~70-90 min (rate limit, ~4 mil jogadores únicos em 3000
+# partidas) na primeira vez; reexecuções reusam
+# reports/_cache_challenges_kr.json e só consultam jogador novo. Grava
+# reports/experimento_challenges_piloto.json:
+.venv\Scripts\python.exe -m src.models.experiment_challenges_pilot --n-matches 3000
+```
+
 > `reavalia_calibracao.py` é separado porque a primeira versão do
 > experimento declarava *"VEREDITO: FECHA"* com um limiar que aceitava o
 > próprio estado atual como sucesso: a variante de produção já estava em
@@ -207,6 +226,8 @@ resultado está em `reports/`.**
 | `reports/taxa_base_por_corte.json` | Seção 5.3 e 5.8 |
 | `reports/faixa_duracao.json` | Seção 4.5 e 5.3 (teste ii) |
 | `reports/experimento_calibracao_veredito.json` | Seção 5.8 e Apêndice D; checagem 14 |
+| `reports/experimento_placas_torre.json` | Seção 5.4 e Apêndice D (experimento 10) |
+| `reports/experimento_challenges_piloto.json` | Seção 5.4 e Apêndice D (experimento 11) |
 
 > `reports/tune_models_39k.log` cai no `.gitignore` (`*.log`) e não é
 > versionado; o `.json` é, e é dele que a checagem 12 lê. O log é a versão
