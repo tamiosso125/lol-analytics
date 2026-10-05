@@ -1,0 +1,271 @@
+{
+  "medido_em": "2026-10-04",
+  "base_partidas_fila_420": 41063,
+  "total_perguntas": 26,
+  "acertos": 23,
+  "execution_accuracy": 0.8846,
+  "modelo": "claude-haiku-4-5-20251001",
+  "metodo": "comparacao do RESULTADO da query gerada com o da query de referencia (execution accuracy), nao do texto da SQL",
+  "detalhe": [
+    {
+      "n": 1,
+      "pergunta": "Quantas partidas existem no banco?",
+      "sql_referencia": "SELECT COUNT(*) FROM matches",
+      "sql_gerada": "SELECT COUNT(*) AS total_partidas FROM matches;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 2,
+      "pergunta": "Quais os 5 campeões mais jogados?",
+      "sql_referencia": "SELECT champion_name, COUNT(*) AS n FROM participants GROUP BY champion_name ORDER BY n DESC LIMIT 5",
+      "sql_gerada": "SELECT champion_name, COUNT(*) AS jogos\nFROM participants\nGROUP BY champion_name\nORDER BY jogos DESC\nLIMIT 5;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 3,
+      "pergunta": "Qual o win rate do time azul?",
+      "sql_referencia": "SELECT AVG(win::int) FROM teams WHERE team_id = 100",
+      "sql_gerada": "SELECT AVG(t.win::int) AS win_rate\nFROM teams t\nWHERE t.team_id = 100;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 4,
+      "pergunta": "Qual a duração média das partidas em minutos?",
+      "sql_referencia": "SELECT AVG(game_duration_s) / 60.0 FROM matches",
+      "sql_gerada": "SELECT AVG(game_duration_s) / 60.0 AS duracao_media_minutos\nFROM matches;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 5,
+      "pergunta": "Quais os 5 campeões com maior win rate com pelo menos 50 jogos?",
+      "sql_referencia": "SELECT champion_name, AVG(win::int) AS wr FROM participants GROUP BY champion_name HAVING COUNT(*) >= 50 ORDER BY wr DESC LIMIT 5",
+      "sql_gerada": "SELECT champion_name, AVG(win::int) AS win_rate, COUNT(*) AS jogos\nFROM participants\nGROUP BY champion_name\nHAVING COUNT(*) >= 50\nORDER BY win_rate DESC\nLIMIT 5;",
+      "ok": false,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 6,
+      "pergunta": "Quantos jogadores estão cadastrados na tabela de jogadores?",
+      "sql_referencia": "SELECT COUNT(*) FROM players",
+      "sql_gerada": "SELECT COUNT(*) AS total_jogadores FROM players;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 7,
+      "pergunta": "Quantas partidas o time vermelho venceu?",
+      "sql_referencia": "SELECT COUNT(*) FROM teams WHERE team_id = 200 AND win = true",
+      "sql_gerada": "SELECT COUNT(*) AS partidas_vencidas\nFROM teams\nWHERE team_id = 200 AND win = true;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 8,
+      "pergunta": "Qual a média de ouro (gold_earned) dos jogadores na posição JUNGLE?",
+      "sql_referencia": "SELECT AVG(gold_earned) FROM participants WHERE team_position = 'JUNGLE'",
+      "sql_gerada": "SELECT AVG(gold_earned) AS media_ouro_jungle\nFROM participants\nWHERE team_position = 'JUNGLE';",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 9,
+      "pergunta": "Quais os 5 campeões mais jogados na posição MIDDLE?",
+      "sql_referencia": "SELECT champion_name, COUNT(*) AS n FROM participants WHERE team_position = 'MIDDLE' GROUP BY champion_name ORDER BY n DESC LIMIT 5",
+      "sql_gerada": "SELECT champion_name, COUNT(*) AS jogos\nFROM participants\nWHERE team_position = 'MIDDLE'\nGROUP BY champion_name\nORDER BY jogos DESC\nLIMIT 5;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 10,
+      "pergunta": "Qual o win rate por posição?",
+      "sql_referencia": "SELECT team_position, AVG(win::int) AS wr FROM participants GROUP BY team_position ORDER BY wr DESC",
+      "sql_gerada": "SELECT team_position, AVG(win::int) AS win_rate\nFROM participants\nGROUP BY team_position\nORDER BY win_rate DESC;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 11,
+      "pergunta": "Qual a média de barões derrubados pelo time vencedor por partida?",
+      "sql_referencia": "SELECT AVG(barons) FROM teams WHERE win = true",
+      "sql_gerada": "SELECT AVG(t.barons) AS media_barons_time_vencedor\nFROM teams t\nWHERE t.win = true;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 12,
+      "pergunta": "Qual o campeão com maior win rate jogando na posição UTILITY, com pelo menos 20 partidas?",
+      "sql_referencia": "SELECT champion_name, AVG(win::int) AS wr FROM participants WHERE team_position = 'UTILITY' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY wr DESC LIMIT 1",
+      "sql_gerada": "SELECT champion_name, AVG(win::int) AS win_rate, COUNT(*) AS partidas\nFROM participants\nWHERE team_position = 'UTILITY'\nGROUP BY champion_name\nHAVING COUNT(*) >= 20\nORDER BY win_rate DESC\nLIMIT 1;",
+      "ok": false,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 13,
+      "pergunta": "Quantas partidas duraram mais de 30 minutos?",
+      "sql_referencia": "SELECT COUNT(*) FROM matches WHERE game_duration_s > 1800",
+      "sql_gerada": "SELECT COUNT(*) AS partidas\nFROM matches\nWHERE game_duration_s > 1800;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 14,
+      "pergunta": "Qual a média de dano causado a campeões pelos jogadores do time azul?",
+      "sql_referencia": "SELECT AVG(dmg_to_champions) FROM participants WHERE team_id = 100",
+      "sql_gerada": "SELECT AVG(dmg_to_champions) AS media_dano_time_azul\nFROM participants\nWHERE team_id = 100;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 15,
+      "pergunta": "Quantos jogadores estão no tier Challenger?",
+      "sql_referencia": "SELECT COUNT(*) FROM players WHERE tier = 'CHALLENGER'",
+      "sql_gerada": "SELECT COUNT(DISTINCT puuid) AS challenger_players\nFROM players\nWHERE UPPER(tier) = 'CHALLENGER';",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 16,
+      "pergunta": "Qual time, azul ou vermelho, derruba mais torres em média?",
+      "sql_referencia": "SELECT team_id, AVG(towers) AS avg_towers FROM teams GROUP BY team_id ORDER BY avg_towers DESC LIMIT 1",
+      "sql_gerada": "SELECT t.team_id, AVG(t.towers) AS media_torres\nFROM teams t\nGROUP BY t.team_id\nORDER BY media_torres DESC\nLIMIT 1;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 17,
+      "pergunta": "Quantas partidas existem por versão do jogo, da mais para a menos frequente?",
+      "sql_referencia": "SELECT game_version, COUNT(*) AS n FROM matches GROUP BY game_version ORDER BY n DESC",
+      "sql_gerada": "SELECT game_version, COUNT(*) AS partidas\nFROM matches\nGROUP BY game_version\nORDER BY partidas DESC\nLIMIT 100;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 18,
+      "pergunta": "Qual o CS (farm) médio dos jogadores na posição TOP?",
+      "sql_referencia": "SELECT AVG(cs_total) FROM participants WHERE team_position = 'TOP'",
+      "sql_gerada": "SELECT AVG(cs_total) AS cs_medio_top\nFROM participants\nWHERE team_position = 'TOP';",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 19,
+      "pergunta": "Quais os 5 campeões com maior média de assistências?",
+      "sql_referencia": "SELECT champion_name, AVG(assists) AS avg_assists FROM participants GROUP BY champion_name ORDER BY avg_assists DESC LIMIT 5",
+      "sql_gerada": "SELECT champion_name, AVG(assists) AS media_assistencias\nFROM participants\nGROUP BY champion_name\nORDER BY media_assistencias DESC\nLIMIT 5;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 20,
+      "pergunta": "Em quantas partidas o time que conquistou pelo menos um arauto também venceu?",
+      "sql_referencia": "SELECT COUNT(*) FROM teams WHERE heralds > 0 AND win = true",
+      "sql_gerada": "SELECT COUNT(DISTINCT t.match_id) AS partidas\nFROM teams t\nWHERE t.heralds >= 1 AND t.win = true;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 21,
+      "pergunta": "Quantas partidas têm participantes que também estão na tabela de jogadores?",
+      "sql_referencia": "SELECT COUNT(DISTINCT pt.match_id) FROM participants pt JOIN players p ON p.puuid = pt.puuid",
+      "sql_gerada": "SELECT COUNT(DISTINCT p.match_id) AS partidas_com_jogadores_registrados\nFROM participants p\nWHERE EXISTS (SELECT 1 FROM players pl WHERE pl.puuid = p.puuid);",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 22,
+      "pergunta": "Qual o campeão com maior win rate entre os jogadores do tier Grandmaster, com pelo menos 10 partidas?",
+      "sql_referencia": "SELECT pt.champion_name, AVG(pt.win::int) AS wr FROM participants pt JOIN players p ON p.puuid = pt.puuid WHERE p.tier = 'GRANDMASTER' GROUP BY pt.champion_name HAVING COUNT(*) >= 10 ORDER BY wr DESC LIMIT 1",
+      "sql_gerada": "SELECT p.champion_name, AVG(p.win::int) AS win_rate, COUNT(*) AS partidas\nFROM participants p\nJOIN players pl ON pl.puuid = p.puuid\nWHERE UPPER(pl.tier) = 'GRANDMASTER'\nGROUP BY p.champion_name\nHAVING COUNT(*) >= 10\nORDER BY win_rate DESC\nLIMIT 1;",
+      "ok": false,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 23,
+      "pergunta": "Quantos jogos profissionais de 2026 existem no banco?",
+      "sql_referencia": "SELECT COUNT(DISTINCT game_id) FROM pro_games WHERE year = 2026",
+      "sql_gerada": "SELECT COUNT(DISTINCT game_id) AS jogos\nFROM pro_games\nWHERE year = 2026;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 24,
+      "pergunta": "Qual o win rate do lado azul no competitivo em 2026?",
+      "sql_referencia": "SELECT AVG(win::int) FROM pro_games WHERE side = 'Blue' AND year = 2026",
+      "sql_gerada": "SELECT AVG(CASE WHEN pg.side = 'Blue' THEN pg.win::int ELSE NULL END) AS win_rate_azul\nFROM pro_games pg\nWHERE pg.year = 2026;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 25,
+      "pergunta": "Quais os 5 campeões mais jogados no competitivo em 2026?",
+      "sql_referencia": "SELECT pp.champion, COUNT(*) AS jogos FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pg.year = 2026 GROUP BY pp.champion ORDER BY jogos DESC LIMIT 5",
+      "sql_gerada": "SELECT pp.champion, COUNT(*) AS jogos\nFROM pro_players pp\nJOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side\nWHERE pg.year = 2026\nGROUP BY pp.champion\nORDER BY jogos DESC\nLIMIT 5;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    },
+    {
+      "n": 26,
+      "pergunta": "Qual liga teve mais jogos profissionais em 2026?",
+      "sql_referencia": "SELECT league, COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE year = 2026 GROUP BY league ORDER BY jogos DESC LIMIT 1",
+      "sql_gerada": "SELECT league, COUNT(DISTINCT game_id) AS jogos\nFROM pro_games\nWHERE year = 2026\nGROUP BY league\nORDER BY jogos DESC\nLIMIT 1;",
+      "ok": true,
+      "erro": "",
+      "erro_sql": "",
+      "erro_causa": ""
+    }
+  ]
+}

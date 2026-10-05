@@ -218,13 +218,22 @@ Antes de fechar o TCC, duas checagens automáticas. Ambas saem com exit 1
 quando algo diverge, e ambas devem passar.
 
 ```powershell
-# 18 checagens de consistência do texto contra o banco e os artefatos:
-# CJK, referências cruzadas, tabelas, ordem alfabética de referências,
-# números de modelo contra metricas_corte.json, Quadro 1 contra o banco,
-# dataset profissional contra o banco, guard de resíduo (valores
-# substituídos e formas refutadas), figuras citadas no corpo, fonte das
-# figuras contra o Anexo A, anglicismos de prosa, e a afirmação de
-# não-subajuste contra o artefato do tuning.
+# 20 checagens de consistência do texto contra o banco e os artefatos.
+# A lista completa e o docstring de docs/verifica_tcc.py; a checagem 20
+# confere que o numero aqui afirmado bate com o que a suite imprime, entao
+# este comentario nao pode divergir sem reprovar.
+#   1-5   texto e formatacao (CJK, referencias cruzadas, tabelas, ABNT,
+#         numeros de modelo)
+#   6-8   numero contra artefato (Quadro 1 x banco, dataset profissional x
+#         banco, guard de residuo + Abstract english)
+#   9-14  figuras, fontes, anglicismos, tuning, citacoes, calibracao
+#   15    scripts que produzem medida estao documentados aqui
+#   16    regioes: o texto nao uniformiza o que o IC nao sustenta
+#   17    teste (ii) de faixa de duracao x artefato E x banco
+#   18    as DUAS bases declaradas onde cada numero aparece
+#   19    accuracy do NLQ: artefato, ou declaracao de lacuna com a chave
+#         comprovadamente ausente
+#   20    o numero de checagens que os docs afirmam e o real
 .venv\Scripts\python.exe docs\verifica_tcc.py
 
 # Conformidade formal do .docx gerado: títulos em negrito, contagem de
@@ -374,7 +383,7 @@ texto existam de verdade. Ver **5b**, **5c** e **5d**.
 ```
 15. python -m src.models.multi_cutoff_metrics  # Apêndice C + metricas_corte.json
 16. python -m src.models.tune_models_full     # lastro da 5.8
-17. python docs/verifica_tcc.py               # 18 checagens, exit 0
+17. python docs/verifica_tcc.py               # 20 checagens, exit 0
 18. python docs/build_tcc_docx.py             # gera o .docx
 19. powershell -File docs/finalize-fields.ps1  # Word preenche os campos
 20. python docs/confere_docx.py               # conformidade formal, exit 0

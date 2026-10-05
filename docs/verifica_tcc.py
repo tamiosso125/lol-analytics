@@ -1,6 +1,6 @@
 """Verificacao de consistencia do texto do TCC II.
 
-19 checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e que
+20 checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e que
 antes eram feitas a mao (e por isso falhavam). Exit code 0 = tudo consistente.
 
 TEXTO E FORMATACAO
@@ -1069,83 +1069,221 @@ def check_bases_declaradas(t: str) -> None:
         aviso(f"banco inacessivel, cruzamento das bases pulado: {exc}")
 
 
+# Marcador do heading do Apendice B. Declarado como constante porque a
+# checagem precisa dele em tres lugares e o `i + 10` magico do primeiro
+# versao quebrava se o titulo mudasse de tamanho.
+HEADING_APENDICE_B = "## APÊNDICE B"
+
+
+def _tem_chave_nlq() -> bool:
+    """A chave da API de linguagem natural esta disponivel neste ambiente?
+
+    A checagem 19 aceita, como estado legitimo, que o Apêndice B publique um
+    numero sem artefato desde que o texto declare isso. Sem esta funcao esse
+    "estado legitimo" e um PERDOA PERMANENTE: ninguem precisa rodar o
+    benchmark, a frase fica no texto para sempre e a suite continua verde
+    imprimindo [OK] para algo que o proprio texto chama de pendente.
+
+    O bloqueio e um fato de ambiente, e a checagem consegue ler o fato. Se a
+    chave esta aqui, a desculpa evaporou e o ramo vira falha — o item deixa
+    de ser pendencia suspensa e passa a ser divida com gatilho.
+    """
+    import os as _os
+
+    try:
+        from dotenv import load_dotenv as _load
+
+        _load(RAIZ / ".env")
+    except Exception:  # noqa: BLE001,S110
+        pass  # sem .env ou sem dotenv: olha so o ambiente ja pronto
+    return bool(_os.environ.get("ANTHROPIC_API_KEY"))
+
+
 def check_benchmark_nlq(t: str) -> None:
     """O numero do Apendice B ou tem artefato, ou declara que nao tem.
 
-    O Apendice B publica a execution accuracy do benchmark de linguagem
-    natural. Ate 2026-10-04 esse numero nao tinha artefato: `evaluate_nlq.py`
-    so imprimia, e o valor vivia na saida de console e no diario de execucao.
-    Isso e a falha que o projeto vem fechando ha meses — o mesmo formato do
-    `tune_models` que imprimia sem guardar, com a metrica do TCC citando o
-    resultado.
+    O Apêndice B publica a execution accuracy do benchmark de linguagem
+    natural. Até 2026-10-04 esse número não tinha artefato: `evaluate_nlq.py`
+    só imprimia, e o valor vivia na saída de console e no diário de execução.
 
-    A guarda aceita as duas situacoes legitimas e reprova a terceira:
+    A guarda aceita três estados e reprova o quarto:
 
-    - o artefato existe e o accuracy do texto bate com o do JSON; ou
-    - o texto declara que o numero nao tem artefato arquivado.
+    - o artefato existe, o accuracy do texto é o do JSON e a base também;
+    - o artefato não existe, o texto declara a lacuna E a chave não está no
+      ambiente (não haveria como produzir o artefato agora);
+    - o artefato não existe e o texto declara a lacuna, mas a chave ESTÁ no
+      ambiente: isso reprova, porque a desculpa "sem chave" não se sustenta.
 
-    O que reprova e numero publicado, sem artefato e sem a declaracao. Uma
-    checagem que exigisse o artefato unconditionally reprovaria hoje, porque
-    `ANTHROPIC_API_KEY` nao esta no ambiente e o benchmark nao roda — e uma
-    suite vermelha por um item que ninguem consegue fechar no ambiente atual
-    e um invite a ignorar a suite, que e o noise floor que o diario proibe.
-
-    Quando o benchmark rodar com a chave, o artefato passa a existir e esta
-    checagem passa a exigir igualdade entre o numero do JSON e o do texto.
+    O que reprova é número publicado, sem artefato e sem a declaração — ou
+    com a declaração que a chave disponível torna Mentirosa.
     """
     import json
     import re as _re
 
-    i = t.find("## APÊNDICE B")
+    i = t.find(HEADING_APENDICE_B)
     if i < 0:
+        # Antes isto era `return` mudo: perdia-se o acento, renomeava-se a
+        # seção ou rebaixava-se para `###` e a 19ª checagem virava no-op
+        # enquanto `main()` continuava anunciando. Cobertura que se pode
+        # desligar sem erro não é cobertura.
+        falha(f"Apêndice B não encontrado no texto (procurado "
+              f"{HEADING_APENDICE_B!r}) — a checagem do accuracy não roda")
         return
-    prox = _re.search(r"(?m)^## ", t[i + 10:])
-    apendice = t[i:i + 10 + prox.start()] if prox else t[i:]
+    prox = _re.search(r"(?m)^#{1,2} ", t[i + len(HEADING_APENDICE_B):])
+    apendice = t[i:i + len(HEADING_APENDICE_B)
+                   + (prox.start() if prox else len(t))]
+
+    # O numero do apendice, e o paragrafo em que ele esta. A declaracao de
+    # lacuna e procurada NESSE paragrafo: uma frase sobre outro artefato em
+    # outro paragrafo ("o resultado nao foi arquivado no diario") nao pode
+    # servir de quitacao para o accuracy.
+    cab = _re.search(r"(\d+)/(\d+)\s*=\s*(\d+)%", apendice)
+    if not cab:
+        falha("Apêndice B: o texto não cita o accuracy no formato N/M = P% — "
+              "a checagem não tem contra o que conferir")
+        return
+    acertos, total, pct = int(cab.group(1)), int(cab.group(2)), int(cab.group(3))
+    # O bloco em que o numero esta. Pegar o primeiro bloco do apendice
+    # pegava o TITULO — o heading e separado do paragrafo por linha em
+    # branco, e a declaracao vive no paragrafo, nunca no titulo.
+    ini = apendice.rfind("\n\n", 0, cab.start())
+    fim = apendice.find("\n\n", cab.end())
+    paragrafo = apendice[ini + 2:fim if fim > 0 else len(apendice)]
+
+    # `\\s+` porque o markdown quebra a ~76 colunas e a declaracao "não tem
+    # artefato" cai exatamente na quebra — um espaco literal nao casava, e a
+    # checagem reprovou um texto que declarava a lacuna.
+    DECLARA = (r"n[aã]o\s+tem\s+artefato|sem\s+artefato|n[aã]o\s+possui\s+artefato"
+               r"|n[aã]o\s+foi\s+arquiv")
+    declara = bool(_re.search(DECLARA, paragrafo, _re.I))
 
     artefato = RAIZ / "reports" / "nlq_benchmark.json"
     tem_artefato = artefato.exists()
-    # `\s+` e obrigatorio: o markdown e quebrado a ~76 colunas e a
-    # declaracao "nao tem artefato arquivado" cai exatamente na quebra, entao
-    # um espaco literal nao casava. Foi o que aconteceu na primeira rodada
-    # desta checagem — reprovou um texto que declarava a lacuna.
-    declara_lacuna = bool(
-        _re.search(r"n[aã]o\s+tem\s+artefato|sem\s+artefato|"
-                   r"n[aã]o\s+possui\s+artefato|n[aã]o\s+foi\s+arquiv",
-                   apendice, _re.I))
 
-    if tem_artefato:
-        try:
-            dados = json.loads(artefato.read_text(encoding="utf-8"))
-        except Exception as exc:  # noqa: BLE001
-            falha(f"Apendice B: nlq_benchmark.json ilegivel: {exc}")
+    if not tem_artefato:
+        if not declara:
+            falha("Apêndice B: publica accuracy sem artefato em "
+                  "reports/nlq_benchmark.json e sem declarar a lacuna — ou "
+                  "rode o benchmark, ou diga no texto que o número não tem "
+                  "artefato")
             return
-        acc = f"{float(dados['execution_accuracy']):.0%}"
-        base = f"{int(dados['base_partidas_fila_420']):,}".replace(",", ".")
-        print(f"  artefato: {dados['acertos']}/{dados['total_perguntas']} "
-              f"= {acc} sobre {base} partidas, medido em {dados['medido_em']}")
-        m = _re.search(r"(\d+)/(\d+)\s*=\s*(\d+)%", apendice)
-        if not m:
-            falha("Apendice B: o artefato do benchmark existe mas o texto "
-                  "nao cita o accuracy no formato N/M = P%")
+        if _tem_chave_nlq():
+            falha("Apêndice B: o texto declara que o número não tem artefato, "
+                  "mas ANTHROPIC_API_KEY está disponível neste ambiente — a "
+                  "pendência é de execução, não de ausência de chave. Rode "
+                  "`python -m src.nlq.evaluate_nlq` e atualize o Apêndice B")
             return
-        acertos, total, pct = int(m.group(1)), int(m.group(2)), int(m.group(3))
-        if (acertos, total) != (dados["acertos"], dados["total_perguntas"]) \
-                or pct != round(float(dados["execution_accuracy"]) * 100):
-            falha(f"Apendice B: o texto cita {acertos}/{total} = {pct}%, e o "
-                  f"artefato mede {dados['acertos']}/{dados['total_perguntas']} "
-                  f"= {acc}")
-            return
-        if base not in apendice:
-            aviso(f"Apendice B: o benchmark mediu sobre {base} partidas e o "
-                  "apendice nao declara a base")
-        print("  [OK] accuracy do Apendice B bate com o artefato")
-    elif declara_lacuna:
-        print("  [OK] Apendice B declara que o numero nao tem artefato "
-              "(reports/nlq_benchmark.json ainda nao existe)")
-    else:
-        falha("Apendice B: publica accuracy sem artefato em "
-              "reports/nlq_benchmark.json e sem declarar a lacuna — ou rode o "
-              "benchmark, ou diga no texto que o numero nao tem artefato")
+        print("  [OK] Apêndice B declara a lacuna e ANTHROPIC_API_KEY não está "
+              "no ambiente: a pendência é de chave, não de omissão")
+        return
+
+    try:
+        dados = json.loads(artefato.read_text(encoding="utf-8"))
+        acc_artefato = float(dados["execution_accuracy"])
+        acertos_artefato = int(dados["acertos"])
+        total_artefato = int(dados["total_perguntas"])
+        base_artefato = f"{int(dados['base_partidas_fila_420']):,}".replace(",", ".")
+        medido = dados["medido_em"]
+    except Exception as exc:  # noqa: BLE001
+        falha(f"Apêndice B: nlq_benchmark.json ilegível ou com outro formato "
+              f"({exc}) — o artefato precisa de execution_accuracy, acertos, "
+              f"total_perguntas, base_partidas_fila_420 e medido_em")
+        return
+
+    print(f"  artefato: {acertos_artefato}/{total_artefato} = "
+          f"{acc_artefato:.0%} sobre {base_artefato} partidas, medido em {medido}")
+
+    if (acertos, total) != (acertos_artefato, total_artefato) \
+            or pct != round(acc_artefato * 100):
+        falha(f"Apêndice B: o texto cita {acertos}/{total} = {pct}%, e o "
+              f"artefato mede {acertos_artefato}/{total_artefato} = "
+              f"{acc_artefato:.0%}")
+        return
+    if base_artefato not in apendice:
+        # A base e o que o benchmark mediu sobre. Divergencia aqui e o mesmo
+        # bug da checagem 18: numero certo, base errada ao lado.
+        falha(f"Apêndice B: o benchmark mediu sobre {base_artefato} partidas e "
+              f"o Apêndice B não declara essa base")
+        return
+    if declara:
+        # O artefato existe: a frase de lacuna virou mentira.
+        falha("Apêndice B: o texto ainda diz que o número não tem artefato, "
+              "mas reports/nlq_benchmark.json existe — remova a declaração")
+        return
+    print("  [OK] accuracy e base do Apêndice B batem com o artefato")
+
+
+def check_contagem_de_checagens() -> None:
+    """O numero de checagens que os documentos afirmam tem que ser o real.
+
+    A contagem divergiu em quatro lugares ao longo de 2026-10-04 — 12, depois
+    17, depois 18, agora 20 — e nada pegava. `check_scripts_documentados`
+    procura um token do nome do script em `comandos.md`, nunca o numero, e o
+    numero tambem aparecia no bloco de pendencias do proprio TCC.
+
+    SOBRE O BLOCO DE PENDENCIAS: ele NAO vai para o `.docx`. `build_tcc_docx.py`
+    remove `## Pendencias finais antes da entrega` de proposito — e log de
+    trabalho, nao parte do entregavel. Conferi porque a affirmacao de que ele
+    "vai para a banca" era falsa, e o `.docx` nao contem `smoke_test` nem
+    `verifica_tcc`. A checagem compara o `.md` mesmo assim: e o registro de
+    trabalho do projeto, e um numero que diverge ali ainda e divergencia.
+
+    A fonte da verdade e o proprio `verifica_tcc.py`: quantos `print("N.` ele
+    emite. Comparar com o que cada documento afirma e o que fecha o ciclo.
+
+    LIMITE CONHECIDO: o numero e julgado literalmente, e a checagem nao
+    distingue citacao de afirmacao. Citar uma contagem antiga no diario
+    reprova, mesmo dizendo que e antiga. Preferi isso a criar excecao por
+    palavra-chave — excecao que nao esta no criterio afrouxa a guarda, e o
+    custo aqui e reescrever uma frase.
+    """
+    import re as _re
+
+    proprio = (RAIZ / "docs" / "verifica_tcc.py").read_text(encoding="utf-8")
+    # o grupo de captura e obrigatorio: sem ele o findall devolve a match
+    # inteira ("print(\"1.") e o int() estoura
+    # o grupo de captura e obrigatorio: sem ele o findall devolve a match
+    # inteira (print("1.) e o int() estoura
+    reais = {int(n) for n in _re.findall(r'print\("(\d+)\.', proprio)}
+    if not reais:
+        falha("contagem: nao encontrei nenhum print('N.') no verifica_tcc.py — "
+              "a checagem de contagem nao tem contra o que conferir")
+        return
+    esperado = max(reais)
+    print(f"  a suite imprime {len(reais)} checagens, numeradas ate {esperado}")
+
+    if esperado != len(reais):
+        falha(f"contagem: as checagens vao ate {esperado} mas sao {len(reais)} "
+              f"— ha numero pulado no main()")
+
+    for caminho, rotulo in ((RAIZ / "docs" / "comandos.md", "comandos.md"),
+                            (RAIZ / "docs" / "tcc2_texto.md", "tcc2_texto.md"),
+                            (RAIZ / "docs" / "diario_execucao.md",
+                             "diario_execucao.md")):
+        if not caminho.exists():
+            aviso(f"{rotulo} ausente: contagem de checagens nao conferida nele")
+            continue
+        texto = caminho.read_text(encoding="utf-8")
+        # O diario e um log CRONOLOGICO: uma entrada de dia anterior falando
+        # do tamanho da suite daquele dia e historica e esta certa. Julgar
+        # "as 9 checagens nao-OK apontadas pela versao antiga" pela contagem
+        # de hoje reprovaria o diario por registro faithfully do passado.
+        # So a entrada mais recente e comparada.
+        if rotulo == "diario_execucao.md":
+            entradas = list(_re.finditer(r"(?m)^## (\d{4}-\d{2}-\d{2})", texto))
+            if not entradas:
+                aviso("diario sem entrada datada: contagem nao conferida nele")
+                continue
+            texto = texto[entradas[-1].start():]
+        for m in _re.finditer(r"(\d+)\s+checagens", texto):
+            afirmado = int(m.group(1))
+            ln = texto[: m.start()].count("\n") + 1
+            if afirmado != esperado:
+                trecho = texto.splitlines()[ln - 1].strip()[:70]
+                falha(f"contagem: {rotulo} L{ln} afirma {afirmado} checagens e a "
+                      f"suite tem {esperado} -> {trecho!r}")
+            else:
+                print(f"  ok  {rotulo}: {afirmado} checagens, L{ln}")
 
 
 def main() -> None:
@@ -1192,6 +1330,8 @@ def main() -> None:
     check_bases_declaradas(t)
     print("19. Accuracy do NLQ: artefato ou declaracao de lacuna")
     check_benchmark_nlq(t)
+    print("20. A contagem de checagens que os docs affirmam e a real")
+    check_contagem_de_checagens()
 
     print()
     print("=" * 66)

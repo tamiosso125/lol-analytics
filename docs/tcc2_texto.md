@@ -1498,18 +1498,14 @@ linguagem natural.
 
 ## APÊNDICE B — Benchmark da interface em linguagem natural
 
-Execução em 2026-10-04 sobre a base de produção de 39.426 partidas:
+Execução em 2026-10-04 sobre a base de produção de **41.063 partidas**:
 **23/26 = 88% de acurácia de execução**, com o comando
-`python -m src.nlq.evaluate_nlq`. Este é o único número do trabalho que não
-tem artefato arquivado em `reports/`: a versão anterior do script imprimia o
-resultado sem gravá-lo, e a medição foi registrada no diário de execução. O
-script passou a gravar `reports/nlq_benchmark.json` para que a próxima
-execução deixe rastro; com a chave da API de linguagem natural ausente no
-ambiente em que este texto foi fechado, a reexecução ficou pendente e o
-número publicado é o da saída de console. O mesmo número havia sido obtido em
-execuções anteriores — a de 2026-09-28, sobre a base de então (24.154
-partidas), e uma de 2026-07-13 —, o que dá alguma estabilidade ao
-resultado. Uma
+`python -m src.nlq.evaluate_nlq`, que grava
+`reports/nlq_benchmark.json` com o accuracy, a base, o modelo e o desfecho de
+cada pergunta. É o mesmo número que a execução anterior mediu sobre as 39.426
+partidas da base intermediária — 4% de diferença no volume que não moveu o
+resultado. O mesmo número já havia saído antes, na execução de 2026-09-28
+(24.154 partidas) e em uma de 2026-07-13. Uma
 primeira execução, feita simultaneamente à coleta em background, mediu
 22/26 (85%) com uma falha adicional na pergunta 3 ("win rate do time
 azul") — repetida a execução sem a interferência de escrita
@@ -1636,19 +1632,21 @@ e cerca de 26× o menor deles (0,001).
 
 ## ANEXO A — Capturas de tela da plataforma
 
-Geradas em 2026-10-04 às 11:58 via Playwright (Chromium, 1440 px de largura,
+Geradas em 2026-10-04 às 21:21 via Playwright (Chromium, 1440 px de largura,
 altura ajustada à página, sem `full_page`) contra a API e o *frontend* rodando
-localmente com dados de produção — 39.426 partidas no momento da captura. **Não
-são as mesmas da Seção 5.3**: o Quadro 1 daquela seção é medido sobre as
-41.063 partidas da base final, e a captura é anterior à última rodada de
-coleta da KR, que só fechou depois. O que as capturas têm em comum com a 5.3
-é a direção do achado, não o volume. As capturas anteriores, de 2026-09-28,
-foram feitas
-com 24.154 partidas e foram substituídas: o Dashboard anterior exibia a
-tabela regional com NA1 = 1.446, em contradição com os 7.159 que o texto
-afirma. Arquivos em `reports/anexo_a/` (não versionados neste Markdown —
-inserir como figura ao converter para o `.docx` final). O comando que as
-regera é `python docs/recapturar_anexo_a.py`.
+localmente, com **41.063 partidas** na fila ranqueada — a mesma base do Quadro 1
+da Seção 5.3. O instante e a base não são afirmados por memória: estão em
+`reports/anexo_a/captura.json`, gravado pelo comando que produz as telas, e é
+esse arquivo que sustenta a afirmação.
+
+Substituíram-se duas gerações de capturas. As de 2026-09-28, feitas com 24.154
+partidas, mostravam no Dashboard a tabela regional com NA1 = 1.446, em
+contradição com os 7.159 que o texto afirma; as de 2026-10-04 pela manhã, feitas
+com 39.426, ficaram desatualizadas quando a última rodada de coleta da KR levou
+o banco a 41.063. Na Figura 2 a tabela regional já mostra KR com 10.204 partidas
+e 50,4% de vitória do vermelho. Arquivos em `reports/anexo_a/` (não
+versionados neste Markdown — inserir como figura ao converter para o `.docx`
+final). O comando que as regera é `python docs/recapturar_anexo_a.py`.
 
 | Arquivo | Página |
 |---|---|
@@ -1755,7 +1753,7 @@ acima e não se repetem aqui.
 
 Antes de entregar, a suíte completa passa:
 `tests/smoke_test.py` (exit 0), `tests/validate_predictions.py`
-(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (18 checagens de
+(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (20 checagens de
 consistência do texto contra o banco e os artefatos, exit 0),
 `docs/confere_docx.py` (conformidade formal do `.docx`, exit 0), e
 `cd frontend; npm run lint; npm run test` (31/31).
@@ -1766,7 +1764,10 @@ que tabela sem legenda não é permitida. O título foi escrito na conversão e
 **confirmado pelo autor em 2026-10-03**: "Métricas completas por corte temporal
 — comparação entre os três modelos".
 
-**Nenhuma pendência em aberto.**
+**Nenhuma pendência em aberto.** A última era a reexecução do benchmark de
+linguagem natural do Apêndice B, fechada no mesmo dia: o accuracy de 88% foi
+medido sobre a base final de 41.063 partidas e passou a ter artefato em
+`reports/nlq_benchmark.json`.
 
 **Estrutura final do corpo (2026-10-04), seguindo os 10 TCC II aprovados:**
 1 Introdução · 2 Fundamentação Teórica · 3 Trabalhos Relacionados ·

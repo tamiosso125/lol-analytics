@@ -3771,6 +3771,145 @@ qualificada da Seção 5.3 **não é uma ressalva temporária esperando coleta: 
 resposta final.** Registrar isso é o que separa "faltou dados" de "o dado não
 sustenta".
 
+
+### O número do Apêndice B deixou de ser número sem rastro
+
+Terceira revisão do diff, e ela mudou o estado em vez de só produzir achados.
+
+**A CHAVE ESTAVA NO `.env` O TEMPO TODO, E EU TINHA ERRADO A SONDAGEM.** A
+primeira versão desta seção dizia que `ANTHROPIC_API_KEY` não estava no
+ambiente e que a reexecução ficava pendente. A sonda que usei listava os
+atributos em maiúsculas de `src.config` — e a chave é lida por
+`os.environ[...]` dentro de `generate_sql`, não por uma constante do módulo.
+Um `print(dir(config))` sem `os.environ` produz "não tem" para tudo que não
+foi promovido a constante. **Sondar ausência de configuração olhando o módulo
+errado é como medir a ausência de dado olhando a tabela errada.**
+
+Benchmark reexecutado sobre a base final de 41.063: **23/26 = 88%**, o mesmo
+número da execução anterior sobre 39.426. Uma diferença de 4% no volume que
+não move o resultado — e agora isso é verificável, porque
+`reports/nlq_benchmark.json` existe com accuracy, base, modelo e o desfecho das
+26 perguntas, incluindo a SQL gerada de cada uma.
+
+**O QUE A CHECAGEM 19 ERA.** Ela aceitava que o Apêndice B publicasse um número
+sem artefato desde que o texto declarasse isso. O revisor Nomeou o problema com
+precisão: um perdão permanente emitido por prosa. A condição de passa se
+cumpre sem ninguém rodar o benchmark, o texto pode carregar a declaração para
+sempre, e a linha de saída ainda imprime `[OK]` para um estado que o próprio
+texto chama de pendente.
+
+A guarda agora tem três saídas, e só uma delas é dívida:
+
+| situação | veredito |
+|---|---|
+| artefato existe, accuracy e base batem | passa |
+| não existe, texto declara a lacuna, **chave ausente** | passa — é bloqueio de ambiente |
+| não existe, texto declara a lacuna, **chave presente** | **reprova** — a desculpa evaporou |
+
+A segunda linha é a única dívida tolerada, e ela tem gatilho: a checagem lê
+`ANTHROPIC_API_KEY` do ambiente. Se a chave voltar a existir, o perdão expira
+sozinho. A declaração também passou a ser procurada **no parágrafo do número**,
+não no apêndice inteiro, para que uma frase sobre outro artefato não sirva de
+quitação.
+
+### O Anexo A foi regerado, em vez de explicado
+
+A correção anterior dizia que as capturas **não** eram as mesmas da Seção 5.3, e
+sustentava isso com o mtime do PNG. O revisor apontou o problema: o mtime não é
+verificável num clone limpo, e `recapturar_anexo_a.py` — o comando que o
+próprio anexo manda rodar — produz PNGs com mtime novo, tornando as duas
+afirmações publicadas falsas sem que nada acuse.
+
+Duas correções, e a segunda é a que fecha o problema:
+
+1. `recapturar_anexo_a.py` agora grava `reports/anexo_a/captura.json` com
+   `capturado_em`, `base_partidas_fila_420`, as telas e o id de partida usado.
+   O registro só é escrito se as 6 capturas passarem — um registro de seis telas
+   das quais três falharam seria pior do que nenhum registro.
+2. **As capturas foram regeradas** sobre 41.063 partidas. Com isso "as mesmas da
+   Seção 5.3" voltou a ser **verdade** e o parágrafo voltou a ser simples.
+
+A Figura 2 agora mostra KR com 10.204 partidas e 50,4% de vitória do vermelho —
+confirmei contra `/stats/regions`, que devolve 10.204 e 0,5044. A contradição
+que motivou a primeira recaptura (NA1 = 1.446 na tela contra 7.159 no texto)
+continua resolvida.
+
+Detalhe operacional: a primeira tentativa de regerar **falhou todas as 6** e a
+trava de segurança do script derrubou a captura. A causa era o frontend ter
+subido na porta 5174 porque a 5173 estava ocupada por um processo node antigo,
+e a allowlist de CORS da API só tem `http://localhost:5173`. O sintoma — "a
+página mostrou 'Erro no servidor'" — não é o que parece: a API estava de pé e
+respondia 200 pelo `curl`. **A trava de segurança funcionou como deve: recusou
+a tela de erro em vez de virar figura do TCC.**
+
+### O artefato podia mentir, e sobrescrever o bom
+
+`evaluate_nlq.py` gravava `reports/nlq_benchmark.json` em qualquer run. Com a
+chave ausente, `generate_sql` estoura `KeyError` nas 26 perguntas, o `except`
+engole, e o script escrevia `execution_accuracy: 0.0` com `medido_em` de hoje —
+**sobrescrevendo a última medição boa com um arquivo que tem cara de medição.**
+E `docs/scripts.md` manda exatamente esse caminho: "rode de novo depois de
+qualquer mudança".
+
+`_degenerado()` recusa a rodada em três casos, e o terceiro é o que eu não tinha
+pensado:
+
+- nenhum acerto;
+- accuracy abaixo de `MINIMO_PLAUSIVEL = 0,5` — nenhuma plataforma que
+  responda 85-95% produz 4/26, então o corte está longe do resultado legítimo
+  e não é um limiar que aceita o estado atual;
+- **três ou mais falhas com a mesma causa** — cobre a cota que acaba no meio da
+  rodada, em que as primeiras perguntas passam e as seguintes falham igual. Esse
+  caso não se enxerga no total, só nas causas.
+
+Run recusado preserva o artefato anterior e sai com código 1. A gravação também
+passou a ser atômica (temporário + `replace`), e o `detalhe` agora carrega a
+**SQL gerada** e a causa — sem isso as três falhas benignas continuavam
+indecifíveis, porque `str(SqlExecutionError)` devolve só a causa: a classe chama
+`super().__init__(str(cause))` e o `.sql` fica um nível acima.
+
+### Checagem 20: a contagem de checagens que os documentos afirmam
+
+A contagem divergiu quatro vezes num dia — 12, 17, 18, 20 — e nada pegava.
+`check_scripts_documentados` procura um token do nome do script em
+`comandos.md`, nunca o número; e o número também aparecia no bloco de
+pendências do próprio TCC. Conferi se ele vai para o `.docx` — **não vai**:
+`build_tcc_docx.py` remove `## Pendências finais antes da entrega` de propósito,
+é log de trabalho. A checagem compara o `.md` mesmo assim, porque um número que
+divergiria ali ainda é divergência.
+
+A fonte da verdade é o próprio `verifica_tcc.py`: quantos `print("N.` ele emite.
+A 20 compara com o que `comandos.md`, o TCC e o diário afirmam. O diário é
+julgado **só na entrada mais recente**, porque é um log cronológico: a entrada
+de 2026-10-03 que falou das falhas da versão antiga da suíte é histórica e está
+certa, e reprová-la seria reprovar o diário por registrar o passado com
+fidelidade.
+
+**LIMITE DESTA CHECAGEM, REGISTRADO:** ela julga o número literalmente e não
+distingue citação de afirmação. Citar uma contagem antiga no diário — mesmo
+dizendo explicitamente que é antiga — reprova, porque o padrão `N checagens`
+casa igual nas duas situações. Reescrevi a frase acima em vez de criar uma
+exceção no código: uma exceção "não conta se a linha disser 'antiga'" é o tipo
+de heurística que afrouxa a guarda sem motivo, e aqui o custo de reescrever é
+uma frase.
+
+### Duas lições que se repetem nesta rodada
+
+**Substituição por faixa de linhas, quando as faixas se sobrepõem, imprime "ok"
+e não grava.** Uma das minhas edições do Apêndice B substituiu o parágrafo em
+memória, imprimiu sucesso, e **esqueceu de escrever o arquivo**. As três
+tentativas seguintes foram por âncora de texto e falharam por causa da quebra de
+linha do markdown; a que resolveu foi por conteúdo, de um ponto a outro do
+bloco. Escrever é parte da operação — um `ok` sem `write` é uma mentira
+silenciosa, do mesmo tipo das que estas checagens existem para pegar.
+
+**Quase tentei automatizar a detecção de frase quebrada.** Um pattern
+"minúscula seguida de maiúscula sem pontuação" dá **211 falsos positivos** no
+texto: títulos de seção, "Riot", "Seção", quebras de parágrafo. Inútil. A
+cobertura desse erro continua sendo humana — registrado aqui como limite
+conhecido, e não como guarda que enfeita a suíte.
+
+
 **A CONCILIAÇÃO DOS QUATRO NÚMEROS, QUE ESTAVA INCOERENTE.** Durante a
 revisão do diff, o `stats_regions.txt` arquivado em `045fdc0` — que a checagem
 6 gera a partir do SQL — registrava KR 8.655 / TOTAL 39.514, enquanto o texto
@@ -3865,7 +4004,7 @@ amostragem.
 
 ### Ferramenta que evita a repetição
 
-`docs/verifica_tcc.py` roda 18 checagens antes de qualquer commit: CJK,
+`docs/verifica_tcc.py` roda 20 checagens antes de qualquer commit: CJK,
 referências cruzadas, consistência de tabela, ordem alfabética de
 referências, números de modelo contra `reports/metricas_corte.json`, Quadro 1
 contra o banco, dataset profissional contra o banco, e um **guard de

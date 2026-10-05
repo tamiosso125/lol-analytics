@@ -109,7 +109,11 @@ tal na UI.
   SELECT`/CTE desde 2026-07-10), `schema_context.py` (⚠️ regra:
   qualquer mudança aqui exige re-rodar `evaluate_nlq` — já regrediu
   silenciosamente mais de uma vez), `evaluate_nlq.py` (benchmark, 26
-  perguntas, exigência da banca).
+  perguntas, exigência da banca; grava `reports/nlq_benchmark.json` com
+  accuracy, base, modelo e o desfecho de cada pergunta, e **recusa gravar
+  em run degenerado** — sem chave, com accuracy abaixo de 50% ou com três
+  ou mais falhas de mesma causa — para não sobrescrever a última medição
+  boa com um 0/26).
 - **Front**: `frontend/` — 6 páginas desde a consolidação de
   2026-07-06: Início, Dashboard, Campeões (+detalhe com itens),
   Partidas (+análise com heat map, itens/KDA/ouro/CS/dano por minuto,

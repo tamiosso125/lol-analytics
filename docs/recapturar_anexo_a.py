@@ -5,11 +5,19 @@ no banco. A coleta posterior levou a base a 39.426, e a Figura 2 (Dashboard)
 passou a mostrar a tabela regional com NA1 = 1.446 enquanto o texto da Secao
 5.3 afirma 7.159 — contradicao visivel dentro do proprio documento.
 
-Uso (API em :8000 e build do frontend servido):
+Uso (API em :8000 e frontend em :5173):
     .venv\\Scripts\\python.exe docs\\recapturar_anexo_a.py
+
+Grava: reports/anexo_a/captura.json — `capturado_em`, `base_partidas_fila_420`,
+as telas e o id de partida usado. E o arquivo que o Anexo A do TCC cita para
+sustentar "N partidas no momento da captura": antes disso a afirmacao se
+apoiava so no mtime do PNG, que este proprio comando invalida.
 """
+import json
 import os
+import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -18,6 +26,23 @@ RAIZ = Path(__file__).resolve().parent.parent
 SAIDA = RAIZ / "reports" / "anexo_a"
 FRONT = os.environ.get("FRONT_URL", "http://localhost:5173")
 ALTURA = 2400
+
+
+def _partidas_fila_420() -> int:
+    """Partidas na fila ranqueada no momento da captura.
+
+    POR QUE ISTO ENTROU NO SCRIPT: o Anexo A afirmava "39.426 partidas no
+    momento da captura, as mesmas da Seção 5.3", e a unica fonte dessa
+    afirmacao era o mtime do PNG — que o proprio comando de regeneracao
+    invalida, sem que nada acuse. Um anexo que descreve o estado do banco sem
+    registrar o estado do banco e um anexo que nao sabe o que mostra.
+    """
+    sys.path.insert(0, str(RAIZ))
+    from src.db import get_conn
+
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) FROM matches WHERE queue_id = 420")
+        return int(cur.fetchone()[0])
 
 # (arquivo, caminho, espera) — a espera é pelo dado, não por tempo fixo:
 # o dashboard só sai depois da consulta ao banco.
@@ -96,8 +121,25 @@ def main() -> None:
         print("\n--- falhas ---")
         for e in erros:
             print(" ", e)
+        # Nao grava captura.json com falhas parciais: o Anexo A cita este
+        # arquivo, e um registro de seis telas das quais tres falharam seria
+        # pior do que nenhum registro.
         raise SystemExit(1)
+
+    # O registro que o Anexo A cita. Sem ele, a afirmacao "N partidas no
+    # momento da captura" so se sustenta pelo mtime do PNG, que qualquer
+    # regeracao posterior torna falso sem aviso.
+    base = _partidas_fila_420()
+    registro = {
+        "capturado_em": datetime.now().isoformat(timespec="seconds"),
+        "base_partidas_fila_420": base,
+        "telas": [{"arquivo": nome, "rota": rota} for nome, rota, _ in TELAS],
+        "match_id_usado": os.environ.get("ANEXO_MATCH_ID", "NA1_5653867149"),
+    }
+    (SAIDA / "captura.json").write_text(
+        json.dumps(registro, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"\n6 capturas regravadas em {SAIDA}")
+    print(f"registro: captura.json (base {base} partidas)")
 
 
 if __name__ == "__main__":

@@ -371,11 +371,18 @@ reler console. O `base_partidas_fila_420` entra porque um benchmark que não
 declara a base não diz sobre o que mediu — foi exatamente o que aconteceu
 com o Apêndice B, que citava 39.426 sem meio de conferir.
 
-**Pendência:** com `ANTHROPIC_API_KEY` ausente do ambiente em 2026-10-04, o
-benchmark não foi reexecutado e `reports/nlq_benchmark.json` ainda não
-existe. Quem tiver a chave roda o comando acima uma vez e o Apêndice B passa
-a ter artefato; se a accuracy mudar, o número do TCC tem de mudar junto, e a
-checagem 19 falha até isso acontecer.
+**Fechado em 2026-10-04:** o benchmark foi reexecutado sobre a base final de
+41.063 partidas e mediu **23/26 = 88%**, o mesmo número da execução anterior
+sobre 39.426. `reports/nlq_benchmark.json` existe, e a checagem 19 passou a
+exigir que o accuracy e a base do Apêndice B sejam os do artefato.
+
+**Run degenerado não grava.** `_degenerado()` recusa a rodada quando nenhum
+acerto sai, quando a accuracy cai abaixo de 50%, ou quando três ou mais
+perguntas falham com a mesma causa — o caso de `ANTHROPIC_API_KEY` ausente,
+em que `generate_sql` estoura `KeyError` nas 26. Sem isso, rodar o comando num
+ambiente quebrado gravaria 0/26 e **sobrescreveria** a última medição boa com um
+arquivo que tem cara de medição. Run quebrado preserva o artefato anterior e
+sai com código 1.
 
 ---
 
