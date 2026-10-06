@@ -14,3 +14,6 @@ frontend/dist/
 # próprio. Baixar de http://sites.google.com/site/tugunisinos — não versionar
 # aqui (1,3 MB de .pdf/.eps de terceiros + histórico duplicado).
 docs/tcc2_latex/template_src/
+
+# Configuração local do Claude Code (pode conter segredos)
+.claude/settings.local.json
