@@ -207,12 +207,12 @@ export function Dashboard() {
                   ))}
                 </div>
                 <Takeaway>
-                  a literatura aponta leve vantagem azul no solo queue (~50,6-53%), mas neste
-                  dataset (Challenger/GM, múltiplas regiões) o vermelho domina no agregado —
-                  embora o viés varie por região (ver "Viés de lado por região" abaixo): mais
-                  forte no BR, quase neutro no KR. Hipótese: counter-pick garantido pesa mais
-                  no elo em que todos punem draft, somado ao acesso ao pit do dragão. É por
-                  isso que a predição "empatada" não dá 50%.
+                  neste dataset (Challenger/GM, múltiplas regiões) o vermelho vence mais no
+                  agregado — embora o viés varie por região (ver "Viés de lado por região"
+                  abaixo): mais forte no BR, quase neutro no KR. No jogo profissional (Oracle's
+                  Elixir) o padrão se inverte e o azul vence mais. Hipótese: counter-pick
+                  garantido pesa mais no elo em que todos punem draft, somado ao acesso ao pit
+                  do dragão. É por isso que a predição "empatada" não dá 50%.
                 </Takeaway>
               </>
             ) : null}

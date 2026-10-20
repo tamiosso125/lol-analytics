@@ -381,7 +381,7 @@ export function Home() {
           title="O lado do mapa importa"
           headline={`Vermelho vence ${pct(h.red_side_win_rate)}`}
           detail={`vs ${pct(1 - h.red_side_win_rate)} do lado azul`}
-          why="A literatura aponta leve vantagem azul no solo queue — mas no alto elo BR o vermelho domina, provavelmente pelo counter-pick garantido (que pesa mais quando todos sabem punir draft) e pelo acesso ao pit do dragão. Um achado do dataset que qualquer análise aqui precisa descontar."
+          why="No alto elo o vermelho vence mais que o azul, provavelmente pelo counter-pick garantido (que pesa mais quando todos sabem punir draft) e pelo acesso ao pit do dragão. No jogo profissional o padrão se inverte. Um achado do dataset que qualquer análise aqui precisa descontar."
           to="/dashboard"
         />
         <Card>

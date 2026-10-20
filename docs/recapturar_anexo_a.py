@@ -91,7 +91,12 @@ def main() -> None:
         for nome, rota, espera in TELAS:
             pagina = contexto.new_page()
             try:
-                pagina.goto(f"{FRONT}{rota}", wait_until="networkidle", timeout=45000)
+                # A Home (rota "/") nunca fica ociosa na rede: com
+                # "networkidle" estourava o timeout (2026-10-20, 2 tentativas
+                # seguidas, API respondendo em ~2 s). Nela vale "load": o
+                # seletor e a espera de 6 s abaixo garantem o dado na tela.
+                espera_rede = "load" if rota == "/" else "networkidle"
+                pagina.goto(f"{FRONT}{rota}", wait_until=espera_rede, timeout=45000)
                 pagina.wait_for_selector(espera, timeout=25000)
                 # Recharts + full_page=True = barras vazias no screenshot. A
                 # animação não completa antes do corte e o axes sai sem os
