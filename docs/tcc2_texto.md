@@ -502,8 +502,8 @@ apenas na camada de perfis de jogador, conforme descrito na Seção 5.7.
 
 Outros estudos tratam da previsão de partidas de *League of Legends* com
 insumos diferentes. Jadowski e Cunningham (2022) ajustam classificadores
-estatísticos a métricas dos campeonatos internacionais profissionais de 2020
-e acertam 67% dos 306 jogos avaliados. Do et al. (2021) preveem o resultado de
+estatísticos a métricas das ligas profissionais de 2020 e acertam 67% dos 306
+jogos da etapa seguinte. Do et al. (2021) preveem o resultado de
 partidas ranqueadas antes de elas começarem, a partir da experiência de cada
 jogador com o campeão escolhido, e chegam a 75,1% de acurácia com uma rede
 neural profunda. Maymin (2021) calibra um modelo de probabilidade de vitória com dados de
@@ -919,9 +919,10 @@ opostos. Hipótese de explicação: no *solo queue*, sem coordenação de
 *draft* de cinco jogadores, o *counter-pick* garantido do time vermelho (que
 escolhe por último) pesa mais; no jogo profissional, a prioridade de
 primeira escolha é valorizada o suficiente para influenciar decisões
-de lado em *playoffs*. Essa leitura é coerente com a literatura recente de
-previsão no profissional, que trata a prioridade de escolha como covariável
-própria do modelo (Guan e Tung, 2026), mas não a comprova.
+de lado em *playoffs*. O resultado é coerente com Jadowski e Cunningham
+(2022), que observam 54,08% de vitórias do azul em 882 jogos profissionais de
+2020, e a prioridade de escolha entra como covariável própria em Guan e Tung
+(2026), mas isso não comprova a hipótese.
 
 **Conversão de vantagem.** Com uma vantagem de ouro entre +2.000 e
 +4.000 aos 15 minutos, o time azul venceu 81,5% das partidas no cenário

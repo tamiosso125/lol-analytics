@@ -352,6 +352,18 @@ profissionais de 2020 e acertaram **67% de 306 jogos**. Dado tirado do
 texto do preprint de Guan e Tung, que os cita (confira no artigo, DOI
 10.1007/978-3-030-95531-1_10).
 
+*Lido por inteiro em 2026-10-20.* Treinam com a etapa de primavera de 2020
+(882 jogos) e testam na de verão (306), então é previsão **pré-jogo com
+divisão no tempo**, em ligas regionais (LEC, LCS, LCK, CBLOL, PCS, TCL), com
+regressão logística sobre notas de jogadores: 67,3%. Dados do Oracle's Elixir,
+a mesma fonte do TCC. **Três usos para a banca:** (1) mediram vitória do azul de
+**54,08% em 882 jogos profissionais** (qui-quadrado p = 0,015), o que apoia o
+nosso 53,2%, e citam que em 2017 o azul chegou a 64%; (2) escrevem que
+abordagens assim "dificilmente chegam a 90% de acurácia, pela inevitabilidade
+de zebras, e que mesmo no fim de uma partida o resultado pode ser muito volátil",
+exatamente a resposta à pergunta "por que não 90%?"; (3) usam o Hodge como
+exemplo de 85% em **outro MOBA profissional**, o mesmo que o TCC diz.
+
 **9. Do et al. (2021)** (FDG 2021): preveem o resultado da partida
 ranqueada **antes de ela começar**, pela experiência de cada jogador com o
 campeão, com **75,1%** de acurácia (rede neural profunda). Autores: Do, Wang,
