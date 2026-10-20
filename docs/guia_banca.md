@@ -361,6 +361,16 @@ Yu, McMillian e McMahan.
 abates e mortes individuais à probabilidade de vitória; mostra que a
 telemetria do jogo carrega sinal preditivo.
 
+*Lido por inteiro em 2026-10-20.* O modelo de probabilidade de vitória dele é
+uma regressão logística com minuto, abates, torres e monstros grandes, e
+**exclui o ouro de propósito** (diz que a diferença de ouro engana conforme o
+jogo avança); o nosso usa ouro e experiência, e o SHAP mostra o ouro como fator
+dominante. Foi calibrado em ~150 mil partidas do último *patch*, metade de
+Bronze e menos de 1% de Mestre/Desafiante, bem diferente do nosso elo alto. Os
+80% de acerto do artigo vêm de uma árvore que prevê o resultado do time pelo
+desempenho individual no fim da partida; não é previsão em tempo de jogo e não
+é comparável à nossa acurácia.
+
 **11. Guan e Tung (2026)** (*preprint* arXiv:2609.08060, **sem revisão por
 pares**, publicado em setembro de 2026): previsão **pré-jogo** no
 profissional, que trata o lado do mapa e a prioridade de escolha (*first
