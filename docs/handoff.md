@@ -267,9 +267,11 @@ de escopo, não uma lista de pendências ativas.
 
 **O TCC II está escrito e fechado (2026-10-04), revisado ponta a ponta
 em 2026-10-05 (Blocos A-E, ver diário).** `docs/tcc2_texto.md`
-→ `docs/build_tcc_docx.py` → `docs/tcc2_final.docx` (51 páginas, corpo
+→ `docs/build_tcc_docx.py` → `docs/tcc2_final.docx` (53 páginas, corpo
 30, dentro da faixa institucional 25-30 — **sem folga**, qualquer
-acréscimo de texto no corpo estoura o teto). Suíte completa verde:
+acréscimo de texto no corpo estoura o teto; 32 referências, Apêndices A-E.
+O Apêndice E recebeu as notas de proveniência da Seção 5.3, movidas do
+corpo em 2026-10-20 para abrir espaço às citações novas). Suíte completa verde:
 `tests/smoke_test.py`, `tests/validate_predictions.py` (aprovado com
 ressalvas), `docs/verifica_tcc.py` (20 checagens, consistente),
 `docs/confere_docx.py` (conforme), `frontend` lint + 31/31 testes.

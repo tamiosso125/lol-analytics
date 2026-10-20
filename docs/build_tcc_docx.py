@@ -316,9 +316,18 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     novos.append(_p(doc, TITULO_PT, bold=True,
                     align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12))
     novos.append(_p(doc))
+    # achado da conferencia linha-a-linha (2026-10-13): faltava a clausula
+    # final ("pelo Curso de... UNISINOS") e "grau" deveria ser "titulo" —
+    # confirmado em 3/3 aprovados conferidos (Carolina, Rodrigo, Henrique),
+    # mesma frase nos tres a menos de "Trabalho de Conclusao de Curso" vs
+    # "Artigo" no inicio (mantido "Trabalho de Conclusao de Curso", que e o
+    # que a Carolina usa e o que corresponde ao formato real deste documento
+    # — nao e um artigo curto, tem Apendices/Anexos como monografia).
     novos.append(_p(doc, "Trabalho de Conclusão de Curso apresentado como "
-                         "requisito parcial para obtenção do grau de Bacharel "
-                         "em Ciência da Computação.",
+                         "requisito parcial para obtenção do título de "
+                         "Bacharel em Ciência da Computação, pelo Curso de "
+                         "Ciência da Computação da Universidade do Vale do "
+                         "Rio dos Sinos (UNISINOS).",
                     align=WD_ALIGN_PARAGRAPH.JUSTIFY))
     novos.append(_p(doc))
     novos.append(_p(doc, ORIENTADOR, align=WD_ALIGN_PARAGRAPH.RIGHT))
@@ -341,14 +350,29 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     r.font.name, r.font.size = "Arial", Pt(12)
     _ref_rodape(p_aluno, 1)
     novos.append(p_aluno)
-    p_orient = _p(doc, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+    p_orient = _p(doc, align=WD_ALIGN_PARAGRAPH.CENTER)
     r = p_orient.add_run(ORIENTADOR_NOME_PROPRIO)
     r.font.name, r.font.size = "Arial", Pt(12)
     _ref_rodape(p_orient, 2)
     novos.append(p_orient)
+    # linha em branco de verdade antes do Resumo — achado de 2026-10-13: o
+    # `space_after=12` sozinho deixava o bloco mais colado que o modelo
+    # oficial (que tem um paragrafo vazio aqui, visto em
+    # modelo_elvandi.docx) e que os aprovados reais (ex.: Carolina Paz
+    # Prates), onde o espaco antes de "Resumo:" e visivelmente maior.
+    novos.append(_p(doc))
 
     # --- RESUMO / ABSTRACT ------------------------------------------------
+    # espacamento simples (1.0), nao o 1.5 do corpo: regra explicita do
+    # modelo oficial ("deve ser um texto unico e com espacamento simples
+    # entre linhas") e medida em 4/4 aprovados conferidos em 2026-10-13
+    # (razao delta_y/fonte = 1.15, contra 1.73 no corpo — 1.73/1.15 = a
+    # mesma proporcao 1.5 esperada). Setar aqui diretamente no paragrafo:
+    # setar so no nivel do paragrafo (nao da duplicar no `_p`, que outros
+    # ~1.500 paragrafos do corpo tambem usam) e setar DEPOIS de `_p()`
+    # (que sempre aplica 1.5) para nao ser sobrescrito.
     p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    p.paragraph_format.line_spacing = 1.0
     r = p.add_run("Resumo: ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
     r = p.add_run(resumo)
@@ -356,6 +380,7 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     novos.append(p)
 
     p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=12)
+    p.paragraph_format.line_spacing = 1.0
     r = p.add_run("Palavras-chave: ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
     r = p.add_run(palavras_chave)
@@ -363,6 +388,7 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     novos.append(p)
 
     p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    p.paragraph_format.line_spacing = 1.0
     r = p.add_run("Abstract: ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
     r = p.add_run(abstract)
@@ -370,6 +396,7 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     novos.append(p)
 
     p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=12)
+    p.paragraph_format.line_spacing = 1.0
     r = p.add_run("Key-words: ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
     r = p.add_run(key_words)

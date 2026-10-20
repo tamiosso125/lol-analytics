@@ -34,6 +34,14 @@ onde é osso.
    regra do projeto é "número sempre vem de artefato real", e isso vale
    também para não destruir o rastro depois de ele existir.
 
+> **Executado em 2026-10-20** (ao inserir 14 referências novas, o corpo
+> foi a 31 páginas): 0b (lista dos 11 experimentos da 5.4 trocada por
+> remissão ao Apêndice D) e metade de 0a (a "Nota de método" do Quadro 1 e
+> a origem das taxas de conversão foram para o novo **Apêndice E**; a "Nota
+> sobre as bases" ficou na 5.3 porque a checagem 18 do `verifica_tcc.py` a
+> exige). Corpo voltou a 30/30. **O teto continua sem folga**: o que ainda
+> pode sair sem perda é só a "Nota sobre as bases" e o Tier 1.
+
 ## Tier 0 — mover para apêndice (perda de informação: zero)
 
 A Seção 5 (Resultados) tem 445 linhas de Markdown — mais que o dobro de

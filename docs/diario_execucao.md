@@ -4308,6 +4308,315 @@ numeração consistentes.
 Fecha o planejamento de revisão completa (Blocos A-E).
 
 
+## 2026-10-13 — Última leitura completa antes da entrega: sem achados novos
+
+Pedido do usuário: reler todo o material escrito, conferir se figuras e
+quadros fazem sentido e se a estrutura ainda bate com os modelos — uma
+passada final, depois que os Blocos A-E (2026-10-05) já tinham fechado a
+revisão formal. Objetivo era confirmação, não auditoria às cegas: ler
+com ceticismo em vez de assumir que, por já ter sido revisado, está
+necessariamente certo.
+
+**Leitura de prosa completa** (Resumo → Anexo B, as seções que as
+sessões anteriores não tinham relido na íntegra nesta rodada: 1
+Introdução, 2 Fundamentação, 3 Trabalhos Relacionados, Referências por
+extenso): coerente, terminologia consistente, nenhum placeholder.
+
+**Três checagens novas, que não existiam em nenhuma sessão anterior:**
+
+1. **Apêndice A (esquema do banco) contra `db/schema.sql` real, campo a
+   campo.** As 11 tabelas e todos os campos batem exatamente — zero
+   deriva entre o que o texto descreve e o schema que o banco
+   efetivamente usa hoje.
+2. **Toda referência interna "Seção X.Y" do corpo testada por *script*
+   contra os headings reais do Markdown** (`re.findall` dos headings
+   vs. das citações "Seção N"). Zero link quebrado — nenhuma seção
+   citada que não existe no documento.
+3. **As 18 entradas de REFERÊNCIAS reconciliadas uma a uma** com as
+   citações no corpo: 7 estudos de domínio (Seção 3) + 6 obras de
+   método (Seção 2) + 5 referências metodológicas/API (Seção 4,
+   Apêndice B/Anexo B) = 18. Nenhuma órfã (citada mas sem entrada), nenhuma
+   sobrando (na lista mas nunca citada).
+4. **Pré-textual opcional** (Dedicatória, Agradecimentos, Epígrafe,
+   Lista de abreviaturas/siglas/símbolos, Folha de aprovação) testado
+   contra os 10 aprovados de novo, item que o Bloco B (que olhou só
+   Sumário/Listas de ilustração) não tinha coberto: **0 dos 10** usa
+   qualquer um desses elementos. Confirma que a ausência deles no nosso
+   documento é o padrão, não uma lacuna.
+
+**Figuras/Quadros conferidos contra o código, não só contra o texto:**
+a ordem das 6 Figuras em `FIGURAS` (`build_tcc_docx.py`) bate 1:1 com a
+promessa da Seção 4.7 ("a Figura 1 mostra a página inicial..."); os 6
+Quadros (`QUADROS`) idem, na ordem corpo→Apêndices A-D.
+
+**Suíte reexecutada ao vivo** (não reaproveitada de memória):
+`smoke_test` (pass), `validate_predictions` (APROVADO COM RESSALVAS —
+as mesmas 5 limitações já declaradas na Seção 5.8), `verifica_tcc`
+(20/20), `confere_docx` (conforme).
+
+**Resultado: nenhum achado novo, nenhuma mudança no `.docx`.** Depois de
+cinco rodadas de revisão (Blocos A-E) mais esta, o documento resiste a
+uma leitura cética completa sem produzir mais nada para corrigir — é o
+sinal de que a revisão chegou a rendimento decrescente, não de que
+parei de procurar.
+
+
+## 2026-10-13 (continuação) — Dois achados reais que a leitura automatizada não pegou
+
+O usuário, olhando o `.docx` aberto no Word (não um script), fez duas
+perguntas que levaram a dois achados reais — nenhum dos dois tinha
+aparecido em nenhuma das seis rodadas de revisão anteriores.
+
+**1. Espaçamento antes do "Resumo:" estava apertado demais.** O bloco
+"Título + Autor*/Orientador**" (Bloco D, 2026-10-05) usava
+`space_after=12pt` no parágrafo do orientador, em vez de um parágrafo
+em branco de verdade. Comparado lado a lado com o `.doc` oficial do
+professor (que tem um parágrafo vazio entre o orientador e "Resumo:")
+e com a Carolina Paz Prates (TCC aprovado real, mesmo espaço visível
+maior), confirmou visualmente que o nosso ficava mais colado.
+Corrigido em `montar_pre_textual()`: `space_after=12` trocado por um
+parágrafo em branco real.
+
+**2. O Resumo tinha 341 palavras — o modelo oficial exige 100 a 250.**
+Achado direto no texto do `.doc` do Prof. Elvandi ("deve conter entre
+100 a 250 palavras"), não suposição. Contei o Resumo dos 10 aprovados
+pra confirmar que a regra é levada a sério na prática, não só escrita e
+ignorada (como aconteceu com outras regras do modelo genérico em
+sessões anteriores): todos ficam entre 130 e 249 palavras, nenhum passa
+do teto. Resumo cortado para 243 palavras e o Abstract (tradução) para
+233, removendo principalmente o nível de detalhe sobre
+"39.426 partidas disponíveis quando o conjunto de *features* foi
+congelado (39.309 delas geraram linha de *feature*)" — nuance de
+metodologia/limitação (Seção 5.8), não algo que um resumo de 250
+palavras precise carregar.
+
+**Efeito em duas checagens do `verifica_tcc.py`** (achado 18(c) e uma
+checagem dentro de `check_residuos`): ambas exigiam que o Resumo/Abstract
+citassem as DUAS bases (41.063 e 39.426) e, no caso do Abstract, a
+palavra "limitation". Cortar o Resumo quebrou as duas de propósito —
+exatamente o comportamento que se quer de uma checagem que cruza texto
+contra regra. Relaxadas para exigir só a base descritiva (41.063,
+contagem real que o resumo deve mesmo declarar) e a ausência de uma
+frase que reivindique treino sobre ela — o risco original (resumo
+afirmando que o modelo foi treinado na base errada) continua coberto;
+a exigência da nuance completa é que deixou de fazer sentido num
+resumo deliberadamente mais curto.
+
+Rebuild completo: 50 páginas totais (51→50, o corte do Resumo tirou
+meia página do pré-textual), corpo inalterado em 30 (é medida
+relativa, Introdução→Referências — mesma razão de sempre). `verifica_tcc`
+(20/20) e `confere_docx` (conforme) depois da correção.
+
+**Terceira pergunta do usuário, sem achado:** "temos dados reais dos 3
+modelos (XGBoost, Random Forest, MLP)?" — sim, confirmado contra
+`reports/metricas_corte.json` (gerado 2026-10-04), que tem as métricas
+completas dos três em todos os 4 cortes e bate exatamente com o que o
+Quadro 2 da Seção 5.4 e o Apêndice C citam. Só o XGBoost (vencedor) foi
+exportado pra produção (`data/model.joblib` + `models_phases.joblib`)
+— prática normal de ML, e já é isso que o texto descreve ("XGBoost
+adotado como modelo de produção").
+
+**Usuário perguntou como o erro do Resumo passou por cinco blocos de
+revisão** (resposta honesta: as revisões anteriores checaram ESTRUTURA
+— quais seções existem, ordem, elementos presentes/ausentes — e
+CONSISTÊNCIA FACTUAL — números batendo com artefato —, nunca
+converteram o `.doc` do professor num checklist linha a linha de
+regras explícitas de formatação/conteúdo). Isso levou a reler o
+`modelo_elvandi.docx` por inteiro (não em fragmentos, como nas sessões
+anteriores) e a achar mais dois reais, ambos confirmados contra os 10
+aprovados antes de corrigir — para não repetir o erro de generalizar
+de um exemplo só:
+
+- **Testado e DESCARTADO**: título em outro idioma antes do Resumo. O
+  modelo marca "OPCIONAL"; só 1 dos 10 (Carolina) usa. Não é bug —
+  somos maioria (9/10 sem ele).
+- **Confirmado e corrigido**: espaçamento interno do bloco
+  Resumo/Palavras-chave/Abstract/Key-words. O modelo diz
+  "espaçamento simples entre linhas" (diferente do corpo, 1,5); medido
+  em 4/4 aprovados via razão delta_y/tamanho_de_fonte (1,15 no resumo
+  contra 1,73 no corpo — proporção 1,5 exata). O nosso estava em 1,5
+  (herdava do estilo `Normal`). Causa raiz interessante: `_p()` grava
+  `line_spacing=1.5` direto no parágrafo, mas o Word, ao salvar de novo
+  via `finalize-fields.ps1`, **remove formatação direta redundante com
+  o estilo** — como `ajustar_tipografia()` também fixa o estilo
+  `Normal` em 1,5, a marcação direta igual ao estilo desaparecia
+  silenciosamente no re-save. `line_spacing=1.0` sobrevive porque não é
+  mais redundante.
+- **Confirmado e corrigido, com nuance**: pontuação/capitalização das
+  palavras-chave. O modelo pede `;` entre termos e minúsculas exceto
+  substantivo próprio/sigla, com exemplo literal. Nos 10 aprovados o
+  `;` é só 5/10 (não unânime como o limite de palavras do resumo) mas
+  a **capitalização em minúsculas é consistente** nos que chequei
+  (Rodrigo, Eduardo, Michel — todos minúsculo exceto siglas/nomes
+  próprios). Corrigido para `;` + minúsculas nas duas línguas (nosso
+  "Esports. League of Legends. Análise de dados..." virou "esports;
+  *League of Legends*; análise de dados...").
+
+Rebuild: 50 páginas (inalterado), corpo 30 (inalterado — mudança é
+toda em formatação de parágrafo, não em quantidade de texto).
+`verifica_tcc` (20/20) e `confere_docx` (conforme) depois de cada
+correção.
+
+**Pedido do usuário**: recriar o plano de revisão, desta vez tópico a
+tópico/linha a linha/estrutura a estrutura/formatação a formatação,
+usando o `modelo_elvandi.docx` como checklist explícito (não só como
+referência pontual) cruzado contra os 10 aprovados — plano detalhado
+na conversa, a executar em blocos como os A-E anteriores.
+
+**Usuário perguntou se os 10 aprovados também foram transcritos por
+inteiro** (não — só extração pontual por tópico, mesma limitação de
+método que causou o problema do Resumo). Resposta honesta dada, e
+construído um esqueleto estrutural em lote dos 10 (títulos de nível 1 +
+página de Referências, via `pymupdf`) para servir de base de consulta.
+Confirmou a ordem de seções (1 Introdução → 2 Fundamentação/Referencial
+Teórico → 3 Trabalhos Relacionados → 4 Metodologia → 5 Resultados → 6
+Conclusão/Considerações Finais) em 9/10 — a detecção de subseções (2.1,
+2.2...) não funcionou de forma confiável (negrito/caixa alta variam
+entre os 10), registrado como limite honesto do método, não escondido.
+
+**Bloco F (Capa + Folha de Rosto) executado.** Negrito (Capa=negrito,
+Folha de Rosto=sem negrito, inclusive o nome do aluno) e alinhamento
+("Orientador:" à direita) já batiam com o modelo — conferido contra o
+XML do `modelo_elvandi.docx` diretamente, não por inspeção visual.
+**Achado real**: a frase "Trabalho de Conclusão de Curso apresentado
+como requisito parcial para obtenção do **grau** de Bacharel em
+Ciência da Computação." estava incompleta e com a palavra errada.
+Testado contra 3 aprovados (Carolina, Rodrigo, Henrique) — os três
+usam "para obtenção do **título** de Bacharel em Ciência da
+Computação, **pelo Curso de Ciência da Computação da Universidade do
+Vale do Rio dos Sinos (UNISINOS)**", cláusula final inteira que faltava
+na nossa. Corrigido em `build_tcc_docx.py`.
+
+Rebuild: 50 páginas (inalterado), corpo 30 (inalterado — mudança é só
+uma frase no pré-textual, que não conta pro corpo). `verifica_tcc`
+(20/20) e `confere_docx` (conforme) depois da correção.
+
+## 2026-10-17 — Revisão de naturalidade da prosa (não para driblar detector de IA)
+
+**Pedido original do usuário**: validar a escrita contra "programas
+detectores de IA". Recusado nesses termos — o objetivo declarado era
+mascarar, para a banca, o quanto de IA entrou na redação, e esse TCC
+teve edição direta extensa ao longo de todas as sessões. Reformulado e
+aceito pelo usuário como: revisão de **qualidade e naturalidade de
+prosa**, comparada contra a variação de estilo real dos 10 aprovados —
+um objetivo legítimo (texto melhor é texto melhor), independente de
+quem/o que escreveu.
+
+**Achado quantificado, não impressionista**: contagem de travessão (—)
+no corpo (Seções 1-6) deu 95 ocorrências em 10.250 palavras (1 a cada
+108). Nos 10 aprovados, medido o mesmo jeito: **6 de 10 não usam
+NENHUM travessão**, e os 4 que usam ficam entre 1 a cada 320 e 1 a cada
+7.770 palavras — 3 a 70× menos frequente que o nosso. É de longe o
+maior desvio de estilo encontrado nesta sessão, e um padrão conhecido
+de prosa gerada por modelo de linguagem (a construção "frase — aposto
+— frase" em cadeia). Outros padrões testados (contraste "não X, mas
+Y", "isso é", "vale notar") apareceram raramente nos dois lados — não
+eram achado, só o travessão era.
+
+**Correção: 95 → 2 travessões no corpo**, reescrevendo frase por frase
+(não substituição mecânica — cada caso recebeu pontuação adequada ao
+contexto: vírgula para aposto simples, dois-pontos para explicação que
+segue, parênteses para inciso, ponto final para separar em duas
+frases). Os 2 que sobraram são legenda de Quadro ("Quadro — Título"),
+formato ABNT exigido, não prosa. Headings de Apêndice/Anexo
+("APÊNDICE A — Título") e conteúdo de célula de tabela também foram
+preservados intencionalmente pelo mesmo motivo. O Abstract em inglês
+não foi tocado: a convenção de travessão em inglês acadêmico é
+diferente da do português, e não há exemplo real em inglês pra
+comparar.
+
+Verificação: cada edição preservou literalmente todo número e fato
+citado (`verifica_tcc.py` 20/20 continua batendo os mesmos artefatos
+depois da reescrita inteira — prova de que a reformulação não alterou
+nenhum dado). Resumo recontado após a reescrita: 239 palavras (dentro
+de 100-250). `confere_docx` conforme. Rebuild: 50 páginas, corpo 30
+(inalterado — mudança é só pontuação, não volume de texto).
+
+
+## 2026-10-20 — Lacunas de referência fechadas: 18 → 32 referências
+
+**Origem.** Pergunta do usuário: o TCC tem afirmações sem fonte? Levantadas
+as lacunas lendo o texto (métodos citados só pelo nome, uma frase atribuída
+à "literatura geral" sem citação, fonte de dados fora da lista). Pesquisa
+na web para achar e confirmar os dados bibliográficos; o usuário conferiu o
+DOI do Hornik, o do Wallner e o jogo do Hodge.
+
+**Referências acrescentadas (14), todas citadas no corpo** (checagem por
+script: nenhuma órfã): Brown, Cai e DasGupta (Wilson, 4.5); Holm (4.5);
+Kohavi (validação cruzada, 4.6); Pedregosa (scikit-learn, 4.6); Kaufman
+(vazamento de dados, 4.6); Hornik et al. (MLP, 2.2); Grinsztajn et al.
+(árvores em dados tabulares, 2.2); Niculescu-Mizil e Caruana (calibração,
+5.4); Zhong, Yu e Klein (acurácia de execução, 4.7, com a limitação de o
+benchmark usar um banco só); Oracle's Elixir (fonte dos dados, 4.3, acesso
+em 20 out. 2026); e quatro estudos de LoL na Seção 3.2: Jadowski e
+Cunningham (2022), Do et al. (2021), Maymin (2021) e Guan e Tung (2026,
+*preprint* arXiv:2609.08060, sem revisão por pares). Seção 5.7 ganhou um
+parágrafo comparando a acurácia com os trabalhos de LoL, marcado como
+comparação apenas indicativa (dados, nível e momento da previsão diferem).
+
+**Erro encontrado e corrigido: Hodge et al. (2021) estuda Dota 2, não LoL.**
+O texto dizia (3.1) que ele "sustenta, no domínio de League of Legends"
+a abordagem, e (5.7) que o estudo "não detalha por fase" e "não propõe
+plataforma integrada", duas afirmações que não tinham como ser conferidas
+no resumo do artigo. Reescritas com o que o resumo realmente diz (Dota 2
+profissional, ao vivo, até 85% após 5 minutos).
+
+**Afirmação sem fonte removida.** "O padrão descrito pela literatura geral
+sobre League of Legends" (azul vence no profissional, 5.3): nenhuma fonte
+acadêmica com taxa por lado foi achada (o preprint de Guan e Tung trata o
+lado e o *first pick* como covariáveis, mas não reporta taxas). A frase
+virou "observado neste trabalho" (53,2% em 96.716 jogos), e o preprint é
+citado só como apoio à hipótese do *draft*. **Pendência fora do texto:** a
+captura do Dashboard (Figura 2, Anexo A) mostra um texto da própria
+interface, "a literatura aponta leve vantagem azul no solo queue
+(~50,6-53%)", sem fonte; corrigir exige mexer no frontend e refazer as
+capturas.
+
+**Outro erro achado ao mover texto:** a nota sobre conversão de vantagem na
+5.3 estava truncada (faltavam as palavras entre `features_phases.csv` e
+"+6.000"). Reescrita ao ser movida.
+
+**Custo em páginas e como foi absorvido.** As citações levaram o corpo a
+31 páginas (teto 30). Aplicado o corte Tier 0 do `plano_reducao_corpo.md`:
+lista dos 11 experimentos na 5.4 trocada por remissão ao Apêndice D, e a
+"Nota de método" do Quadro 1 mais a origem das taxas de conversão movidas
+para o novo **Apêndice E**, sem perda de informação. Corpo de volta a 30.
+
+**Validação.** `verifica_tcc` 20/20, `confere_docx` conforme (esperado
+agora 32 referências). Documento: 53 páginas, corpo 30.
+
+**Fora do escopo desta rodada, registrado:** Silva et al. (2018, SBGames)
+não foi incluído porque a página original não foi localizada (só números
+de segunda mão). Efron e Morris (1977, *shrinkage*) ficou de fora, prioridade
+baixa.
+
+## 2026-10-20 (continuação) — Conferência dos artigos e frase sem fonte na interface
+
+**Conferência das referências novas contra o texto dos artigos.** Lidos os
+PDFs do Do et al. (FDG 2021, DOI 10.1145/3472538.3472579) e do Kohavi
+(IJCAI-95); lidos o resumo do Maymin (De Gruyter) e o do Jadowski e
+Cunningham (repositório da MMU), mais os metadados do Crossref para os dois.
+Resultado: **Do et al. confere** (75,1% antes da partida, partidas
+ranqueadas de 2020, cidade Montreal, editora ACM; referência corrigida, ganhou
+DOI); **Kohavi confere** (recomenda validação cruzada estratificada de 10
+*folds*; o PDF não traz cidade, então ficou "[S. l.]"); **Maymin**
+corrigido (n. 1; o artigo calibra um modelo de probabilidade de vitória com
+milhões de partidas ranqueadas, e o texto do TCC dizia só "liga abates e
+mortes", que era imprecisão minha a partir do preprint); **Jadowski e
+Cunningham** confere (67% de 306 jogos). Não verificados: os nomes dos
+organizadores do livro do Jadowski (Wölfel, Bernhardt e Thiel vêm do
+preprint de Guan e Tung; o Crossref não os devolve) e o conteúdo integral
+do Jadowski (Springer exige login).
+
+**Frase sem fonte tirada da interface.** `Dashboard.tsx` e `Home.tsx`
+diziam "a literatura aponta leve vantagem azul no solo queue (~50,6-53%)".
+Trocadas por texto que descreve o dado medido, inclusive a inversão no
+profissional. Lint e 31 testes passam. Capturas do Anexo A refeitas (base
+41.063, 2026-10-20 12:21), recortes regenerados, texto do Anexo A atualizado
+("quarta geração"). A Home não concluía o `networkidle` do Playwright (duas
+tentativas, API respondendo em ~2 s); `recapturar_anexo_a.py` agora usa
+`load` só nessa rota.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

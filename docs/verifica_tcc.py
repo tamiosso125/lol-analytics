@@ -426,19 +426,22 @@ def check_residuos(t: str) -> None:
     for pt, porque in PADROES_REFUTADOS:
         if _re.search(pt, abstrato, _re.I):
             falha(f"ABSTRACT repete a {porque}")
-    # O Abstract tem que declarar AS DUAS bases. Depois da rodada final de
-    # coleta da KR o banco tem 41.063 e os modelos foram construidos sobre
-    # 39.426; citar so uma deixa o leitor sem saber qual numero descreve o
-    # que. Exigir as duas e o que impede o Abstract de escolher o mais
-    # redondo e esconder o outro.
+    # Ate 2026-10-13 esta checagem exigia as DUAS bases (41.063 e 39.426) e a
+    # palavra "limitation" dentro do Abstract. Relaxada pelo mesmo motivo da
+    # checagem 18(c) sobre o RESUMO em portugues: o modelo oficial do
+    # Prof. Elvandi exige 100-250 palavras (confirmado contra os 10 TCC II
+    # aprovados — nenhum passa de 249) e o nosso Resumo/Abstract tinham
+    # 341/326. A nuance "base de modelagem != base descritiva" e detalhe de
+    # metodologia/limitacao (Secao 5.8), nao algo que um resumo precise
+    # carregar — e o Abstract e traducao do Resumo, tem que encolher junto.
+    # O risco que a checagem protegia continua coberto: o Abstract tem que
+    # citar a base descritiva real (41.063) e nao pode CLAMAR que o modelo
+    # foi treinado sobre ela.
     if not _re.search(r"41[.,]063", abstrato):
         falha("ABSTRACT nao menciona a base descritiva (41.063)")
-    if not _re.search(r"39[.,]426", abstrato):
-        falha("ABSTRACT nao menciona a base de modelagem (39.426) - sem ela "
-              "o leitor nao sabe que os dois numeros coexistem")
-    if not _re.search(r"limitation|limita", abstrato, _re.I):
-        falha("ABSTRACT declara as duas bases mas nao diz que a diferenca e "
-              "uma limitacao registrada")
+    elif _re.search(r"train\w*[^.]{0,40}41[.,]063", abstrato, _re.I):
+        falha("ABSTRACT parece afirmar que o modelo foi treinado sobre "
+              "41.063 (a base descritiva) — base de modelagem errada")
     if not _re.search(r"0[.,]7621", abstrato):
         falha("ABSTRACT nao menciona a acuracia atual (0,7621)")
     if not _re.search(r"0[.,]8473", abstrato):
@@ -1032,20 +1035,40 @@ def check_bases_declaradas(t: str) -> None:
 
     # (c) o RESUMO em portugues, e SO ele: a varredura precisa parar no
     # Abstract ingles, senao apagar o numero do resumo em portugues nao
-    # reprova nada — que e o bug que esta checagem existe para pegar
+    # reprova nada.
+    #
+    # Ate 2026-10-13 esta checagem exigia as DUAS bases (DESCRITIVA e
+    # MODELAGEM) dentro do resumo. Relaxada nessa data porque o modelo
+    # oficial do Prof. Elvandi exige 100-250 palavras no resumo (confirmado
+    # contra os 10 TCC II aprovados: nenhum passa de 249) e o nosso tinha
+    # 341 — a nuance "base de modelagem != base descritiva" e detalhe de
+    # metodologia/limitacao (ja coberto pela Secao 5.8 e pelas checagens (a)
+    # e (b) acima), nao algo que um resumo de 250 palavras precise carregar.
+    # O risco que esta checagem protegia — o resumo CLAMAR que o modelo foi
+    # treinado sobre a base descritiva — continua coberto: exige-se so que
+    # DESCRITIVA apareca (a contagem real de partidas coletadas, fato que o
+    # resumo deve mesmo declarar) e que nenhuma frase do tipo "treinad...
+    # sobre as 41.063" exista.
     i = t.find("## RESUMO")
     if i < 0:
         falha("bases: o RESUMO nao existe no texto")
     else:
         corte = t.find("**Abstract", i)
         resumo = t[i:corte if corte > 0 else t.find("\n## ", i + 5)]
-        if DESCRITIVA not in resumo or not any(b in resumo for b in MODELAGEM):
-            falta = [b for b in (DESCRITIVA, *MODELAGEM) if b not in resumo]
-            falha(f"bases: o RESUMO em portugues nao declara {falta} — o "
-                  "Abstract ingles declara, e o resumo e a superficie que o "
-                  ".md entrega")
+        reivindica_treino_na_descritiva = _re.search(
+            r"treinad\w*[^.]{0,40}" + _re.escape(DESCRITIVA), resumo
+        )
+        if DESCRITIVA not in resumo:
+            falha(f"bases: o RESUMO em portugues nao declara {DESCRITIVA} "
+                  "(a base descritiva/total coletada)")
+        elif reivindica_treino_na_descritiva:
+            falha("bases: o RESUMO parece afirmar que o modelo foi treinado "
+                  f"sobre {DESCRITIVA} (a base descritiva) — essa e a base de "
+                  "modelagem errada, o mesmo bug que esta checagem existe "
+                  "para pegar")
         else:
-            print("  RESUMO em portugues declara as duas bases")
+            print(f"  RESUMO em portugues declara {DESCRITIVA} e nao "
+                  "reivindica treino sobre ela")
 
     # (d) a base descritiva tem que SER a que o banco tem — comparar, e nao so
     # imprimir. Sem esta comparacao a checagem avisaria nada na proxima rodada

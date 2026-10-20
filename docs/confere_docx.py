@@ -85,8 +85,8 @@ def main() -> None:
         problemas.append(f"{len(sem_negrito)} título(s) de seção SEM negrito")
     if len(titulos) < 40:
         problemas.append(f"suspiciousamente poucos títulos ({len(titulos)})")
-    if len(refs) != 18:
-        problemas.append(f"referências: esperado 18, achou {len(refs)}")
+    if len(refs) != 32:
+        problemas.append(f"referências: esperado 32, achou {len(refs)}")
     if len(leg_fig) != 6:
         problemas.append(f"legendas de figura: esperado 6, achou {len(leg_fig)}")
     if len(leg_quad) != 6:
