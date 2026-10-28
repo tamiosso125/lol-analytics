@@ -1660,8 +1660,10 @@ para isso que este guia existe.
 - *temperature* 0; *max_tokens* 1.200; tempo máximo 10 s
 
 **Documento**
-- limite: 30 páginas do Resumo ao fim das Referências (em redução em 2026-10-23)
-- 32 referências; 6 Figuras; 6 Quadros; Apêndices A-E
+- 29 páginas do Resumo ao fim das Referências (limite 30, uma linha de folga)
+- 32 referências; 11 Figuras (5 no corpo, 6 telas inteiras no Apêndice F);
+  9 Quadros (6 no corpo); Apêndices A-G; Anexo A (documentação da Riot)
+- limitações: Seção 6.1, com o detalhe no Apêndice G
 - `verifica_tcc.py`: 20/20
 
 ---
