@@ -102,6 +102,22 @@ ajustar (a paginação muda a cada corte).
 a ~368 palavras/página ≈ **3.700 palavras**. O corpo tinha 10.636; com os
 parágrafos novos que citam quadros e figuras, o corte é de ~35%.
 
+## Etapa 2 executada (2026-10-28): Seção 5 e limitações
+
+- **5.8 Limitações saiu do corpo.** A 6.1 virou a lista única, em quatro
+  blocos (construto, externa, interna, modelo); o detalhe com números e
+  experimentos foi para o novo **Apêndice G**, sem perda.
+- **5.3** condensada: a série anual do profissional e o detalhe do teste
+  (ii) por faixa foram para o **Apêndice E**; ficaram a frase-síntese e os
+  números que sustentam o achado.
+- **5.4, 5.5, 5.6** sem repetição do que os quadros e figuras já mostram.
+- **5.7** em dois parágrafos, com as onze referências ainda citadas.
+
+**Medido:** Seção 5 de 4.295 para 2.077 palavras; Seção 6 de 934 para
+1.044 (recebeu as limitações). Documento de **39 para 34 páginas**.
+Faltam 4 a 5 páginas (≈ 1.500-1.800 palavras) das Seções 1 a 4, que é o
+que os alvos da tabela acima já previam (5.440 → ~3.650).
+
 ## Ordem de execução (uma etapa por vez, com sua aprovação)
 
 1. **Inserir os visuais no texto primeiro.** É mecânico e mede o custo

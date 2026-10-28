@@ -808,27 +808,17 @@ viés de lado (Seção 5.3).
 ### 5.3 Análise exploratória: padrões identificados (objetivo d)
 
 (Nota sobre as bases usadas nesta seção e na modelagem: a análise
-descritiva, este quadro, o viés de lado e o teste de faixa de duração,
-foi medida sobre as **41.063 partidas** que o banco tem ao fim da coleta.
-As *features* e os modelos foram construídos antes da última rodada da
-KR e usam a base anterior de **39.426 partidas**, das quais 39.309 geraram
-*features* e 39.188 chegam ao corte de 15 minutos. Por isso a Seção 5.4 e
-o Apêndice C citam 39.426. A diferença são 1.637
-partidas, quase todas da KR: das 1.754 partidas do banco que ainda não
-geraram *features*, 1.647 são da KR e 107 são de três outras regiões.
-Os modelos não foram retreinados sobre a base nova: as 1.637 partidas a
-mais alterariam a amostra de treino em cerca de 4%, dentro do que a
-própria discussão de volume mediu como ganho real, e não justificam
-descartar um modelo cujo desempenho já foi medido e validado. É uma
-limitação declarada, registrada na Seção 5.8.)
-
+descritiva foi medida sobre as **41.063 partidas** que o banco tem ao fim
+da coleta. As *features* e os modelos foram construídos antes da última
+rodada da KR, sobre a base anterior de **39.426 partidas**, das quais
+39.309 geraram *features* e 39.188 chegam ao corte de 15 minutos; por isso
+a Seção 5.4 e o Apêndice C citam 39.426. As 1.637 partidas de diferença,
+quase todas da KR, são uma limitação declarada na Seção 6.1.)
 
 **Viés de lado no *solo queue* de elo alto.** No agregado das cinco
-regiões coletadas, o time vermelho venceu com mais frequência que o
-azul, com intensidade variável por região. O Quadro 2 traz a medição
-direta em SQL, de 2026-10-04, sobre as 41.063 partidas da base final (o
-volume foi ampliado especificamente para fortalecer este quadro; ver
-Apêndice E):
+regiões, o time vermelho venceu mais que o azul, com intensidade variável
+por região. O Quadro 2 traz a medição direta em SQL, de 2026-10-04, sobre
+as 41.063 partidas; o histórico das medições está no Apêndice E.
 
 Quadro — Vitória do time vermelho por região
 
@@ -840,115 +830,60 @@ Quadro — Vitória do time vermelho por região
 | NA1 | 7.159 | 52,2% |
 | EUN1 | 20 | 50,0% (amostra insuficiente, não considerada) |
 
-A direção do achado é a mesma nas quatro regiões com amostra relevante
-(entre 50,4% e 56,3%), mas a força da evidência não é uniforme: **três das
-quatro** (BR1, EUW1 e NA1) têm taxa de vitória do vermelho cujo intervalo de
-95% exclui 50%, e a KR fica em 50,4% com intervalo [49,5%, 51,4%], que o inclui.
-Lá o viés não é estatisticamente distinguível de zero. É a BR1, que sozinha
-sustenta a assimetria com folga ([55,4%, 57,2%]), que carrega o argumento de que
-o padrão não é especificamente brasileiro. Isso fortalece a leitura de "padrão
-de elo altíssimo em geral" sem permitir afirmar que as quatro regiões o
-demonstram com a mesma força. O histórico das quatro medições deste quadro está
-no Apêndice E.
+A direção é a mesma nas quatro regiões com amostra relevante, mas a força
+da evidência não é uniforme. Em BR1, EUW1 e NA1 o intervalo de confiança
+de 95% exclui 50%; na KR, com 50,4% e intervalo [49,5%, 51,4%], o
+intervalo inclui 50%, e o viés não é distinguível de zero. A BR1 sustenta
+a assimetria com folga ([55,4%, 57,2%]). O padrão é de elo alto, e não só
+brasileiro, mas as quatro regiões não o demonstram com a mesma força.
 
-**O viés de lado é estável ao longo da partida, e essa constância é o
-resultado.** Uma primeira versão deste texto afirmava que o viés atingia um
-pico no meio do jogo e se enfraqueceria até o fim. A medição sobre a base
-ampliada de 41.063 partidas **não confirma essa forma**, e o resultado
-negativo é relatado aqui em vez de omitido.
+**O viés é estável ao longo da partida.** Uma versão anterior deste texto
+afirmava que ele atingia um pico no meio do jogo; a base ampliada não
+confirma essa forma. Entre as partidas empatadas em cada corte (diferença
+de ouro menor que 500), o azul venceu 46,4% aos 10 minutos (n = 7.349),
+47,9% aos 15 (n = 3.970), 46,7% aos 20 (n = 2.423) e 47,1% aos 25
+(n = 1.430). Nenhuma diferença entre pares sobrevive à correção de Holm
+para comparações múltiplas (o menor valor-p corrigido é 0,83), e o
+intervalo do corte de 10 minutos, o de maior amostra, [45,3%, 47,6%],
+exclui 50% com folga. O viés existe e tem magnitude praticamente
+constante; o que a amostra maior desfez foi a *evolução* atribuída a ele.
+A lição vale para o trabalho todo: em corpus de esports, um ponto
+percentual de diferença em subamostras de mil partidas não é diferença.
 
-Entre as partidas genuinamente empatadas em cada corte (diferença de ouro
-menor que 500), a taxa de vitória do time azul foi de 46,4% aos 10
-minutos (n = 7.349), 47,9% aos 15 (n = 3.970), 46,7% aos 20 (n = 2.423)
-e 47,1% aos 25 (n = 1.430). A dispersão entre os quatro cortes é de 1,4
-ponto percentual, e **nenhuma diferença entre pares sobrevive ao ajuste
-para múltiplas comparações**: o menor valor-p corrigido é 0,83, para o par
-de 10 contra 15 minutos. Os intervalos de confiança de 95% se sobrepõem em
-todos os casos. Em outras palavras, as quatro taxas são estatisticamente
-indistinguíveis, e o corte mais favorável ao vermelho é o de 10 minutos,
-não o de 15.
-
-A mesma conclusão aparece na taxa-base dos modelos, medida no estado de
-empate total: 49,2% de probabilidade de vitória azul aos 10 minutos,
-49,6% aos 15, 51,4% aos 20 e 49,0% aos 25. A série é plana e não
-apresenta o pico vermelho do meio de jogo.
-
-O que sobrevive é o achado principal, e ele é forte: o viés de lado
-existe e favorece o time vermelho em magnitude praticamente constante. O
-intervalo de confiança do corte de 10 minutos, o de maior amostra, é
-[45,3%, 47,6%] e exclui 50% com folga: o viés não é casual em nenhum dos
-quatro cortes. O que a base ampliada desfez foi a *evolução* atribuída ao
-viés, não o viés.
-
-Os quatro testes de robustez definidos na Seção 4.5 se aplicam todos aqui,
-com o desfecho de cada um. O teste (i), de replicação regional, restringe a
-análise à BR1 isoladamente e reproduz a assimetria, descartando mistura
-regional como explicação. O teste (ii), de faixa de duração, confirma que a
-taxa de vitória
-incondicional do **azul** por faixa de duração total de partida
-permaneceu estável (medido em 2026-10-04 sobre as 41.063 partidas: 45,6%
-a 47,3% entre as faixas de duração, amplitude de 1,7 ponto percentual,
-todas abaixo de 50%), o que descarta a hipótese de que "partidas
-longas são um tipo diferente de jogo". O teste (iii), o intervalo de Wilson,
-está aplicado acima: mostra que nenhum dos quatro cortes admite 50%. E o
-teste (iv), a comparação de pares com correção de Holm, é o que sustenta a
-afirmação de constância e está detalhado no parágrafo anterior. É ele que
-substituiu o teste que antes sustentava a alegação de enfraquecimento,
-deixando de ser aplicável quando a forma deixou de existir.
-
-O teste (ii) foi **remedido** em 2026-10-04 sobre a base atual, porque a
-medição que o texto usava era de 2026-07-08 e de uma base quase metade
-desta: as taxas por faixa de duração total são 46,5% (0 a 25 min, 15.944
-partidas), 47,3% (25 a 30, 13.314), 46,4% (30 a 35, 8.364), 45,6% (35 a 40,
-2.684) e 47,0% (acima de 40, 757). A amplitude é de 1,7 ponto percentual e
-todas as faixas ficam abaixo de 50%: o teste se sustenta, agora com data,
-base e amplitude explícitas.
-
-Este resultado negativo tem valor próprio. Um padrão que se dissolve ao
-aumentar a amostra era, em verdade, um artefato de tamanho de amostra: as
-quatro taxas sempre ficaram próximas umas das outras, mas a amostra menor
-permitia que o ruído se desenhasse como tendência. Registrar isso é mais
-honesto do que manter a versão anterior, e reforça a principal ressalva
-metodológica do trabalho: em corpus de esports, diferença de um ponto
-percentual em subamostras de mil partidas não é diferença.
+Os quatro testes de robustez da Seção 4.5 se aplicam aqui. O teste (i),
+restrito à BR1, reproduz a assimetria e descarta mistura regional. O
+teste (ii) mostra a taxa de vitória do **azul** estável por faixa de
+duração total da partida
+(medido em 2026-10-04 sobre as 41.063 partidas: 45,6% a 47,3% entre
+as faixas de duração, amplitude de 1,7 ponto percentual, todas abaixo
+de 50%; a série está no Apêndice E), o que
+descarta que partidas longas sejam outro tipo de jogo. O teste (iii), o
+intervalo de Wilson, está aplicado acima, e o teste (iv), a comparação de
+pares com correção de Holm, é o que sustenta a constância.
 
 **Comparação com o cenário profissional.** No dataset competitivo
-(Oracle's Elixir, 96.716 jogos), o time azul venceu 53,2% das partidas. A série
-anual é estável a partir de 2016: 53,6% (2016), 55,0% (2017), 53,7%
-(2018), 53,2% (2019), 52,7% (2020), 52,6% (2021), 52,5% (2022), 53,3%
-(2023), 53,1% (2024), 53,3% (2025) e 53,1% (2026). Os dois primeiros anos
-divergem (58,2% em 2014 e 55,3% em 2015), mas apoiadas em amostras muito
-menores (814 e 1.702 jogos, contra 96.716 no total), e a diferença é
-atribuída a essa assimetria de volume, não a uma mudança no padrão. O viés de lado do
-*solo queue* de elo alto vai na direção oposta ao do jogo profissional, o
-que constitui um dos achados centrais deste trabalho: a mesma métrica,
-medida em dois contextos institucionalmente diferentes, produz sinais
-opostos. Hipótese de explicação: no *solo queue*, sem coordenação de
-*draft* de cinco jogadores, o *counter-pick* garantido do time vermelho (que
-escolhe por último) pesa mais; no jogo profissional, a prioridade de
-primeira escolha é valorizada o suficiente para influenciar decisões
-de lado em *playoffs*. O resultado é coerente com Jadowski e Cunningham
-(2022), que observam 54,08% de vitórias do azul em 882 jogos profissionais de
-2020, e a prioridade de escolha entra como covariável própria em Guan e Tung
-(2026), mas isso não comprova a hipótese.
+(Oracle's Elixir, 96.716 jogos), o time azul venceu 53,2% das partidas,
+com série anual estável desde 2016 (entre 52,5% e 55,0%; a série completa
+está no Apêndice E). O viés vai na direção oposta à do *solo queue* de
+elo alto: a mesma métrica, em dois contextos institucionalmente
+diferentes, produz sinais opostos. Hipótese de explicação: no *solo
+queue*, sem coordenação de *draft*, o *counter-pick* garantido do time
+vermelho (que escolhe por último) pesa mais; no jogo profissional, a
+prioridade de primeira escolha é valorizada a ponto de influenciar a
+escolha de lado em *playoffs*. O resultado é coerente com Jadowski e
+Cunningham (2022), que observam 54,08% de vitórias do azul em 882 jogos
+profissionais de 2020, e a prioridade de escolha entra como covariável
+própria em Guan e Tung (2026), mas isso não comprova a hipótese.
 
-**Conversão de vantagem.** Com uma vantagem de ouro entre +2.000 e
-+4.000 aos 15 minutos, o time azul venceu 81,5% das partidas no cenário
-profissional (n = 3.294) contra 73,7% no *solo queue* (n = 5.166). Na faixa
-de +4.000 a +6.000, as taxas são de 91,7% no profissional (n = 72) e 86,3%
-no *solo queue* (n = 3.343). Esse resultado quantifica a noção de que
-"macro ganha jogo": a mesma vantagem material aos 15 minutos vale mais nas
-mãos de um time coordenado. A diferença na faixa com amostra suficiente é
-de 7,8 pontos percentuais, e é pequena em termos absolutos, bem menor do
-que a estimativa de 16 pontos que a primeira versão deste texto apresentava,
-mas permanece altamente significativa (z = 8,3, p < 0,001 para a
-comparação das duas proporções), de modo que a direção do efeito não
-depende da amostra.
-
-A faixa de +4.000 a +6.000 no cenário profissional apoia-se em apenas 72 jogos
-e deve ser lida como indicativa; a conclusão sobre conversão de vantagem se
-apoia na faixa de +2.000 a +4.000. A origem destas taxas está no Apêndice E.
-A Figura 1 mostra as duas comparações na tela Competitivo da plataforma,
+**Conversão de vantagem.** Com vantagem de ouro entre +2.000 e +4.000 aos
+15 minutos, o azul venceu 81,5% das partidas no profissional (n = 3.294)
+contra 73,7% no *solo queue* (n = 5.166); entre +4.000 e +6.000, 91,7%
+(n = 72) contra 86,3% (n = 3.343). A mesma vantagem material vale mais
+nas mãos de um time coordenado. A diferença na faixa com amostra
+suficiente, de 7,8 pontos percentuais, é pequena em termos absolutos, mas
+significativa (z = 8,3, p < 0,001); a faixa de +4.000 a +6.000 do
+profissional, com 72 jogos, é só indicativa. A origem das taxas está no
+Apêndice E. A Figura 1 mostra as duas comparações na tela Competitivo,
 com o cenário profissional restrito a 2026; por isso o azul aparece com
 53,1%, e não com os 53,2% do acervo completo.
 
@@ -957,8 +892,10 @@ Figura — Tela Competitivo: viés de lado e conversão de vantagem de ouro, sol
 ### 5.4 Modelagem preditiva e comparação entre modelos (objetivo e)
 
 O Quadro 3 compara os três modelos após ajuste de hiperparâmetros
-(*GridSearchCV*, validação cruzada estratificada de 5 *folds*) sobre o
-corte de 15 minutos, no conjunto final de 39.188 partidas:
+(*GridSearchCV*, validação cruzada estratificada de 5 *folds*, semente 42)
+sobre o corte de 15 minutos, no conjunto final de 39.188 partidas, em que
+o azul vence 46,6%. A medição é do retreino de 2026-10-04 e se reproduz
+com `python -m src.models.multi_cutoff_metrics`.
 
 Quadro — Comparação entre modelos (corte de 15 minutos)
 
@@ -968,26 +905,14 @@ Quadro — Comparação entre modelos (corte de 15 minutos)
 | MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
 | *Random Forest* | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
 
-(taxa de vitória do time azul na amostra: 46,6%; medição do retreino de
-2026-10-04, sobre as 39.188 partidas do corte de 15 min, com validação
-cruzada estratificada de 5 *folds* e semente 42. Reproduzível por
-`python -m src.models.multi_cutoff_metrics`.)
-
-Os três modelos performaram de forma próxima entre si, com o XGBoost
-adotado como modelo de produção pela estabilidade da faixa intermediária:
-a 10 minutos o MLP o supera em acurácia (0,7020 contra 0,7004) e aos
-25 minutos o MLP iguala seu AUC (0,9072 contra 0,9090), de modo que a
-escolha não decorre de vantagem em todos os cortes, e sim de comportamento
-consistente na faixa em que a previsão é usada. Modelos independentes
-foram treinados para os quatro cortes temporais, com desempenho crescente
-conforme a partida avança (medido com os hiperparâmetros de produção, sobre
-a base de 39.426 partidas, congelada antes da rodada final): AUC-ROC de
-0,774 (10min), 0,847 (15min), 0,876 (20min) e 0,909 (25min), como mostra o
-Quadro 4. É um resultado
-esperado, já que mais informação está disponível em cortes mais
-tardios, mas que só se sustenta porque um modelo *por fase* foi
-treinado especificamente para cada corte. As métricas dos três modelos
-nos quatro cortes estão no Apêndice C.
+Os três modelos ficaram próximos. O XGBoost foi adotado em produção pela
+estabilidade na faixa intermediária, e não por vencer em todos os cortes:
+aos 10 minutos o MLP o supera em acurácia (0,7020 contra 0,7004) e aos 25
+iguala seu AUC (0,9072 contra 0,9090). Com um modelo treinado para cada
+corte, com os mesmos hiperparâmetros e sobre a base de 39.426 partidas, o
+desempenho cresce conforme a partida avança: AUC-ROC de 0,774 aos 10
+minutos a 0,909 aos 25 (Quadro 4). As métricas dos três modelos nos
+quatro cortes estão no Apêndice C.
 
 Quadro — Desempenho do XGBoost por corte temporal
 
@@ -998,39 +923,29 @@ Quadro — Desempenho do XGBoost por corte temporal
 | 20 min | 34.337 | 0,7917 | 0,8762 |
 | 25 min | 26.837 | 0,8241 | 0,9090 |
 
-A análise de importância de variáveis (SHAP, valor médio absoluto por
-*feature*) mostrou a diferença de ouro e de experiência como os fatores
-dominantes em todos os cortes (gold_diff variando de 0,66 aos 10 min até
-1,07 aos 20 min; xp_diff de 0,27 aos 10 min até 0,81 aos 25 min). A
-diferença de torres tem comportamento distinto: quase irrelevante nos três
-primeiros cortes (0,0044 aos 10 min, 0,0060 aos 15 min e 0,0031 aos 20
-min) e salta para 0,0928 aos 25 min, um salto de cerca de 15 vezes entre
-o corte de 15 e o de 25 minutos. Vale notar que a série das torres não é
-monótona: o corte de 20 min registra valor menor que os de 10 e de 15, de
-modo que o que se observa é uma concentração tardia, e não um crescimento
-contínuo. Esse comportamento é consistente com a mecânica do jogo, em
-que as placas de defesa das torres caem por volta dos 14 minutos,
-tornando destruições de torre um evento raro (e pouco informativo) antes
-disso; é a justificativa concreta para treinar um modelo *por fase*
-em vez de um único modelo genérico. A Figura 2 mostra essa evolução na
-aba de explicabilidade do Simulador.
+Na importância das variáveis (SHAP, média do valor absoluto), as
+diferenças de ouro e de experiência dominam em todos os cortes. A
+diferença de torres é quase irrelevante até os 20 minutos (0,0044 aos 10,
+0,0060 aos 15 e 0,0031 aos 20) e salta para 0,0928 aos 25, cerca de 15
+vezes o valor dos 15 minutos (Figura 2). É coerente com a mecânica do
+jogo: as placas de defesa das torres caem por volta dos 14 minutos, e
+antes disso destruir uma torre é raro e pouco informativo. É a
+justificativa concreta para treinar um modelo *por fase*, e não um único
+modelo genérico. A calibração, preocupação conhecida em modelos de
+*boosting* (Niculescu-Mizil e Caruana, 2005), não exigiu correção: a curva
+de calibração mostrou o XGBoost já bem calibrado.
 
 Figura — Importância média de cada variável (|SHAP|) nos quatro cortes temporais | reports/figuras_texto/fig_shap_fases.png
 
-A calibração é uma preocupação
-conhecida em modelos de *boosting*, cujas probabilidades podem se distorcer
-(Niculescu-Mizil e Caruana, 2005). Aqui, a curva de calibração mostrou que
-os modelos, especialmente o XGBoost, já produziam probabilidades bem
-calibradas sem necessidade de recalibração adicional.
-
 **Experimentos negativos.** Onze tentativas de enriquecer o conjunto de
-variáveis (objetivos neutros, dispersão espacial do time, itens, visão,
-placas de torre e percentis comportamentais do jogador, entre outras) não
-produziram ganho de desempenho estatisticamente distinguível de ruído, com
-deltas de AUC-ROC na ordem de ±0,001-0,003. O Quadro 5 lista as onze, com o
-resultado de cada uma; as notas sobre três delas estão no Apêndice D. O único
-caso em que o desempenho piorou de forma mensurável foi o tipo do dragão
-(`monsterSubType`: AUC-ROC de 0,8319 para 0,8295).
+variáveis não produziram ganho distinguível de ruído (Quadro 5); o único
+caso de piora mensurável foi o tipo do dragão (`monsterSubType`: AUC-ROC
+de 0,8319 para 0,8295). As notas sobre três delas estão no Apêndice D. Já
+o aumento do *volume* de partidas produziu ganho real: o AUC-ROC do
+XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133) e para
+0,8473 (39.188). Com as variáveis de estado agregado que a API oferece, o
+desempenho é limitado mais pelo volume de dados do que pela engenharia de
+novas variáveis.
 
 Quadro — Experimentos negativos de enriquecimento de *features*
 
@@ -1048,32 +963,18 @@ Quadro — Experimentos negativos de enriquecimento de *features*
 | 10 | Placas de torre (`plate_diff`, `TURRET_PLATE_DESTROYED`) | Δ AUC -0,0002 (cortes 10 e 15 min, base de 39.188-39.309) |
 | 11 | Percentis comportamentais (`teamwork_pct_diff`/`expertise_pct_diff`, `lol-challenges-v1`) | Δ AUC -0,0031/+0,0007 (corte 15 min, n=2.987, piloto de n=199 sugeriu sinal que não se sustentou) |
 
-Em contraste, o
-aumento do *volume* de partidas produziu ganhos reais e consistentes: o
-AUC-ROC do
-XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133 partidas) e
-para 0,8473 (39.188 partidas)
-ao longo da coleta incremental, evidência de que, com as *features* de
-estado agregado atualmente disponíveis via API, o teto de desempenho é
-limitado mais pelo volume de dados do que pela engenharia de novas
-variáveis a partir da mesma fonte.
-
 ### 5.5 Dashboards (objetivo f)
 
-Foram entregues seis páginas de visualização (Início, Dashboard,
-Campeões, Partidas, Competitivo e Simulador), incluindo KPIs agregados,
-gráficos de distribuição por campeão e objetivo, mapa de calor de
-posicionamento por minuto na análise de partida, comparação visual
-*solo queue* × profissional com seletor de ano, e um simulador que
-combina composição de time (heurística de taxa de vitória histórica,
-sinalizada como tal na interface para não ser confundida com predição
-por modelo), estado de jogo (predição pelo modelo de produção) e
-explicabilidade (SHAP).
+Foram entregues seis páginas de visualização: Início, Dashboard,
+Campeões, Partidas, Competitivo e Simulador. O simulador separa a
+estimativa por composição de time, uma heurística de taxa de vitória
+histórica sinalizada como tal na interface, da predição feita pelo modelo
+de produção a partir do estado de jogo.
 
 A Figura 3 mostra a análise de uma partida individual: o mapa de calor de
-posicionamento no minuto escolhido, a diferença de ouro ao longo da partida
-e os objetivos de cada time até aquele minuto. A Figura 4 mostra o
-simulador no estado de jogo: o usuário define as diferenças aos 15
+posicionamento no minuto escolhido, a diferença de ouro ao longo da
+partida e os objetivos de cada time até aquele minuto. A Figura 4 mostra
+o simulador no estado de jogo: o usuário define as diferenças aos 15
 minutos, o modelo de produção devolve a probabilidade de vitória do time
 azul e o SHAP decompõe essa probabilidade por variável, na mesma tela. As
 seis telas completas estão no Apêndice F.
@@ -1084,15 +985,14 @@ Figura — Simulador, aba Estado: probabilidade de vitória e contribuição de 
 
 ### 5.6 Interface em linguagem natural (objetivo g)
 
-O *pipeline* de linguagem natural para consulta ao banco (*text-to-SQL*
-com validação estrutural antes da execução) atingiu **88% de acurácia de
-execução** (23 de 26 perguntas de referência, sendo 22 sobre *solo
-queue* e 4 sobre o dataset competitivo), medida de forma estável ao
-longo de sessões de revisão sucessivas. As três falhas remanescentes
-pertencem à mesma família benigna: diferenças de formatação ou coluna
-extra na resposta, não erros de interpretação da pergunta ou de geração
-de SQL incorreto. O Quadro 6 agrupa as 26 perguntas pelo tipo de consulta
-que exigem; as perguntas e as consultas de referência estão no Apêndice B.
+O *pipeline* de consulta em linguagem natural (*text-to-SQL* com
+validação estrutural antes da execução) atingiu **88% de acurácia de
+execução**: 23 de 26 perguntas de referência, 22 sobre *solo queue* e 4
+sobre o dataset competitivo, com o mesmo resultado em execuções
+sucessivas (Apêndice B). As três falhas pertencem à mesma família: todas
+pedem um mínimo de jogos e erram na formatação ou numa coluna a mais na
+resposta, não na interpretação da pergunta. O Quadro 6 agrupa as 26
+perguntas pelo tipo de consulta que exigem.
 
 Quadro — Acurácia de execução por tipo de pergunta do benchmark
 
@@ -1110,155 +1010,33 @@ a SQL gerada pelo modelo, já validada, e o resultado lido do banco.
 
 Figura — Consulta em linguagem natural: pergunta, SQL gerada e resultado | reports/figuras_texto/fig_nlq.png
 
----
-
-
 ### 5.7 Os resultados frente à literatura
 
-Hodge et al. (2021) demonstraram a viabilidade de modelos preditivos
-para partidas profissionais de Dota 2 em tempo real, com até 85% de
-acurácia após 5 minutos; este trabalho transpõe essa abordagem para
-*League of Legends*, caracterizando como o desempenho preditivo varia em
-quatro cortes de tempo (acurácia de 0,7004 aos 10 minutos a 0,8241 aos 25;
-AUC-ROC de 0,774 a 0,909). Hodge et al. (2021) concentram-se na previsão;
-este trabalho se diferencia por integrar predição, explicabilidade,
-visualização e consulta em uma mesma solução.
+Hodge et al. (2021) chegam a 85% de acurácia após 5 minutos em partidas
+profissionais de Dota 2, mas tratam só da previsão; este trabalho leva a
+predição por fases a *League of Legends* e a integra a explicabilidade,
+visualização e consulta numa mesma solução. Entre os estudos de *League of
+Legends*, Jadowski e Cunningham (2022) reportam 67% de acerto em jogos
+profissionais e Do et al. (2021), 75,1% antes de a partida começar, a
+partir da experiência com o campeão. As acurácias deste trabalho, de 70,0%
+a 82,4% conforme o corte, ficam na mesma ordem de grandeza, mas a
+comparação é só indicativa: mudam o nível dos jogadores, o momento da
+previsão e a informação usada. Maymin (2021) trata de eventos individuais
+e Guan e Tung (2026) avaliam o erro de probabilidade (Brier) em vez da
+acurácia, por isso ficam fora da comparação numérica.
 
-Entre os estudos de *League of Legends*, Jadowski e Cunningham (2022)
-reportam 67% de acerto em jogos profissionais e Do et al. (2021) reportam
-75,1% na previsão antes de a partida começar, a partir da experiência com o
-campeão. As acurácias deste trabalho, de 70,0% a 82,4% conforme o corte,
-ficam na mesma ordem de grandeza, mas a comparação é apenas indicativa:
-mudam o nível dos jogadores, o momento da previsão e a informação usada.
-Maymin (2021) trata de eventos individuais, e Guan e Tung (2026) avaliam o
-erro de probabilidade (Brier) em vez da acurácia, por isso não entram na
-comparação numérica.
-
-Birant e Birant (2023) destacam a relevância da modelagem centrada no
-time para compreender resultados de partidas, abordagem que este
-trabalho adotou diretamente ao construir as variáveis preditoras como
-diferenças agregadas entre os dois times (ouro, experiência, abates,
-torres, dragões), em vez de métricas individuais de jogador. Já
-Bahrololloomi et al. (2022) analisam desempenho a partir de funções e
-métricas individuais de jogador; este trabalho não explorou essa
-granularidade na modelagem preditiva de vitória, mas incorporou uma
-noção próxima na camada de perfis de jogador e de recomendação de
-time (estimativa por jogador-campeão com correção estatística de
-amostra pequena, não reportada em detalhe nesta seção por não ser
-parte da modelagem preditiva central).
-
-García-Méndez e Arriba-Pérez (2025) argumentam que sistemas preditivos
-em esports precisam de mecanismos de interpretação para serem úteis ao
-usuário final; este trabalho concretizou essa recomendação por meio de
-explicações SHAP integradas ao *dashboard* e de um módulo de orientação
-estratégica que cita, para cada recomendação, o dado real de onde ela
-foi extraída, nunca uma afirmação genérica de modelo de linguagem sem
-lastro nos dados coletados.
-
-Jiang et al. (2025) e Guo et al. (2024) fundamentam a aplicação de
-modelos de linguagem para exploração de dados estruturados fora do
-contexto de esports; este trabalho estendeu essa ideia especificamente
-ao domínio competitivo de *League of Legends*, com validação estrutural
-da consulta gerada antes da execução, uma camada de segurança que não é
-detalhada nos trabalhos de referência, mas que se mostrou necessária na
-prática para evitar consultas malformadas ou fora do escopo de tabelas
-permitidas.
-
-Wallner, Wang e Dormann (2023) demonstram o valor de visualizações
-espaço-temporais para revisão pós-jogo; o mapa de calor de
-posicionamento desenvolvido neste trabalho aplica esse princípio, embora
-de forma mais simples (posição agregada por minuto, sem a técnica de
-*storyline visualization* proposta pelos autores), limitação
-reconhecida e discutida na próxima subseção.
-
-### 5.8 Limitações
-
-- **Amostras pequenas em recortes finos** (combinações específicas de
-  jogador e campeão, ou de matchup de rota) seguem estatisticamente
-  frágeis mesmo com 41.063 partidas, mitigado, onde aplicável, por
-  encolhimento estatístico (*shrinkage*) em direção à média do grupo
-  maior, mas não eliminado.
-- **A taxa-base do modelo em estado de empate subestima o viés de lado.**
-  Com o retreino de 39.188 partidas, a probabilidade prevista para o
-  estado "tudo empatado" ficou em 49,2% (10 min), 49,6% (15 min), 51,4%
-  (20 min) e 49,0% (25 min), enquanto a medição direta sobre os dados
-  brutos, entre partidas genuinamente empatadas, dá 46,4% a 47,9%
-  (Seção 5.3): uma diferença de **1,7 a 4,7 pontos percentuais
-  conforme o corte**. As duas séries não concordam apenas em magnitude:
-  aos 20 minutos o modelo projeta 51,4% de vitória azul, favorecendo o
-  azul, enquanto o dado bruto dá 46,7%, favorecendo o vermelho. A
-  discrepância não decorre de subajuste: uma busca em grade completa
-  (27 combinações, 5 *folds*) escolheu a **mesma profundidade** de
-  produção (3) e terminou 0,0001 de AUC acima dela, de 0,8473 para
-  0,8475, em 2º lugar entre as 27. Testadas as três alavancas que a grade
-  não cobre, a conclusão é contraintuitiva: a **calibração piora** a
-  discrepância (de 1,7 para 2,3 pp na sigmoidal), porque o estado de empate
-  total fica fora da distribuição observada e o calibrador o extrapola
-  para perto de 50%; a regularização alternativa move o desvio dentro do
-  ruído; e só a **troca de família** o fecha: uma *Random Forest* com
-  500 árvores e profundidade 6 leva o desvio a **0,6 pp** ao custo de
-  0,0005 de AUC. A discrepância é, portanto, uma propriedade da função que
-  o XGBoost aprende neste recorte, e não um déficit de ajuste. A troca
-  não foi adotada porque o critério de escolha do modelo foi a
-  acurácia no corte de 15 min, e nela a *Random Forest* fica em 0,7617
-  contra 0,7621. É decisão consciente e reversível, sem retreino.
-  Comando e artefato: `docs/experimento_calibracao.py` e
-  `reports/experimento_calibracao_veredito.json`.
-- **O modelo não viu a última rodada de coleta.** As *features* e a
-  modelagem foram construídas sobre 39.426 partidas, e a base do banco
-  tem 41.063, 1.637 partidas a mais, quase todas da KR (das 1.754
-  partidas do banco que não geraram *features*, 1.647 são da KR e 107
-  são de BR1, EUW1 e NA1). O conjunto que de fato alimentou o modelo
-  são 39.309 partidas distintas, das quais 39.188 chegam ao corte de 15
-  minutos; as outras 117 da base congelada não produziram linha em
-  `features_phases.csv`. A discussão de
-  volume da Seção 5.4 mediu que o ganho de AUC por volume é da ordem de
-  0,001 por acréscimo relevante, o que situa o efeito desta diferença
-  abaixo do que aquela discussão mediu como ganho real, mas não nulo.
-  Retreinar foi deixado de fora porque o desempenho do modelo atual já
-  está medido e validado contra o Apêndice C e a bateria comportamental, e
-  refazê-lo invalidaria as duas coisas sem ganho apurado. Fica registrado
-  como limitação, e não escondido: quem quiser o modelo treinado sobre a
-  base completa reexecuta `train_baseline` e `export_model`.
-- **Desequilíbrio de amostra por região**: após as rodadas adicionais de
-  coleta (Seção 5.3), BR1 e EUW1 concentram a maior parte dos dados
-  (11.936 e 11.744 partidas) e KR cresceu para 10.204; NA1, que permanecia
-  em 1.446, foi ampliada para 7.159 na rodada final, o que reduz a assimetria
-  entre regiões sem eliminá-la. O achado de viés de lado "generalizado ao
-  elo alto, não específico do Brasil" é sustentado pela direção
-  consistente nas três regiões com evidência estatística firme, e a NA1 deixa de
-  ser o elo mais frágil da generalização. A ressalva é que a força da evidência não é uniforme: três
-  das quatro regiões têm taxa cujo intervalo de 95% exclui 50% e a KR fica
-  em 50,4%, com intervalo que a inclui.
-- **Cobertura desigual por versão do jogo** (*patch*): um único *patch*
-  concentra a maior parte das partidas coletadas, o que limita a
-  generalização dos achados para versões do jogo com balanceamento
-  diferente.
-- **Teto de desempenho das variáveis atuais**: onze experimentos de
-  enriquecimento de *features* não superaram o modelo com as cinco
-  variáveis originais, dez a partir da mesma fonte de dados (linha do
-  tempo da partida) e um a partir de uma fonte diferente (percentis
-  comportamentais do jogador via `lol-challenges-v1`, Apêndice D), o que
-  descarta a hipótese de que o teto fosse só da *timeline* esgotada.
-  Sugere que o próximo ganho relevante depende de um tipo de dado que a
-  API atual não fornece de forma alguma, notadamente a ordem de escolha
-  de campeão (*draft*), que a API pública não expõe, e o estado das ondas
-  de
-  *minions*. A posição em tempo real **existe** no payload da *timeline*
-  (`participantFrames`) e já foi testada sem ganho mensurável (experimento 2
-  do Apêndice D, dispersão espacial do time), de modo que ela não é o que
-  falta; o que falta são as duas variáveis acima.
-- **Ausência de dados de micro-posicionamento** (movimentação de
-  *minions*, controle de onda): nenhuma API pública da Riot expõe esse
-  nível de detalhe; caminhos alternativos (replays `.rofl`, visão
-  computacional sobre o minimapa) foram considerados, mas não
-  implementados neste trabalho.
-- **Monotonicidade isolada por fator**: o modelo XGBoost não garante
-  formalmente que aumentar isoladamente a diferença de abates ou de
-  torres nunca reduza a probabilidade prevista de vitória, por conta de
-  interações e redundâncias entre variáveis, comportamento documentado
-  e compreendido, mas não corrigido por restrição formal
-  (`monotone_constraints`) nesta versão.
+As variáveis preditoras, diferenças agregadas entre os dois times, seguem
+a modelagem centrada no time de Birant e Birant (2023); a granularidade
+por jogador de Bahrololloomi et al. (2022) entrou só nos perfis de
+jogador, fora da modelagem de vitória. A recomendação de García-Méndez e
+Arriba-Pérez (2025), de que a predição em esports precisa de interpretação
+para ser útil, foi atendida com o SHAP na interface e com um módulo de
+orientação que cita o dado real de cada recomendação. Jiang et al. (2025)
+e Guo et al. (2024) fundamentam a consulta a dados estruturados por
+modelos de linguagem; este trabalho acrescenta a validação da consulta
+antes da execução, que eles não detalham. O mapa de calor aplica, de forma
+mais simples, a visualização espaço-temporal de Wallner, Wang e Dormann
+(2023), sem a técnica de *storyline* dos autores.
 
 ---
 
@@ -1324,40 +1102,47 @@ de vantagem material em vitória entre os dois contextos.
 
 ### 6.1 LIMITAÇÕES E AMEAÇAS À VALIDADE
 
-Registrar o que o trabalho não sustenta é parte da conclusão, e não uma
-fórmula de cortesia. As três limitações a seguir delimitam o alcance em
-que os achados podem ser generalizados; nenhuma delas os invalida.
+Registrar o que o trabalho não sustenta é parte da conclusão. Nenhuma das
+limitações a seguir invalida os achados; elas delimitam até onde eles
+valem. O detalhe e os experimentos de cada uma estão no Apêndice G.
 
 **Validade de construto.** A *timeline-v5* não registra o estado das ondas
-de *minions*, de modo que o modelo de predição trabalha sem uma variável
-que um analista humano consideraria informativa sobre o momento da
-partida. É razoável supor que parte do que o modelo erra é informação que
-ele jamais recebeu, mas essa é uma hipótese, e não um resultado medido:
-nenhum experimento deste trabalho isola o efeito de acrescentar essa
-variável, porque ela não existe na fonte. A consequência prática é
-observável: nenhuma orientação exibida pela plataforma cuja fundamentação
-dependa de itemização ou de estado de ondas foi produzida pelo modelo, e a
-interface marca essa orientação como inferência geral em vez de resultado
-calculado.
+de *minions* nem a ordem de escolha de campeões (*draft*), e nenhuma API
+pública da Riot expõe micro-posicionamento. Onze experimentos de
+enriquecimento não superaram as cinco variáveis originais (Quadro 5),
+inclusive a posição dos jogadores, que existe na *timeline* e foi testada;
+o próximo ganho provável depende do que a fonte não tem. Que parte do erro
+do modelo venha dessa informação ausente é hipótese, não resultado medido.
+Por isso nenhuma orientação da plataforma que dependa de itemização ou de
+ondas vem do modelo, e a interface a marca como inferência geral.
 
-**Validade externa.** Todos os resultados de *solo queue* vêm da fila
-ranqueada, nas faixas Challenger e Grandmaster, em cinco regiões
-coletadas, quatro delas com amostra suficiente para a leitura. Não há base
-para estender as taxas de vitória por lado nem a acurácia do modelo a
-outras filas, a outros níveis de elo ou a outros jogos, ainda que a
+**Validade externa.** Os resultados de *solo queue* vêm da fila ranqueada,
+nas faixas Challenger e Grão-Mestre, em cinco regiões, quatro delas com
+amostra suficiente e desiguais entre si: BR1 e EUW1 concentram a maior
+parte das partidas, e a KR tem intervalo que inclui 50%. Um único *patch*
+concentra a maior parte da coleta. Não há base para estender as taxas por
+lado nem a acurácia a outras filas, elos, versões ou jogos, ainda que a
 arquitetura seja reaproveitável.
 
-**Validade interna.** As partidas foram coletadas em janelas de tempo
-delimitadas, e não amostradas aleatoriamente ao longo de todo o histórico
-disponível. Um padrão sazonal (mudanças de *patch*, eventos do cenário
-competitivo) pode portanto estar parcialmente confundido com o que os
-dados descrevem. A validação cruzada, além disso, sorteia partidas ao acaso,
-e jogadores que aparecem em várias partidas ou a mudança de *patch* podem
-tornar as dobras menos independentes do que a técnica supõe.
+**Validade interna.** As partidas foram coletadas em janelas de tempo, e
+não amostradas ao longo de todo o histórico; um padrão sazonal pode estar
+confundido com o que os dados descrevem. A validação cruzada sorteia
+partidas ao acaso, e jogadores que se repetem entre partidas tornam as
+dobras menos independentes do que a técnica supõe. Recortes finos, como um
+jogador num campeão ou um confronto de rota, seguem frágeis mesmo com
+41.063 partidas, apesar do encolhimento estatístico (*shrinkage*) em
+direção à média.
 
-Há ainda uma limitação técnica de modelo, não de dado, em aberto: a
-subestimação do viés de lado nos cortes empatados, detalhada com números
-e experimento na Seção 5.8, e não repetida aqui.
+**Limitações do modelo.** Três ficam em aberto. A taxa-base do XGBoost no
+estado de empate total, de 49,0% a 51,4% conforme o corte, subestima o
+viés de lado medido nos dados (46,4% a 47,9%). A discrepância não é
+subajuste: a busca em grade completa ficou 0,0001 de AUC acima da
+produção (de 0,8473 para 0,8475, em 2º lugar entre 27 combinações), e só a
+troca para *Random Forest* a fecha (0,6 pp), ao custo de 0,0005 de AUC.
+O modelo foi treinado sobre 39.426 partidas, e não sobre as 41.063 do
+banco, e não foi retreinado para não invalidar as validações já feitas. E
+o XGBoost não garante monotonicidade isolada por variável, por não usar
+restrição formal (`monotone_constraints`).
 
 ### 6.2 TRABALHOS FUTUROS
 
@@ -1669,14 +1454,14 @@ Os onze experimentos estão no Quadro 5 da Seção 5.4. Três deles pedem
 detalhe que não cabe no quadro.
 
 *Nota sobre o experimento 4.* A ausência de ganho de AUC da calibração foi
-reexaminada em 2026-10-04, quando a limitação de taxa-base da Seção 5.8
+reexaminada em 2026-10-04, quando a limitação de taxa-base (Apêndice G)
 passou a ser testada contra as alavancas que este apêndice não cobre. O
 resultado é mais forte que "sem ganho": a calibração **piora** também a
 discrepância de taxa-base, de 1,7 para 2,3 pontos percentuais, porque o
 estado de empate total fica fora da distribuição observada e o calibrador o
 extrapola para perto de 50%. A *Random Forest* com 500 árvores e
 profundidade 6 fecha a discrepância (0,6 pp) ao custo de 0,0005 de AUC,
-mas não foi adotada; a justificativa está na Seção 5.8. Esse teste não
+mas não foi adotada; a justificativa está no Apêndice G. Esse teste não
 figura na tabela porque não é enriquecimento de *features*, e sim
 caracterização de uma limitação de modelo; o comando é
 `python docs/experimento_calibracao.py`.
@@ -1726,12 +1511,23 @@ regiões com amostra relevante do lado do vermelho) se manteve idêntica em toda
 as quatro medições. A BR1 não se alterou em nenhum dos quatro levantamentos. A
 NA1, que era o elo mais frágil da generalização, foi ampliada de 1.446 para
 7.159 partidas na rodada final, e a taxa do vermelho passou de 51,9% para
-52,2%. A direção do achado não mudou, e a limitação saiu da Seção 5.8.
+52,2%. A direção do achado não mudou, e a NA1 deixou de ser limitação.
 
 **Origem das taxas de conversão de vantagem.** Todas as taxas de conversão da
 Seção 5.3 foram remedidas sobre a base de *features* congelada (39.309 partidas
 distintas, 39.188 no corte de 15 minutos) pelo script
 `docs/confere_conversao_advantagem.py`, que lê `data/features_phases.csv`.
+
+**Teste (ii), faixas de duração.** Foi remedido em 2026-10-04 sobre a base atual, porque a
+medição que o texto usava era de 2026-07-08 e de uma base quase metade
+desta: as taxas por faixa de duração total são 46,5% (0 a 25 min, 15.944
+partidas), 47,3% (25 a 30, 13.314), 46,4% (30 a 35, 8.364), 45,6% (35 a 40,
+2.684) e 47,0% (acima de 40, 757). A amplitude é de 1,7 ponto percentual e
+todas as faixas ficam abaixo de 50%: o teste se sustenta, agora com data,
+base e amplitude explícitas.
+
+**Série anual do cenário profissional.** Vitória do azul por ano no dataset competitivo: 53,6% (2016), 55,0% (2017), 53,7% (2018), 53,2% (2019), 52,7% (2020), 52,6% (2021), 52,5% (2022), 53,3% (2023), 53,1% (2024), 53,3% (2025) e 53,1% (2026). Os dois primeiros anos divergem (58,2% em 2014 e 55,3% em 2015), mas se apoiam em amostras muito menores (814 e 1.702 jogos, contra 96.716 no total), e a diferença é atribuída a essa assimetria de volume, não a uma mudança no padrão.
+
 
 ---
 
@@ -1756,6 +1552,95 @@ interface, aplicado antes de a página montar, e não um filtro de imagem.
 | `reports/anexo_a/04_partida_detalhe.png` | Partidas: análise de uma partida individual |
 | `reports/anexo_a/05_competitivo.png` | Competitivo (solo queue × profissional) |
 | `reports/anexo_a/06_simulador.png` | Simulador, aba Estado |
+
+---
+
+## APÊNDICE G – Limitações em detalhe
+
+Detalhe das limitações resumidas na Seção 6.1, com os números e os
+experimentos de cada uma.
+
+**A taxa-base do modelo em estado de empate subestima o viés de lado.**
+Com o retreino de 39.188 partidas, a probabilidade prevista para o estado
+"tudo empatado" ficou em 49,2% (10 min), 49,6% (15 min), 51,4% (20 min) e
+49,0% (25 min), enquanto a medição direta sobre os dados brutos, entre
+partidas genuinamente empatadas, dá 46,4% a 47,9% (Seção 5.3): uma
+diferença de **1,7 a 4,7 pontos percentuais conforme o corte**. A série
+do modelo é plana, sem o pico de meio de jogo da primeira versão do
+texto, mas as duas séries não concordam em magnitude, nem sempre em
+direção: aos 20 minutos o modelo projeta 51,4% de vitória azul,
+favorecendo o azul, enquanto o dado bruto dá 46,7%, favorecendo o
+vermelho. A discrepância não decorre de subajuste: uma busca em grade
+completa (27 combinações, 5 *folds*) escolheu a **mesma profundidade** de
+produção (3) e terminou 0,0001 de AUC acima dela, de 0,8473 para 0,8475,
+em 2º lugar entre as 27. Testadas as três alavancas que a grade não cobre,
+a conclusão é contraintuitiva: a **calibração piora** a discrepância (de
+1,7 para 2,3 pp na sigmoidal), porque o estado de empate total fica fora
+da distribuição observada e o calibrador o extrapola para perto de 50%; a
+regularização alternativa move o desvio dentro do ruído; e só a **troca
+de família** o fecha: uma *Random Forest* com 500 árvores e profundidade 6
+leva o desvio a **0,6 pp** ao custo de 0,0005 de AUC. A discrepância é,
+portanto, uma propriedade da função que o XGBoost aprende neste recorte, e
+não um déficit de ajuste. A troca não foi adotada porque o critério de
+escolha do modelo foi a acurácia no corte de 15 min, e nela a *Random
+Forest* fica em 0,7617 contra 0,7621. É decisão consciente e reversível,
+sem retreino. Comando e artefato: `docs/experimento_calibracao.py` e
+`reports/experimento_calibracao_veredito.json`.
+
+**O modelo não viu a última rodada de coleta.** As *features* e a
+modelagem foram construídas sobre 39.426 partidas, e a base do banco tem
+41.063, 1.637 partidas a mais, quase todas da KR (das 1.754 partidas do
+banco que não geraram *features*, 1.647 são da KR e 107 são de BR1, EUW1 e
+NA1). O conjunto que de fato alimentou o modelo são 39.309 partidas
+distintas, das quais 39.188 chegam ao corte de 15 minutos; as outras 117
+da base congelada não produziram linha em `features_phases.csv`. A
+discussão de volume da Seção 5.4 mediu que o ganho de AUC por volume é da
+ordem de 0,001 por acréscimo relevante, o que situa o efeito desta
+diferença abaixo do que aquela discussão mediu como ganho real, mas não
+nulo. Retreinar foi deixado de fora porque o desempenho do modelo atual já
+está medido e validado contra o Apêndice C e a bateria comportamental, e
+refazê-lo invalidaria as duas coisas sem ganho apurado. Quem quiser o
+modelo treinado sobre a base completa reexecuta `train_baseline` e
+`export_model`.
+
+**Teto de desempenho das variáveis atuais.** Onze experimentos de
+enriquecimento de *features* não superaram o modelo com as cinco
+variáveis originais (Quadro 5), dez a partir da mesma fonte de dados
+(linha do tempo da partida) e um a partir de uma fonte diferente
+(percentis comportamentais do jogador via `lol-challenges-v1`, Apêndice
+D), o que descarta a hipótese de que o teto fosse só da *timeline*
+esgotada. O próximo ganho relevante depende de dado que a API não fornece:
+a ordem de escolha de campeão (*draft*), que a API pública não expõe, e o
+estado das ondas de *minions*. A posição em tempo real **existe** no
+payload da *timeline* (`participantFrames`) e já foi testada sem ganho
+mensurável (experimento 2, dispersão espacial do time), de modo que ela
+não é o que falta.
+
+**Ausência de dados de micro-posicionamento** (movimentação de *minions*,
+controle de onda). Nenhuma API pública da Riot expõe esse nível de
+detalhe; caminhos alternativos (replays `.rofl`, visão computacional sobre
+o minimapa) foram considerados, mas não implementados neste trabalho.
+
+**Desequilíbrio de amostra por região.** Após as rodadas adicionais de
+coleta, BR1 e EUW1 concentram a maior parte dos dados (11.936 e 11.744
+partidas) e a KR cresceu para 10.204; a NA1, que permanecia em 1.446, foi
+ampliada para 7.159 na rodada final, o que reduz a assimetria entre
+regiões sem eliminá-la. O achado de viés de lado "generalizado ao elo
+alto, não específico do Brasil" se apoia nas três regiões com evidência
+estatística firme; três das quatro têm taxa cujo intervalo de 95% exclui
+50%, e a KR fica em 50,4%, com intervalo que inclui 50%.
+
+**Cobertura desigual por versão do jogo** (*patch*). Um único *patch*
+concentra a maior parte das partidas coletadas, o que limita a
+generalização dos achados para versões do jogo com balanceamento
+diferente.
+
+**Monotonicidade isolada por fator.** O XGBoost não garante formalmente
+que aumentar isoladamente a diferença de abates ou de torres nunca reduza
+a probabilidade prevista de vitória, por conta de interações e
+redundâncias entre variáveis. O comportamento é documentado e
+compreendido, mas não corrigido por restrição formal
+(`monotone_constraints`) nesta versão.
 
 ---
 
@@ -1852,8 +1737,8 @@ https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
      apêndices/anexos.
 6. ~~Ampliar a coleta EUW1/KR/NA1~~ — **feito**: EUW1 1.307→11.744
    partidas, KR 1.308→10.204 e **NA1 1.446→7.159** (a NA1 foi ampliada na
-   rodada final de 2026-10-04; a limitação que ela representava saiu da
-   Seção 5.8). Quadro de viés de lado por região remedido com dados de
+   rodada final de 2026-10-04; a limitação que ela representava saiu das
+   limitações, então na 5.8). Quadro de viés de lado por região remedido com dados de
    2026-10-04 (Seção 5.3) e verificado por SQL direto contra o valor
    mostrado no *dashboard*: BR1 56,3%, EUW1 53,4%, KR 50,4%, NA1 52,2% de
    vitória do time vermelho, sobre 41.063 partidas.

@@ -4714,6 +4714,21 @@ quadros e figuras esperar. Frontend: lint limpo, 31 testes passam.
 Verificações: `verifica_tcc.py` CONSISTENTE (11 figuras citadas no corpo),
 `confere_docx.py` conforme.
 
+## 2026-10-28 (continuação) — Seção 5 condensada, 5.8 fundida na 6.1 (etapa 2)
+
+A 5.8 (Limitações) e a 6.1 diziam duas vezes o que o trabalho não
+sustenta. A 6.1 virou a lista única (construto, externa, interna, modelo) e
+o detalhe com números e experimentos foi para o novo Apêndice G. Da 5.3
+saíram para o Apêndice E a série anual do profissional e a série do teste
+(ii) por faixa de duração. Seção 5: 4.295 → 2.077 palavras. Documento: 39 →
+34 páginas.
+
+Duas armadilhas da checagem, registradas para a próxima edição:
+`verifica_tcc.py` lê o Markdown **inteiro**, inclusive a seção interna de
+pendências (um "Seção 5.8" lá reprovou a referência cruzada), e o padrão da
+frase-síntese do teste (ii) exige espaço literal em "medido em … sobre as N
+partidas: X%"; uma quebra de linha no meio dela reprova a checagem 17.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
