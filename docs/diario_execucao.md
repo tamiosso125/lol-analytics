@@ -4748,6 +4748,17 @@ Erros corrigidos no caminho, todos de texto que já estava "pronto":
 - Introdução: "Oracle's Elixir, ~99 mil partidas" (são 96.716). O
   `verifica_tcc.py` só procurava o literal 99.259; "99 mil" entrou na lista.
 
+## 2026-10-28 (fechamento) — Resumo/Abstract e referência do Kohavi
+
+O Resumo e o Abstract diziam que o azul vence 53,2% "desde 2016", mas 53,2%
+é a taxa do acervo inteiro (2014-2026); corrigido. `docs/artigos/` entrou no
+`.gitignore`. A referência do Kohavi (IJCAI-95) deixou de ser "[S. l.]":
+**San Mateo: Morgan Kaufmann**, p. 1137-1145. A cidade vem de dois
+resultados de busca independentes (registro do artigo e catálogo do volume 2
+dos anais, ISBN 1-55860-363-8, páginas 1019-2077); o PDF do artigo não a
+traz e o DBLP bloqueou a consulta direta. Conferir no PDF dos anais se a
+banca cobrar.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

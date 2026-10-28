@@ -1054,7 +1054,7 @@ Knowledge Discovery from Data**, [S. l.], v. 6, n. 4, art. 15, 2012. DOI:
 KOHAVI, Ron. A study of cross-validation and bootstrap for accuracy estimation
 and model selection. In: INTERNATIONAL JOINT CONFERENCE ON ARTIFICIAL
 INTELLIGENCE, 14., 1995. **Proceedings of the 14th International Joint
-Conference on Artificial Intelligence (IJCAI-95)**. [S. l.]: Morgan Kaufmann,
+Conference on Artificial Intelligence (IJCAI-95)**. San Mateo: Morgan Kaufmann,
 1995. p. 1137-1145.
 
 LUNDBERG, Scott M.; LEE, Su-In. A unified approach to interpreting model
