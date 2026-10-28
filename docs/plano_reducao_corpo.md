@@ -146,6 +146,18 @@ NL deixou de afirmar o que o SiriusBI e o Talk2Data não fazem, o que não
 foi conferido nos artigos. Documento: **32 → 30 páginas, no teto**. A
 Introdução (1.293) dá a página de folga.
 
+## Etapa 6 executada (2026-10-28): Introdução — META ATINGIDA
+
+1.293 → 856 palavras; problema, objetivo geral e objetivos específicos
+intactos (vêm do TCC I). Corrigido um número errado que tinha sobrevivido:
+"Oracle's Elixir, ~99 mil partidas" (o banco tem 96.716; era o resíduo do
+99.259 já corrigido em outros lugares, e a checagem de resíduos só
+procurava o literal). "99 mil" entrou na lista do `verifica_tcc.py`.
+
+**Resultado final: 29 páginas** do Resumo ao fim das Referências (37 no
+início, pela régua certa), com 6 quadros e 5 figuras no corpo. Corpo de
+texto de 10.669 para 6.384 palavras. Uma página de folga.
+
 ## Ordem de execução (uma etapa por vez, com sua aprovação)
 
 1. **Inserir os visuais no texto primeiro.** É mecânico e mede o custo

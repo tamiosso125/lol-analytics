@@ -343,6 +343,9 @@ VALORES_SUBSTITUIDOS: list[tuple[str, str]] = [
     ("84,0%", "conversao de vantagem no profissional, antes da remedicao"),
     ("33.713", "tamanho da base entre 2026-10-03 e 2026-10-04"),
     ("99.259", "contagem de jogos profissionais, nunca conferida"),
+    # a mesma contagem errada, arredondada: sobreviveu na Introdução até
+    # 2026-10-28 porque o literal "99.259" não casava com "~99 mil"
+    ("99 mil", "contagem de jogos profissionais arredondada (o banco tem 96.716)"),
     # rodada final da KR: os numeros que a base de 41.063 substituiu
     ("8.567", "KR antes da rodada final, a contagem que(features) alcançou"),
     ("50,3%", "taxa do vermelho na KR antes da rodada final"),

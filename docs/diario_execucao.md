@@ -4729,6 +4729,25 @@ pendências (um "Seção 5.8" lá reprovou a referência cruzada), e o padrão d
 frase-síntese do teste (ii) exige espaço literal em "medido em … sobre as N
 partidas: X%"; uma quebra de linha no meio dela reprova a checagem 17.
 
+## 2026-10-28 (continuação) — Seções 4, 2, 3 e 1 condensadas: 29 páginas
+
+Etapas 3 a 6 do plano de redução, uma por commit. Palavras: Metodologia
+1.429 → 1.099; Fundamentação 1.493 → 911; Trabalhos Relacionados 1.225 →
+837; Introdução 1.293 → 856. Todas as citações mantidas. Documento: 33 →
+32 → 30 → **29 páginas** (Resumo ao fim das Referências), meta atingida
+com uma página de folga.
+
+Erros corrigidos no caminho, todos de texto que já estava "pronto":
+- 2.3: "sempre azul acerta 46,6%" como referência da acurácia; a certa é
+  "sempre vermelho acerta 53,4%", a taxa-base.
+- 2.3 e 2.4 remetiam à Seção 4 para coisas que ela não descreve nesses
+  termos (as "quatro camadas", a separação dado medido × conhecimento geral).
+- 3.6: "os trabalhos de predição atuam sobre o profissional" ficou falso
+  com Do et al. e Maymin (ranqueadas); "partem de bases de terceiros" e
+  "não avaliam contra benchmark" não estavam conferidos nos artigos.
+- Introdução: "Oracle's Elixir, ~99 mil partidas" (são 96.716). O
+  `verifica_tcc.py` só procurava o literal 99.259; "99 mil" entrou na lista.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

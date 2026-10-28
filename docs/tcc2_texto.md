@@ -95,99 +95,61 @@ learning; natural language interface.
 ## 1 INTRODUÇÃO
 
 Os esports vêm se consolidando como um campo de crescente relevância
-acadêmica e tecnológica, especialmente em função do grande volume de
-dados gerados por partidas, jogadores, equipes e estratégias
-competitivas. Em *League of Legends*, Birant e Birant (2023) destacam
-que esses dados podem ser explorados por meio de modelos de *machine
-learning* voltados à análise competitiva e à predição de resultados.
+acadêmica e tecnológica, em função do grande volume de dados gerados por
+partidas, jogadores, equipes e estratégias competitivas. Em *League of
+Legends*, Birant e Birant (2023) destacam que esses dados podem ser
+explorados por modelos de *machine learning* voltados à análise
+competitiva e à predição de resultados. Além do potencial preditivo, a
+análise desses dados pode apoiar a interpretação do jogo, a identificação
+de padrões e a avaliação de desempenho.
 
-Nesse cenário, a análise de dados aplicada a esports ganha importância
-não apenas pelo potencial preditivo, mas também pela capacidade de
-apoiar a interpretação do jogo, a compreensão de tendências
-competitivas e a organização de informações complexas de forma mais
-estruturada. No contexto de *League of Legends*, informações
-relacionadas a partidas, jogadores, equipes e estatísticas de
-desempenho podem servir de base para identificar padrões, avaliar
-performance e apoiar análises competitivas.
+A exploração dessas informações, porém, ainda costuma depender de
+processos fragmentados e de ferramentas que exigem conhecimento técnico
+específico. García-Méndez e Arriba-Pérez (2025) indicam que não basta
+gerar previsões: é preciso apresentá-las de forma interpretável ao
+usuário final. E Jiang et al. (2025) mostram que modelos de linguagem
+podem apoiar a exploração de dados estruturados em soluções de *Business
+Intelligence*, reduzindo a barreira técnica entre o usuário e a base de
+dados.
 
-Apesar desse potencial, a exploração dessas informações ainda costuma
-depender de processos fragmentados e de ferramentas que exigem
-conhecimento técnico específico, o que limita o acesso mais amplo a
-análises competitivas de qualidade. García-Méndez e Arriba-Pérez
-(2025) indicam que não basta apenas gerar previsões, sendo também
-importante apresentar resultados de forma interpretável e acessível ao
-usuário final.
+Neste contexto, o presente trabalho teve como objetivo geral desenvolver
+uma plataforma inteligente para análise de dados de esports, com foco em
+*League of Legends*, que integra coleta, organização e exploração de
+dados competitivos, modelagem preditiva com técnicas de *machine learning*
+e mecanismos de visualização e consulta em linguagem natural. Além do
+escopo previsto no TCC I, a base foi complementada com dados
+profissionais (Oracle's Elixir, 96.716 jogos de 2014 a 2026), o que
+permitiu comparar os padrões do *solo queue* com os do cenário
+competitivo profissional.
 
-Outro ponto relevante é que a interação com dados analíticos tem sido
-ampliada pelo uso de interfaces em linguagem natural, capazes de
-reduzir a barreira técnica entre o usuário e a base de dados. Jiang et
-al. (2025) mostram que modelos de linguagem podem apoiar soluções de
-*Business Intelligence* voltadas à exploração de dados estruturados, o
-que se mostra pertinente em cenários com grande quantidade de dados
-competitivos e múltiplas possibilidades de análise.
-
-Neste contexto, o presente trabalho teve como objetivo geral
-desenvolver uma plataforma inteligente para análise de dados de
-esports, com foco em *League of Legends*, integrando coleta,
-organização e exploração de dados competitivos, modelagem preditiva
-com técnicas de *machine learning* e mecanismos de visualização e
-consulta em linguagem natural. Para alcançar esse objetivo, foram
-mapeados os dados e recursos disponibilizados pela Riot Games API,
-identificadas as informações relevantes sobre partidas, jogadores e
-estatísticas, estruturado um processo de coleta e tratamento dos
-dados, comparados os modelos XGBoost, *Random Forest* e redes
-neurais, e propostos dashboards e uma interface em linguagem natural
-para apoiar a interpretação das informações competitivas de forma
-mais acessível e organizada. Além do escopo originalmente previsto no
-TCC I, a base de dados competitivos foi complementada com um segundo
-conjunto de dados profissionais (Oracle's Elixir, ~99 mil partidas de
-2014 a 2026), o que permitiu comparar os padrões observados no *solo
-queue* com os do cenário competitivo profissional.
-
-Este trabalho está organizado em cinco seções, além desta introdução.
-A Seção 2 apresenta a fundamentação teórica, reunindo os principais
-conceitos relacionados a esports, análise de dados, *machine
-learning*, explicabilidade, interfaces em linguagem natural e
-visualização analítica. A Seção 3 descreve os trabalhos relacionados
-que sustentam a pesquisa, identificando o objeto, a abordagem e o que
-cada um deixa em aberto. A Seção 4 descreve a metodologia
-utilizada no desenvolvimento da plataforma. A Seção 5 apresenta os
-resultados obtidos e os analisa à luz da literatura e das limitações
-identificadas. A Seção 6 apresenta as considerações finais. Por fim,
-são apresentadas as referências utilizadas na construção deste
-trabalho.
+Este trabalho está organizado em cinco seções, além desta introdução. A
+Seção 2 apresenta a fundamentação teórica; a Seção 3, os trabalhos
+relacionados; a Seção 4, a metodologia; a Seção 5, os resultados e sua
+análise à luz da literatura; e a Seção 6, as conclusões, as limitações e
+os trabalhos futuros.
 
 ### 1.1 TEMA
 
-O tema deste trabalho é a análise de dados aplicada a esports, com
-foco no desenvolvimento de uma plataforma inteligente para exploração
-de informações competitivas em *League of Legends*. A plataforma,
-batizada **Bellestraiko**, constitui a materialização do sistema
-desenvolvido e implementado ao longo deste trabalho. O estudo está
-inserido na área da Ciência da Computação e envolve conceitos de
-ciência de dados, inteligência artificial, *machine learning* e
-sistemas de informação, contribuindo para a organização, interpretação
-e acessibilidade de dados gerados em partidas competitivas.
+O tema deste trabalho é a análise de dados aplicada a esports, com foco
+no desenvolvimento de uma plataforma inteligente para exploração de
+informações competitivas em *League of Legends*. A plataforma, batizada
+**Bellestraiko**, é o sistema desenvolvido e implementado ao longo do
+trabalho, que se insere na área da Ciência da Computação e envolve
+ciência de dados, inteligência artificial, *machine learning* e sistemas
+de informação.
 
 ### 1.2 DELIMITAÇÃO DO TEMA
 
-Este trabalho delimitou-se ao desenvolvimento de uma plataforma
-inteligente para análise de dados de esports com foco exclusivo em
-*League of Legends*. O estudo concentrou-se na utilização de dados
-competitivos obtidos por meio da Riot Games API, complementados por
-dados históricos profissionais do Oracle's Elixir, considerando
-informações relacionadas a partidas, jogadores e estatísticas de
-desempenho. No campo analítico, o recorte envolveu a aplicação e
-comparação de modelos de *machine learning*, com ênfase em XGBoost,
-*Random Forest* e redes neurais, voltados à identificação de padrões e
-à realização de análises preditivas restritas ao estado do jogo até o
-momento da predição (sem uso de informações posteriores ao corte
-temporal). Além disso, a proposta restringiu-se à concepção de
-dashboards e de uma interface em linguagem natural para consulta e
-interpretação dos dados. Dessa forma, o trabalho não abrange todos os
-jogos do cenário de esports nem todas as abordagens possíveis de
-inteligência artificial, mas um recorte específico e viável, alinhado
-aos objetivos definidos no TCC I.
+O trabalho delimitou-se a *League of Legends*, com dados da Riot Games
+API complementados por dados profissionais do Oracle's Elixir, sobre
+partidas, jogadores e estatísticas de desempenho. No campo analítico, o
+recorte é a comparação entre XGBoost, *Random Forest* e redes neurais em
+análises preditivas restritas ao estado do jogo até o momento da
+predição, sem informação posterior ao corte temporal. A proposta inclui
+*dashboards* e uma interface em linguagem natural para consulta e
+interpretação dos dados. Não abrange outros jogos nem todas as abordagens
+possíveis de inteligência artificial, mas um recorte específico e viável,
+alinhado aos objetivos definidos no TCC I.
 
 ### 1.3 PROBLEMA
 
@@ -243,31 +205,15 @@ aos dados e a geração de descobertas no contexto competitivo estudado.
 
 ### 1.5 JUSTIFICATIVA
 
-A realização deste trabalho se justifica pela crescente relevância dos
-esports como campo de produção e exploração de dados, especialmente em
-jogos competitivos amplamente consolidados, como *League of Legends*.
-O tema apresenta importância acadêmica por articular áreas centrais da
+O trabalho se justifica academicamente por articular áreas centrais da
 Ciência da Computação, como análise de dados, inteligência artificial,
-*machine learning*, sistemas de informação e interação
-humano-computador, permitindo o desenvolvimento de uma proposta
-interdisciplinar alinhada à formação do curso. Além disso, a
-investigação sobre dados competitivos em esports representou uma
-oportunidade significativa de aprofundamento, sobretudo por integrar
-análise preditiva, visualização e acessibilidade no uso das
-informações.
-
-Do ponto de vista prático, o trabalho também se mostra relevante por
-propor uma solução capaz de organizar e tornar mais acessível a
-exploração de dados competitivos, reduzindo a dependência de processos
-fragmentados e de ferramentas que exigem conhecimento técnico elevado.
-Ao reunir coleta, tratamento, modelagem analítica e mecanismos de
-consulta em linguagem natural em uma mesma plataforma, a proposta
-ofereceu uma contribuição aplicável à interpretação de desempenho, ao
-acompanhamento de tendências competitivas e ao apoio à análise de
-partidas. Nesse sentido, a ausência de abordagens integradas voltadas
-à exploração acessível desses dados limitava o aproveitamento de
-informações valiosas no contexto dos esports, tanto em estudos
-acadêmicos quanto em aplicações práticas.
+*machine learning*, sistemas de informação e interação humano-computador,
+sobre um campo de produção de dados em crescimento. Do ponto de vista
+prático, reunir coleta, tratamento, modelagem e consulta em linguagem
+natural numa mesma plataforma reduz a dependência de processos
+fragmentados e de ferramentas que exigem conhecimento técnico elevado, e
+oferece uma contribuição aplicável à interpretação de desempenho, ao
+acompanhamento de tendências competitivas e à análise de partidas.
 
 ---
 

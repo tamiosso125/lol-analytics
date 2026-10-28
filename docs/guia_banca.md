@@ -441,7 +441,7 @@ quatro eixos (decore os nomes):
 
 - **Prodanov e Freitas (2013), Gil (2002), Creswell e Creswell (2023),
   Yin (2018):** livros de metodologia científica (Parte 4).
-- **Riot Games (APIs):** a documentação oficial da API (Anexo B).
+- **Riot Games (APIs):** a documentação oficial da API (Anexo A).
 - **Oracle's Elixir (Downloads):** fonte dos dados profissionais
   (oracleselixir.com/tools/downloads, acesso em 20 out. 2026; os arquivos
   são baixados do Google Drive que o site aponta).
@@ -938,7 +938,7 @@ de chuva" e choveu em 70 deles, ela é **bem calibrada**.
 mostrou que os modelos, especialmente o XGBoost, **já eram bem
 calibrados**, sem precisar de ajuste extra.
 
-### 10.7 Taxa-base e a limitação do empate (Seção 5.8)
+### 10.7 Taxa-base e a limitação do empate (Seção 6.1 e Apêndice G)
 
 **Pergunta crítica:** se as duas equipes estão **totalmente empatadas**,
 o que o modelo prevê?
@@ -1014,7 +1014,7 @@ jogos**, do **valor de Shapley**.
 
 ## 12. Os 11 experimentos que não funcionaram (e por que isso é bom)
 
-### 12.1 O que foi tentado (Apêndice D)
+### 12.1 O que foi tentado (Quadro 5, Seção 5.4; notas no Apêndice D)
 
 Para tentar melhorar o modelo, foram testadas 11 ideias. **Nenhuma**
 melhorou de forma distinguível de ruído (mudanças de ±0,001 a 0,003 na
@@ -1347,7 +1347,7 @@ antiga."
 "As *features* foram congeladas com 39.426. As 1.637 a mais, quase todas
 da Coreia, mudariam o treino em cerca de 4%, e o ganho medido por volume
 é pequeno nessa escala. Retreinar invalidaria as métricas e a bateria de
-validação já feitas. Está declarado como limitação na Seção 5.8, com o
+validação já feitas. Está declarado como limitação na Seção 6.1 (detalhe no Apêndice G), com o
 comando para quem quiser retreinar."
 
 **13. "O que é SHAP e por que não LIME?"**
@@ -1456,7 +1456,7 @@ Oracle's Elixir (CSV) → tabelas do profissional
 TCC II, ferramentas e materiais são **descritos**, não referenciados com
 citação. Por isso a 4.8 não tem citações.
 
-### 16.3 As 6 páginas (Anexo A)
+### 16.3 As 6 páginas (recortes na Seção 5, telas inteiras no Apêndice F)
 
 | Figura | Página | O que mostra |
 |---|---|---|
@@ -1512,7 +1512,7 @@ resultado e **reprova** se algo divergir.
 
 ## 18. Limitações e trabalhos futuros
 
-### 18.1 Limitações (Seção 5.8 e 6.1)
+### 18.1 Limitações (Seção 6.1 e Apêndice G)
 
 Saber as limitações **é ponto a favor**. A banca respeita quem conhece
 os limites do próprio trabalho.
