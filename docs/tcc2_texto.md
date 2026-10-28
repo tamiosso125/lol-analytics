@@ -379,146 +379,104 @@ posicionamento da análise de partida (Seção 5.5).
 
 ## 3 TRABALHOS RELACIONADOS
 
-A seção anterior define os conceitos mobilizados por esta pesquisa;
-esta seção descreve os estudos que os sustentam. Para cada um, são
-apresentados o objeto, a abordagem adotada e a contribuição
-relevante para o problema aqui tratado. São onze estudos de domínio, todos
-citados ao longo do trabalho; nenhum foi incluído apenas para preencher
-esta seção. As obras de método (Breiman, 2001; Chen e Guestrin, 2016;
+Esta seção descreve os onze estudos de domínio que sustentam a pesquisa,
+com o objeto, a abordagem e a contribuição de cada um para o problema
+aqui tratado. As obras de método (Breiman, 2001; Chen e Guestrin, 2016;
 Hanley e McNeil, 1982; Lundberg e Lee, 2017; Ribeiro, Singh e Guestrin,
-2016; Wang et al., 2020) não aparecem aqui: são textos de técnica, não de
-domínio, e estão citados na Seção 2, no ponto em que o método que eles
-fundamentam é introduzido.
+2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
+elas fundamentam é introduzido.
 
 ### 3.1 ESPORTS COMO FENÔMENO DE PRODUÇÃO E ANÁLISE DE DADOS
 
-Hodge et al. (2021) tratam da predição de vitória em esports com
-múltiplos jogadores (*multi-player*), em partidas profissionais de Dota 2
-e em tempo real. Com modelos de *machine learning* padrão, engenharia de
-atributos e otimização, chegam a até 85% de acurácia após 5 minutos de
-jogo. O trabalho estabelece, portanto, a viabilidade da predição de
+Hodge et al. (2021) tratam da predição de vitória em partidas
+profissionais de Dota 2, em tempo real. Com modelos de *machine learning*
+padrão, engenharia de atributos e otimização, chegam a até 85% de
+acurácia após 5 minutos de jogo, o que estabelece a predição de
 resultados em esports como problema tratável por modelagem estatística.
-Por tratar de outro jogo, sustenta a abordagem de prever a partir do
-estado da partida, e não o recorte de *League of Legends* que este
-trabalho constrói.
+Por tratar de outro jogo, o estudo sustenta a abordagem de prever a
+partir do estado da partida, e não o recorte de *League of Legends*.
 
 ### 3.2 MACHINE LEARNING APLICADO A LEAGUE OF LEGENDS E ESPORTS
 
 Birant e Birant (2023) apresentam uma abordagem de aprendizado
 multi-objetivo e multi-instância (*Multi-Objective Multi-Instance
-Learning*) aplicada a esports, e destacam a modelagem centrada no time,
-e não no jogador isolado, como caminho para compreender resultados de
-partidas. É a abordagem que este trabalho adotou diretamente ao
-construir as variáveis preditoras como diferenças agregadas entre os
-dois times (ouro, experiência, abates, torres, dragões), em vez de
-métricas individuais de jogador.
+Learning*) aplicada a esports e destacam a modelagem centrada no time, e
+não no jogador isolado. É a abordagem adotada aqui, com as variáveis
+preditoras construídas como diferenças agregadas entre os dois times.
+Bahrololloomi et al. (2022) percorrem o caminho oposto: predizem a
+vitória a partir das funções (*roles*) e das métricas individuais dos
+jogadores. Este trabalho usa esse nível de agregação só nos perfis de
+jogador.
 
-Bahrololloomi et al. (2022) percorrem caminho distinto: analisam o
-desempenho de jogadores de *League of Legends* com técnicas de
-*machine learning*, tomando como entrada as funções (*roles*) em
-jogo e as métricas individuais de desempenho, com foco na predição
-de vitória.
-
-Os dois estudos são complementares e delimitam o espaço de escolha da
-modelagem preditiva em *League of Legends*: um nível de agregação
-por time e um nível de agregação por jogador. Este trabalho
-adota o primeiro como eixo da modelagem preditiva, e usa o segundo
-apenas na camada de perfis de jogador, conforme descrito na Seção 5.7.
-
-Outros estudos tratam da previsão de partidas de *League of Legends* com
-insumos diferentes. Jadowski e Cunningham (2022) ajustam classificadores
-estatísticos a métricas das ligas profissionais de 2020 e acertam 67% dos 306
-jogos da etapa seguinte. Do et al. (2021) preveem o resultado de
-partidas ranqueadas antes de elas começarem, a partir da experiência de cada
-jogador com o campeão escolhido, e chegam a 75,1% de acurácia com uma rede
-neural profunda. Maymin (2021) calibra um modelo de probabilidade de vitória com dados de
-alta frequência de milhões de partidas ranqueadas e avalia as ações
-individuais pelo efeito que têm nessa probabilidade. Guan e Tung (2026), em um *preprint* ainda sem revisão por pares,
-fazem previsão pré-jogo no cenário profissional e tratam o lado do mapa e a
-prioridade de escolha como covariáveis do modelo. Neste trabalho, a previsão
-parte do estado agregado dos dois times em quatro cortes de tempo, sobre
-partidas ranqueadas de elo alto.
+Outros estudos preveem partidas de *League of Legends* com insumos
+diferentes. Jadowski e Cunningham (2022) ajustam classificadores
+estatísticos a métricas das ligas profissionais de 2020 e acertam 67% dos
+306 jogos da etapa seguinte. Do et al. (2021) preveem partidas ranqueadas
+antes de elas começarem, a partir da experiência de cada jogador com o
+campeão escolhido, e chegam a 75,1% de acurácia com uma rede neural
+profunda. Maymin (2021) calibra um modelo de probabilidade de vitória com
+dados de milhões de partidas ranqueadas e avalia cada ação individual pelo
+efeito que tem nessa probabilidade. Guan e Tung (2026), em um *preprint*
+ainda sem revisão por pares, fazem previsão pré-jogo no cenário
+profissional e tratam o lado do mapa e a prioridade de escolha como
+covariáveis do modelo.
 
 ### 3.3 EXPLICABILIDADE E ANÁLISE PREDITIVA
 
-García-Méndez e Arriba-Pérez (2025) abordam a predição de vitória em
-esports sob a perspectiva da explicabilidade, combinando
-classificação por *machine learning* com mecanismos de interpretação,
-inclusive em cenário de transmissão (*streaming*). A contribuição
-relevante para este trabalho é o argumento de que um sistema
-preditivo só é útil ao usuário final quando acompanha a previsão de
-uma explicação dos fatores que a sustentam, pressuposto que orienta
-a camada de explicabilidade da plataforma descrita na Seção 5.5.
+García-Méndez e Arriba-Pérez (2025) combinam classificação por *machine
+learning* com mecanismos de interpretação na predição de vitória em
+esports, inclusive em transmissões (*streaming*). Deles vem o pressuposto
+de que um sistema preditivo só é útil ao usuário final quando acompanha a
+previsão de uma explicação dos fatores que a sustentam, que orienta a
+camada de explicabilidade da plataforma (Seção 5.5).
 
 ### 3.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
 
 Jiang et al. (2025) apresentam o SiriusBI, solução de *Business
-Intelligence* apoiada por modelos de linguagem para análise de dados
-em contextos corporativos. Guo et al. (2024) apresentam o Talk2Data,
-interface em linguagem natural para análise visual exploratória,
-baseada em decomposição de perguntas. Ambos exploram o uso de modelos
-de linguagem como camada de interação sobre dados estruturados, e
-ambos são citados aqui como fundamento para o *text-to-SQL*
-implementado neste trabalho (Seção 4.7), que estende a abordagem ao
-domínio competitivo de *League of Legends*.
+Intelligence* apoiada por modelos de linguagem para análise de dados em
+contextos corporativos, e Guo et al. (2024), o Talk2Data, interface em
+linguagem natural para análise visual exploratória baseada em
+decomposição de perguntas. Os dois usam modelos de linguagem como camada
+de interação sobre dados estruturados e fundamentam o *text-to-SQL* deste
+trabalho (Seção 4.7), que leva a abordagem ao domínio de *League of
+Legends*.
 
 ### 3.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
 
 Wallner, Wang e Dormann (2023) estudam a evolução espaço-temporal do
-gameplay em *League of Legends* por meio da técnica de *storyline
-visualization*, e mostram o valor de representações que integram
-tempo e localização em uma única visualização para a interpretação
-pós-jogo. O estudo é a referência para a representação de
-posicionamento minuto a minuto adotada na análise de partida da
-plataforma (Seção 5.5).
+gameplay em *League of Legends* com a técnica de *storyline
+visualization* e mostram o valor de integrar tempo e localização numa
+única representação para a interpretação pós-jogo. O estudo é a
+referência do posicionamento minuto a minuto da análise de partida
+(Seção 5.5).
 
 ### 3.6 SÍNTESE E POSIÇÃO DESTE TRABALHO
 
-Lidas em conjunto, as referências acima cobrem quatro frentes
-isoladas: predição de resultados (Hodge et al.; Birant e Birant;
-Bahrololloomi et al.; e os demais estudos da Seção 3.2), interpretabilidade da predição (García-Méndez e
-Arriba-Pérez), interação em linguagem natural (Jiang et al.; Guo et
-al.) e visualização espaço-temporal (Wallner, Wang e Dormann). Nenhuma
-delas, isoladamente, é entregue como uma plataforma integrada que reúna
-coleta, tratamento, modelagem, explicabilidade, visualização e consulta
-em linguagem natural sobre a mesma base de dados. É essa lacuna de
-integração que este trabalho propõe ocupar.
+Os estudos cobrem frentes isoladas: predição de resultados (Seções 3.1 e
+3.2), interpretabilidade da predição (García-Méndez e Arriba-Pérez),
+interação em linguagem natural (Jiang et al.; Guo et al.) e visualização
+espaço-temporal (Wallner, Wang e Dormann). Nenhum é entregue como uma
+plataforma que reúna coleta, tratamento, modelagem, explicabilidade,
+visualização e consulta em linguagem natural sobre a mesma base, e é
+essa lacuna de integração que este trabalho ocupa. A distinção também
+está em três decisões de projeto.
 
-A distinção em relação a cada trabalho não se resume a esse degrau de
-integração. Está em decisões de projeto que alteram o que é possível
-concluir, ao longo de quatro eixos.
+**Horizonte da predição.** Em vez de um único momento, a predição é feita
+em quatro cortes de tempo, com um modelo por corte, o que torna o
+desempenho comparável ao longo da partida e mostra como a importância das
+variáveis muda de fase para fase.
 
-**Horizonte da predição.** Hodge et al. (2021) e García-Méndez e
-Arriba-Pérez (2025) tratam a predição como problema que se resolve
-enquanto a partida acontece. Este trabalho estima o vencedor a partir de
-um corte temporal artificial, o que torna a pergunta mensurável e
-comparável entre cortes: o modelo deixa de depender de um relógio e
-passa a depender de um parâmetro controlável pelo experimento.
+**Recorte de população.** A maior parte dos estudos de predição atua
+sobre o cenário profissional, e os que usam partidas ranqueadas (Do et
+al., 2021; Maymin, 2021) não as comparam com ele. Este trabalho mede o
+mesmo indicador nos dois contextos e mostra que o viés de lado do *solo
+queue* de elo alto se inverte no circuito profissional.
 
-**Fonte de dados.** Os estudos citados partem de bases já estruturadas
-por terceiros. Este trabalho coletou diretamente da *timeline-v5* da
-Riot Games, única fonte que expõe a posição dos eventos e a evolução
-minuto a minuto dos recursos, a granularidade que torna possível a
-análise espaço-temporal da Seção 5.5 (o viés de lado em si é medido
-sobre o agregado de vitória por time e região, sem coordenada alguma; a
-*timeline* acrescenta a análise de partida individual, não a medição do
-viés).
+**Consulta mensurável.** A interface em linguagem natural foi avaliada no
+próprio domínio, com 26 perguntas fixas e resposta esperada conferida
+contra o banco, o que torna o erro de conversão mensurável, e não
+ilustrativo.
 
-**Recorte de população.** Os trabalhos de predição analisados atuam
-sobre o cenário profissional. Parte da contribuição deste trabalho é
-contrapor a ele o *solo queue* de elo alto e mostrar que o viés de lado
-observado entre jogadores de *rank* não se reproduz no circuito
-profissional. Sem essa comparação, o achado seria uma peculiaridade
-sem base comparativa.
-
-**Transparência da camada preditiva.** Nenhum dos trabalhos citados
-avalia a interface de consulta em linguagem natural contra um
-*benchmark* de referência. A implementação aqui descrita usa 26
-perguntas fixas, com resposta esperada conferida diretamente contra o
-banco, de modo que o erro de conversão fica mensurável, não ilustrativo.
-
-A confrontação entre os resultados aqui obtidos e os resultados relatados
-na literatura é apresentada na Seção 5.7.
 ---
 
 ## 4 METODOLOGIA

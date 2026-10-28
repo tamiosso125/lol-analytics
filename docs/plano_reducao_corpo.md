@@ -135,6 +135,17 @@ separação entre dado e conhecimento geral) apontavam para algo que a
 Seção 4 não descreve nesses termos. Documento: **33 → 32 páginas**. Faltam
 2 a 3 páginas (≈ 750-1.100 palavras), das Seções 3 (1.225) e 1 (1.293).
 
+## Etapa 5 executada (2026-10-28): Seção 3
+
+1.225 → 837 palavras, os onze estudos mantidos (o modelo pede no mínimo
+cinco). Corrigidas na 3.6 duas afirmações que as referências novas
+tornaram falsas ou não sustentadas: "os trabalhos de predição atuam sobre
+o profissional" (Do et al. e Maymin usam partidas ranqueadas) e "os
+estudos partem de bases estruturadas por terceiros". O eixo da consulta
+NL deixou de afirmar o que o SiriusBI e o Talk2Data não fazem, o que não
+foi conferido nos artigos. Documento: **32 → 30 páginas, no teto**. A
+Introdução (1.293) dá a página de folga.
+
 ## Ordem de execução (uma etapa por vez, com sua aprovação)
 
 1. **Inserir os visuais no texto primeiro.** É mecânico e mede o custo
