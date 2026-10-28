@@ -763,7 +763,7 @@ Quadro — Experimentos negativos de enriquecimento de *features*
 | 4 | Calibração adicional (além da já obtida) | sem ganho (modelos já calibrados) |
 | 5 | Ouro convertido em itens | Δ AUC ≈ ruído |
 | 6 | Separação de features defensivas/ofensivas | Δ AUC ≈ ruído |
-| 7 | Ouro em itens finalizados (`item_gold_diff`), repetido em amostra maior | Δ AUC ≈ ruído |
+| 7 | Ouro em itens (`item_gold_diff`), em amostra maior | Δ AUC ≈ ruído |
 | 8 | Visão (ward_diff / ward_kill_diff) | Δ AUC ≈ ruído |
 | 9 | Dragões por tipo (`monsterSubType`) | **AUC piorou** (0,8319 → 0,8295), sobre a base de 23.133 partidas |
 | 10 | Placas de torre (`plate_diff`, `TURRET_PLATE_DESTROYED`) | Δ AUC -0,0002 (cortes 10 e 15 min, base de 39.188-39.309) |
