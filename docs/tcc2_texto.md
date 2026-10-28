@@ -273,182 +273,107 @@ acadêmicos quanto em aplicações práticas.
 
 ## 2 FUNDAMENTAÇÃO TEÓRICA
 
-A fundamentação teórica deste trabalho reúne os principais conceitos
-necessários para compreender a proposta de uma plataforma inteligente
-para análise de dados de esports com foco em *League of Legends*.
-Considerando a natureza interdisciplinar do tema, a seção articula
-contribuições da análise de dados, do *machine learning*, da
-explicabilidade de modelos, das interfaces em linguagem natural e da
-visualização analítica, buscando estabelecer uma base conceitual
-coerente para o desenvolvimento da pesquisa. Hodge et al. (2021)
-contribuem para a compreensão da predição em partidas de esports,
-enquanto Birant e Birant (2023) e Bahrololloomi et al. (2022)
-fundamentam a discussão sobre *machine learning* aplicado a *League of
-Legends*.
-
-No campo da interpretação e da interação com dados, García-Méndez e
-Arriba-Pérez (2025) apoiam a discussão sobre explicabilidade, enquanto
-Jiang et al. (2025) fundamentam o uso de modelos de linguagem em
-soluções analíticas.
-
-Esta seção é conceitual: define os termos usados no restante do
-trabalho. As obras originais dos métodos aplicados (*Random Forest*,
-XGBoost, AUC-ROC, SHAP, LIME e conversão de linguagem natural em SQL)
-são citadas nas subseções 2.2 a 2.4, pela propriedade técnica que
-justifica o uso; os estudos de contexto do domínio, com objeto,
-abordagem e resultados, são descritos autor a autor na Seção 3.
+Esta seção define os conceitos usados no restante do trabalho: análise de
+dados em esports, as famílias de modelos preditivos comparadas,
+explicabilidade e avaliação de modelos, interfaces em linguagem natural e
+visualização analítica. As obras originais dos métodos aplicados são
+citadas pela propriedade técnica que justifica o uso; os estudos do
+domínio são descritos autor a autor na Seção 3 e confrontados com os
+resultados na Seção 5.7.
 
 ### 2.1 ESPORTS E ANÁLISE DE DADOS
 
-Os esports vêm se consolidando como um campo relevante para análise de
-dados, uma vez que jogos competitivos geram grande volume de
-informações sobre partidas, jogadores, equipes, estratégias e eventos
-em tempo real. Hodge et al. (2021) mostram que é possível prever
-resultados de partidas profissionais de Dota 2 enquanto elas acontecem,
-com modelos de *machine learning* padrão e engenharia de atributos. No contexto de *League of Legends*, Birant e
-Birant (2023) destacam a importância da modelagem centrada no time,
-enquanto Bahrololloomi et al. (2022) evidenciam a relação entre
-métricas de jogadores, funções em jogo e desempenho competitivo.
+Jogos competitivos geram grande volume de dados sobre partidas,
+jogadores, equipes e eventos em tempo real, o que faz dos esports um
+campo relevante para a análise de dados. Hodge et al. (2021) mostram que
+é possível prever o resultado de partidas profissionais de Dota 2
+enquanto elas acontecem, com modelos de *machine learning* padrão e
+engenharia de atributos. Em *League of Legends*, Birant e Birant (2023)
+destacam a modelagem centrada no time, e Bahrololloomi et al. (2022), a
+relação entre métricas de jogadores, funções em jogo (*roles*) e
+desempenho competitivo.
 
 ### 2.2 FAMÍLIAS DE MODELOS PREDITIVOS E SUA APLICAÇÃO EM ESPORTS
 
-A aplicação de *machine learning* em esports tem se mostrado promissora
-em tarefas como predição de vitória, avaliação de desempenho e
-identificação de padrões competitivos. Em *League of Legends*, Birant e
-Birant (2023) indicam que a modelagem centrada no time, e não no
-jogador isolado, é uma abordagem relevante para compreender os
-resultados das partidas. Bahrololloomi et al. (2022) percorrem caminho
-distinto, analisando o desempenho dos jogadores a partir de funções
-(*roles*) em jogo e de métricas individuais de desempenho.
-
-As duas leituras delimitam o espaço de escolha da modelagem preditiva,
-mas não decidem qual família é adequada a este problema. Este trabalho
-comparou três, por critério técnico, não preferência.
+Esses estudos delimitam o espaço de escolha da modelagem, mas não decidem
+qual família de modelos é adequada a este problema. O trabalho comparou
+três, por medição, e não por preferência.
 
 A primeira são os *ensembles* de árvores de decisão, em particular a
-*Random Forest* (Breiman, 2001): combina *bagging*, em que cada árvore
-treina sobre uma amostra *bootstrapeada*, com a seleção de um subconjunto
-aleatório de variáveis por nó, o que força as árvores a divergirem entre
-si e reduz a variância do conjunto. Para variáveis preditoras fortemente
-correlacionadas entre si (ouro, abates e torres evoluem juntos ao longo
-da partida), essa decorrelação é diretamente relevante.
+*Random Forest* (Breiman, 2001), que combina *bagging*, em que cada árvore
+treina sobre uma amostra *bootstrap*, com a seleção aleatória de
+variáveis em cada nó. Isso faz as árvores divergirem entre si e reduz a
+variância do conjunto, o que importa quando as variáveis preditoras são
+correlacionadas, como ouro, abates e torres, que evoluem juntos ao longo
+da partida.
 
 A segunda é o *gradient boosting*, representado pelo XGBoost (Chen e
-Guestrin, 2016): em vez de árvores independentes, constrói-as
-sequencialmente, cada uma ajustada ao resíduo acumulado das anteriores,
-com otimização de segunda ordem (gradiente e curvatura da perda) e
-regularização explícita, o que torna o método utilizável com árvores
-profundas sem sobreajustar. Para dados tabulares, o formato que as
-*features* deste trabalho produzem, os métodos baseados em árvores, entre
-eles o *boosting*, seguem competitivos frente a redes neurais em amostras de
-porte médio (Grinsztajn, Oyallon e Varoquaux, 2022).
+Guestrin, 2016), que constrói as árvores em sequência, cada uma ajustada
+ao resíduo das anteriores, com otimização de segunda ordem e
+regularização explícita. Em dados tabulares, como os deste trabalho, os
+métodos baseados em árvores seguem competitivos frente a redes neurais em
+amostras de porte médio (Grinsztajn, Oyallon e Varoquaux, 2022).
 
-A terceira são as redes neurais *feedforward*, ou perceptrons
-multicamada (MLP): com capacidade de aproximação universal (Hornik,
-Stinchcombe e White, 1989), capturam interações complexas sem que precisem ser especificadas, mas exigem mais
-dados e mais cuidado com escala e regularização, restrição relevante
-numa amostra da ordem de dezenas de milhares de observações, não
-milhões.
-
-As três famílias foram comparadas sob o mesmo desenho experimental
-(mesmos dados, particionamento e cortes temporais); o resultado está na
-Seção 5, e aqui fica só o critério: medição, não preferência.
+A terceira são as redes neurais *feedforward*, ou perceptrons multicamada
+(MLP). Com capacidade de aproximação universal (Hornik, Stinchcombe e
+White, 1989), elas capturam interações sem que precisem ser
+especificadas, mas exigem mais dados e mais cuidado com escala e
+regularização, restrição relevante numa amostra de dezenas de milhares de
+partidas, e não de milhões.
 
 ### 2.3 EXPLICABILIDADE E AVALIAÇÃO DE MODELOS PREDITIVOS
 
-Além de produzir previsões, sistemas analíticos voltados a esports
-precisam oferecer mecanismos que favoreçam a interpretação dos
-resultados gerados. García-Méndez e Arriba-Pérez (2025) mostram que
-abordagens de predição explicável podem combinar classificação e
-interpretação, tornando *dashboards*, descrições e fatores relevantes
-da previsão mais compreensíveis para o usuário final.
+García-Méndez e Arriba-Pérez (2025) mostram que a predição em esports pode
+combinar classificação e interpretação, tornando os fatores da previsão
+compreensíveis para o usuário final. Explicar um *ensemble*, porém, não é
+trivial: a saída é a soma de centenas de árvores, e a contribuição de cada
+variável não é diretamente legível. O LIME (Ribeiro, Singh e Guestrin,
+2016) aproxima o modelo por um modelo linear local na vizinhança de cada
+predição, simples de ler, mas sensível à escolha dessa vizinhança. O SHAP
+recorre ao valor de Shapley da teoria dos jogos: a importância de uma
+variável é sua contribuição média para a previsão, sobre todas as
+combinações das demais. Lundberg e Lee (2017) mostram que essa é a única
+atribuição aditiva com propriedades desejáveis, como a consistência e a
+importância nula para uma variável ausente, e o SHAP foi o método
+adotado. Como as contribuições somam a previsão, a explicação exibida na
+plataforma vem de valores calculados, e não de conhecimento genérico
+sobre o jogo.
 
-Explicar a decisão de um *ensemble*, porém, não é trivial: a saída final
-resulta da soma de centenas de árvores, e a contribuição individual de
-cada variável não é diretamente legível. Duas famílias de métodos
-endereçam essa questão, e respondem a perguntas diferentes.
-
-A primeira aproxima o comportamento do modelo por perturbações locais da
-entrada. O LIME (Ribeiro, Singh e Guestrin, 2016) constrói um modelo
-linear local, simples de interpretar, na vizinhança de cada instância; a
-vantagem é a simplicidade, o custo é que a escolha da vizinhança
-influencia o que se vê.
-
-A segunda recorre à teoria dos jogos e ao valor de Shapley: a
-importância de cada variável é sua contribuição média para a previsão,
-calculada sobre todas as combinações possíveis das demais variáveis.
-Lundberg e Lee (2017) unificam essa família e mostram uma solução única
-com propriedades desejáveis: consistência e a impossibilidade de
-atribuir importância a uma variável ausente. SHAP (*SHapley Additive
-exPlanations*), a implementação dessa unificação, foi o mecanismo
-adotado aqui. Como a atribuição é sempre somada à previsão em linguagem
-aditiva, os valores de SHAP permitem montar a explicação textual da
-plataforma a partir de contribuições efetivamente calculadas, não de
-conhecimento genérico sobre o jogo (a honestidade dessa separação é
-tratada na Seção 4).
-
-A avaliação exige ainda uma escolha metodológica sobre a métrica. Com
-classes praticamente balanceadas (46,6% de vitória azul contra 53,4%), a
-acurácia isolada é enganosa: um classificador que sempre responde
-"vitória do time azul" alcança 46,6% (a própria taxa-base da amostra)
-sem qualquer poder preditivo. Por isso a avaliação se apoia na área sob
-a curva da característica operacional do receptor (AUC-ROC), que mede a
-discriminação do modelo em todos os limiares e independe da escolha de
-um limiar específico. Hanley e McNeil (1982) mostram que essa medida
-equivale à probabilidade de um caso positivo receber pontuação maior que
-um negativo, a proporção de pares corretamente ordenados. AUC-ROC e
-acurácia são reportados juntos na Seção 5 para tornar essa distinção
-visível.
+A avaliação exige também uma escolha de métrica. A acurácia depende de um
+limiar e precisa ser lida contra a taxa-base: na amostra, o azul vence
+46,6% das partidas, de modo que um classificador que sempre respondesse
+"vitória do vermelho" acertaria 53,4% sem poder preditivo algum. Por isso
+a avaliação se apoia também na área sob a curva ROC (AUC-ROC), que mede a
+discriminação do modelo em todos os limiares; Hanley e McNeil (1982)
+mostram que ela equivale à probabilidade de um caso positivo receber
+pontuação maior que um negativo. As duas métricas são reportadas juntas
+na Seção 5.
 
 ### 2.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
 
-A utilização de interfaces em linguagem natural tem ampliado as
-possibilidades de interação com sistemas analíticos, reduzindo a
-barreira técnica entre o usuário e os dados. Jiang et al. (2025)
-observam que soluções de *Business Intelligence* apoiadas por modelos
-de linguagem podem favorecer a exploração de dados estruturados. Guo et
-al. (2024) também destacam que mecanismos de diálogo, decomposição de
-perguntas e análise visual podem tornar a exploração dos dados mais
-intuitiva e eficiente.
-
-O problema técnico central é a geração de consultas: um modelo de
-linguagem produz texto, e o banco exige SQL sintaticamente válido e
-semanticamente correto sobre um esquema específico. São requisitos que
-falham de formas diferentes (uma consulta gramaticalmente correta pode
-referenciar tabela inexistente, ou responder à pergunta errada). Wang et
-al. (2020) tratam esse segundo caso, mostrando que representações do
-esquema que incorporam os relacionamentos entre tabelas, não só os
-nomes das colunas, melhoram de forma consistente a precisão da
-conversão.
-
-Este trabalho implementou uma interface de linguagem natural que traduz
-perguntas em português para SQL validado contra o esquema real do banco,
-integrando visualização, recuperação de informações e geração de
-descobertas numa mesma plataforma. A validação não é delegada ao
-modelo: a consulta gerada passa por checagem em quatro camadas antes de
-tocar o banco (Seção 4); os resultados de acurácia estão na Seção 5.
+Interfaces em linguagem natural reduzem a barreira técnica entre o
+usuário e os dados. Jiang et al. (2025) observam que soluções de
+*Business Intelligence* apoiadas por modelos de linguagem favorecem a
+exploração de dados estruturados, e Guo et al. (2024), que diálogo,
+decomposição de perguntas e análise visual tornam essa exploração mais
+intuitiva. O problema técnico central é a geração da consulta: o modelo
+produz texto, e o banco exige SQL válido e correto sobre um esquema
+específico. Uma consulta gramaticalmente correta pode citar uma tabela
+inexistente ou responder à pergunta errada. Wang et al. (2020) tratam
+este segundo caso e mostram que representar o esquema com os
+relacionamentos entre tabelas, e não só com os nomes das colunas, melhora
+a precisão da conversão. Neste trabalho, a correção da consulta não é
+delegada ao modelo: ela é validada antes de tocar o banco (Seção 4.7).
 
 ### 2.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
 
-Além da modelagem preditiva, a análise de dados em esports também
-envolve o desafio de representar visualmente informações complexas que
-evoluem no espaço e no tempo ao longo das partidas. Em jogos como
-*League of Legends*, dados relacionados a movimentação, posicionamento,
-interação entre jogadores e dinâmica das partidas podem ser explorados
-por meio de abordagens de *visual analytics* voltadas à revisão
-pós-jogo. Wallner, Wang e Dormann (2023) mostram que visualizações
-espaço-temporais podem contribuir para a interpretação do comportamento
-em jogo e para a identificação de padrões relevantes ao desempenho
-competitivo, especialmente quando conseguem integrar tempo e
-localização em uma única representação visual. Esse referencial
-fundamentou o desenvolvimento do mapa de calor de posicionamento
-apresentado na análise de partida da plataforma (Seção 5.5).
-
-Os estudos citados nesta seção são apresentados, autor a autor, na
-Seção 3. A confrontação direta entre eles e os resultados obtidos
-neste trabalho é feita na Seção 5.7, onde a leitura crítica faz
-sentido, porque só há o que confrontar depois que os resultados estão
-apresentados.
+A análise de esports também precisa representar informações que evoluem
+no espaço e no tempo, como movimentação, posicionamento e interação entre
+jogadores. Wallner, Wang e Dormann (2023) mostram que visualizações
+espaço-temporais, sobretudo as que integram tempo e localização numa
+única representação, ajudam a interpretar o comportamento em jogo na
+revisão pós-partida. Esse referencial fundamentou o mapa de calor de
+posicionamento da análise de partida (Seção 5.5).
 
 ---
 

@@ -125,6 +125,16 @@ tabelas (agora é o Quadro 1) e o detalhe das telas na 4.7 (a Seção 5 as
 mostra). Documento: **34 → 33 páginas**. Faltam ~3 páginas (≈ 1.100-1.300
 palavras) das Seções 1 a 3, que somam 4.011.
 
+## Etapa 4 executada (2026-10-28): Seção 2
+
+1.493 → 911 palavras, as 15 citações mantidas. Corrigidos dois erros ao
+condensar: (a) a 2.3 dizia que a acurácia engana porque "sempre azul"
+acerta 46,6%; a referência certa é que "sempre vermelho" já acerta 53,4%,
+a taxa-base; (b) duas remissões à Seção 4 (as "quatro camadas" e a
+separação entre dado e conhecimento geral) apontavam para algo que a
+Seção 4 não descreve nesses termos. Documento: **33 → 32 páginas**. Faltam
+2 a 3 páginas (≈ 750-1.100 palavras), das Seções 3 (1.225) e 1 (1.293).
+
 ## Ordem de execução (uma etapa por vez, com sua aprovação)
 
 1. **Inserir os visuais no texto primeiro.** É mecânico e mede o custo
