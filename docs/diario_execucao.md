@@ -4759,6 +4759,27 @@ dos anais, ISBN 1-55860-363-8, páginas 1019-2077); o PDF do artigo não a
 traz e o DBLP bloqueou a consulta direta. Conferir no PDF dos anais se a
 banca cobrar.
 
+## 2026-10-28 (leitura como leitor) — cinco ajustes de conteúdo
+
+Leitura do `.docx` de ponta a ponta, com correções de redação (AUC do MLP
+"iguala" 0,9072 vs 0,9090; "mesmo resultado em execuções sucessivas" omitia
+a execução de 22/26 do Apêndice B; "que eles não detalham" sobre artigos não
+conferidos; "Challenger" × "Desafiante"). Mais cinco decisões aprovadas:
+
+1. Conclusão: "variável sem propriedade intrínseca é um atalho" contradizia a
+   hipótese da 5.3 (que atribui o viés a propriedades do jogo). Agora: o lado
+   carrega informação sobre o resultado sem refletir o estado da partida.
+2. Conclusão: saiu "com potencial de contribuição à literatura".
+3. O módulo de orientação (*coach*) era citado na 4.8, 5.7 e 6.1 sem nunca
+   ser descrito; ganhou um parágrafo na 4.7, escrito a partir de
+   `src/coach/advice.py`.
+4. 5.4: a causa do teto (volume × engenharia de variáveis) passou a "é
+   consistente com", com a ressalva dos três pontos.
+5. 5.3: a nota das duas bases saiu da abertura da seção e vai depois da
+   análise do Quadro 2.
+
+Documento segue em 29 páginas.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

@@ -541,6 +541,17 @@ gerada com o da consulta de referência; Zhong, Yu e Klein (2020) discutem
 seus limites e propõem avaliar a mesma consulta sobre vários bancos de
 teste, o que este *benchmark*, feito sobre uma única base, não faz.
 
+O módulo de orientação estratégica (*coach*) traduz a probabilidade e as
+contribuições SHAP de um estado de jogo em recomendações em linguagem
+natural, geradas por um modelo de linguagem (Claude). Cada resposta separa
+o que vem dos dados (confrontos de rota, sinergias entre campeões e itens
+calculados sobre o histórico de partidas) do que é conhecimento geral do
+modelo sobre o jogo, marcado como tal e não verificado pelos dados da
+partida. O modelo preditivo não vê itens, posição nem o estado das ondas
+de *minions*; qualquer orientação que dependa disso é inferência (Seção
+6.1). Antes da partida, o módulo também lê a composição dos dois times e
+aponta a condição de vitória de cada um, sem usar a predição.
+
 ### 4.8 MATERIAIS E MÉTODOS UTILIZADOS
 
 Foram utilizados Python (coleta, ETL e modelagem, com *pandas*, *NumPy*,
@@ -601,14 +612,6 @@ viés de lado (Seção 5.3).
 
 ### 5.3 Análise exploratória: padrões identificados (objetivo d)
 
-(Nota sobre as bases usadas nesta seção e na modelagem: a análise
-descritiva foi medida sobre as **41.063 partidas** que o banco tem ao fim
-da coleta. As *features* e os modelos foram construídos antes da última
-rodada da KR, sobre a base anterior de **39.426 partidas**, das quais
-39.309 geraram *features* e 39.188 chegam ao corte de 15 minutos; por isso
-a Seção 5.4 e o Apêndice C citam 39.426. As 1.637 partidas de diferença,
-quase todas da KR, são uma limitação declarada na Seção 6.1.)
-
 **Viés de lado no *solo queue* de elo alto.** No agregado das cinco
 regiões, o time vermelho venceu mais que o azul, com intensidade variável
 por região. O Quadro 2 traz a medição direta em SQL, de 2026-10-04, sobre
@@ -630,6 +633,14 @@ de 95% exclui 50%; na KR, com 50,4% e intervalo [49,5%, 51,4%], o
 intervalo inclui 50%, e o viés não é distinguível de zero. A BR1 sustenta
 a assimetria com folga ([55,4%, 57,2%]). O padrão é de elo alto, e não só
 brasileiro, mas as quatro regiões não o demonstram com a mesma força.
+
+(Nota sobre as bases usadas nesta seção e na modelagem: a análise
+descritiva foi medida sobre as **41.063 partidas** que o banco tem ao fim
+da coleta. As *features* e os modelos foram construídos antes da última
+rodada da KR, sobre a base anterior de **39.426 partidas**, das quais
+39.309 geraram *features* e 39.188 chegam ao corte de 15 minutos; por isso
+a Seção 5.4 e o Apêndice C citam 39.426. As 1.637 partidas de diferença,
+quase todas da KR, são uma limitação declarada na Seção 6.1.)
 
 **O viés é estável ao longo da partida.** Uma versão anterior deste texto
 afirmava que ele atingia um pico no meio do jogo; a base ampliada não
@@ -737,9 +748,10 @@ caso de piora mensurável foi o tipo do dragão (`monsterSubType`: AUC-ROC
 de 0,8319 para 0,8295). As notas sobre três delas estão no Apêndice D. Já
 o aumento do *volume* de partidas produziu ganho real: o AUC-ROC do
 XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133) e para
-0,8473 (39.188). Com as variáveis de estado agregado que a API oferece, o
-desempenho é limitado mais pelo volume de dados do que pela engenharia de
-novas variáveis.
+0,8473 (39.188). Com as variáveis de estado agregado que a API oferece, isso
+é consistente com um desempenho limitado mais pelo volume de dados do que
+pela engenharia de novas variáveis, embora três pontos não bastem para
+afirmá-lo.
 
 Quadro — Experimentos negativos de enriquecimento de *features*
 
@@ -882,16 +894,15 @@ do mapa, estatisticamente firme em três das quatro regiões coletadas
 (BR1, EUW1, NA1; a KR tem intervalo de confiança que inclui 50%) e com
 sinal invertido no jogo profissional. O valor é duplo: é um fator de
 confusão que qualquer modelo preditivo sobre *solo queue* precisa
-controlar, já que uma variável que distingue os lados sem nenhuma
-propriedade intrínseca do jogo é, necessariamente, um atalho; e a
+controlar, já que o lado carrega informação sobre o resultado sem refletir
+o estado da partida; e a
 inversão no circuito profissional sugere origem distinta no *solo
 queue*, hipótese que este trabalho delimita sem comprovar.
 
 Como contribuição além do escopo originalmente delimitado no TCC I, a
 incorporação do dataset competitivo profissional (Oracle's Elixir)
 permitiu uma comparação direta entre dois contextos institucionalmente
-diferentes do mesmo jogo, produzindo dois achados quantitativos com
-potencial de contribuição à literatura: a inversão do viés de lado entre
+diferentes do mesmo jogo, produzindo dois achados quantitativos: a inversão do viés de lado entre
 *solo queue* de elo alto e jogo profissional, e a diferença na conversão
 de vantagem material em vitória entre os dois contextos.
 
