@@ -49,7 +49,7 @@ temporais (10 a 25 min); o XGBoost alcançou o melhor desempenho no
 corte de 15 minutos (acurácia de 0,7621; AUC-ROC de 0,8473). A análise exploratória identificou viés de lado favorável
 ao time vermelho no *solo queue* de elo alto (56,3% de vitórias na
 região com maior amostra), estável ao longo da partida e invertido no
-cenário profissional (o time azul vence 53,2% desde 2016), achado
+cenário profissional (o time azul vence 53,2% de 2014 a 2026), achado
 sustentado por testes de robustez. Uma interface em linguagem natural
 (*text-to-SQL* validado estruturalmente) atingiu 88% de acurácia em um
 benchmark de 26 perguntas. A plataforma inclui seis páginas de
@@ -78,7 +78,7 @@ cutoff (accuracy of 0.7621; AUC-ROC of 0.8473). The exploratory
 analysis identified a side bias favoring the red side in high-elo solo
 queue (56.3% win rate in the region with the largest sample), stable
 along the match and reversed in the professional scenario (the blue
-side wins 53.2% from 2016 on) — a finding supported by robustness
+side wins 53.2% from 2014 to 2026) — a finding supported by robustness
 tests. A natural language interface (structurally validated
 text-to-SQL) achieved 88% accuracy on a 26-question benchmark. The
 platform includes six visualization pages, with explainable prediction

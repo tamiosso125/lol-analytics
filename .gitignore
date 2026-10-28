@@ -17,3 +17,6 @@ docs/tcc2_latex/template_src/
 
 # Configuração local do Claude Code (pode conter segredos)
 .claude/settings.local.json
+
+# PDFs dos artigos citados, baixados para leitura (material de terceiros)
+docs/artigos/
