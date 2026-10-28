@@ -598,164 +598,129 @@ na literatura é apresentada na Seção 5.7.
 
 ## 4 METODOLOGIA
 
-Esta seção descreve os procedimentos metodológicos efetivamente
-empregados no desenvolvimento da pesquisa e da plataforma, detalhando a
+Esta seção descreve como a pesquisa e a plataforma foram desenvolvidas: a
 natureza do estudo, a coleta e o tratamento dos dados, a modelagem
-preditiva e os recursos de visualização e consulta construídos.
+preditiva e os recursos de visualização e consulta.
 
 ### 4.1 NATUREZA E ABORDAGEM DA PESQUISA
 
-O presente trabalho caracteriza-se, quanto à sua natureza, como uma
-pesquisa aplicada: Prodanov e Freitas (2013) explicam que a pesquisa
-aplicada busca produzir conhecimentos voltados à solução de problemas
-específicos e com possibilidade de utilização prática, o que se
-concretizou na estruturação de uma plataforma funcional para coletar,
-organizar e analisar dados competitivos de *League of Legends*. Quanto
-aos objetivos, a pesquisa teve caráter exploratório e descritivo (Gil, 2002): exploratório na investigação inicial sobre a Riot Games API e as
-possibilidades de modelagem, e descritivo na caracterização dos dados
-coletados, dos padrões identificados e dos modelos comparados. Quanto à
-abordagem, a pesquisa adotou perspectiva mista (Creswell; Creswell, 2023): o componente qualitativo esteve presente na revisão
-bibliográfica e na interpretação dos achados; o componente quantitativo
-esteve associado à coleta e ao tratamento dos dados, à análise
-exploratória e à comparação entre os modelos de *machine learning*.
+Quanto à natureza, trata-se de pesquisa aplicada, que busca conhecimento
+voltado à solução de um problema específico e de uso prático (Prodanov e
+Freitas, 2013): aqui, uma plataforma para coletar, organizar e analisar
+dados competitivos de *League of Legends*. Quanto aos objetivos, a
+pesquisa é exploratória, na investigação da Riot Games API e das
+possibilidades de modelagem, e descritiva, na caracterização dos dados,
+dos padrões e dos modelos comparados (Gil, 2002). A abordagem é mista
+(Creswell; Creswell, 2023): qualitativa na revisão bibliográfica e na
+interpretação dos achados, quantitativa na coleta, na análise
+exploratória e na comparação entre os modelos de *machine learning*.
 
 ### 4.2 ESTRATÉGIAS DE PESQUISA
 
-O trabalho foi desenvolvido por meio de pesquisa bibliográfica (Gil, 2002), pesquisa documental sobre a documentação oficial da Riot Games
-API (Prodanov; Freitas, 2013) e estudo aplicado com recorte de caso no
-domínio de *League of Legends* (Yin, 2018).
+O trabalho foi desenvolvido por meio de pesquisa bibliográfica (Gil,
+2002), pesquisa documental sobre a documentação oficial da Riot Games API
+(Prodanov; Freitas, 2013) e estudo aplicado com recorte de caso no domínio
+de *League of Legends* (Yin, 2018).
 
 ### 4.3 COLETA DE DADOS
 
-A coleta foi realizada a partir de duas fontes complementares, a
-segunda delas incorporada durante a execução do TCC II, ampliando o
-escopo originalmente previsto no TCC I:
+A coleta usou duas fontes. A segunda foi incorporada durante o TCC II,
+além do escopo previsto no TCC I.
 
-**a) Riot Games API (dados de partidas ranqueadas, *solo queue*).**
-Foram utilizados os endpoints *league-v4* (para identificar jogadores
-nos elos Desafiante e Grão-Mestre), *account-v1* (resolução de Riot ID)
-e *match-v5*/*timeline-v5* (dados de partida e linha do tempo minuto a
-minuto). A coleta abrangeu cinco regiões (BR1, EUW1, KR, NA1 e EUN1, esta
-última com amostra insuficiente e excluída da leitura) na fila
-420 (ranqueada solo/duo), totalizando **41.063 partidas** normalizadas,
-com estado bruto (JSON) preservado em `raw_matches`/`raw_timelines`
-para reprocessamento. A chave de desenvolvedor da Riot expira a cada 24
-horas, o que exigiu um processo de coleta resumível (script capaz de
-retomar de onde parou, pulando partidas já salvas).
+**a) Riot Games API (*solo queue*).** O endpoint *league-v4* identificou
+os jogadores dos elos Desafiante e Grão-Mestre, o *account-v1* resolveu o
+Riot ID, e o *match-v5* e o *timeline-v5* trouxeram cada partida e sua
+linha do tempo minuto a minuto. A coleta cobriu cinco regiões (BR1, EUW1,
+KR, NA1 e EUN1, esta com amostra insuficiente e fora da leitura) na fila
+420 (ranqueada solo/duo), num total de **41.063 partidas**, com o JSON
+bruto preservado para reprocessamento. Como a chave de desenvolvedor
+expira a cada 24 horas, o coletor retoma de onde parou e pula as partidas
+já salvas.
 
-**b) Oracle's Elixir (dados de partidas profissionais).** Foram
-incorporados **96.716 jogos profissionais** (2014-2026), cobrindo as
-principais ligas mundiais (LCK, LPL, LEC, LTA, CBLOL, entre outras), a
-partir de arquivos CSV anuais publicados publicamente (Oracle's Elixir,
-[s.d.]). Essa fonte não
-estava prevista no recorte original do TCC I e foi adicionada para
-permitir a comparação entre o padrão observado no *solo queue* de elo
-alto e o padrão do cenário competitivo profissional (ver Seção 5.3).
+**b) Oracle's Elixir (cenário profissional).** Foram incorporados
+**96.716 jogos profissionais** de 2014 a 2026, das principais ligas (LCK,
+LPL, LEC, LTA, CBLOL, entre outras), a partir dos arquivos CSV anuais que
+o site publica (Oracle's Elixir, [s.d.]), para comparar o *solo queue* de
+elo alto com o cenário profissional (Seção 5.3).
 
-Como o TCC I já delimitava o uso de dados secundários e públicos, não
-houve participação direta de sujeitos humanos como fonte de dados em
-nenhuma etapa.
+Os dados são secundários e públicos, sem participação de sujeitos humanos
+como fonte em nenhuma etapa.
 
 ### 4.4 ORGANIZAÇÃO E TRATAMENTO DE DADOS
 
-Os dados foram estruturados em um banco de dados relacional PostgreSQL,
-com entidades para partidas, times, participantes, jogadores, banimentos
-de campeão, eventos de item e, para o dataset profissional,
-`pro_games`/`pro_players`. Um catálogo de itens (`items`, derivado dos
-dados públicos do Data Dragon da Riot) foi incorporado para permitir que
-nomes e ícones de item fossem resolvidos por consulta direta ao banco,
-nunca por conhecimento genérico de um modelo de linguagem. O tratamento
-incluiu normalização dos dados brutos de partida (ETL específico por
-fonte), extração de eventos de compra/venda de item a partir da linha
-do tempo (com desfazimento de `ITEM_UNDO` aplicado) e reconciliação de
-nomes de campeão entre a Riot API e o Oracle's Elixir (que usam
-convenções de nomenclatura diferentes).
+Os dados foram organizados em um banco relacional PostgreSQL, descrito no
+Quadro 1 (Seção 5.2). O tratamento incluiu a normalização da partida
+bruta de cada fonte, a extração das compras e vendas de itens a partir da
+linha do tempo, com os desfazimentos (`ITEM_UNDO`) aplicados, e a
+reconciliação dos nomes de campeão entre a Riot API e o Oracle's Elixir,
+que usam convenções diferentes. O catálogo de itens, derivado do Data
+Dragon da Riot, permite resolver nome e ícone de item por consulta ao
+banco, e não pela memória de um modelo de linguagem.
 
 ### 4.5 ANÁLISE EXPLORATÓRIA DE DADOS
 
-A análise exploratória buscou identificar distribuições, padrões
-iniciais e relações entre variáveis relevantes ao problema de pesquisa,
-com particular atenção à taxa de vitória por lado do mapa (azul/vermelho)
-em diferentes recortes: por região, por fase da partida e por contexto
-competitivo (*solo queue* vs. profissional). Todo padrão quantitativo
-encontrado nessa etapa foi submetido a testes de robustez antes de ser
-aceito como resultado, e o conjunto desses testes é o mesmo para todos os
-achados: (i) replicação restrita a uma única região, para descartar efeito
-de mistura regional; (ii) comparação contra a duração total da partida,
-para descartar confusão com "jogos longos"; (iii) intervalo de confiança
-de Wilson (Brown, Cai e DasGupta, 2001) sobre a proporção observada, para avaliar a significância
-estatística do efeito em amostras menores; e (iv) comparação de pares com
-correção de Holm (Holm, 1979), que corrige a multiplicidade quando várias diferenças
-são testadas sobre a mesma base. Este último foi o teste decisivo para o
-achado de viés de lado: sem ele, a dispersão entre cortes seria lida como
-tendência (ver Seção 5.3). Os resultados dessa análise são apresentados na
-Seção 5.3.
+A análise exploratória investigou distribuições e relações entre
+variáveis, com atenção à taxa de vitória por lado do mapa em três
+recortes: região, fase da partida e contexto (*solo queue* ou
+profissional). Nenhum padrão foi aceito como resultado sem passar por
+quatro testes de robustez: (i) replicação restrita a uma região, contra
+o efeito de mistura regional; (ii) comparação por duração total da
+partida, contra a confusão com "jogos longos"; (iii) intervalo de
+confiança de Wilson sobre a proporção (Brown, Cai e DasGupta, 2001), para
+a significância em amostras menores; e (iv) comparação de pares com
+correção de Holm (Holm, 1979), que corrige a multiplicidade quando várias
+diferenças são testadas na mesma base. O teste (iv) foi decisivo para o
+viés de lado: sem ele, a dispersão entre cortes seria lida como tendência
+(Seção 5.3).
 
 ### 4.6 MODELAGEM PREDITIVA E COMPARAÇÃO ENTRE MODELOS
 
-Foram treinados e comparados três modelos de classificação binária
-(vitória do time azul: sim/não), XGBoost, *Random Forest* e uma rede
-neural do tipo perceptron multicamadas (MLP), usando como variáveis
-preditoras as diferenças (azul menos vermelho) de ouro, experiência,
-abates, torres e dragões acumuladas até um corte temporal da partida.
-Foram treinados modelos independentes para quatro cortes (10, 15, 20 e
-25 minutos), respeitando a restrição de que nenhuma informação posterior
-ao corte é usada como *feature* (evitando o vazamento de dados descrito por
-Kaufman et al., 2012). A validação foi feita por validação cruzada
-estratificada de 5 *folds* (Kohavi, 1995), com métricas de acurácia, precisão,
-*recall*, F1 e AUC-ROC. Após um baseline inicial, foi realizado ajuste de
-hiperparâmetros por *GridSearchCV*, da biblioteca scikit-learn (Pedregosa et
-al., 2011), otimizando AUC-ROC para os três modelos, seguido de
-geração de curva de calibração e de explicações SHAP (importância
-global e por instância) sobre o modelo de produção. Adicionalmente,
-foram conduzidos onze experimentos exploratórios de enriquecimento de
-*features* (ver Seção 5.4) para avaliar se sinais adicionais, dez deles
-da linha do tempo da partida (visão, itens, dispersão espacial do time,
-objetivos neutros, placas de torre) e um de um endpoint de progressão do
-jogador (percentis de comportamento), melhoravam o poder preditivo além
-das cinco variáveis de estado já utilizadas.
+Foram comparados três classificadores binários da vitória do time azul:
+XGBoost, *Random Forest* e uma rede neural do tipo perceptron multicamadas
+(MLP). As variáveis preditoras são as diferenças, azul menos vermelho, de
+ouro, experiência, abates, torres e dragões acumuladas até o corte
+temporal. Há um modelo independente para cada corte (10, 15, 20 e 25
+minutos), e nenhuma informação posterior ao corte entra como *feature*, o
+que evita o vazamento de dados descrito por Kaufman et al. (2012). A
+validação foi cruzada e estratificada, com 5 *folds* (Kohavi, 1995), e
+mediu acurácia, precisão, *recall*, F1 e AUC-ROC. Depois de um modelo de
+referência, os hiperparâmetros foram ajustados por *GridSearchCV*, do
+scikit-learn (Pedregosa et al., 2011), otimizando a AUC-ROC; o modelo de
+produção recebeu curva de calibração e explicações SHAP, globais e por
+predição. Onze experimentos de enriquecimento testaram se outros sinais,
+dez da linha do tempo e um de um endpoint de progressão do jogador,
+melhoravam a previsão (Seção 5.4).
 
 ### 4.7 PROPOSTA DE VISUALIZAÇÃO E INTERFACE EM LINGUAGEM NATURAL
 
-A camada de apresentação foi construída como uma aplicação web (React +
-TypeScript no *frontend*, consumindo uma API própria em FastAPI),
-organizada em seis páginas principais: Início (busca unificada),
-Dashboard (KPIs e padrões agregados), Campeões (estatísticas e detalhe
-por campeão, incluindo presença no cenário profissional), Partidas
-(análise minuto a minuto com mapa de calor de posicionamento, leitura de
-composição/draft e modo contrafactual "e se"), Competitivo (comparação
-*solo queue* × profissional, com seletor de ano/*split*) e Simulador
-(composição de time com estimativa por heurística de taxa de vitória
-histórica, estado de jogo com predição por modelo e explicabilidade via
+A camada de apresentação é uma aplicação web em React com TypeScript, que
+consome uma API própria em FastAPI, com seis páginas: Início (busca),
+Dashboard (indicadores agregados), Campeões, Partidas (análise minuto a
+minuto, mapa de calor, leitura de *draft* e modo "e se"), Competitivo
+(*solo queue* × profissional) e Simulador (composição, estado de jogo e
 SHAP). A Seção 5 mostra, recortada, a parte de cada tela que discute; as
-seis telas completas estão no Apêndice F (Figuras 6 a 11). A interface em
-linguagem natural foi implementada como um
-pipeline *text-to-SQL*: a pergunta do usuário é traduzida em uma consulta
-SQL por um modelo de linguagem (Claude), a consulta é validada
-estruturalmente antes da execução (apenas `SELECT`/`WITH...SELECT`,
-tabelas permitidas em lista fechada) e o resultado é executado contra o
-banco real, nunca respondido a partir de conhecimento genérico do
-modelo sobre o domínio. A acurácia dessa interface foi medida por um
-benchmark de 26 perguntas de referência com SQL esperado, cobrindo tanto
-o dataset de *solo queue* quanto o competitivo. A métrica é a acurácia de
-execução, que compara o resultado da consulta gerada com o da consulta de
-referência; Zhong, Yu e Klein (2020) discutem seus limites e propõem avaliar a
-mesma consulta sobre vários bancos de teste, o que este *benchmark*, feito
-sobre uma única base, não faz.
+seis telas completas estão no Apêndice F (Figuras 6 a 11).
+
+A interface em linguagem natural é um *pipeline* *text-to-SQL*: um modelo
+de linguagem (Claude) traduz a pergunta em SQL, a consulta é validada
+antes de executar (só `SELECT` ou `WITH...SELECT`, sobre uma lista fechada
+de tabelas) e a resposta vem sempre do banco, nunca do conhecimento
+genérico do modelo. A acurácia foi medida num *benchmark* de 26 perguntas
+de referência com SQL esperado, sobre o *solo queue* e o competitivo. A
+métrica é a acurácia de execução, que compara o resultado da consulta
+gerada com o da consulta de referência; Zhong, Yu e Klein (2020) discutem
+seus limites e propõem avaliar a mesma consulta sobre vários bancos de
+teste, o que este *benchmark*, feito sobre uma única base, não faz.
 
 ### 4.8 MATERIAIS E MÉTODOS UTILIZADOS
 
-Foram utilizados Python (coleta, ETL, modelagem, bibliotecas *pandas*,
-*NumPy*, *scikit-learn*, *XGBoost*, *SHAP*), PostgreSQL (armazenamento
-relacional), FastAPI (camada de serviço/API) e React com TypeScript
-(camada de visualização, biblioteca de gráficos Recharts). A interface
-em linguagem natural e o módulo de orientação estratégica (*coach*)
-utilizaram a API da Anthropic (modelo Claude). Testes automatizados
-cobriram tanto o *backend* (testes de fumaça em ambiente isolado e uma
-bateria de validação comportamental do modelo de produção) quanto o
-*frontend* (Vitest). O ambiente de desenvolvimento e execução foi
-Windows, com os serviços de API e *frontend* executados localmente
-durante o desenvolvimento.
+Foram utilizados Python (coleta, ETL e modelagem, com *pandas*, *NumPy*,
+*scikit-learn*, *XGBoost* e *SHAP*), PostgreSQL, FastAPI e React com
+TypeScript e Recharts. A interface em linguagem natural e o módulo de
+orientação estratégica (*coach*) usam a API da Anthropic (modelo Claude).
+Testes automatizados cobrem o *backend* (testes de fumaça e uma bateria de
+validação comportamental do modelo de produção) e o *frontend* (Vitest).
+O desenvolvimento e a execução foram feitos localmente, em Windows.
 
 ---
 

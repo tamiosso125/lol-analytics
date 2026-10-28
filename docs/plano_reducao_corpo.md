@@ -118,6 +118,13 @@ parágrafos novos que citam quadros e figuras, o corte é de ~35%.
 Faltam 4 a 5 páginas (≈ 1.500-1.800 palavras) das Seções 1 a 4, que é o
 que os alvos da tabela acima já previam (5.440 → ~3.650).
 
+## Etapa 3 executada (2026-10-28): Seção 4
+
+1.429 → 1.099 palavras, todas as citações mantidas. Saíram a descrição das
+tabelas (agora é o Quadro 1) e o detalhe das telas na 4.7 (a Seção 5 as
+mostra). Documento: **34 → 33 páginas**. Faltam ~3 páginas (≈ 1.100-1.300
+palavras) das Seções 1 a 3, que somam 4.011.
+
 ## Ordem de execução (uma etapa por vez, com sua aprovação)
 
 1. **Inserir os visuais no texto primeiro.** É mecânico e mede o custo
