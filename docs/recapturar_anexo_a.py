@@ -98,6 +98,18 @@ def main() -> None:
                 espera_rede = "load" if rota == "/" else "networkidle"
                 pagina.goto(f"{FRONT}{rota}", wait_until=espera_rede, timeout=45000)
                 pagina.wait_for_selector(espera, timeout=25000)
+                if rota == "/simulador":
+                    # A aba padrão (Composição) sai como formulário VAZIO: a
+                    # captura de 2026-10-20 não mostrava nem estado nem SHAP,
+                    # que é o que a legenda promete. Abre a aba Estado com o
+                    # mesmo estado da figura da Seção 5.5
+                    # (capturar_figuras_texto.py).
+                    pagina.get_by_role("button", name="Estado").first.click()
+                    pagina.wait_for_selector("#gold_diff", timeout=15000)
+                    for chave, valor in (("gold_diff", "2000"), ("xp_diff", "1000"),
+                                         ("kill_diff", "3"), ("tower_diff", "0"),
+                                         ("dragon_diff", "1")):
+                        pagina.locator(f"#{chave}").fill(valor)
                 # Recharts + full_page=True = barras vazias no screenshot. A
                 # animação não completa antes do corte e o axes sai sem os
                 # retângulos (pegadinha do diário em 2026-07-02). Esperar o

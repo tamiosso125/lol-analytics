@@ -71,8 +71,11 @@ NOTA_ORIENTADOR = (
     "Orientador, Professor Dr. da Escola Politécnica da UNISINOS. "
     "E-mail: elvandi@unisinos.br."
 )
+# "\n" vira quebra de linha em `_p`: no modelo oficial e nos aprovados o
+# subtítulo começa em linha própria logo após "TÍTULO:" (2026-10-23; saía
+# quebrando no meio, em "...ESPORTS: Uma / proposta").
 TITULO_PT = (
-    "PLATAFORMA INTELIGENTE PARA ANÁLISE DE DADOS DE ESPORTS: "
+    "PLATAFORMA INTELIGENTE PARA ANÁLISE DE DADOS DE ESPORTS:\n"
     "Uma proposta para League of Legends com uso de machine learning "
     "e interface em linguagem natural"
 )
@@ -90,36 +93,35 @@ _RE_NAO_NUMERAR = re.compile(
     r"^## (REFERÊNCIAS|APÊNDICE|ANEXO)", re.M
 )
 
-# Títulos dos Quadros, na ordem em que aparecem no documento. A numeração é
-# automática (campo SEQ), não texto fixo: assim o Word reenumera se um quadro
-# for inserido ou removido, e a "Lista de Quadros" do pre-textual consegue
-# listar os quatro.
-QUADROS = [
-    "Vitória do time vermelho por região",
-    "Comparação entre modelos (corte de 15 minutos)",
-    "Esquema relacional do banco de dados",
-    "Benchmark de 26 perguntas de referência (NLQ)",
-    # A 4ª tabela (Apêndice C) não tem título no markdown — só uma nota de
-    # método, o que viola a regra da instituição (tabela sem legenda).
-    # Título escrito na conversão e CONFIRMADO pelo autor em 2026-10-03.
-    "Métricas completas por corte temporal — comparação entre os três modelos",
-    "Experimentos negativos de enriquecimento de features",
-]
+# Os títulos dos Quadros vêm da linha "Quadro – Título" que o markdown põe
+# antes de cada tabela (numerar_quadros). Até 2026-10-28 eram uma lista fixa
+# NA ORDEM das tabelas: inserir um quadro no corpo trocava o título de todos
+# os seguintes sem erro nenhum. A numeração é automática (campo SEQ).
 
-# As 6 capturas do Anexo A. Descrições copiadas da tabela de arquivos que o
-# próprio markdown traz — não reescritas.
+# Figuras do CORPO: o markdown marca com uma linha "Figura – Título |
+# caminho.png" no ponto em que a figura entra (inserir_figuras_texto). Os
+# recortes são gerados por docs/capturar_figuras_texto.py.
+_RE_FIGURA_TEXTO = re.compile(r"^Figura\s*[—–-]\s*(.+?)\s*\|\s*(\S+\.png)\s*$")
+FONTE_FIGURAS_TEXTO = (
+    "Fonte: Elaborado pelo autor (2026), recorte de tela da plataforma "
+    "(Playwright, tema escuro)."
+)
+
+# As 6 capturas de página inteira do Apêndice F (era Anexo A até
+# 2026-10-28: são de autoria própria, e o modelo reserva "Anexo" para
+# material de terceiros). Descrições da tabela de arquivos do markdown.
 FIGURAS = [
-    ("01_inicio.png", "Página inicial — busca unificada e rankings"),
-    ("02_dashboard.png", "Dashboard — KPIs, viés de lado por região e cobertura do dataset"),
+    ("01_inicio.png", "Página inicial: busca unificada e rankings"),
+    ("02_dashboard.png", "Dashboard: KPIs, viés de lado por região e cobertura do dataset"),
     ("03_campeoes.png", "Campeões"),
-    ("04_partida_detalhe.png", "Partidas — análise de uma partida individual"),
-    ("05_competitivo.png", "Competitivo — solo queue × profissional"),
-    ("06_simulador.png", "Simulador — Composição, Estado e Explicabilidade"),
+    ("04_partida_detalhe.png", "Partidas: análise de uma partida individual"),
+    ("05_competitivo.png", "Competitivo: solo queue × profissional"),
+    ("06_simulador.png", "Simulador: aba Estado, com probabilidade e contribuições SHAP"),
 ]
 FONTE_IMAGENS = (
     "Fonte: Elaborado pelo autor (2026). Capturas de tela geradas via Playwright "
     "(Chromium, largura de 1440 px, altura ajustada à página, sem captura de "
-    "página inteira, tema escuro — maior contraste contra o fundo branco da "
+    "página inteira, tema escuro, de maior contraste contra o fundo branco da "
     "página impressa) contra a API e o frontend locais."
 )
 FONTE_QUADROS = "Fonte: Elaborado pelo autor (2026)."
@@ -190,10 +192,17 @@ def _p(doc, texto="", *, bold=False, align=None, size=12, space_after=None):
         p.alignment = align
     pf = p.paragraph_format
     pf.line_spacing = 1.5
+    # sem recuo de 1a linha: o estilo Normal leva 1,25 cm (ajustar_tipografia)
+    # e isso deslocava "Resumo:"/"Abstract:" e os textos centralizados da capa.
+    # No modelo oficial o "Resumo:" encosta na margem (2026-10-23).
+    pf.first_line_indent = Cm(0)
     if space_after is not None:
         pf.space_after = Pt(space_after)
-    if texto:
-        r = p.add_run(texto)
+    for i, trecho in enumerate(texto.split("\n") if texto else []):
+        r = p.add_run()
+        if i:
+            r.add_break()
+        r.add_text(trecho)
         r.font.name = "Arial"
         r.font.size = Pt(size)
         r.font.bold = bold
@@ -202,10 +211,16 @@ def _p(doc, texto="", *, bold=False, align=None, size=12, space_after=None):
     return p
 
 
+def _marca_rodape(footnote_id: int) -> str:
+    """'*' para o aluno, '**' para o orientador, como no modelo oficial e nos
+    aprovados (2026-10-23: até aqui saíam '1' e '2', numeração automática)."""
+    return "*" * footnote_id
+
+
 def _ref_rodape(paragrafo, footnote_id: int) -> None:
-    """Insere a marca de chamada de rodapé real (w:footnoteReference),
-    sobrescrita em superscrito — não um "*" literal, para o Word numerar/
-    renumerar sozinho se a ordem mudar."""
+    """Insere a chamada de rodapé real (w:footnoteReference) com marca
+    personalizada ('*', '**'): `w:customMarkFollows` diz ao Word que a marca
+    é o texto do run seguinte, e não o número automático."""
     r = paragrafo.add_run()
     rpr = OxmlElement("w:rPr")
     rstyle = OxmlElement("w:rStyle")
@@ -213,8 +228,11 @@ def _ref_rodape(paragrafo, footnote_id: int) -> None:
     rpr.append(rstyle)
     r._r.append(rpr)
     ref = OxmlElement("w:footnoteReference")
+    ref.set(qn("w:customMarkFollows"), "1")
     ref.set(qn("w:id"), str(footnote_id))
     r._r.append(ref)
+    marca = paragrafo.add_run(_marca_rodape(footnote_id))
+    marca.font.superscript = True
 
 
 def _adicionar_rodapes(doc, notas: dict[int, str]) -> None:
@@ -242,11 +260,13 @@ def _adicionar_rodapes(doc, notas: dict[int, str]) -> None:
         pPr = etree.SubElement(p, f"{ns}pPr")
         pStyle = etree.SubElement(pPr, f"{ns}pStyle")
         pStyle.set(f"{ns}val", "Textodenotaderodap")
+        # com customMarkFollows não há w:footnoteRef: a marca é texto literal
         r1 = etree.SubElement(p, f"{ns}r")
         rPr1 = etree.SubElement(r1, f"{ns}rPr")
         rStyle = etree.SubElement(rPr1, f"{ns}rStyle")
         rStyle.set(f"{ns}val", "Refdenotaderodap")
-        etree.SubElement(r1, f"{ns}footnoteRef")
+        etree.SubElement(rPr1, f"{ns}vertAlign").set(f"{ns}val", "superscript")
+        etree.SubElement(r1, f"{ns}t").text = _marca_rodape(fid)
         r2 = etree.SubElement(p, f"{ns}r")
         t = etree.SubElement(r2, f"{ns}t")
         t.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
@@ -273,15 +293,55 @@ def _campo(paragrafo, instrucao: str) -> None:
     r2._r.append(end)
 
 
-def _numeracao_comeca_em_um(doc) -> None:
-    """Zera a contagem no inicio do corpo: a capa e a folha nao contam."""
-    for sec in doc.sections:
-        sectPr = sec._sectPr
-        pgNum = sectPr.find(qn("w:pgNumType"))
-        if pgNum is None:
-            pgNum = OxmlElement("w:pgNumType")
-            sectPr.append(pgNum)
-        pgNum.set(qn("w:start"), "1")
+def _quebra_de_secao(doc, paragrafo) -> None:
+    """Fecha a seção da capa/folha de rosto no fim de `paragrafo`.
+
+    No OOXML a quebra de seção é um `w:sectPr` dentro do `w:pPr` do último
+    parágrafo da seção. Cópia das margens/tamanho do `sectPr` final, mas SEM
+    referência a cabeçalho/rodapé: a 1ª seção sem `headerReference` não tem
+    cabeçalho, e é isso que deixa capa e folha de rosto sem número.
+    """
+    import copy
+
+    sect = copy.deepcopy(doc.element.body.sectPr)
+    for filho in list(sect):
+        if filho.tag in (qn("w:headerReference"), qn("w:footerReference"),
+                         qn("w:titlePg"), qn("w:pgNumType")):
+            sect.remove(filho)
+    paragrafo._p.get_or_add_pPr().append(sect)
+
+
+def numerar_paginas(doc) -> None:
+    """Número no canto superior direito, de 1 na página do título/Resumo até
+    o fim (Referências, Apêndices e Anexos inclusive).
+
+    MEDIDO (2026-10-23): no modelo oficial e no exemplo do Prof. Elvandi o
+    campo PAGE fica no cabeçalho, alinhado à direita, e a seção do artigo tem
+    `pgNumType start=1` e NÃO tem `titlePg` (a 1ª página também mostra o
+    número). Nos 10 aprovados, 8 imprimem "1" no topo direito da página
+    física 3. O `.docx` saía com uma seção só e nenhum cabeçalho.
+    """
+    sec = doc.sections[-1]
+    sec.different_first_page_header_footer = False
+    pgNum = sec._sectPr.find(qn("w:pgNumType"))
+    if pgNum is None:
+        pgNum = OxmlElement("w:pgNumType")
+        sec._sectPr.append(pgNum)
+    pgNum.set(qn("w:start"), "1")
+
+    cab = sec.header
+    cab.is_linked_to_previous = False
+    for p in list(cab.paragraphs)[1:]:
+        p._p.getparent().remove(p._p)
+    p = cab.paragraphs[0]
+    for r in list(p.runs):
+        r._r.getparent().remove(r._r)
+    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p.paragraph_format.first_line_indent = Cm(0)
+    p.paragraph_format.line_spacing = 1.0
+    _campo(p, " PAGE ")
+    for r in p.runs:
+        r.font.name, r.font.size = "Arial", Pt(12)
 
 
 def montar_pre_textual(doc, resumo: str, palavras_chave: str,
@@ -329,14 +389,23 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
                          "Ciência da Computação da Universidade do Vale do "
                          "Rio dos Sinos (UNISINOS).",
                     align=WD_ALIGN_PARAGRAPH.JUSTIFY))
+    # recuo esquerdo de 8 cm e espaçamento simples: medido no parágrafo de
+    # natureza do modelo oficial (esq = 7,98 cm, line = 1,0) em 2026-10-23;
+    # saía na largura toda e em 1,5
+    novos[-1].paragraph_format.left_indent = Cm(8)
+    novos[-1].paragraph_format.line_spacing = 1.0
     novos.append(_p(doc))
     novos.append(_p(doc, ORIENTADOR, align=WD_ALIGN_PARAGRAPH.RIGHT))
     for _ in range(5):
         novos.append(_p(doc))
     novos.append(_p(doc, LOCAL_ANO[0], align=WD_ALIGN_PARAGRAPH.CENTER))
     novos.append(_p(doc, LOCAL_ANO[1], align=WD_ALIGN_PARAGRAPH.CENTER))
-    ult = novos[-1].add_run()
-    ult.add_break(WD_BREAK.PAGE)
+    # QUEBRA DE SEÇÃO, não de página (2026-10-23): o documento saía com uma
+    # seção só e SEM número de página nenhum. No modelo oficial, capa e folha
+    # de rosto ficam numa seção sem cabeçalho, e o artigo abre outra seção
+    # que começa em 1 na página do título/Resumo. O modelo avisa: "esta quebra
+    # não pode ser removida, pois compromete a formatação".
+    _quebra_de_secao(doc, novos[-1])
 
     # --- TÍTULO DO ARTIGO + AUTOR*/ORIENTADOR** ----------------------------
     # Elemento presente nos 10 TCC II aprovados e no .doc oficial do
@@ -345,12 +414,14 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     # (confirmado em 3, estruturalmente idêntico nos demais).
     novos.append(_p(doc, TITULO_PT, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER,
                     space_after=12))
-    p_aluno = _p(doc, align=WD_ALIGN_PARAGRAPH.CENTER)
+    # nomes à DIREITA, como no modelo oficial e nos aprovados (estavam
+    # centralizados até 2026-10-23)
+    p_aluno = _p(doc, align=WD_ALIGN_PARAGRAPH.RIGHT)
     r = p_aluno.add_run(ALUNO_NOME_PROPRIO)
     r.font.name, r.font.size = "Arial", Pt(12)
     _ref_rodape(p_aluno, 1)
     novos.append(p_aluno)
-    p_orient = _p(doc, align=WD_ALIGN_PARAGRAPH.CENTER)
+    p_orient = _p(doc, align=WD_ALIGN_PARAGRAPH.RIGHT)
     r = p_orient.add_run(ORIENTADOR_NOME_PROPRIO)
     r.font.name, r.font.size = "Arial", Pt(12)
     _ref_rodape(p_orient, 2)
@@ -480,35 +551,50 @@ def _campo_seq(paragrafo, identificador: str) -> None:
 
 
 def _legenda(doc, tipo: str, titulo: str) -> "docx.text.paragraph.Paragraph":
-    """'Quadro 1 — Título'. Título ACIMA do elemento, por convenção ABNT."""
+    """'Quadro 1 – Título'. Título ACIMA do elemento, por convenção ABNT.
+
+    REGRA ESCRITA NO MODELO OFICIAL (lida em 2026-10-23): a legenda vem
+    "precedida da palavra designativa, SEM NEGRITO, seguida do número [...],
+    travessão e do respectivo título, em FONTE 12", e o estilo Legenda do
+    modelo é centralizado; o exemplo usa meia-risca ("Figura 1 – ..."). Até
+    aqui saía em negrito, 10 pt, à esquerda e com travessão longo.
+    """
     p = doc.add_paragraph()
     try:
         p.style = doc.styles["Caption"]
     except KeyError:
         pass
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.first_line_indent = Cm(0)
     # achado da Bloco E (2026-10-05): sem isto, a paginação do Word pode
     # separar a legenda do quadro/figura que ela descreve (visto na Figura 1,
     # legenda sobrando sozinha no fim de uma página e a imagem na seguinte).
     p.paragraph_format.keep_with_next = True
     r = p.add_run(f"{tipo} ")
-    r.font.name, r.font.size, r.font.bold = "Arial", Pt(10), True
+    r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), False
     _campo_seq(p, tipo)
-    r = p.add_run(f" — {titulo}")
-    r.font.name, r.font.size, r.font.bold = "Arial", Pt(10), True
+    r = p.add_run(f" – {titulo}")
+    r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), False
     return p
 
 
 def _fonte(doc, texto: str) -> "docx.text.paragraph.Paragraph":
-    """Linha de fonte OBRIGATÓRIA abaixo de quadro/figura (regra UNISINOS)."""
+    """Linha de fonte OBRIGATÓRIA abaixo de quadro/figura (regra UNISINOS).
+
+    Estilo 'FONTE DAS ILUSTRAÇÕES' do modelo oficial: centralizado, 11 pt,
+    sem itálico, 3 pt antes e 12 pt depois (medido em 2026-10-23; saía à
+    esquerda, 9 pt e em itálico).
+    """
     p = doc.add_paragraph()
     st = _estilo(doc, "Fonte das ilustrações", "FONTE DAS ILUSTRAÇÕES")
     if st is not None:
         p.style = st
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.first_line_indent = Cm(0)
+    p.paragraph_format.space_before = Pt(3)
     p.paragraph_format.space_after = Pt(12)
     r = p.add_run(texto)
-    r.font.name, r.font.size, r.font.italic = "Arial", Pt(9), True
+    r.font.name, r.font.size, r.font.italic = "Arial", Pt(11), False
     return p
 
 
@@ -528,26 +614,59 @@ def numerar_quadros(doc) -> int:
 
     corpo = doc.element.body
     tabelas = [el for el in corpo.iterchildren() if el.tag.endswith("}tbl")]
-    # a última tabela é a lista de arquivos do Anexo A, substituída por
+    # a última tabela é a lista de arquivos do Apêndice F, substituída por
     # figuras mais adiante — não recebe legenda de Quadro
     alvos = tabelas[:-1] if tabelas else []
     n = 0
-    for tb, titulo in zip(alvos, QUADROS):
-        # remove a linha "Quadro - ..." que vem imediatamente antes
+    for tb in alvos:
         anterior = tb.getprevious()
         while anterior is not None and not anterior.tag.endswith("}p"):
             anterior = anterior.getprevious()
-        if anterior is not None:
-            txt = Paragraph(anterior, doc).text.strip()
-            if txt.lower().startswith("quadro"):
-                corpo.remove(anterior)
+        txt = Paragraph(anterior, doc).text.strip() if anterior is not None else ""
+        m = re.match(r"Quadro\s*[—–-]\s*(.+)$", txt)
+        if not m:
+            # quadro sem título viola a regra da instituição; parar é melhor
+            # do que sair um "Quadro 7 –" vazio
+            sys.exit(f"tabela sem linha 'Quadro – Título' antes dela; o que veio: {txt[:60]!r}")
+        titulo = m.group(1)
+        corpo.remove(anterior)
         leg = _legenda(doc, "Quadro", titulo)
         tb.addprevious(leg._p)
-        larguras = LARGURAS_QUADROS.get(n)
-        if larguras:
-            ajustar_tabela(Table(tb, doc), larguras)
+        larguras = LARGURAS_QUADROS.get(titulo)
+        if larguras is None:
+            sys.exit(f"sem larguras declaradas para o quadro {titulo!r} em LARGURAS_QUADROS")
+        ajustar_tabela(Table(tb, doc), larguras)
         fonte = _fonte(doc, FONTE_QUADROS)
         tb.addnext(fonte._p)
+        n += 1
+    return n
+
+
+def inserir_figuras_texto(doc) -> int:
+    """Troca cada marcador 'Figura – Título | caminho.png' por legenda,
+    imagem e fonte, no ponto do texto em que ele está."""
+    n = 0
+    for p in list(doc.paragraphs):
+        m = _RE_FIGURA_TEXTO.match(p.text.strip())
+        if not m:
+            continue
+        titulo, rel = m.groups()
+        caminho = os.path.join(ROOT, rel)
+        if not os.path.exists(caminho):
+            sys.exit(f"figura do texto ausente: {rel} (rode docs/capturar_figuras_texto.py)")
+        leg = _legenda(doc, "Figura", titulo)
+        p._p.addprevious(leg._p)
+        largura, altura = _tamanho_figura(caminho)
+        p_img = doc.add_paragraph()
+        p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_img.paragraph_format.first_line_indent = Cm(0)
+        p_img.paragraph_format.keep_with_next = True
+        p_img.paragraph_format.line_spacing = 1.0
+        p_img.add_run().add_picture(caminho, width=largura, height=altura)
+        p._p.addprevious(p_img._p)
+        fonte = _fonte(doc, FONTE_FIGURAS_TEXTO)
+        p._p.addprevious(fonte._p)
+        p._p.getparent().remove(p._p)
         n += 1
     return n
 
@@ -610,6 +729,8 @@ def inserir_figuras(doc) -> int:
         largura, altura = _tamanho_figura(os.path.join(pasta, arquivo))
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        # sem o recuo de 1a linha do Normal, que deslocava a imagem 0,6 cm
+        p_img.paragraph_format.first_line_indent = Cm(0)
         p_img.paragraph_format.keep_with_next = True
         p_img.add_run().add_picture(
             os.path.join(pasta, arquivo), width=largura, height=altura
@@ -667,7 +788,6 @@ def formatar_referencias(doc) -> int:
 
     estilo_ref = _estilo(doc, "REFERÊNCIAS")
     n = 0
-    entrada_anterior = None
     for el in elementos[ini + 1:]:
         if not el.tag.endswith("}p"):
             break
@@ -679,13 +799,39 @@ def formatar_referencias(doc) -> int:
         if estilo_ref is not None:
             p.style = estilo_ref
         p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        p.paragraph_format.line_spacing = 1.5
-        if entrada_anterior is not None:
-            # linha em branco entre entradas
-            br = entrada_anterior.add_run()
-            br.add_break()
-        entrada_anterior = p
+        # ESPAÇAMENTO SIMPLES + 12 pt depois = a "1 linha em branco" do
+        # orientador. Corrigido em 2026-10-23: saía em 1,5 E com uma quebra
+        # de linha manual além do espaço do estilo, ou seja, linha em branco
+        # dupla; ~7 entradas por página contra ~13 nos aprovados. O estilo
+        # REFERÊNCIAS do modelo oficial mede line=1,0 e after=12 pt.
+        p.paragraph_format.line_spacing = 1.0
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(12)
+        p.paragraph_format.first_line_indent = Cm(0)
         n += 1
+    return n
+
+
+def centralizar_pos_textuais(doc) -> int:
+    """REFERÊNCIAS, APÊNDICE x e ANEXO x centralizados.
+
+    Regra escrita no modelo oficial, ao lado de cada um dos três: "por ser um
+    elemento pós-textual, não possui numeração e deve ser centralizada".
+    Saíam alinhados à esquerda como os títulos numerados (até 2026-10-23).
+    """
+    n = 0
+    for p in doc.paragraphs:
+        if not p.style.name.lower().startswith(("heading 1", "título 1")):
+            continue
+        txt = p.text.strip().upper()
+        if re.match(r"(REFERÊNCIAS|APÊNDICE|ANEXO)\b", txt):
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            # cada Apêndice/Anexo abre página nova, como nos aprovados (medido
+            # em 2026-10-23: o título está no topo da página em todos os que
+            # têm apêndice). Referências não: em 4 dos 10 começam no meio.
+            if not txt.startswith("REFERÊNCIAS"):
+                p.paragraph_format.page_break_before = True
+            n += 1
     return n
 
 
@@ -765,10 +911,46 @@ def aplicar_negrito_titulos(doc) -> int:
         if st is None:
             continue
         st.font.bold = True
-        st.font.all_caps = True
+        # caixa alta só no 1º e 2º níveis: no modelo oficial o 3º nível é
+        # "2.1.1 Título do subcapítulo", em negrito e caixa normal
+        # (2026-10-23; saía "1.4.1 OBJETIVO GERAL")
+        st.font.all_caps = nome != "Heading 3"
         st.paragraph_format.space_before = Pt(18)
+        # todos à esquerda; o Heading 3 herdado do TCC I vinha justificado
+        st.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
         aplicados += 1
     return aplicados
+
+
+def _bordas_de_quadro(tabela) -> None:
+    """Moldura completa (externa + linhas internas), simples.
+
+    Quadro, na norma, é fechado dos quatro lados e com divisões internas —
+    e é como estão as duas tabelas do modelo oficial (bordas single em top/
+    left/bottom/right/insideH/insideV, medido em 2026-10-23). O pandoc gera a
+    tabela sem borda nenhuma.
+    """
+    tblPr = tabela._tbl.tblPr
+    antigo = tblPr.find(qn("w:tblBorders"))
+    if antigo is not None:
+        tblPr.remove(antigo)
+    bordas = OxmlElement("w:tblBorders")
+    for lado in ("top", "left", "bottom", "right", "insideH", "insideV"):
+        b = OxmlElement(f"w:{lado}")
+        b.set(qn("w:val"), "single")
+        b.set(qn("w:sz"), "4")
+        b.set(qn("w:space"), "0")
+        b.set(qn("w:color"), "000000")
+        bordas.append(b)
+    # a ordem dos filhos de tblPr importa para o Word: tblBorders vem depois
+    # de tblW/jc e antes de tblLayout/tblLook
+    ref = tblPr.find(qn("w:tblLayout"))
+    if ref is None:
+        ref = tblPr.find(qn("w:tblLook"))
+    if ref is not None:
+        ref.addprevious(bordas)
+    else:
+        tblPr.append(bordas)
 
 
 def ajustar_tabela(tabela, larguras_cm: list[float]) -> None:
@@ -792,18 +974,37 @@ def ajustar_tabela(tabela, larguras_cm: list[float]) -> None:
         )
     tabela.autofit = False
     tabela.alignment = WD_TABLE_ALIGNMENT.CENTER
-    for linha in tabela.rows:
+    _bordas_de_quadro(tabela)
+    # cabeçalho repete se o quadro atravessar página; quadro curto (até 12
+    # linhas) não se parte: o Quadro 2 saía com o cabeçalho numa página e as
+    # linhas na seguinte (2026-10-23)
+    trPr = tabela.rows[0]._tr.get_or_add_trPr()
+    trPr.append(OxmlElement("w:tblHeader"))
+    inteiro = len(tabela.rows) <= 12
+    for i_linha, linha in enumerate(tabela.rows):
+        if inteiro and i_linha < len(tabela.rows) - 1:
+            for celula in linha.cells:
+                for p in celula.paragraphs:
+                    p.paragraph_format.keep_with_next = True
+    for i_linha, linha in enumerate(tabela.rows):
         for celula, larg in zip(linha.cells, larguras_cm):
             celula.width = Cm(larg)
             for p in celula.paragraphs:
                 p.paragraph_format.space_before = Pt(1)
                 p.paragraph_format.space_after = Pt(1)
                 p.paragraph_format.line_spacing = 1.0
+                # SEM RECUO dentro da célula (2026-10-23): o estilo Normal
+                # leva 1,25 cm na 1a linha e as células herdavam. Numa coluna
+                # de 2 cm isso partia "0,7621" em "0,762 / 1" e "Acurácia" em
+                # "Acurá / cia" no Quadro 2 — visível só renderizando.
+                p.paragraph_format.first_line_indent = Cm(0)
                 for r in p.runs:
                     r.font.name = "Arial"
-                    # 9 pt no corpo da tabela: 12 pt deixava o Quadro 3 com
-                    # 27 páginas de tabela, o que estourava o limite de 25-30
-                    r.font.size = Pt(9)
+                    # 10 pt, como as tabelas do modelo oficial (era 9 pt; 12 pt
+                    # deixava o Quadro 3 com 27 páginas de tabela)
+                    r.font.size = Pt(10)
+                    if i_linha == 0:
+                        r.font.bold = True  # cabeçalho em negrito, como no modelo
     # repetem a largura no grid, que é o que o Word usa para renderizar
     grid = tabela._tbl.find(qn("w:tblGrid"))
     if grid is not None:
@@ -816,13 +1017,21 @@ def ajustar_tabela(tabela, larguras_cm: list[float]) -> None:
 # A contagem de entradas tem que ser a de colunas do quadro: `ajustar_tabela`
 # levanta se divergir, porque o `zip` trunca em silencio e a falha não aparece
 # em nenhuma checagem. Foi assim que o Quadro 1 saiu com 5 larguras e 3 colunas.
+# Chave = título do quadro, como está na linha "Quadro – Título" do markdown
+# (sem a marcação de itálico). Era a POSIÇÃO do quadro até 2026-10-28.
 LARGURAS_QUADROS = {
-    0: [2.8, 4.2, 9.0],                         # vitória do vermelho por região
-    1: [3.4, 2.5, 2.3, 2.1, 2.3, 3.4],         # comparação entre modelos
-    2: [3.0, 9.5, 3.5],                         # esquema relacional do banco
-    3: [0.8, 4.4, 7.4, 3.4],                    # benchmark NLQ (o problema)
-    4: [1.6, 1.6, 2.0, 2.4, 1.8, 1.8, 1.4, 1.4, 1.8],   # métricas por corte
-    5: [0.9, 6.1, 9.0],                         # experimentos negativos
+    # corpo
+    "Tabelas do banco de dados e o que cada uma guarda": [5.0, 11.0],
+    "Vitória do time vermelho por região": [2.8, 4.2, 9.0],
+    "Comparação entre modelos (corte de 15 minutos)": [3.4, 2.5, 2.3, 2.1, 2.3, 3.4],
+    "Desempenho do XGBoost por corte temporal": [3.0, 4.0, 4.5, 4.5],
+    "Experimentos negativos de enriquecimento de features": [0.9, 6.1, 9.0],
+    "Acurácia de execução por tipo de pergunta do benchmark": [6.0, 6.5, 3.5],
+    # apêndices
+    "Esquema relacional do banco de dados": [3.0, 9.5, 3.5],
+    "Benchmark de 26 perguntas de referência (NLQ)": [0.8, 4.4, 7.4, 3.4],
+    "Métricas completas por corte temporal, comparação entre os três modelos":
+        [1.6, 1.6, 2.0, 2.4, 1.8, 1.8, 1.4, 1.4, 1.8],
 }
 
 
@@ -860,9 +1069,11 @@ def main() -> None:
     montar_pre_textual(doc, resumo, palavras, abstract, kwords)
     _adicionar_rodapes(doc, {1: NOTA_ALUNO, 2: NOTA_ORIENTADOR})
     n_q = numerar_quadros(doc)
-    n_f = inserir_figuras(doc)
+    n_ft = inserir_figuras_texto(doc)
+    n_f = n_ft + inserir_figuras(doc)
     n_r = formatar_referencias(doc)
-    _numeracao_comeca_em_um(doc)
+    centralizar_pos_textuais(doc)
+    numerar_paginas(doc)
     doc.save(OUT)
     os.remove(STAGE)
     print(f"[3/4] pre-textual montado (sem sumario/listas, ver nota em "

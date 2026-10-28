@@ -461,21 +461,25 @@ def check_figuras_citadas(t: str) -> None:
     """
     import re as _re
 
-    i = t.find("## ANEXO A")
-    if i < 0:
-        i = t.find("## 5 ")
+    # 2026-10-28: 5 recortes no corpo (marcador "Figura – ... | arquivo.png")
+    # + as 6 telas inteiras do Apêndice F (era Anexo A). O total vem do texto,
+    # não de constante: um marcador novo entra na conta sozinho.
+    n_texto = len(_re.findall(r"(?m)^Figura\s*[—–-].*\|\s*\S+\.png\s*$", t))
+    total = n_texto + 6
+    i = t.find("## REFERÊNCIAS")
     if i < 0:
         aviso("corpo nao localizado para conferir as figuras")
         return
     corpo = t[:i]
-    orfas = []
-    for n in range(1, 7):
-        if not _re.search(rf"Figura {n}\b", corpo):
-            orfas.append(n)
+    citadas = {int(n) for n in _re.findall(r"Figura (\d+)\b", corpo)}
+    # "Figuras 6 a 11" cita a faixa inteira
+    for a, b in _re.findall(r"Figuras (\d+) a (\d+)", corpo):
+        citadas.update(range(int(a), int(b) + 1))
+    orfas = [n for n in range(1, total + 1) if n not in citadas]
     if orfas:
         falha(f"figura sem citacao no corpo (NBR 14724): {orfas}")
     else:
-        print("  [OK] as 6 figuras sao citadas no corpo")
+        print(f"  [OK] as {total} figuras sao citadas no corpo")
 
 
 def check_fonte_figuras(t: str) -> None:

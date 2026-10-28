@@ -263,7 +263,7 @@ quando algo diverge, e ambas devem passar.
 .venv\Scripts\python.exe docs\confere_docx.py
 ```
 
-### 5d. Regerar as capturas do Anexo A
+### 5d. Regerar as figuras (recortes da Seção 5 e telas do Apêndice F)
 
 ```powershell
 # A API precisa estar em :8000 e o frontend na porta LIBERADA NO CORS
@@ -271,12 +271,16 @@ quando algo diverge, e ambas devem passar.
 # fetch, e aí o Chromium renderiza o banner de erro.
 Push-Location frontend; npx vite preview --port 5173; Pop-Location
 $env:FRONT_URL = "http://localhost:5173"
-.venv\Scripts\python.exe docs\recapturar_anexo_a.py
+.venv\Scripts\python.exe docs\capturar_figuras_texto.py   # 5 recortes do corpo (Figuras 1-5)
+.venv\Scripts\python.exe docs\recapturar_anexo_a.py       # 6 telas inteiras (Apêndice F)
 ```
 
-O script recusa a captura se a página mostrar "Erro no servidor" ou se o
-arquivo sair com menos de 60 KB. Vale deixar essa trava: sem ela o script
-grava a tela de erro e reporta sucesso.
+Os recortes vão para `reports/figuras_texto/` (registro em `figuras.json`,
+inclusive a SQL gerada na figura da consulta NL, que chama a API da
+Anthropic). As telas inteiras vão para `reports/anexo_a/` (o nome da pasta
+ficou de quando eram Anexo A). Os dois scripts recusam a captura se a página
+mostrar "Erro no servidor" ou se o arquivo sair vazio. Vale deixar essa
+trava: sem ela o script grava a tela de erro e reporta sucesso.
 
 ---
 

@@ -1660,7 +1660,7 @@ para isso que este guia existe.
 - *temperature* 0; *max_tokens* 1.200; tempo máximo 10 s
 
 **Documento**
-- 50 páginas; corpo com 30 (teto da faixa 25-30)
+- limite: 30 páginas do Resumo ao fim das Referências (em redução em 2026-10-23)
 - 32 referências; 6 Figuras; 6 Quadros; Apêndices A-E
 - `verifica_tcc.py`: 20/20
 

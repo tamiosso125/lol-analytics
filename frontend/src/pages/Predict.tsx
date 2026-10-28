@@ -152,9 +152,9 @@ export function StatePanel() {
                   <p className="mt-3 border-t border-border pt-2 text-xs leading-relaxed text-muted-ink">
                     Com tudo zerado a probabilidade não é 50%: zerar significa "empate em
                     ouro/XP/objetivos", e o modelo aprendeu dos dados que, mesmo empatado, o
-                    lado vermelho é estruturalmente favorecido neste elo (counter-pick
-                    garantido e acesso ao dragão) — viés que não aparece em nenhum dos 5
-                    fatores e por isso vive na taxa-base.
+                    lado vermelho vence mais neste elo — viés que não aparece em nenhum dos 5
+                    fatores e por isso vive na taxa-base. A causa é hipótese, não medida
+                    (counter-pick garantido, acesso ao dragão).
                   </p>
                 </>
               )}
@@ -183,7 +183,11 @@ export function StatePanel() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-              <p className="mt-1 text-xs text-muted-ink">
+            </CardContent>
+            {/* fora do CardContent de altura fixa: dentro dele a nota transbordava
+                o card (visível no recorte da figura do TCC, 2026-10-28) */}
+            <CardContent className="pt-0">
+              <p className="text-xs text-muted-ink">
                 Azul empurra para vitória do time azul; vermelho, contra. Troque a fase para
                 ver a importância de cada fator mudar.
               </p>

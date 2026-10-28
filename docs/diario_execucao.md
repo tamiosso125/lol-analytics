@@ -4617,6 +4617,103 @@ profissional. Lint e 31 testes passam. Capturas do Anexo A refeitas (base
 tentativas, API respondendo em ~2 s); `recapturar_anexo_a.py` agora usa
 `load` só nessa rota.
 
+## 2026-10-20 (continuação) — Jadowski e Cunningham lido por inteiro
+
+O PDF completo (fornecido pelo usuário) mostrou que a Seção 3.2 descrevia o
+estudo errado: são as **ligas regionais profissionais de 2020** (LEC, LCS,
+LCK, CBLOL, PCS, TCL), com treino na primeira etapa (882 jogos) e teste na
+segunda (306), não "campeonatos internacionais". Corrigido. O artigo também
+mede **54,08% de vitórias do azul em 882 jogos profissionais** (qui-quadrado,
+p = 0,015), que entrou na Seção 5.3 como apoio externo ao nosso 53,2%. No
+guia da banca: os autores escrevem que abordagens assim dificilmente chegam a
+90% de acurácia por causa das zebras. Commit 849037c.
+
+## 2026-10-23 — Revisão de formatação contra o modelo e a régua de páginas corrigida
+
+**Achado do usuário: a contagem de páginas estava errada.** O
+`finalize-fields.ps1` media da Introdução até a página em que o título
+REFERÊNCIAS **começa**, apesar de o comentário dizer "até o fim". Reportava
+30/30 quando o real era 37. A régua certa foi medida nos 10 aprovados: o
+artigo começa na página física 3 com o número 1, e as Referências terminam no
+máximo na física 32 (número 30); só Apêndices e Anexos ficam fora. O script
+agora mede do "Resumo:" até a página anterior ao primeiro Apêndice.
+
+**Formatação que tinha passado, conferida contra o `.doc` do modelo oficial
+e do exemplo do Prof. Elvandi (convertidos para `.docx` e lidos no XML):**
+
+- **Sem número de página.** O `.docx` tinha uma seção só e nenhum cabeçalho.
+  Agora capa e folha de rosto ficam numa seção sem cabeçalho, e o artigo
+  começa em 1 no canto superior direito (campo PAGE).
+- **Referências em 1,5 e com linha em branco dupla** (espaço do estilo +
+  quebra manual). Modelo: simples, 12 pt depois. Foi o que mais pesou na
+  contagem (37 → 34).
+- REFERÊNCIAS, APÊNDICE e ANEXO **centralizados** (regra escrita no modelo);
+  cada Apêndice e Anexo **em página nova** (como nos aprovados).
+- Autor e orientador **à direita**, com `*` e `**` (saíam centralizados, com
+  1 e 2). "Resumo:" e "Abstract:" **sem recuo**.
+- Legenda **sem negrito, 12 pt, centralizada, com "–"** (regra escrita no
+  modelo; saía em negrito, 10 pt, à esquerda, com "—"). "Fonte:" centralizada,
+  11 pt, sem itálico. Títulos de Apêndice/Anexo com "–".
+- **Quadros sem borda nenhuma.** Modelo: moldura completa. Texto das células
+  10 pt, cabeçalho em negrito e repetido; quadro curto não se parte.
+- **Quadro 2 quebrado:** as células herdavam o recuo de 1,25 cm do Normal e
+  partiam "0,7621" em "0,762 / 1". Só aparecia renderizando.
+- Natureza do trabalho na folha de rosto com **recuo de 8 cm e espaçamento
+  simples**; título quebra a linha depois dos dois-pontos; 3º nível
+  ("1.4.1 Objetivo geral") sem caixa alta e à esquerda.
+- **Asteriscos impressos** nas notas das Seções 5.3 e 5.4 (itálico dentro
+  de itálico no Markdown). As notas viraram texto normal entre parênteses.
+
+Verificado e **mantido**: margens, papel, fonte e entrelinha do corpo, recuo
+de parágrafo, rodapé, espaçamento do Resumo. Itálico de termo estrangeiro no
+Resumo: só 2 dos 10 aprovados usam, não é padrão.
+
+**Estado:** 35 páginas contadas pela régua nova, 5 acima do limite.
+`verifica_tcc.py` CONSISTENTE, `confere_docx.py` conforme. O orientador
+pediu quadros e figuras no texto, não nos apêndices; o plano de redução
+(`docs/plano_reducao_corpo.md`) foi reescrito com essa restrição: corte de
+~3.600 palavras do corpo (~34%), uma seção por vez.
+
+## 2026-10-28 — Quadros e figuras no texto (etapa 1 do plano de redução)
+
+A pedido do orientador ("com tudo no apêndice o texto perde o sentido"),
+6 quadros e 5 figuras entraram na Seção 5 (lista em
+`docs/plano_reducao_corpo.md`). As figuras são **recortes por elemento** do
+painel discutido, gerados por `docs/capturar_figuras_texto.py`; as telas
+inteiras foram para o novo Apêndice F, e o anexo da documentação da Riot
+passou de Anexo B a Anexo A. Custo medido: 35 → 39 páginas.
+
+**Achados ao preparar as figuras** (todos visíveis em tela que ia impressa):
+
+- A tela **Competitivo** ainda trazia "a literatura que aponta 'leve vantagem
+  azul'", a frase sem fonte tirada do Dashboard e da Início em 2026-10-20.
+  Trocada pela leitura dos dados, com a explicação marcada como hipótese.
+- A mesma tela e a **Campeões** rotulavam o solo queue como "Challenger/GM
+  **BR**", mas o número é das cinco regiões (41.063 partidas). Corrigido.
+- **Arredondamento duplo** em `/stats/pro/overview`: 0,530534 virava 0,5305
+  na API e 53,0% no navegador, contra 53,1% no texto e no SQL direto. A API
+  passou a mandar 6 casas.
+- A **Explicabilidade** dizia "metodologia de Hodge et al., 2021, com
+  explicabilidade via SHAP"; Hodge é Dota 2 e não usa SHAP. Agora cita
+  Lundberg e Lee (2017).
+- A nota do **Simulador** afirmava como fato que o vermelho é favorecido por
+  counter-pick e acesso ao dragão; agora diz que a causa é hipótese. O card
+  de SHAP transbordava a nota para fora da borda.
+- A captura do **Simulador** do antigo Anexo A era o formulário vazio da aba
+  Composição; a legenda prometia estado e SHAP. Agora abre a aba Estado.
+- Uma pergunta fora do benchmark ("win rate do azul por região") falhou ao
+  testar a figura da consulta NL (coluna inexistente). A figura usa a
+  pergunta 9 do benchmark, conferível no Apêndice B.
+- A nota da 5.3 dizia que "os Apêndices B e C e o Anexo A citam 39.426"; só
+  o C cita.
+
+`build_tcc_docx.py` passou a ler o título de cada quadro da linha "Quadro –"
+do Markdown (era lista fixa por posição: inserir um quadro trocaria o título
+de todos os seguintes sem erro). `confere_docx.py` deriva do Markdown quantos
+quadros e figuras esperar. Frontend: lint limpo, 31 testes passam.
+Verificações: `verifica_tcc.py` CONSISTENTE (11 figuras citadas no corpo),
+`confere_docx.py` conforme.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

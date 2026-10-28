@@ -87,19 +87,28 @@ def main() -> None:
         problemas.append(f"suspiciousamente poucos títulos ({len(titulos)})")
     if len(refs) != 32:
         problemas.append(f"referências: esperado 32, achou {len(refs)}")
-    if len(leg_fig) != 6:
-        problemas.append(f"legendas de figura: esperado 6, achou {len(leg_fig)}")
-    if len(leg_quad) != 6:
-        problemas.append(f"legendas de quadro: esperado 6, achou {len(leg_quad)}")
+    # Esperado vem do markdown, não de constante (2026-10-28): com quadros e
+    # recortes entrando no corpo, o "6" fixo virou falso. Cada linha
+    # "Quadro – Título" é um quadro; cada marcador "Figura – ... | x.png" é
+    # uma figura do corpo, e o Apêndice F traz mais 6 telas inteiras.
+    import re as _re
+    md = (Path(__file__).resolve().parent / "tcc2_texto.md").read_text(encoding="utf-8")
+    md = md.split("## Pendências finais")[0]  # log interno, não vai ao .docx
+    exp_quad = len(_re.findall(r"(?m)^Quadro\s*[—–-]\s*\S", md))
+    exp_fig = len(_re.findall(r"(?m)^Figura\s*[—–-].*\|\s*\S+\.png\s*$", md)) + 6
+    if len(leg_fig) != exp_fig:
+        problemas.append(f"legendas de figura: esperado {exp_fig}, achou {len(leg_fig)}")
+    if len(leg_quad) != exp_quad:
+        problemas.append(f"legendas de quadro: esperado {exp_quad}, achou {len(leg_quad)}")
     if len(fontes) != len(leg_fig) + len(leg_quad):
         problemas.append(
             f"fontes ({len(fontes)}) não cobrem as legendas "
             f"({len(leg_fig) + len(leg_quad)})"
         )
-    if len(d.tables) != 6:
-        problemas.append(f"tabelas: esperado 6, achou {len(d.tables)}")
-    if len(d.inline_shapes) != 6:
-        problemas.append(f"imagens: esperado 6, achou {len(d.inline_shapes)}")
+    if len(d.tables) != exp_quad:
+        problemas.append(f"tabelas: esperado {exp_quad}, achou {len(d.tables)}")
+    if len(d.inline_shapes) != exp_fig:
+        problemas.append(f"imagens: esperado {exp_fig}, achou {len(d.inline_shapes)}")
 
     print()
     if problemas:

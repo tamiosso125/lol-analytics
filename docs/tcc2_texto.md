@@ -727,12 +727,9 @@ composição/draft e modo contrafactual "e se"), Competitivo (comparação
 *solo queue* × profissional, com seletor de ano/*split*) e Simulador
 (composição de time com estimativa por heurística de taxa de vitória
 histórica, estado de jogo com predição por modelo e explicabilidade via
-SHAP). As seis telas estão reproduzidas no Anexo A: a Figura 1 mostra a
-página inicial, a Figura 2 o painel de indicadores agregados, a Figura 3 o
-detalhe de um campeão, a Figura 4 a análise de uma partida, a Figura 5 a
-comparação com o cenário profissional e a Figura 6 o simulador com o estado
-de jogo e a explicação por SHAP. A interface em linguagem natural foi
-implementada como um
+SHAP). A Seção 5 mostra, recortada, a parte de cada tela que discute; as
+seis telas completas estão no Apêndice F (Figuras 6 a 11). A interface em
+linguagem natural foi implementada como um
 pipeline *text-to-SQL*: a pergunta do usuário é traduzida em uma consulta
 SQL por um modelo de linguagem (Claude), a consulta é validada
 estruturalmente antes da execução (apenas `SELECT`/`WITH...SELECT`,
@@ -770,7 +767,7 @@ os objetivos específicos definidos na Seção 1.4.2.
 ### 5.1 Mapeamento de dados e recursos da Riot Games API (objetivo a)
 
 Foram mapeados e utilizados os endpoints *league-v4*, *account-v1*,
-*match-v5* e *timeline-v5* da Riot Games API, além da documentação
+*match-v5* e *timeline-v5* da Riot Games API (Anexo A), além da documentação
 técnica necessária para compreender limitações de taxa de requisição e
 o ciclo de expiração da chave de desenvolvedor (24 horas). Esse
 mapeamento orientou o desenho de um coletor resumível, capaz de operar
@@ -785,11 +782,21 @@ provenientes das **39.426 partidas** que o banco tinha quando o
 conjunto de *features* foi congelado (BR1/EUW1/KR/NA1/EUN1), com JSON
 bruto de partida e linha do tempo preservados para reprocessamento, e
 **96.716 jogos profissionais**
-(2014-2026, Oracle's Elixir). O esquema relacional contempla partidas,
-times, participantes, jogadores, banimentos, eventos de item (com
-desfazimento de compras/vendas aplicado) e um catálogo de itens para
-resolução de nome/ícone sem depender de conhecimento genérico de modelo
-de linguagem.
+(2014-2026, Oracle's Elixir). O Quadro 1 resume as tabelas do banco; os
+campos e as chaves de cada uma estão no Apêndice A.
+
+Quadro — Tabelas do banco de dados e o que cada uma guarda
+
+| Tabela | Conteúdo |
+|---|---|
+| `players` | jogadores Challenger e Grão-Mestre obtidos pela *league-v4* |
+| `raw_matches`, `raw_timelines` | JSON bruto da partida e da linha do tempo, para reprocessar sem nova coleta |
+| `matches` | uma linha por partida: região, fila, versão do jogo e duração |
+| `teams` | resultado e objetivos de cada time na partida |
+| `participants` | desempenho de cada jogador na partida |
+| `bans` | campeões banidos por time |
+| `item_events`, `items` | compras e vendas de itens, já com desfazimentos aplicados, e o catálogo de itens |
+| `pro_games`, `pro_players` | jogos e jogadores profissionais (Oracle's Elixir) |
 
 A coleta seguiu de forma incremental e o volume cresceu ao longo do
 trabalho: 10.295 partidas na primeira base ampla, 23.133 no retreino de
@@ -800,27 +807,28 @@ viés de lado (Seção 5.3).
 
 ### 5.3 Análise exploratória: padrões identificados (objetivo d)
 
-*(Nota sobre as bases usadas nesta seção e na modelagem: a análise
+(Nota sobre as bases usadas nesta seção e na modelagem: a análise
 descritiva, este quadro, o viés de lado e o teste de faixa de duração,
 foi medida sobre as **41.063 partidas** que o banco tem ao fim da coleta.
 As *features* e os modelos foram construídos antes da última rodada da
 KR e usam a base anterior de **39.426 partidas**, das quais 39.309 geraram
-*features* e 39.188 chegam ao corte de 15 minutos. Por isso a Seção 5.4,
-os Apêndices B e C e o Anexo A citam 39.426. A diferença são 1.637
+*features* e 39.188 chegam ao corte de 15 minutos. Por isso a Seção 5.4 e
+o Apêndice C citam 39.426. A diferença são 1.637
 partidas, quase todas da KR: das 1.754 partidas do banco que ainda não
 geraram *features*, 1.647 são da KR e 107 são de três outras regiões.
 Os modelos não foram retreinados sobre a base nova: as 1.637 partidas a
 mais alterariam a amostra de treino em cerca de 4%, dentro do que a
 própria discussão de volume mediu como ganho real, e não justificam
 descartar um modelo cujo desempenho já foi medido e validado. É uma
-limitação declarada, registrada na Seção 5.8.)*
+limitação declarada, registrada na Seção 5.8.)
 
 
 **Viés de lado no *solo queue* de elo alto.** No agregado das cinco
 regiões coletadas, o time vermelho venceu com mais frequência que o
-azul, com intensidade variável por região. Medição direta em SQL,
-2026-10-04, sobre as 41.063 partidas da base final (o volume foi ampliado
-especificamente para fortalecer este quadro; ver Apêndice E):
+azul, com intensidade variável por região. O Quadro 2 traz a medição
+direta em SQL, de 2026-10-04, sobre as 41.063 partidas da base final (o
+volume foi ampliado especificamente para fortalecer este quadro; ver
+Apêndice E):
 
 Quadro — Vitória do time vermelho por região
 
@@ -940,12 +948,17 @@ depende da amostra.
 A faixa de +4.000 a +6.000 no cenário profissional apoia-se em apenas 72 jogos
 e deve ser lida como indicativa; a conclusão sobre conversão de vantagem se
 apoia na faixa de +2.000 a +4.000. A origem destas taxas está no Apêndice E.
+A Figura 1 mostra as duas comparações na tela Competitivo da plataforma,
+com o cenário profissional restrito a 2026; por isso o azul aparece com
+53,1%, e não com os 53,2% do acervo completo.
+
+Figura — Tela Competitivo: viés de lado e conversão de vantagem de ouro, solo queue × profissional de 2026 | reports/figuras_texto/fig_competitivo.png
 
 ### 5.4 Modelagem preditiva e comparação entre modelos (objetivo e)
 
-Após ajuste de hiperparâmetros (*GridSearchCV*, validação cruzada
-estratificada de 5 *folds*) sobre o corte de 15 minutos, no conjunto
-final de 39.188 partidas:
+O Quadro 3 compara os três modelos após ajuste de hiperparâmetros
+(*GridSearchCV*, validação cruzada estratificada de 5 *folds*) sobre o
+corte de 15 minutos, no conjunto final de 39.188 partidas:
 
 Quadro — Comparação entre modelos (corte de 15 minutos)
 
@@ -955,10 +968,10 @@ Quadro — Comparação entre modelos (corte de 15 minutos)
 | MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
 | *Random Forest* | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
 
-*(taxa de vitória do time azul na amostra: 46,6%; medição do retreino de
+(taxa de vitória do time azul na amostra: 46,6%; medição do retreino de
 2026-10-04, sobre as 39.188 partidas do corte de 15 min, com validação
 cruzada estratificada de 5 *folds* e semente 42. Reproduzível por
-`python -m src.models.multi_cutoff_metrics`.)*
+`python -m src.models.multi_cutoff_metrics`.)
 
 Os três modelos performaram de forma próxima entre si, com o XGBoost
 adotado como modelo de produção pela estabilidade da faixa intermediária:
@@ -969,10 +982,21 @@ consistente na faixa em que a previsão é usada. Modelos independentes
 foram treinados para os quatro cortes temporais, com desempenho crescente
 conforme a partida avança (medido com os hiperparâmetros de produção, sobre
 a base de 39.426 partidas, congelada antes da rodada final): AUC-ROC de
-0,774 (10min), 0,847 (15min), 0,876 (20min) e 0,909 (25min). É um resultado
+0,774 (10min), 0,847 (15min), 0,876 (20min) e 0,909 (25min), como mostra o
+Quadro 4. É um resultado
 esperado, já que mais informação está disponível em cortes mais
 tardios, mas que só se sustenta porque um modelo *por fase* foi
-treinado especificamente para cada corte.
+treinado especificamente para cada corte. As métricas dos três modelos
+nos quatro cortes estão no Apêndice C.
+
+Quadro — Desempenho do XGBoost por corte temporal
+
+| Corte | Partidas | Acurácia | AUC-ROC |
+|---|---:|---:|---:|
+| 10 min | 39.309 | 0,7004 | 0,7742 |
+| 15 min | 39.188 | 0,7621 | 0,8473 |
+| 20 min | 34.337 | 0,7917 | 0,8762 |
+| 25 min | 26.837 | 0,8241 | 0,9090 |
 
 A análise de importância de variáveis (SHAP, valor médio absoluto por
 *feature*) mostrou a diferença de ouro e de experiência como os fatores
@@ -988,7 +1012,12 @@ contínuo. Esse comportamento é consistente com a mecânica do jogo, em
 que as placas de defesa das torres caem por volta dos 14 minutos,
 tornando destruições de torre um evento raro (e pouco informativo) antes
 disso; é a justificativa concreta para treinar um modelo *por fase*
-em vez de um único modelo genérico. A calibração é uma preocupação
+em vez de um único modelo genérico. A Figura 2 mostra essa evolução na
+aba de explicabilidade do Simulador.
+
+Figura — Importância média de cada variável (|SHAP|) nos quatro cortes temporais | reports/figuras_texto/fig_shap_fases.png
+
+A calibração é uma preocupação
 conhecida em modelos de *boosting*, cujas probabilidades podem se distorcer
 (Niculescu-Mizil e Caruana, 2005). Aqui, a curva de calibração mostrou que
 os modelos, especialmente o XGBoost, já produziam probabilidades bem
@@ -998,10 +1027,28 @@ calibradas sem necessidade de recalibração adicional.
 variáveis (objetivos neutros, dispersão espacial do time, itens, visão,
 placas de torre e percentis comportamentais do jogador, entre outras) não
 produziram ganho de desempenho estatisticamente distinguível de ruído, com
-deltas de AUC-ROC na ordem de ±0,001-0,003. A lista completa, com o resultado
-de cada uma, está no Apêndice D. O único caso em que o desempenho piorou de
-forma mensurável foi o tipo do dragão (`monsterSubType`: AUC-ROC de 0,8319 para
-0,8295). Em contraste, o
+deltas de AUC-ROC na ordem de ±0,001-0,003. O Quadro 5 lista as onze, com o
+resultado de cada uma; as notas sobre três delas estão no Apêndice D. O único
+caso em que o desempenho piorou de forma mensurável foi o tipo do dragão
+(`monsterSubType`: AUC-ROC de 0,8319 para 0,8295).
+
+Quadro — Experimentos negativos de enriquecimento de *features*
+
+| # | Experimento | Resultado |
+|---|---|---|
+| 1 | Diferença de abates de Barão/Arauto | Δ AUC ≈ ruído (±0,001-0,003) |
+| 2 | Dispersão espacial do time | Δ AUC ≈ ruído |
+| 3 | Tuning específico por fase | Δ AUC ≈ ruído |
+| 4 | Calibração adicional (além da já obtida) | sem ganho — modelos já calibrados |
+| 5 | Ouro convertido em itens | Δ AUC ≈ ruído |
+| 6 | Separação de features defensivas/ofensivas | Δ AUC ≈ ruído |
+| 7 | `item_gold_diff` (segunda tentativa, refeita) | Δ AUC ≈ ruído |
+| 8 | Visão (ward_diff / ward_kill_diff) | Δ AUC ≈ ruído |
+| 9 | Dragões por tipo (`monsterSubType`) | **AUC piorou** (0,8319 → 0,8295), sobre a base de 23.133 partidas |
+| 10 | Placas de torre (`plate_diff`, `TURRET_PLATE_DESTROYED`) | Δ AUC -0,0002 (cortes 10 e 15 min, base de 39.188-39.309) |
+| 11 | Percentis comportamentais (`teamwork_pct_diff`/`expertise_pct_diff`, `lol-challenges-v1`) | Δ AUC -0,0031/+0,0007 (corte 15 min, n=2.987, piloto de n=199 sugeriu sinal que não se sustentou) |
+
+Em contraste, o
 aumento do *volume* de partidas produziu ganhos reais e consistentes: o
 AUC-ROC do
 XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133 partidas) e
@@ -1023,15 +1070,17 @@ sinalizada como tal na interface para não ser confundida com predição
 por modelo), estado de jogo (predição pelo modelo de produção) e
 explicabilidade (SHAP).
 
-A Figura 2 exibe o painel de indicadores agregados, incluindo a leitura de
-viés de lado por região que fundamenta a Seção 5.3; a Figura 4 mostra a
-análise de uma partida individual, com o mapa de calor de posicionamento e
-a evolução das variáveis ao longo da partida; a Figura 3 traz o detalhe de
-um campeão, com os itens finalizados extraídos das *timelines*; e a Figura
-6 apresenta o simulador com o estado de jogo e a explicação por SHAP, na
-mesma tela em que a previsão é exibida. A Figura 5 traz a comparação com o
-cenário profissional discutida adiante, e a Figura 1 a tela inicial da
-plataforma.
+A Figura 3 mostra a análise de uma partida individual: o mapa de calor de
+posicionamento no minuto escolhido, a diferença de ouro ao longo da partida
+e os objetivos de cada time até aquele minuto. A Figura 4 mostra o
+simulador no estado de jogo: o usuário define as diferenças aos 15
+minutos, o modelo de produção devolve a probabilidade de vitória do time
+azul e o SHAP decompõe essa probabilidade por variável, na mesma tela. As
+seis telas completas estão no Apêndice F.
+
+Figura — Análise de partida: mapa de calor, diferença de ouro e objetivos até o minuto 14 | reports/figuras_texto/fig_partida.png
+
+Figura — Simulador, aba Estado: probabilidade de vitória e contribuição de cada variável (SHAP) | reports/figuras_texto/fig_simulador_estado.png
 
 ### 5.6 Interface em linguagem natural (objetivo g)
 
@@ -1042,7 +1091,24 @@ queue* e 4 sobre o dataset competitivo), medida de forma estável ao
 longo de sessões de revisão sucessivas. As três falhas remanescentes
 pertencem à mesma família benigna: diferenças de formatação ou coluna
 extra na resposta, não erros de interpretação da pergunta ou de geração
-de SQL incorreto.
+de SQL incorreto. O Quadro 6 agrupa as 26 perguntas pelo tipo de consulta
+que exigem; as perguntas e as consultas de referência estão no Apêndice B.
+
+Quadro — Acurácia de execução por tipo de pergunta do benchmark
+
+| Tipo de pergunta | Perguntas | Acertos |
+|---|---|---:|
+| Agregação simples (contagem ou média) | 1, 3, 4, 6, 7, 8, 11, 13, 14, 15, 18, 20 | 12 de 12 |
+| Ranking ou agrupamento | 2, 9, 10, 16, 17, 19 | 6 de 6 |
+| Ranking com mínimo de jogos | 5, 12, 22 | 0 de 3 |
+| Junção com a tabela de jogadores | 21 | 1 de 1 |
+| Dataset competitivo | 23, 24, 25, 26 | 4 de 4 |
+| **Total** | **26** | **23 de 26 (88%)** |
+
+A Figura 5 mostra uma consulta na plataforma: a pergunta 9 do benchmark,
+a SQL gerada pelo modelo, já validada, e o resultado lido do banco.
+
+Figura — Consulta em linguagem natural: pergunta, SQL gerada e resultado | reports/figuras_texto/fig_nlq.png
 
 ---
 
@@ -1466,7 +1532,7 @@ Linguistics, 2020. p. 396-411. DOI: 10.18653/v1/2020.emnlp-main.29.
 
 ---
 
-## APÊNDICE A — Esquema relacional do banco de dados
+## APÊNDICE A – Esquema relacional do banco de dados
 
 O banco de dados (PostgreSQL) foi estruturado com as tabelas listadas
 no Quadro a seguir. `raw_matches`/`raw_timelines` preservam o JSON
@@ -1499,7 +1565,7 @@ linguagem natural.
 
 ---
 
-## APÊNDICE B — Benchmark da interface em linguagem natural
+## APÊNDICE B – Benchmark da interface em linguagem natural
 
 Execução em 2026-10-04 sobre a base de produção de **41.063 partidas**:
 **23/26 = 88% de acurácia de execução**, com o comando
@@ -1557,7 +1623,7 @@ do mesmo benchmark.
 
 ---
 
-## APÊNDICE C — Métricas completas por corte temporal
+## APÊNDICE C – Métricas completas por corte temporal
 
 Quadro reproduzido por `python -m src.models.multi_cutoff_metrics`, que
 avalia os três modelos nos quatro cortes com validação cruzada estratificada
@@ -1566,6 +1632,8 @@ de 5 *folds* (semente 42) usando os **mesmos hiperparâmetros de produção**
 do quadro anterior, agora regenerável por comando. Executado em 2026-10-04
 sobre a base de 39.426 partidas. Os valores do corte de 15 min reproduzem os
 já citados na Seção 5.4.
+
+Quadro — Métricas completas por corte temporal, comparação entre os três modelos
 
 | Corte | n | Taxa vitória azul | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
 |---|---:|---:|---|---:|---:|---:|---:|---:|
@@ -1595,23 +1663,10 @@ comando que regenera este quadro é
 
 ---
 
-## APÊNDICE D — Experimentos negativos de enriquecimento de features
+## APÊNDICE D – Notas sobre os experimentos negativos
 
-Quadro — Experimentos negativos de enriquecimento de *features*
-
-| # | Experimento | Resultado |
-|---|---|---|
-| 1 | Diferença de abates de Barão/Arauto | Δ AUC ≈ ruído (±0,001-0,003) |
-| 2 | Dispersão espacial do time | Δ AUC ≈ ruído |
-| 3 | Tuning específico por fase | Δ AUC ≈ ruído |
-| 4 | Calibração adicional (além da já obtida) | sem ganho — modelos já calibrados |
-| 5 | Ouro convertido em itens | Δ AUC ≈ ruído |
-| 6 | Separação de features defensivas/ofensivas | Δ AUC ≈ ruído |
-| 7 | `item_gold_diff` (segunda tentativa, refeita) | Δ AUC ≈ ruído |
-| 8 | Visão (ward_diff / ward_kill_diff) | Δ AUC ≈ ruído |
-| 9 | Dragões por tipo (`monsterSubType`) | **AUC piorou** (0,8319 → 0,8295), sobre a base de 23.133 partidas |
-| 10 | Placas de torre (`plate_diff`, `TURRET_PLATE_DESTROYED`) | Δ AUC -0,0002 (cortes 10 e 15 min, base de 39.188-39.309) |
-| 11 | Percentis comportamentais (`teamwork_pct_diff`/`expertise_pct_diff`, `lol-challenges-v1`) | Δ AUC -0,0031/+0,0007 (corte 15 min, n=2.987, piloto de n=199 sugeriu sinal que não se sustentou) |
+Os onze experimentos estão no Quadro 5 da Seção 5.4. Três deles pedem
+detalhe que não cabe no quadro.
 
 *Nota sobre o experimento 4.* A ausência de ganho de AUC da calibração foi
 reexaminada em 2026-10-04, quando a limitação de taxa-base da Seção 5.8
@@ -1660,9 +1715,9 @@ e cerca de 130× o menor deles (0,0002).
 
 ---
 
-## APÊNDICE E — Proveniência das medições da Seção 5.3
+## APÊNDICE E – Proveniência das medições da Seção 5.3
 
-**Histórico do Quadro 1.** O quadro original, medido em 2026-07-06 com BR1
+**Histórico do Quadro 2.** O quadro original, medido em 2026-07-06 com BR1
 11.936, EUW1 1.307, NA1 1.367 e KR 1.308 partidas, foi substituído por uma
 segunda rodada de coleta destinada especificamente a ampliar EUW1, KR e NA1, e
 depois pela medição de 2026-10-04, quando EUW1 e KR já haviam quase dobrado
@@ -1680,42 +1735,31 @@ distintas, 39.188 no corte de 15 minutos) pelo script
 
 ---
 
-## ANEXO A — Capturas de tela da plataforma
+## APÊNDICE F – Telas completas da plataforma
 
-Geradas em 2026-10-20 às 12:21 via Playwright (Chromium, 1440 px de largura,
-altura ajustada à página, sem `full_page`, **tema escuro**) contra a API e o
-*frontend* rodando localmente, com **41.063 partidas** na fila ranqueada, a
-mesma base do Quadro 1 da Seção 5.3. O instante e a base não são afirmados por
-memória: estão em `reports/anexo_a/captura.json`, gravado pelo comando que
-produz as telas, e é esse arquivo que sustenta a afirmação.
-
-Esta é a quarta geração de capturas; a de 2026-10-04 foi refeita só porque a
-interface exibia uma frase sem fonte ("a literatura aponta leve vantagem azul"),
-trocada por texto que descreve os dados medidos. As de 2026-09-28 (24.154 partidas)
-ficaram desatualizadas na tabela regional (NA1 = 1.446, contra os 7.159 do
-texto); as de 2026-10-04 pela manhã (39.426, tema claro) ficaram
-desatualizadas quando a última rodada de coleta da KR levou o banco a 41.063.
-À parte o número, o tema claro produzia capturas de fundo branco sobre a
-página branca do `.docx`, com baixo contraste visual. A geração atual resolve
-as duas coisas: usa `ANEXO_TEMA=dark` (variável de ambiente do comando, padrão
-`dark`) para capturar com o tema escuro da própria interface, aplicado via
-`localStorage` antes do React montar, não por filtro de imagem, e reflete o
-banco no instante da captura. Arquivos em `reports/anexo_a/` (não versionados
-neste Markdown; inserir como figura ao converter para o `.docx` final). O
-comando que as regera é `python docs/recapturar_anexo_a.py`.
+As seis telas, inteiras, das quais a Seção 5 mostra recortes. Geradas em
+2026-10-28 via Playwright (Chromium, 1440 px de largura, altura ajustada à
+página, sem `full_page`, **tema escuro**) contra a API e o *frontend*
+rodando localmente, com **41.063 partidas** na fila ranqueada, a mesma base
+do Quadro 2 da Seção 5.3. O instante e a base estão em
+`reports/anexo_a/captura.json`, gravado pelo comando que produz as telas
+(`python docs/recapturar_anexo_a.py`); os recortes da Seção 5 têm o próprio
+registro, `reports/figuras_texto/figuras.json`, gravado por
+`python docs/capturar_figuras_texto.py`. O tema escuro é o da própria
+interface, aplicado antes de a página montar, e não um filtro de imagem.
 
 | Arquivo | Página |
 |---|---|
 | `reports/anexo_a/01_inicio.png` | Início (busca unificada) |
 | `reports/anexo_a/02_dashboard.png` | Dashboard (KPIs, viés de lado por região, cobertura do dataset) |
 | `reports/anexo_a/03_campeoes.png` | Campeões |
-| `reports/anexo_a/04_partida_detalhe.png` | Partidas — análise de uma partida individual |
+| `reports/anexo_a/04_partida_detalhe.png` | Partidas: análise de uma partida individual |
 | `reports/anexo_a/05_competitivo.png` | Competitivo (solo queue × profissional) |
-| `reports/anexo_a/06_simulador.png` | Simulador (Composição/Estado/Explicabilidade) |
+| `reports/anexo_a/06_simulador.png` | Simulador, aba Estado |
 
 ---
 
-## ANEXO B — Documentação da Riot Games API
+## ANEXO A – Documentação da Riot Games API
 
 Referência: RIOT GAMES. **APIs**. Disponível em:
 https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*

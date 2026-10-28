@@ -267,9 +267,15 @@ de escopo, não uma lista de pendências ativas.
 
 **O TCC II está escrito e fechado (2026-10-04), revisado ponta a ponta
 em 2026-10-05 (Blocos A-E, ver diário).** `docs/tcc2_texto.md`
-→ `docs/build_tcc_docx.py` → `docs/tcc2_final.docx` (53 páginas, corpo
-30, dentro da faixa institucional 25-30 — **sem folga**, qualquer
-acréscimo de texto no corpo estoura o teto; 32 referências, Apêndices A-E.
+→ `docs/build_tcc_docx.py` → `docs/tcc2_final.docx`. **ACIMA DO LIMITE
+(2026-10-23):** pela régua certa (do Resumo, página 1, até o fim das
+Referências; ver diário 2026-10-23) o corpo tem **35 páginas** para um
+limite de 30. A contagem antiga ("30") parava no início das Referências.
+Redução em andamento conforme `docs/plano_reducao_corpo.md`, com quadros e
+figuras voltando para o texto a pedido do orientador (etapa 1 feita em
+2026-10-28: 6 quadros e 5 figuras recortadas na Seção 5, gerados por
+`docs/capturar_figuras_texto.py`; corpo medido em 39). 32 referências,
+Apêndices A-F (F = telas inteiras), Anexo A (documentação da Riot).
 O Apêndice E recebeu as notas de proveniência da Seção 5.3, movidas do
 corpo em 2026-10-20 para abrir espaço às citações novas). Suíte completa verde:
 `tests/smoke_test.py`, `tests/validate_predictions.py` (aprovado com

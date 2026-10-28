@@ -1622,7 +1622,10 @@ def pro_overview(year: int | None = None):
     return {
         "year": year,
         "games": games,
-        "blue_win_rate": round(float(blue_wr), 4),
+        # 6 casas, não 4 (2026-10-28): 0,530534 virava 0,5305 aqui e o front
+        # arredondava de novo, mostrando 53,0% contra os 53,1% do TCC (SQL
+        # direto). Arredondar duas vezes erra o meio; o front formata.
+        "blue_win_rate": round(float(blue_wr), 6),
         "avg_game_min": round(float(avg_min), 1),
         "leagues": leagues,
     }

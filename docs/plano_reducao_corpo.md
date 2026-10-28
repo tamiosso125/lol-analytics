@@ -1,138 +1,131 @@
-# Plano de contingência — reduzir o corpo do TCC, se precisar abrir espaço
+# Plano de redução do corpo — quadros e figuras no texto, prosa resumida
 
-## Por que este documento existe
+> **Substitui o plano de contingência anterior (2026-10-05/20).** Aquele
+> plano partia de uma medição errada: o `finalize-fields.ps1` contava da
+> Introdução até a página em que REFERÊNCIAS *começa* e reportava "30/30".
+> A régua certa, confirmada nos 10 TCC II aprovados em 2026-10-23, vai da
+> página do título/Resumo (número 1) até a **última** página das
+> Referências. Por ela o documento tinha **37 páginas**; as correções de
+> formatação de 2026-10-23 (Referências em espaçamento simples, entre
+> outras) baixaram para **35**. O limite é **30**.
 
-Em 2026-10-05 (Bloco E da revisão completa) o corpo do TCC II (Seção 1
-até o início de REFERÊNCIAS, medido por `docs/finalize-fields.ps1`)
-fechou em **30 páginas — o teto exato da faixa institucional 25-30**.
-Não há folga: qualquer frase nova dentro das Seções 1-6 empurra o corpo
-para fora da faixa permitida, e só se descobre isso rodando o pipeline
-completo (`build_tcc_docx.py` → `finalize-fields.ps1`), não lendo o
-Markdown.
+## Ponto de partida (medido em 2026-10-23)
 
-Se o orientador ou a banca pedir acréscimo de texto no corpo — uma
-discussão mais longa, um parágrafo de limitação adicional, resposta a
-uma pergunta de defesa incorporada ao texto — este plano é o ponto de
-partida: o que cortar primeiro, por quê, e quanto cada corte libera.
-Não é para ser executado agora (o TCC está fechado); é para não
-precisar redescobrir, sob pressão de prazo, onde o texto tem gordura e
-onde é osso.
+| Bloco | Páginas | Observação |
+|---|---|---|
+| Título + Resumo + Abstract | 2,0 | p. 1–2 numeradas; não encolhe sem mexer no Resumo |
+| Corpo (Seções 1–6) | ~29,6 | 10.636 palavras + Quadros 1 e 2 → **~368 palavras/página** |
+| Referências | ~3,3 | 32 entradas; não encolhe |
+| **Total contado** | **35** | limite 30 |
 
-## Regra de ouro ao aplicar qualquer corte
+Palavras por seção hoje: Introdução 1.293 · Fundamentação 1.493 ·
+Trabalhos Relacionados 1.225 · Metodologia 1.469 · **Resultados 4.222** ·
+Conclusão 934.
 
-1. Aplicar um tier por vez, do mais seguro para o mais arriscado —
-   parar assim que as páginas necessárias estiverem liberadas.
-2. Depois de cada corte: `build_tcc_docx.py` → `finalize-fields.ps1`
-   (mede o corpo de novo) → `docs/verifica_tcc.py` → `docs/confere_docx.py`.
-   Um corte que tira um número que o `verifica_tcc.py` cruza contra
-   artefato quebra a suíte — ajustar a checagem junto, nunca remover a
-   checagem pra fazer passar.
-3. Nenhum corte deste plano apaga dado medido. Nos Tiers 0 e 1 a
-   informação continua no documento (só muda de lugar ou de nível de
-   detalhe); no Tier 2, qualquer coisa removida teria que ir para o
-   diário de execução antes de sair do `.md`, para não se perder — a
-   regra do projeto é "número sempre vem de artefato real", e isso vale
-   também para não destruir o rastro depois de ele existir.
+## A decisão que muda o plano: quadros e figuras voltam para o texto
 
-> **Executado em 2026-10-20** (ao inserir 14 referências novas, o corpo
-> foi a 31 páginas): 0b (lista dos 11 experimentos da 5.4 trocada por
-> remissão ao Apêndice D) e metade de 0a (a "Nota de método" do Quadro 1 e
-> a origem das taxas de conversão foram para o novo **Apêndice E**; a "Nota
-> sobre as bases" ficou na 5.3 porque a checagem 18 do `verifica_tcc.py` a
-> exige). Corpo voltou a 30/30. **O teto continua sem folga**: o que ainda
-> pode sair sem perda é só a "Nota sobre as bases" e o Tier 1.
+O orientador comentou que, com tudo nos apêndices, o texto perde o
+sentido: o leitor lê "ver Quadro 3" e precisa ir até o fim do documento.
+Então os elementos visuais que o texto discute **entram no corpo**, em
+versão compacta, e os apêndices ficam com a versão completa (quando ela
+existir). Isso **custa** páginas, e o custo sai da prosa.
 
-## Tier 0 — mover para apêndice (perda de informação: zero)
+| Elemento | Hoje | Vai para | Formato no texto | Custo estimado |
+|---|---|---|---|---|
+| Quadro 1 (viés por região) | 5.3 | fica | igual | já contado |
+| Quadro 2 (modelos, 15 min) | 5.4 | fica | igual | já contado |
+| Esquema do banco | Apêndice A | 5.2 | quadro compacto: tabela → o que guarda | ~0,5 p. |
+| Métricas por corte | Apêndice C | 5.4 | só AUC e acurácia do XGBoost nos 4 cortes (ou fundido ao Quadro 2) | ~0,35 p. |
+| Experimentos negativos | Apêndice D | 5.4 | 11 linhas: experimento → ΔAUC | ~0,5 p. |
+| Benchmark NLQ | Apêndice B | 5.6 | resumo por tipo de pergunta (acertos/total) | ~0,3 p. |
+| Capturas de tela | Anexo A | 5.3, 5.5, 5.6 | **recortes** da parte que o texto discute, ~8 cm de altura | ~0,45 p. cada |
 
-A Seção 5 (Resultados) tem 445 linhas de Markdown — mais que o dobro de
-qualquer outra seção do corpo (Introdução 179, Fundamentação 180,
-Trabalhos Relacionados 129, Metodologia 160, Conclusão 110). É aqui que
-sobra texto para mover, não nas outras seções.
+Figuras candidatas (5, recortadas): viés por região no Dashboard (o
+recorte já existe), mapa de calor da Partida (recorte já existe),
+Competitivo solo queue × profissional, Simulador (estado + SHAP) e a
+consulta em linguagem natural. Início e Campeões ficam fora do corpo.
 
-**0a. As três notas de método em itálico da Seção 5.2/5.3** já são
-parentéticas — o texto principal funciona sem elas, só perde a
-proveniência detalhada dos números:
-- "Nota sobre as bases usadas nesta seção e na modelagem" (após o
-  título 5.3, ~14 linhas) — explica a diferença entre 41.063 e 39.426.
-- "Nota de método: quadro original..." (depois do Quadro 1, ~19 linhas)
-  — histórico das três rodadas de medição do viés de lado.
-- Parêntese final de "Conversão de vantagem" (~7 linhas) — aponta o
-  script e a base usada.
+Efeito colateral bom: as capturas são material **do próprio autor**, e o
+modelo oficial reserva "Anexo" para material de terceiros. O que sobrar do
+Anexo A vira **Apêndice F**; o Anexo B (documentação da Riot) continua
+anexo.
 
-Juntas, ~40 linhas densas (≈1 página impressa). Mover as três para um
-novo "Apêndice E — Notas de proveniência das bases e medições" (ou para
-dentro do Apêndice C, que já é sobre métricas por corte) libera essa
-página inteira sem tirar uma frase do trabalho — elas continuam
-citáveis e citadas (ex.: "ver Apêndice E" no lugar do parêntese).
-**Maior ganho por menor risco deste plano — primeiro candidato.**
+## Orçamento
 
-**0b. A lista de 11 experimentos enumerados por nome na Seção 5.4**
-("diferença de abates de Barão/Arauto, dispersão espacial do time,
-ajuste de hiperparâmetros..." — linhas ~1006-1021 do
-`tcc2_texto.md` atual) **duplica, com menos detalhe, a tabela que já
-existe no Apêndice D** (Quadro — Experimentos negativos, com resultado
-por linha e notas individuais dos experimentos 4/10/11). Trocar a
-enumeração por uma frase curta — "onze tentativas de enriquecimento de
-variáveis não produziram ganho estatisticamente distinguível de ruído
-(Apêndice D)" — mantendo os números de volume que vêm logo depois
-(esses são o achado real da subseção, não a lista). Libera ~12-15
-linhas sem apagar nada: o detalhe already existe no Apêndice D.
+- Meta: **29 páginas**, não 30. Uma página de folga porque a paginação do
+  Word muda de máquina para máquina (fonte, impressora padrão).
+- Corpo disponível: 29 − 2,0 (Resumo/Abstract) − 3,3 (Referências) =
+  **~23,7 páginas**.
+- Visuais no corpo: ~2,3 (quadros) + ~2,25 (5 figuras) = **~4,5 páginas**.
+- Sobra para prosa: ~19,2 páginas × 368 ≈ **~7.000 palavras**.
+- **Hoje são 10.636. Corte necessário: ~3.600 palavras (≈ 34%).**
 
-Estimativa combinada do Tier 0: **~1,5 página**. Como o corpo está
-exatamente no teto (30/30), isso por si só devolve folga para 1-2
-parágrafos novos sem tocar em conteúdo nenhum.
+## Alvo por seção
 
-## Tier 1 — condensar (perda: baixa, pede revisão de quem escreveu)
+| Seção | Hoje | Alvo | Onde está a gordura |
+|---|---|---|---|
+| 1 Introdução | 1.293 | 850 | 1.2 Delimitação e 1.5 Justificativa repetem a abertura; o modelo pede 6–7 parágrafos na introdução |
+| 2 Fundamentação | 1.493 | 1.000 | 2.2 e 2.3 (~380 cada); o modelo pede "1 ou 2 parágrafos por subseção" |
+| 3 Trabalhos Relacionados | 1.225 | 850 | 3.6 Síntese (407) pode cair à metade; manter os ≥ 5 trabalhos que o modelo exige |
+| 4 Metodologia | 1.469 | 950 | 4.7 (317) antecipa o que a 5.5/5.6 mostra; 4.3 Coleta detalha o que a 5.2 repete |
+| 5 Resultados | 4.222 | 2.450 | 5.3 (1.510 → 900): o histórico das medições já está no Apêndice E; 5.7 (517 → 300); **5.8 (950) sai do corpo e se funde com a 6.1** |
+| 6 Conclusão | 934 | 850 | recebe as limitações fundidas: a 6.1 passa a ser a única lista de limitações |
+| **Total** | **10.636** | **~6.950** | |
 
-**1a. Repetição de números do viés de lado por região.** As taxas de
-BR1/EUW1/KR/NA1 aparecem por completo pelo menos três vezes: no Quadro
-1 (5.3), na nota de método logo depois (já candidata ao Tier 0), e de
-novo na bateria de testes de robustez (5.3) e na limitação
-"Desequilíbrio de amostra por região" (5.8). Manter os números só no
-Quadro 1 e, nas outras três ocorrências, referenciar ("conforme o
-Quadro 1") em vez de reafirmar os quatro percentuais — a direção do
-argumento não precisa dos números repetidos para se sustentar.
+A 5.8 e a 6.1 hoje dizem duas vezes o que o trabalho não sustenta (viés
+subestimado na taxa-base, modelo sem a última rodada, desequilíbrio por
+região, ausência de dados de onda). Fundir as duas é o maior ganho sem
+perda: ~700 palavras.
 
-**1b. Os dois primeiros itens da Seção 5.8 (Limitações)** — a
-discrepância de taxa-base e a diferença entre a base do modelo e a base
-do banco — são, cada um, parágrafos de 15-25 linhas com nível de
-detalhe de apêndice (grade search completo, as três alavancas
-testadas, o comando exato). O achado (existe discrepância, foi
-investigada, não é subajuste) cabe em metade do espaço sem perder a
-conclusão; o detalhe do procedimento já está, em grande parte, também
-no texto de `docs/experimento_calibracao.py` e no próprio artefato
-JSON. Resumir mantendo a conclusão e o ponteiro pro artefato, cortando
-a narrativa passo a passo de qual alavanca foi tentada em qual ordem.
+## Etapa 1 executada (2026-10-28): visuais no texto, custo medido
 
-Estimativa combinada do Tier 1: **~1 página**, com revisão (não é corte
-mecânico — exige reler para garantir que a conclusão continua
-sustentada sem a repetição).
+Entraram no corpo 6 quadros e 5 figuras recortadas:
 
-## Tier 2 — cortar de verdade (perda real de conteúdo — último recurso)
+| Seção | Quadros | Figuras |
+|---|---|---|
+| 5.2 | Q1 tabelas do banco (compacto; completo no Apêndice A) | — |
+| 5.3 | Q2 viés por região | F1 Competitivo (viés + conversão de vantagem) |
+| 5.4 | Q3 modelos a 15 min · Q4 XGBoost por corte · Q5 experimentos negativos (subiu do Apêndice D) | F2 importância SHAP por fase |
+| 5.5 | — | F3 análise de partida · F4 Simulador, aba Estado |
+| 5.6 | Q6 benchmark por tipo de pergunta | F5 consulta NL |
 
-**2a. Seção 5.7 (Os resultados frente à literatura)** tem cinco
-parágrafos, um por referência de Trabalhos Relacionados, 8-10 linhas
-cada. É o tipo de seção que a banca costuma valorizar (mostra que o
-autor sabe posicionar o próprio trabalho), então cortar aqui tem custo
-acadêmico, não só de espaço — fazer por último, e preferir condensar
-(2-3 frases por referência) a eliminar alguma comparação inteira.
-Estimativa: ~0,5-1 página, só se os Tiers 0 e 1 não bastarem.
+As telas inteiras viraram **Apêndice F** (autoria própria); o anexo que
+sobrou, a documentação da Riot, virou **Anexo A**.
 
-**2b. Bullets finais da Seção 5.8** (cobertura por patch, ausência de
-micro-posicionamento, monotonicidade isolada) são mais curtos e menos
-centrais ao argumento principal do trabalho do que os dois primeiros.
-Eliminar um deles inteiro (não condensar — remover) é o corte de maior
-risco deste plano: mexe na lista de limitações declaradas, que a banca
-pode perguntar sobre diretamente. Só considerar se nada mais for
-suficiente, e registrar no diário de execução o que foi removido e por
-quê, antes de apagar do `.md`.
+**Medido:** 35 → **39 páginas** (Resumo até o fim das Referências). Os
+visuais custaram 4 páginas, perto da estimativa de 4,5. A Figura 3 deixa
+meia página em branco porque a Figura 4 não cabe embaixo dela; isso se
+resolve sozinho quando o texto em volta encolher, e é a última coisa a
+ajustar (a paginação muda a cada corte).
 
-## Se o pedido for o oposto — abrir espaço cortando dos pré/pós-textuais
+**Alvo de palavras recalculado:** 39 → 29 páginas = **10 páginas de prosa**,
+a ~368 palavras/página ≈ **3.700 palavras**. O corpo tinha 10.636; com os
+parágrafos novos que citam quadros e figuras, o corte é de ~35%.
 
-Apêndices e Anexos **não contam** para o limite de 25-30 páginas do
-corpo (confirmado em `docs/finalize-fields.ps1` — o corpo é medido de
-"1 INTRODUÇÃO" até o início de "REFERÊNCIAS"). Então, se o problema for
-"documento geral ficou grande demais" e não especificamente o corpo
-regulado, mexer lá (ex.: Apêndice C mais enxuto) não resolve o teto do
-corpo — só ajuda a legibilidade geral. Os dois problemas são
-independentes; este plano é só sobre o corpo.
+## Ordem de execução (uma etapa por vez, com sua aprovação)
+
+1. **Inserir os visuais no texto primeiro.** É mecânico e mede o custo
+   real, que hoje é estimativa. Depois disso o alvo de palavras é
+   recalculado com o número medido.
+2. **Seção 5**, a maior: fundir a 5.8 na 6.1, condensar a 5.3 e a 5.7.
+3. **Seção 6**: reescrever a 6.1 como a lista única de limitações.
+4. **Seção 4**, depois a **2**, depois a **3**, por último a **1**.
+5. **Resumo e Abstract**: conferir se ainda descrevem o texto (ex.: a
+   menção a "páginas de visualização").
+
+Depois de **cada** etapa: `build_tcc_docx.py` → `finalize-fields.ps1`
+(mede) → `verifica_tcc.py` → `confere_docx.py` → você lê a seção no
+`.docx`.
+
+## Regras para cada corte
+
+- **Nenhum número sai sem destino.** Número medido que deixa o corpo vai
+  para um apêndice ou fica no `diario_execucao.md`; o `verifica_tcc.py`
+  cruza vários deles contra artefato, e checagem que quebrar é ajustada
+  junto, nunca apagada.
+- **Resumir, não reescrever.** Mantém as conclusões e as citações; sai a
+  narrativa de processo ("primeiro tentamos X, depois Y"), a repetição e o
+  detalhe de procedimento que já está em apêndice.
+- **Cada referência continua citada no corpo**, senão ela sai da lista
+  (regra ABNT, checada pelo `confere_docx.py`).
+- Texto cortado de uma seção não volta em outra.

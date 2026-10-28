@@ -86,7 +86,7 @@ export function Competitivo() {
           {p.games.toLocaleString("pt-BR")} jogos profissionais de {p.year} (LPL, LCK, LEC e
           mais — dados do Oracle's Elixir; o acervo completo cobre 2014-2026), lado a lado
           com as {s ? s.matches.toLocaleString("pt-BR") : "…"} partidas de solo queue
-          Challenger/GM BR da plataforma. Mesmas métricas, dois contextos — e nem sempre a
+          Challenger/GM da plataforma (cinco regiões). Mesmas métricas, dois contextos — e nem sempre a
           mesma conclusão.
         </PageHeader>
         <label className="flex shrink-0 items-center gap-2 pb-1 text-xs text-muted-ink">
@@ -139,7 +139,7 @@ export function Competitivo() {
               {pct(p.blue_win_rate)}
             </span>
             <p className="mt-1 text-xs text-muted-ink">
-              no solo queue BR: {s ? pct(s.blue_win_rate) : "…"}
+              no solo queue: {s ? pct(s.blue_win_rate) : "…"}
             </p>
           </CardContent>
         </Card>
@@ -153,17 +153,21 @@ export function Competitivo() {
           {s && (
             <>
               <SideBar label="Competitivo 2026 (mundial)" blueWr={p.blue_win_rate} />
-              <SideBar label="Solo queue Challenger/GM BR" blueWr={s.blue_win_rate} />
+              {/* "BR" saiu do rótulo em 2026-10-28: o número vem das cinco
+                  regiões coletadas (41.063 partidas), não só do BR1 */}
+              <SideBar label="Solo queue Challenger/GM (cinco regiões)" blueWr={s.blue_win_rate} />
             </>
           )}
+          {/* Sem "a literatura aponta...": frase sem fonte, tirada do Dashboard e da
+              Home em 2026-10-20 e que tinha ficado aqui. A explicação é HIPÓTESE (é
+              assim que o TCC a trata, Seção 5.3), não fato. */}
           <Takeaway>
-            a literatura que aponta "leve vantagem azul" descreve bem o pro play — no
-            competitivo o azul vence {pct(p.blue_win_rate)}, puxado pela prioridade de
-            primeiro pick (tanto que times escolhem lado nos playoffs). No solo queue de elo
-            altíssimo a lógica vira: sem draft coordenado de 5 pessoas, o counter-pick
-            garantido do vermelho pesa mais e o azul cai para{" "}
-            {s ? pct(s.blue_win_rate) : "…"}. Mesma métrica, sinais opostos — qualquer
-            análise precisa dizer de QUAL contexto está falando.
+            no competitivo o azul vence {pct(p.blue_win_rate)}; no solo queue de elo
+            altíssimo, só {s ? pct(s.blue_win_rate) : "…"}. Hipótese: no pro, a prioridade
+            de primeiro pick pesa (times escolhem lado nos playoffs); no solo queue, sem
+            draft coordenado de 5 pessoas, o counter-pick garantido do vermelho pesa mais.
+            Mesma métrica, sinais opostos — qualquer análise precisa dizer de QUAL contexto
+            está falando.
           </Takeaway>
         </CardContent>
       </Card>
@@ -196,7 +200,7 @@ export function Competitivo() {
                   wrapperStyle={{ fontSize: 12 }}
                   formatter={(v: string) => (
                     <span style={{ color: "var(--secondary-ink)" }}>
-                      {v === "competitivo" ? "Competitivo" : "Solo queue BR"}
+                      {v === "competitivo" ? "Competitivo" : "Solo queue"}
                     </span>
                   )}
                 />

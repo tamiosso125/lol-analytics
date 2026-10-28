@@ -1,5 +1,5 @@
 VITORIA DO TIME VERMELHO POR REGIAO — fila ranqueada 420
-medido em: 2026-10-20
+medido em: 2026-10-28
 
 team_id = 200 (vermelho), agregado por partida antes de contar:
 'win' e por jogador, cinco por partida, entao a media direta sobre

@@ -849,9 +849,32 @@ powershell -ExecutionPolicy Bypass -File docs\finalize-fields.ps1
 
 `pandoc` (winget install JohnMacFarlane.Pandoc) e `python-docx` (já no venv).
 
+### `docs/capturar_figuras_texto.py`
+
+Gera as cinco figuras do **corpo** do TCC (Seção 5): recortes do painel que
+o texto discute, não a tela inteira. Entrou em 2026-10-28, quando o
+orientador pediu figuras junto do texto e não no fim do documento.
+
+```powershell
+.venv\Scripts\python.exe docs\capturar_figuras_texto.py
+```
+
+Recorta por **elemento**: cada figura é a caixa que envolve os cards
+nomeados pelo título (Competitivo; mapa de calor + objetivos da partida;
+Simulador nas abas Estado e Explicabilidade; uma consulta NL). Se o layout
+mudar, o recorte acompanha. Usa `device_scale_factor=2` para o texto dos
+eixos não serrilhar a 15 cm de largura. A figura da consulta NL roda de
+verdade a pergunta 9 do benchmark (chama a API da Anthropic) e grava a SQL
+gerada em `reports/figuras_texto/figuras.json`, junto do instante e da base.
+No `.docx`, cada figura entra por um marcador no Markdown:
+`Figura — Título | reports/figuras_texto/arquivo.png`.
+
 ### `docs/recapturar_anexo_a.py`
 
-Regrava as seis capturas do Anexo A contra a API e o frontend de produção.
+Regrava as seis telas inteiras do **Apêndice F** (eram Anexo A até
+2026-10-28) contra a API e o frontend de produção. No Simulador, abre a aba
+Estado com o mesmo estado da figura do corpo (a aba padrão é um formulário
+vazio).
 
 ```powershell
 # API em :8000 e o build do frontend servido na porta LIBERADA NO CORS

@@ -65,8 +65,10 @@ export function ExplainPanel() {
       <p className="max-w-3xl text-sm leading-relaxed text-secondary-ink">
         Um modelo que só diz "azul vence com 78%" é uma caixa-preta. Os valores SHAP abrem
         essa caixa: eles decompõem cada predição na contribuição exata de cada fator, o que
-        torna o modelo auditável (metodologia de Hodge et al., 2021, com explicabilidade via
-        SHAP).
+        torna o modelo auditável (valores SHAP de Lundberg e Lee, 2017).
+        {/* Até 2026-10-28 dizia "metodologia de Hodge et al., 2021, com explicabilidade
+            via SHAP": Hodge et al. é predição em Dota 2 e não usa SHAP (ver Seção 3.1
+            do TCC). A referência do SHAP é Lundberg e Lee. */}
       </p>
 
       <Card>
