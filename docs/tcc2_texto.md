@@ -583,7 +583,7 @@ Quadro — Tabelas do banco de dados e o que cada uma guarda
 
 | Tabela | Conteúdo |
 |---|---|
-| `players` | jogadores Challenger e Grão-Mestre obtidos pela *league-v4* |
+| `players` | jogadores Desafiante e Grão-Mestre obtidos pela *league-v4* |
 | `raw_matches`, `raw_timelines` | JSON bruto da partida e da linha do tempo, para reprocessar sem nova coleta |
 | `matches` | uma linha por partida: região, fila, versão do jogo e duração |
 | `teams` | resultado e objetivos de cada time na partida |
@@ -702,7 +702,7 @@ Quadro — Comparação entre modelos (corte de 15 minutos)
 Os três modelos ficaram próximos. O XGBoost foi adotado em produção pela
 estabilidade na faixa intermediária, e não por vencer em todos os cortes:
 aos 10 minutos o MLP o supera em acurácia (0,7020 contra 0,7004) e aos 25
-iguala seu AUC (0,9072 contra 0,9090). Com um modelo treinado para cada
+chega a 0,002 do seu AUC (0,9072 contra 0,9090). Com um modelo treinado para cada
 corte, com os mesmos hiperparâmetros e sobre a base de 39.426 partidas, o
 desempenho cresce conforme a partida avança: AUC-ROC de 0,774 aos 10
 minutos a 0,909 aos 25 (Quadro 4). As métricas dos três modelos nos
@@ -782,8 +782,9 @@ Figura — Simulador, aba Estado: probabilidade de vitória e contribuição de 
 O *pipeline* de consulta em linguagem natural (*text-to-SQL* com
 validação estrutural antes da execução) atingiu **88% de acurácia de
 execução**: 23 de 26 perguntas de referência, 22 sobre *solo queue* e 4
-sobre o dataset competitivo, com o mesmo resultado em execuções
-sucessivas (Apêndice B). As três falhas pertencem à mesma família: todas
+sobre o dataset competitivo. O mesmo resultado saiu em três execuções
+em datas diferentes; uma quarta, feita durante a coleta, deu 22 de 26 por
+interferência da escrita no banco (Apêndice B). As três falhas pertencem à mesma família: todas
 pedem um mínimo de jogos e erram na formatação ou numa coluna a mais na
 resposta, não na interpretação da pergunta. O Quadro 6 agrupa as 26
 perguntas pelo tipo de consulta que exigem.
@@ -828,7 +829,7 @@ para ser útil, foi atendida com o SHAP na interface e com um módulo de
 orientação que cita o dado real de cada recomendação. Jiang et al. (2025)
 e Guo et al. (2024) fundamentam a consulta a dados estruturados por
 modelos de linguagem; este trabalho acrescenta a validação da consulta
-antes da execução, que eles não detalham. O mapa de calor aplica, de forma
+antes da execução. O mapa de calor aplica, de forma
 mais simples, a visualização espaço-temporal de Wallner, Wang e Dormann
 (2023), sem a técnica de *storyline* dos autores.
 
@@ -911,7 +912,7 @@ Por isso nenhuma orientação da plataforma que dependa de itemização ou de
 ondas vem do modelo, e a interface a marca como inferência geral.
 
 **Validade externa.** Os resultados de *solo queue* vêm da fila ranqueada,
-nas faixas Challenger e Grão-Mestre, em cinco regiões, quatro delas com
+nas faixas Desafiante e Grão-Mestre, em cinco regiões, quatro delas com
 amostra suficiente e desiguais entre si: BR1 e EUW1 concentram a maior
 parte das partidas, e a KR tem intervalo que inclui 50%. Um único *patch*
 concentra a maior parte da coleta. Não há base para estender as taxas por
@@ -950,7 +951,7 @@ simulador de time. O terceiro é a investigação de restrições de
 monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto
 é a extensão do recorte de validade externa, que passaria por coletar
 outras filas e, eventualmente, outro jogo, de modo a testar se o viés
-de lado descreva o jogo ou o modo de jogar de uma população específica.
+de lado descreve o jogo ou o modo de jogar de uma população específica.
 ---
 
 ## REFERÊNCIAS
