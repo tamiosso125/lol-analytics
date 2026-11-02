@@ -943,8 +943,64 @@ ao ouro só porque o número é maior).
 
 **Ponto forte:** consegue aprender combinações complexas sozinha.
 **Ponto fraco:** precisa de **muitos** dados e cuidado. O texto diz:
-"restrição relevante numa amostra da ordem de dezenas de milhares, não
-milhões". Por isso ela não superou as árvores.
+"restrição relevante numa amostra de dezenas de milhares de partidas, e
+não de milhões".
+
+**Como foi implementada (conferido no código, 2026-11-02):**
+
+```python
+make_pipeline(StandardScaler(),
+              MLPClassifier(hidden_layer_sizes=(64, 32),
+                            max_iter=500, random_state=42))
+```
+
+- **Arquitetura:** 5 entradas → 64 → 32 → 1 saída. São **2.497 pesos**
+  aprendidos (5×64+64 = 384; 64×32+32 = 2.080; 32×1+1 = 33), pouco para 39
+  mil partidas.
+- **Padrões do scikit-learn 1.9 usados:** ativação **ReLU** nas camadas
+  escondidas; saída **logística** (probabilidade); perda logarítmica;
+  otimizador **Adam** com taxa 0,001; regularização `alpha` 0,0001; lotes de
+  200 partidas; para em 500 épocas ou após 10 épocas sem melhora.
+- **Treino, em uma frase:** pesos aleatórios (semente 42) → previsão → erro
+  pela perda logarítmica → retropropagação calcula a culpa de cada peso →
+  Adam corrige → repete lote a lote.
+- **Normalização dentro do pipeline:** sem vazamento (Parte 9.6).
+- **Convergência:** no piloto de 98 partidas não convergiu (aviso
+  registrado no diário de 2026-07-01); com milhares, convergiu.
+
+**Histórico de desempenho (AUC aos 15 min, MLP × XGBoost):** 7.353
+partidas sem ajuste 0,8050 × 0,8144; ajustada (32 neurônios, alpha 0,01)
+0,8278 × 0,8260; 10.295 partidas ajustada 0,8325 × 0,8319; base final
+(Quadro 3, configuração de referência 64/32) 0,8455 × 0,8473.
+
+**Por que não foi a de produção:** empate técnico em desempenho (XGBoost
+igual ou melhor em AUC nos quatro cortes e em acurácia em três), e a
+explicação: para árvores o SHAP usa o `TreeExplainer`, exato e rápido; para
+uma rede do scikit-learn usaria o `KernelExplainer`, aproximado e muito
+mais lento, ruim para a tela interativa.
+
+**PONTO DE ATENÇÃO, a comparação do Quadro 3 (achado em 2026-11-02).** A
+5.4 diz que o Quadro 3 compara os três "após ajuste de hiperparâmetros",
+mas na base final só o XGBoost passou pela busca em grade; a *Random
+Forest* (500 árvores, sem limite de profundidade) e o MLP (64, 32) estão na
+configuração de referência. A busca foi rodada para os outros dois sobre as
+mesmas 39.188 partidas (`tune_models_full --completo`, gravado em
+`reports/tune_models_39k.json`) e medida do mesmo jeito do Quadro 3:
+
+| 15 min | Acurácia | AUC |
+|---|---|---|
+| XGBoost (produção) | **0,7621** | 0,8473 |
+| MLP ajustada: (32), alpha 0,001 | 0,7619 | **0,8477** |
+| *Random Forest* ajustada: 200 árvores, profundidade 6, folha 5 | 0,7617 | 0,8468 |
+
+Empate técnico. O XGBoost segue com a maior acurácia, o critério do
+Apêndice G, e a conclusão não muda. Mas o Quadro 3 subestima a *Random
+Forest* e o MLP, e a banca pode notar que o Apêndice G cita uma *Random
+Forest* de profundidade 6 a 0,0005 da AUC do XGBoost, enquanto o Quadro 3
+dá 0,8277 a ela. **Resposta pronta:** "Na base final, ajustei por busca em
+grade o XGBoost. Rodando a mesma busca para a *Random Forest* e a rede, os
+três ficam a menos de 0,001 em AUC e em acurácia. É empate técnico, e o
+XGBoost segue com a maior acurácia, o critério que defini."
 
 ### 9.6 Validação cruzada estratificada de 5 *folds* (semente 42)
 
@@ -1488,6 +1544,37 @@ UNISINOS**. Confirme com o orientador.
   divisão treino/teste e número de dobras, vazamento de dados (inclusive
   no pré-processamento), *overfitting* e generalização.
 
+**Como responder (pesquisa de 2026-11-02, fontes de preparação para
+defesa; são conselhos práticos, não norma):**
+
+- Ouça a pergunta inteira antes de começar. Se não entendeu, peça para
+  reformular; isso não é sinal de despreparo.
+- "Deixa eu pensar um instante" é uma resposta válida. A banca prefere
+  uma pausa a uma resposta apressada.
+- Se não souber, **não blefe**: muitas vezes o avaliador sabe a resposta e
+  está testando a honestidade. Diga "não medi isso neste trabalho", ofereça
+  o que o trabalho mostra de mais próximo e, se couber, diga que é um
+  desdobramento para trabalhos futuros.
+- Pergunta que aponta uma fraqueza: concorde com o que for verdade, diga
+  onde está declarado no texto e por que não invalida o achado. Não
+  responda na defensiva.
+- Treine **em voz alta**; pensar a resposta em silêncio não basta.
+
+**Slides e demo:**
+
+- 1 slide por minuto, no máximo; para 20 minutos, entre 12 e 20 slides. Uma
+  ideia por slide, fonte de 24 pt ou mais. O erro mais comum é tentar mostrar
+  tudo.
+- Ensaie com cronômetro pelo menos três vezes. Estourar o tempo costuma
+  contar contra.
+- Demo ao vivo convence mais que captura de tela, mas só com 3 a 5 coisas.
+  Deixe o ambiente pronto (API e *frontend* rodando) antes de a banca
+  entrar.
+- **Grave um vídeo da demo** funcionando, para o caso de algo falhar, e
+  leve os slides em PDF num pendrive. Abra a apresentação no equipamento
+  da sala antes, se puder: outro computador pode desmontar transições e
+  fontes.
+
 **O que confirmar com o orientador:** tempo de apresentação e de
 arguição, quem são os membros (e a área de cada um, para prever o tipo de
 pergunta), se haverá projetor e se a demo ao vivo é bem-vinda, e a política
@@ -1716,7 +1803,19 @@ participação de pessoas. O que foi medido é a acurácia do modelo e da
 interface em linguagem natural. Avaliação de usabilidade seria um trabalho
 futuro natural."
 
-**40. "Quanto custa rodar a interface em linguagem natural?"** Não há
+**40. "Por que tanto texto nos apêndices?"** Comparação feita em
+2026-11-02 com os 10 TCC II aprovados da pasta de exemplos: 7 têm
+apêndice, e todos usam o apêndice para **material** (link do GitHub,
+figuras de teste, questionários, entrevistas, termos, fotos, circuitos).
+Nenhum tem notas em prosa como os nossos D, E e G. O modelo do professor
+permite ("texto ou documento elaborado pelo próprio autor, com a finalidade
+de complementar seu trabalho"), então não é erro, mas foge do costume.
+Resposta: "O corpo tem tudo o que sustenta as conclusões, dentro das 30
+páginas. Os apêndices guardam o detalhe para quem quiser conferir: a origem
+de cada número, os comandos que reproduzem cada resultado e as limitações
+com os números. Nada que a conclusão use está só no apêndice."
+
+**41. "Quanto custa rodar a interface em linguagem natural?"** Não há
 medição de custo no TCC; não invente número. Diga que usa um modelo
 pequeno da Anthropic (Haiku), com `max_tokens` 1.200 por consulta, e que o
 custo por pergunta não foi objeto do trabalho.

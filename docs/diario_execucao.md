@@ -4803,6 +4803,28 @@ partidas, um minuto sorteado de cada, então a frase da 3.2 está correta. Os
 ~150 mil jogos do último *patch* são da análise de desempenho individual, e
 o guia, que os atribuía à calibração, foi corrigido.
 
+**Achado: a comparação do Quadro 3 não está toda ajustada.** A 5.4 diz
+"compara os três modelos após ajuste de hiperparâmetros", mas
+`multi_cutoff_metrics.py` usa *Random Forest* com 500 árvores e sem limite
+de profundidade e MLP (64, 32) com os padrões; só o XGBoost veio da busca em
+grade (na base de 10.295). Rodado `python -m src.models.tune_models_full
+--completo` sobre as 39.188 linhas (grava `reports/tune_models_39k.json`):
+melhor RF `max_depth=6, min_samples_leaf=5, n_estimators=200`, AUC média
+0,8470; melhor MLP `(32,)`, `alpha=0.001`, AUC média 0,8478. Medidos como
+no Quadro 3 (`cross_val_predict`, 5 dobras, semente 42, probabilidades
+agregadas; comando ad hoc nesta sessão, ainda sem script próprio):
+
+| 15 min | Acurácia | AUC |
+|---|---:|---:|
+| XGBoost 500/0,01/3 | 0,7621 | 0,8473 |
+| MLP (32,), alpha 0,001 | 0,7619 | 0,8477 |
+| RF 200, prof. 6, folha 5 | 0,7617 | 0,8468 |
+
+Empate técnico; o XGBoost mantém a maior acurácia (critério do Apêndice
+G), a MLP ajustada tem a maior AUC por 0,0004. A conclusão não muda, mas a
+frase da 5.4 e as linhas de RF e MLP do Quadro 3 descrevem configurações
+não ajustadas. Texto do TCC **não alterado**; decisão com o autor.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
