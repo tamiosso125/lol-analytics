@@ -457,12 +457,13 @@ A coleta usou duas fontes. A segunda foi incorporada durante o TCC II,
 além do escopo previsto no TCC I.
 
 **a) Riot Games API (*solo queue*).** O endpoint *league-v4* identificou
-os jogadores dos elos Desafiante e Grão-Mestre, o *account-v1* resolveu o
-Riot ID, e o *match-v5* e o *timeline-v5* trouxeram cada partida e sua
-linha do tempo minuto a minuto. A coleta cobriu cinco regiões (BR1, EUW1,
-KR, NA1 e EUN1, esta com amostra insuficiente e fora da leitura) na fila
-420 (ranqueada solo/duo), num total de **41.063 partidas**, com o JSON
-bruto preservado para reprocessamento. Como a chave de desenvolvedor
+os jogadores dos elos Desafiante e Grão-Mestre, recorte de escopo: uma
+população fechada, que a API lista por inteiro e que cabe no limite de
+requisições da chave de desenvolvedor. O *account-v1* resolveu o Riot ID,
+e o *match-v5* e o *timeline-v5* trouxeram cada partida e sua linha do
+tempo minuto a minuto. A coleta cobriu cinco regiões (BR1, EUW1, KR, NA1 e
+EUN1, esta com amostra insuficiente e fora da leitura) na fila 420
+(ranqueada solo/duo), num total de **41.063 partidas**. Como a chave de desenvolvedor
 expira a cada 24 horas, o coletor retoma de onde parou e pula as partidas
 já salvas.
 

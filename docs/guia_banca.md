@@ -378,13 +378,29 @@ milhões de partidas).
 uma regressão logística com minuto, abates, torres e monstros grandes, e
 **exclui o ouro de propósito** (diz que a diferença de ouro engana conforme o
 jogo avança); o nosso usa ouro e experiência, e o SHAP mostra o ouro como fator
-dominante. Na leitura completa (commit a6d0b12), o modelo de probabilidade
-aparece calibrado em ~150 mil partidas do último *patch*, metade de Bronze
-e menos de 1% de Mestre/Desafiante, bem diferente do nosso elo alto. O TCC
-segue o resumo, que fala em milhões de partidas ranqueadas; se a banca
-apontar a diferença, diga que o resumo descreve o volume de dados do
-estudo e que a calibração usou o recorte do último *patch* (confira no PDF
-antes, se tiver acesso). Os
+dominante. **Conferido no texto completo em 2026-11-02** (o artigo é de
+acesso aberto, CC BY 4.0): o modelo de probabilidade em jogo usa **milhões
+de partidas**, com um minuto sorteado de cada partida ("milhões de linhas
+independentes"), então o TCC está certo. Os **~150 mil** são outra coisa:
+as partidas do último *patch* usadas na análise de desempenho individual
+(percentis e a regressão sobre os "pacotes" de estatísticas), das quais
+metade é Bronze e menos de 1% é Mestre ou Desafiante, bem diferente do nosso
+elo alto. A nota anterior deste guia misturava os dois números.
+
+**Três pontos do Maymin que ajudam na banca:**
+1. Ele cita o Hodge e diz que o Hodge treina **um modelo por minuto**,
+   enquanto ele preferiu **um modelo único** para todos os minutos. O seu
+   trabalho fica no meio: um modelo por **fase** (quatro cortes), e o SHAP
+   das torres mostra por que separar fases faz diferença.
+2. Ele escreve que, em trabalho exploratório, **acrescentar variáveis não
+   melhorou** o modelo de probabilidade. É o mesmo que os seus 11
+   experimentos negativos mostraram.
+3. Ele sorteia **um minuto por partida** porque linhas seguidas da mesma
+   partida são muito correlacionadas. No seu desenho, cada modelo tem uma
+   linha por partida (o estado naquele corte), então o problema não aparece
+   dentro de um mesmo modelo.
+
+Os
 80% de acerto do artigo vêm de uma árvore que prevê o resultado do time pelo
 desempenho individual no fim da partida; não é previsão em tempo de jogo e não
 é comparável à nossa acurácia.
@@ -561,8 +577,9 @@ e o número de jogadores é pequeno o bastante para coletar com a chave de
 desenvolvedor (100 pedidos a cada 2 minutos). Cobrir todos os elos
 exigiria amostragem por faixa e muito mais tempo de coleta. O custo do
 recorte está declarado: os resultados não valem para outros elos (Seção
-6.1, validade externa). O texto do TCC não escreve esse motivo; ele está só
-aqui e no site de estudo.
+6.1, validade externa). Desde 2026-11-02 o motivo está escrito no TCC, na
+Seção 4.3 a): "recorte de escopo: uma população fechada, que a API lista por
+inteiro e que cabe no limite de requisições da chave de desenvolvedor".
 
 **Resposta pronta:** "Foi uma decisão de escopo. O topo do ranking é uma
 população fechada, que a API entrega inteira e que dava para coletar com a

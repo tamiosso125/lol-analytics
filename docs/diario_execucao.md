@@ -4780,6 +4780,29 @@ conferidos; "Challenger" × "Desafiante"). Mais cinco decisões aprovadas:
 
 Documento segue em 29 páginas.
 
+## 2026-11-02 — Decisões confirmadas pelo autor, motivo do elo alto no texto, Maymin conferido
+
+**Três decisões que não tinham registro escrito**, confirmadas pelo autor:
+(1) comparar XGBoost com *Random Forest* e redes neurais veio de uma
+conversa com o orientador, para ver as diferenças de resultado (a
+justificativa formal segue a do TCC I, 4.6); (2) Desafiante e Grão-Mestre
+por escopo; (3) 5 dobras e não as 10 do Kohavi por custo computacional, com
+~7.800 partidas por dobra de teste e a mesma divisão em todos os scripts.
+Registradas em `docs/guia_banca.md`.
+
+**4.3 a)** ganhou o motivo do recorte de elo: "recorte de escopo: uma
+população fechada, que a API lista por inteiro e que cabe no limite de
+requisições da chave de desenvolvedor". Para compensar, saiu da mesma
+frase "com o JSON bruto preservado para reprocessamento", que a 5.2 já
+diz. `verifica_tcc.py` consistente, `confere_docx.py` conforme, documento
+em 29 páginas.
+
+**Maymin (2021) lido no texto completo** (acesso aberto, CC BY 4.0, página
+da De Gruyter Brill): o modelo de probabilidade em jogo usa milhões de
+partidas, um minuto sorteado de cada, então a frase da 3.2 está correta. Os
+~150 mil jogos do último *patch* são da análise de desempenho individual, e
+o guia, que os atribuía à calibração, foi corrigido.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
