@@ -20,7 +20,7 @@
 2. League of Legends para quem nunca jogou (você vai precisar explicar)
 3. O problema, a pergunta de pesquisa e os objetivos
 4. Metodologia de pesquisa e pesquisa bibliográfica
-5. Os trabalhos relacionados (os 7 estudos) e as obras de método
+5. Os trabalhos relacionados (os 11 estudos), como foram escolhidos, e as obras de método
 6. Os dados: de onde vieram e como foram coletados
 7. O banco de dados e o tratamento (ETL)
 8. As *features*: o que o modelo enxerga
@@ -100,7 +100,7 @@ base do outro. Uma partida dura em média uns 26 minutos.
 | **Minion / onda (*wave*)** | Soldadinhos que andam sozinhos pelas rotas. A posição das ondas importa muito para jogadores experientes, mas a Riot **não grava** isso. |
 | ***Solo queue*** | A fila ranqueada: jogadores entram sozinhos (ou em dupla) e o jogo monta times com desconhecidos. Fila 420 na API. |
 | **Elo** | O nível/ranking do jogador. Do mais baixo ao mais alto: Ferro... até Mestre, **Grão-Mestre** e **Desafiante** (os topos). |
-| **Elo alto** | Neste TCC: Desafiante e Grão-Mestre, o topo do topo de cada região. |
+| **Elo alto** | Neste TCC: Desafiante e Grão-Mestre, o topo do topo de cada região. Escolhido **por escopo** (confirmado por você em 2026-11-02): ver Parte 6.1. |
 | ***Draft* / seleção de campeões** | A fase antes do jogo em que cada time escolhe e bane campeões, alternadamente. |
 | ***Counter-pick*** | Escolher um campeão que é forte contra o que o inimigo já escolheu. Quem escolhe por último tem essa vantagem. |
 | ***Patch*** | Atualização do jogo que muda o balanceamento (ex.: 16.13). |
@@ -136,7 +136,7 @@ cumprido? onde?".
 | Objetivo | O que pede | Onde está o resultado | Resposta curta |
 |---|---|---|---|
 | **a** | Mapear dados e recursos da Riot API | Seção 5.1 | Usados 4 endpoints: league-v4, account-v1, match-v5, timeline-v5 |
-| **b** | Identificar quais informações organizar | Seção 5.2 | Esquema relacional com 11 tabelas (Apêndice A) |
+| **b** | Identificar quais informações organizar | Seção 5.2 | Quadro 1 (tabelas do banco) e esquema completo no Apêndice A |
 | **c** | Estruturar coleta e tratamento | Seção 5.2 | Coletor resumível, 41.063 partidas |
 | **d** | Avaliar análise de dados para achar padrões | Seção 5.3 | Viés de lado, conversão de vantagem |
 | **e** | Comparar XGBoost, Random Forest e redes neurais | Seção 5.4 | XGBoost venceu: 0,7621 / 0,8473 |
@@ -196,8 +196,8 @@ São os "procedimentos" usados:
 
 | Estratégia | O que é | Como apareceu no TCC | Referência |
 |---|---|---|---|
-| **Pesquisa bibliográfica** | Estudar o que já foi publicado (artigos, livros) | Os 7 trabalhos relacionados e as 6 obras de método | Gil (2002) |
-| **Pesquisa documental** | Estudar documentos que não são artigos científicos (manuais, documentação técnica) | A documentação oficial da Riot Games API (Anexo B) | Prodanov e Freitas (2013) |
+| **Pesquisa bibliográfica** | Estudar o que já foi publicado (artigos, livros) | Os 11 estudos de domínio e as 15 obras de método | Gil (2002) |
+| **Pesquisa documental** | Estudar documentos que não são artigos científicos (manuais, documentação técnica) | A documentação oficial da Riot Games API (Anexo A) | Prodanov e Freitas (2013) |
 | **Estudo de caso / estudo aplicado** | Estudar um caso específico em profundidade | O caso de *League of Legends* | Yin (2018) |
 
 **Diferença entre bibliográfica e documental (pergunta clássica):**
@@ -267,7 +267,7 @@ domínio, que representam o estado da arte do tema, são todos de 2021 a
 
 ---
 
-## 5. Os trabalhos relacionados (os 7 estudos) e as obras de método
+## 5. Os trabalhos relacionados (os 11 estudos), como foram escolhidos, e as obras de método
 
 O TCC separa duas coisas (Seção 3, início):
 
@@ -347,10 +347,9 @@ Intelligent Systems)
 **Os 4 estudos acrescentados em 2026-10-20 (todos de LoL, Seção 3.2):**
 
 **8. Jadowski e Cunningham (2022)** (ArtsIT, Springer): ajustaram
-classificadores estatísticos a métricas dos campeonatos internacionais
-profissionais de 2020 e acertaram **67% de 306 jogos**. Dado tirado do
-texto do preprint de Guan e Tung, que os cita (confira no artigo, DOI
-10.1007/978-3-030-95531-1_10).
+classificadores estatísticos a métricas das ligas profissionais de 2020 e
+acertaram **67% dos 306 jogos da etapa seguinte** (é o que a Seção 3.2 diz).
+DOI 10.1007/978-3-030-95531-1_10.
 
 *Lido por inteiro em 2026-10-20.* Treinam com a etapa de primavera de 2020
 (882 jogos) e testam na de verão (306), então é previsão **pré-jogo com
@@ -369,16 +368,23 @@ ranqueada **antes de ela começar**, pela experiência de cada jogador com o
 campeão, com **75,1%** de acurácia (rede neural profunda). Autores: Do, Wang,
 Yu, McMillian e McMahan.
 
-**10. Maymin (2021)** (*Journal of Quantitative Analysis in Sports*): liga
-abates e mortes individuais à probabilidade de vitória; mostra que a
-telemetria do jogo carrega sinal preditivo.
+**10. Maymin (2021)** (*Journal of Quantitative Analysis in Sports*):
+calibra um modelo de probabilidade de vitória com dados de partidas
+ranqueadas e avalia cada ação individual pelo efeito que tem nessa
+probabilidade (é o que a Seção 3.2 diz, a partir do resumo, que fala em
+milhões de partidas).
 
 *Lido por inteiro em 2026-10-20.* O modelo de probabilidade de vitória dele é
 uma regressão logística com minuto, abates, torres e monstros grandes, e
 **exclui o ouro de propósito** (diz que a diferença de ouro engana conforme o
 jogo avança); o nosso usa ouro e experiência, e o SHAP mostra o ouro como fator
-dominante. Foi calibrado em ~150 mil partidas do último *patch*, metade de
-Bronze e menos de 1% de Mestre/Desafiante, bem diferente do nosso elo alto. Os
+dominante. Na leitura completa (commit a6d0b12), o modelo de probabilidade
+aparece calibrado em ~150 mil partidas do último *patch*, metade de Bronze
+e menos de 1% de Mestre/Desafiante, bem diferente do nosso elo alto. O TCC
+segue o resumo, que fala em milhões de partidas ranqueadas; se a banca
+apontar a diferença, diga que o resumo descreve o volume de dados do
+estudo e que a calibração usou o recorte do último *patch* (confira no PDF
+antes, se tiver acesso). Os
 80% de acerto do artigo vêm de uma árvore que prevê o resultado do time pelo
 desempenho individual no fim da partida; não é previsão em tempo de jogo e não
 é comparável à nossa acurácia.
@@ -405,17 +411,92 @@ Cada estudo cobre **uma frente isolada**:
 - visualização (Wallner)
 
 **Nenhum** entrega tudo junto numa plataforma só, sobre a mesma base de
-dados. **Essa é a lacuna.** E a diferença vai além da integração, em
-quatro eixos (decore os nomes):
+dados. **Essa é a lacuna.** O texto final (Seção 3.6) aponta também **três
+decisões de projeto** (decore os nomes):
 
-1. **Horizonte da predição:** eles preveem "ao vivo"; você usa um corte
-   de tempo controlado pelo experimento.
-2. **Fonte de dados:** eles usam bases prontas de terceiros; você coletou
-   direto da Riot (*timeline-v5*).
-3. **Recorte de população:** eles estudam profissionais; você contrapõe o
-   *solo queue* de elo alto **e** compara com o profissional.
-4. **Transparência:** nenhum deles mede a interface de linguagem natural
-   contra um *benchmark*; você mede (26 perguntas, 88%).
+1. **Horizonte da predição:** em vez de um único momento, quatro cortes
+   (10, 15, 20, 25 min), com um modelo por corte. Isso torna o desempenho
+   comparável ao longo da partida e mostra a importância das variáveis
+   mudando de fase para fase.
+2. **Recorte de população:** a maior parte dos estudos de predição atua
+   sobre o profissional, e os que usam ranqueadas (Do et al.; Maymin) não
+   comparam com ele. Você mede o mesmo indicador nos dois contextos e
+   mostra a inversão do viés de lado.
+3. **Consulta mensurável:** a interface em linguagem natural foi avaliada
+   no próprio domínio, com 26 perguntas fixas conferidas contra o banco, o
+   que torna o erro mensurável, e não ilustrativo.
+
+**Atenção:** versões antigas falavam em "quatro eixos", com "fonte de
+dados" (eles usam bases de terceiros) e "nenhum mede contra *benchmark*".
+Isso saiu do texto porque não estava conferido nos artigos, e porque Do et
+al. e Maymin também usam ranqueadas. Não use esses argumentos na banca.
+
+### 5.2.1 Como os trabalhos relacionados foram escolhidos (justificativa)
+
+A banca pode perguntar "por que esses trabalhos e não outros?". A
+resposta tem três partes: **de onde vieram**, **com que critério** e **o
+papel de cada um**.
+
+**De onde vieram (dois momentos):**
+
+1. **TCC I:** levantamento nas quatro frentes do projeto (esports/*game
+   analytics*, *machine learning* aplicado, interfaces em linguagem natural
+   e LLMs, sistemas e plataformas de dados), com triagem por título e
+   resumo. Daí vieram 5 dos 7 estudos originais (Parte 4.3).
+2. **TCC II (2026-10-20):** numa revisão de afirmações sem fonte, as
+   lacunas foram fechadas por pesquisa na web (18 → 32 referências). Entre
+   elas, quatro estudos **de LoL** (Jadowski e Cunningham, Do et al.,
+   Maymin, Guan e Tung), conferidos contra o texto dos artigos. Até ali o
+   único estudo de predição com número era o Hodge, de Dota 2; com os
+   quatro, a Seção 5.7 passou a comparar a acurácia com trabalhos do mesmo
+   jogo (diário de 2026-10-20).
+
+**Critérios de inclusão (diga assim):**
+
+- **Cobrir as frentes da plataforma:** cada estudo sustenta uma camada:
+  predição, explicabilidade, linguagem natural ou visualização. É por isso
+  que a Seção 3 tem as subseções 3.1 a 3.5, uma por frente.
+- **Recência:** o modelo do professor pede referências de até cinco anos;
+  os onze são de 2021 a 2026.
+- **Afinidade com o problema:** preferência por *League of Legends*; quando
+  o estudo é de outro jogo (Hodge, Dota 2) ou de outro domínio (SiriusBI e
+  Talk2Data, *Business Intelligence*), ele entra pelo **método**, e o texto
+  diz isso.
+- **Fonte com revisão por pares,** com uma exceção declarada: Guan e Tung
+  (2026) é *preprint*, e por isso é citado só como apoio à hipótese, nunca
+  como fonte de número.
+
+**O que ficou de fora:** do levantamento do TCC I não entraram, por
+exemplo, Honor of Kings (outro jogo, sem método aproveitado), player2vec e
+Chat2Data (técnicas que o projeto não usou: *deep learning* temporal, RAG)
+e o rastreamento óptico de 2018 (fora da janela de recência). Esses
+motivos são a leitura mais coerente com os critérios acima; não há
+registro escrito da exclusão de cada um, então fale em critérios, não em
+uma lista de rejeições.
+
+**O papel de cada estudo (uma frase cada):**
+
+| Estudo | Frente | Por que está no TCC |
+|---|---|---|
+| Hodge et al. (2021) | Predição | Mostra que prever pelo estado da partida é tratável; base da "opção B" |
+| Birant e Birant (2023) | Predição | Modelagem centrada no time; origem das *features* como diferenças |
+| Bahrololloomi et al. (2022) | Predição | O caminho oposto (por jogador); delimita a escolha e entra nos perfis |
+| Jadowski e Cunningham (2022) | Predição (LoL) | Comparação de acurácia (67%) e apoio ao 53,2% do azul (54,08%) |
+| Do et al. (2021) | Predição (LoL) | Comparação de acurácia pré-jogo (75,1%) em ranqueadas |
+| Maymin (2021) | Predição (LoL) | Modelo de probabilidade em ranqueadas; mostra que ninguém compara com o profissional |
+| Guan e Tung (2026) | Predição (LoL) | Lado e prioridade de escolha como covariáveis; apoio à hipótese do *draft* |
+| García-Méndez e Arriba-Pérez (2025) | Explicabilidade | "Previsão só é útil com explicação"; justifica o SHAP na tela |
+| Jiang et al. (2025) | Linguagem natural | LLM sobre dados estruturados (SiriusBI) |
+| Guo et al. (2024) | Linguagem natural | Interface NL com decomposição de perguntas (Talk2Data) |
+| Wallner, Wang e Dormann (2023) | Visualização | Tempo e posição juntos; referência do mapa de calor |
+
+**Resposta pronta:** "Os trabalhos foram escolhidos para cobrir cada
+camada da plataforma (predição, explicabilidade, linguagem natural e
+visualização), dentro da janela de cinco anos. O núcleo veio do
+levantamento do TCC I, triado por título e resumo; no TCC II acrescentei
+quatro estudos de *League of Legends* para ter com quem comparar a
+acurácia. Quando o estudo é de outro jogo ou outro domínio, ele entra pelo
+método, e o texto diz isso."
 
 ### 5.3 As 15 obras de método (Seções 2 e 4)
 
@@ -473,6 +554,21 @@ um pedido no formato combinado e recebe uma resposta com dados. A Riot
 estava no mapa, e todos os eventos (abates, torres, dragões) com o
 momento exato. É dela que saem as *features* e o mapa de calor.
 
+**Por que só Desafiante e Grão-Mestre? (confirmado por você em
+2026-11-02: questão de escopo).** O recorte delimita uma população finita e
+bem definida: a *league-v4* devolve a lista inteira desses elos por região,
+e o número de jogadores é pequeno o bastante para coletar com a chave de
+desenvolvedor (100 pedidos a cada 2 minutos). Cobrir todos os elos
+exigiria amostragem por faixa e muito mais tempo de coleta. O custo do
+recorte está declarado: os resultados não valem para outros elos (Seção
+6.1, validade externa). O texto do TCC não escreve esse motivo; ele está só
+aqui e no site de estudo.
+
+**Resposta pronta:** "Foi uma decisão de escopo. O topo do ranking é uma
+população fechada, que a API entrega inteira e que dava para coletar com a
+chave de desenvolvedor. O preço é a validade externa: os números não se
+estendem a outros elos, e isso está nas limitações."
+
 **Fluxo da coleta (em 2 passos):**
 1. `seed_players` busca, pela league-v4, os jogadores de elo alto de
    cada região e guarda na tabela `players`.
@@ -503,7 +599,7 @@ jogadores é por **plataforma** (br1, kr, euw1...), mas as partidas são
 por **região de roteamento** (americas, asia, europe). O cliente
 converte automaticamente (ex.: br1 e na1 → americas).
 
-**Quantas partidas, por região (base final, Quadro 1):**
+**Quantas partidas, por região (base final, Quadro 2):**
 
 | Região | Partidas |
 |---|---|
@@ -692,8 +788,25 @@ antigas seria usar dado do futuro. A solução foi testar só em partidas
    Random Forest e redes neurais". O TCC II cumpriu.
 2. **São três "famílias" diferentes** de modelo, cada uma com uma lógica.
    Comparar mostra qual combina melhor com esse tipo de dado, por
-   **medição**, não por preferência. (O texto diz: "critério técnico,
-   não preferência".)
+   **medição**, não por preferência. (A Seção 2.2 diz: "comparou três, por
+   medição, e não por preferência".)
+3. **Conversa com o orientador (confirmado por você em 2026-11-02):** além
+   do XGBoost, entraram *Random Forest* e redes neurais porque, numa
+   conversa com o orientador, ficou combinado que seria interessante ver
+   as diferenças de resultado entre as abordagens. O registro de
+   acompanhamento não detalha esse assunto (só "estrutura" e
+   "fundamentação"), então, se perguntarem onde está escrito, a
+   justificativa formal é a do TCC I, Seção 4.6: "analisar abordagens
+   distintas para dados competitivos, incluindo métodos amplamente
+   utilizados em dados tabulares e modelos neurais capazes de capturar
+   relações mais complexas entre variáveis".
+
+**Resposta pronta:** "O XGBoost era o candidato natural para dados em
+tabela. Conversando com o orientador, decidimos comparar com *Random
+Forest* e uma rede neural para ver as diferenças de resultado entre
+famílias de modelos: dois *ensembles* de árvores, um por *bagging* e outro
+por *boosting*, e uma rede neural. A comparação foi por medição, e os três
+ficaram próximos."
 
 ### 9.2 Primeiro: o que é uma árvore de decisão
 
@@ -841,9 +954,60 @@ qualquer um.)
 com uma divisão só, o resultado depende da sorte daquela divisão. Com 5,
 a média é mais confiável.
 
-### 9.7 Os resultados completos (Quadro 2 e Apêndice C)
+**Por que 5 e não 10 dobras? (pergunta provável, confirmado por você em
+2026-11-02).** O Kohavi (1995), que o TCC cita, recomenda validação cruzada
+estratificada com **10** dobras. O projeto usou 5 por custo: a busca em
+grade treina cada combinação uma vez por dobra (27 combinações no XGBoost,
+mais as grades da *Random Forest* e do MLP em `tune_models_full.py`), e 10
+dobras dobrariam o número de treinos. Com ~39 mil partidas, cada dobra de
+teste ainda tem perto de **7.800 partidas** (39.188 ÷ 5), amostra grande o
+bastante para a média ser estável. Do Kohavi, o projeto segue a parte
+central: validação cruzada **estratificada**. Um bônus: a mesma divisão
+(`StratifiedKFold(n_splits=5, random_state=42)`) é usada em todos os
+scripts (modelo de referência, busca em grade, os 11 experimentos), então
+toda comparação do trabalho é feita sobre as mesmas dobras.
 
-**Corte de 15 minutos (Quadro 2):**
+**Resposta pronta:** "O Kohavi recomenda 10 dobras. Usei 5 por custo
+computacional, porque a busca em grade treina cada combinação uma vez por
+dobra, nos três modelos. Com quase 40 mil partidas, cada dobra de teste tem
+cerca de 7.800, o que deixa a estimativa estável. A parte da recomendação
+que mais importa, a estratificação, foi seguida, e a mesma divisão vale
+para todos os experimentos."
+
+**Não exagere o custo.** A grade do XGBoost sobre as 39.188 partidas levou
+**51,7 segundos** (`reports/tune_models_39k.json`). Se a banca disser "então
+10 dobras custariam dois minutos", concorde: o custo pesava mais nas grades
+da *Random Forest* (500 árvores) e do MLP e na repetição dos 11
+experimentos, e o argumento principal é outro: com 7.800 partidas por dobra
+de teste, a diferença entre 5 e 10 dobras na estimativa é pequena, e manter
+a mesma divisão em todo o trabalho deixa os resultados comparáveis entre si.
+
+**Pergunta relacionada: "a busca em grade e a avaliação usaram as mesmas
+dobras? Isso não é otimista?"** Sim, as mesmas dobras, sem validação
+cruzada aninhada nem conjunto de teste separado. Em tese isso dá uma
+estimativa levemente otimista para a melhor combinação. Na prática, o
+efeito aqui é desprezível: a configuração de produção (500/0,01/3) foi
+escolhida pela busca em grade na base **antiga, de 10.295 partidas**
+(`reports/tune_models_10k.log`), e mantida; na base de 39.188 a grade
+completa a pôs em 2º de 27, a 0,0001 da melhor. Resposta: "Não usei
+validação aninhada. Mas a configuração de produção veio da busca numa base
+anterior, de 10 mil partidas, e na base final ficou a 0,0001 da melhor
+combinação, então o viés de seleção não muda a conclusão."
+
+**E o `StandardScaler` do MLP, vaza?** Não: ele está dentro de um
+`make_pipeline` (`multi_cutoff_metrics.py`), então é ajustado só nas dobras
+de treino de cada rodada. Esse é um ponto que bancas de ML costumam
+perguntar (pré-processamento ajustado antes de dividir os dados).
+
+**Outra pergunta possível: "as dobras são independentes?"** Não
+totalmente, e o texto admite (Seção 6.1, validade interna): o mesmo
+jogador aparece em várias partidas, e o sorteio por partida pode pôr
+partidas dele no treino e no teste. Uma divisão por grupo (por jogador)
+seria mais rigorosa; fica como limitação declarada.
+
+### 9.7 Os resultados completos (Quadros 3 e 4, Apêndice C)
+
+**Corte de 15 minutos (Quadro 3):**
 
 | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
 |---|---|---|---|---|---|
@@ -851,7 +1015,7 @@ a média é mais confiável.
 | MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
 | Random Forest | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
 
-**XGBoost em todos os cortes:**
+**XGBoost em todos os cortes (Quadro 4):**
 
 | Corte | Acurácia | AUC-ROC |
 |---|---|---|
@@ -1078,7 +1242,7 @@ experimento de *feature* (0,003).
 ### 13.1 O achado
 
 No *solo queue* de elo alto, o **time vermelho vence mais** que o azul
-(Quadro 1, 41.063 partidas):
+(Quadro 2, 41.063 partidas):
 
 | Região | Partidas | Vitória do vermelho | Intervalo de confiança 95% | Conclusão |
 |---|---|---|---|---|
@@ -1183,9 +1347,15 @@ pontos de diferença; com mais dados caiu para 7,8.
 
 ### 13.8 Por que isso importa para o modelo
 
-O viés de lado é um **fator de confusão**: qualquer modelo de *solo
-queue* precisa considerá-lo, porque ele distingue os lados sem nenhuma
-propriedade do jogo em si (Seção 6).
+O viés de lado é um **fator de confusão** que qualquer modelo de *solo
+queue* precisa controlar: o lado carrega informação sobre o resultado sem
+refletir o estado da partida (Seção 6, conclusão). É também o que a
+limitação da taxa-base mostra: no empate total, o modelo dá 49-51% ao azul,
+mas os dados dizem 46-48% (Parte 10.7).
+
+**Cuidado:** uma versão antiga falava em "atalho" e dizia que o lado
+distingue os times "sem nenhuma propriedade do jogo". O texto final não
+usa essa formulação; use a frase acima.
 
 ---
 
@@ -1272,6 +1442,40 @@ que vem do **conhecimento geral** da IA.
 
 ## 15. Perguntas prováveis da banca, com respostas
 
+### 15.0 Como uma banca de TCC costuma funcionar
+
+Pesquisa na web em 2026-11-02. **Nenhum documento público da UNISINOS
+descreve o rito da banca de Ciência da Computação**; o próprio site manda
+consultar o Guia do Aluno de Graduação (portal Minha Unisinos) e a
+coordenação. O que segue é o padrão de regulamentos de outros cursos de
+computação no Brasil, para você saber o que esperar, **não a regra da
+UNISINOS**. Confirme com o orientador.
+
+- **Formato comum:** apresentação oral de 15 a 30 minutos (20 é o mais
+  frequente), depois arguição de cada membro (até ~15 min cada), depois
+  deliberação a portas fechadas e resultado na hora.
+- **Composição comum:** o orientador preside e mais um ou dois
+  professores avaliam. Em geral o orientador não faz a arguição dura; quem
+  pergunta são os outros membros.
+- **Critérios comuns nas fichas:** clareza da apresentação, domínio do
+  tema, metodologia, relevância e coerência dos resultados com os
+  objetivos, qualidade do texto e da formatação, e **respeito ao tempo**.
+- **Regra prática de slides:** cerca de 1 minuto por slide (20 minutos →
+  até ~20 slides, o roteiro do site tem 14).
+- **O que as bancas perguntam (padrão):** justificativa das escolhas
+  metodológicas, limitações, implicações dos resultados, relação entre
+  teoria e dados e continuidade. A banca pergunta mais onde acha que
+  há ponto fraco, não onde você está seguro.
+- **Em trabalhos de ML, os temas típicos:** escolha do modelo frente a
+  alternativas mais simples, *baseline* (classe majoritária), métricas,
+  divisão treino/teste e número de dobras, vazamento de dados (inclusive
+  no pré-processamento), *overfitting* e generalização.
+
+**O que confirmar com o orientador:** tempo de apresentação e de
+arguição, quem são os membros (e a área de cada um, para prever o tipo de
+pergunta), se haverá projetor e se a demo ao vivo é bem-vinda, e a política
+da UNISINOS sobre uso de IA (não há documento público achado).
+
 Treine em voz alta. As respostas são curtas de propósito; se pedirem
 mais, use as partes do guia.
 
@@ -1322,7 +1526,9 @@ mesma profundidade. Diferença de 0,0001."
 "Cinco *folds* estratificados com semente fixa 42. Divido as partidas em
 cinco pilhas com a mesma proporção de vitórias, treino com quatro e testo
 na quinta, cinco vezes. Toda partida é testada sem ter sido vista no
-treino, e qualquer um reproduz os números."
+treino, e qualquer um reproduz os números." Se perguntarem por que não 10
+(o Kohavi recomenda 10): custo da busca em grade, e cada dobra de teste
+ainda tem cerca de 7.800 partidas (Parte 9.6).
 
 **9. "Por que o vermelho vence mais no *solo queue*?"**
 "O trabalho mede isso com firmeza, mas a causa é hipótese: o vermelho
@@ -1380,8 +1586,8 @@ vantagem de ouro vale mais no profissional."
 
 **18. "Os resultados valem para outros elos ou outros jogos?"**
 "Não. É validade externa limitada: só Desafiante e Grão-Mestre, fila
-ranqueada, quatro regiões. A arquitetura é reaproveitável, mas os números
-não se estendem."
+ranqueada, quatro regiões. O recorte foi uma decisão de escopo. A
+arquitetura é reaproveitável, mas os números não se estendem."
 
 **19. "Por que só 5 *features*?"**
 "Porque são o estado agregado de cada time no minuto do corte, que é o
@@ -1391,7 +1597,7 @@ complicado."
 
 **20. "Por que referências tão antigas, como 1982 e 2001?"**
 "São as obras originais dos métodos, como Random Forest e AUC. Os
-estudos de domínio são todos de 2021 a 2025."
+estudos de domínio são todos de 2021 a 2026."
 
 **21. "Qual a diferença entre pesquisa bibliográfica e documental?"**
 "Bibliográfica usa artigos e livros já analisados por outros autores.
@@ -1420,6 +1626,83 @@ partida abre ao clicar numa partida. Se a banca contar o menu, explique
 isso.)
 
 **26. "Você usou IA para fazer o trabalho?"** Ver a Parte 20.
+
+**27. "Por que esses trabalhos relacionados e não outros?"**
+"Escolhi para cobrir cada camada da plataforma (predição,
+explicabilidade, linguagem natural e visualização), dentro da janela de
+cinco anos. O núcleo veio do levantamento do TCC I; no TCC II acrescentei
+quatro estudos de *League of Legends* para comparar a acurácia com
+trabalhos do mesmo jogo." (Parte 5.2.1)
+
+**28. "Por que três modelos?"**
+"Conversando com o orientador, decidimos comparar o XGBoost com *Random
+Forest* e uma rede neural para ver as diferenças de resultado entre
+famílias: *bagging*, *boosting* e rede neural. Os três ficaram próximos, e
+o XGBoost foi o mais estável." (Parte 9.1)
+
+**29. "Por que só Desafiante e Grão-Mestre?"**
+"Escopo. É uma população fechada, que a API entrega inteira e que cabia
+na coleta com a chave de desenvolvedor. O custo é a validade externa,
+declarado na 6.1." (Parte 6.1)
+
+**30. "Por que 5 dobras, se o Kohavi recomenda 10?"** Parte 9.6.
+
+**31. "Qual é o seu *baseline*?"**
+"A classe majoritária: sempre apostar no vermelho acerta 53,4% aos 15
+minutos. O XGBoost fica 23 pontos acima. Antes da busca em grade houve
+também um modelo de referência com parâmetros padrão
+(`train_baseline.py`)."
+
+**32. "Usaram conjunto de teste separado? Validação aninhada?"** Não;
+Parte 9.6 (a configuração veio da base de 10 mil e ficou a 0,0001 da
+melhor na base final).
+
+**33. "As partidas do mesmo jogador não vazam entre treino e teste?"**
+"Podem: o sorteio é por partida, e o mesmo jogador aparece em várias. O
+texto declara isso como ameaça à validade interna (6.1). As *features* são
+do estado da partida, não do jogador, o que reduz o efeito, mas uma divisão
+por jogador seria mais rigorosa."
+
+**34. "Qual a diferença de uma Random Forest para o XGBoost?"**
+"A Random Forest treina árvores independentes em amostras sorteadas e
+faz a média (*bagging*, reduz variância). O XGBoost treina em sequência,
+cada árvore corrigindo o erro das anteriores (*boosting*, reduz viés), com
+regularização."
+
+**35. "O que é a AUC, em uma frase?"**
+"A probabilidade de o modelo dar nota maior a uma partida que o azul
+venceu do que a uma que ele perdeu, sorteadas ao acaso."
+
+**36. "Por que o viés não entra como *feature*?"**
+"Entra implicitamente: todas as *features* são azul menos vermelho, então
+o modelo aprende a vantagem do lado pelo valor de base (a taxa média de
+vitória do azul, que ele recebe quando todas as diferenças são zero). O
+problema é que ele
+a subestima no empate (49-51% contra 46-48% nos dados); está na 6.1 e no
+Apêndice G."
+
+**37. "Se fosse começar de novo, o que faria diferente?"**
+"Congelaria a coleta antes de treinar, para não ter duas bases (41.063 e
+39.426), e dividiria as dobras por jogador. E tentaria desde o início uma
+fonte com a ordem do *draft*, que é o dado que falta para testar a
+hipótese do viés."
+
+**38. "Qual foi a maior dificuldade?"**
+Escolha uma história da Parte 19 e conte em 30 segundos: problema,
+como percebeu, como corrigiu, o que mudou no processo. A melhor é a das
+torres (o bug invertido e o reprocessamento a partir do JSON bruto) ou a
+do "pico" do viés refutado com mais dados.
+
+**39. "A plataforma tem usuários? Foi avaliada com pessoas?"**
+"Não houve avaliação com usuários; os dados são secundários e não houve
+participação de pessoas. O que foi medido é a acurácia do modelo e da
+interface em linguagem natural. Avaliação de usabilidade seria um trabalho
+futuro natural."
+
+**40. "Quanto custa rodar a interface em linguagem natural?"** Não há
+medição de custo no TCC; não invente número. Diga que usa um modelo
+pequeno da Anthropic (Haiku), com `max_tokens` 1.200 por consulta, e que o
+custo por pergunta não foi objeto do trabalho.
 
 ---
 
@@ -1458,14 +1741,21 @@ citação. Por isso a 4.8 não tem citações.
 
 ### 16.3 As 6 páginas (recortes na Seção 5, telas inteiras no Apêndice F)
 
+**No corpo (Seção 5), cinco figuras recortadas:** Figura 1 Competitivo
+(viés de lado e conversão, 5.3); Figura 2 SHAP nos quatro cortes (5.4);
+Figura 3 análise de partida com mapa de calor (5.5); Figura 4 Simulador,
+aba Estado (5.5); Figura 5 consulta em linguagem natural (5.6).
+
+**No Apêndice F, as seis telas inteiras (Figuras 6 a 11):**
+
 | Figura | Página | O que mostra |
 |---|---|---|
-| 1 | **Início** | Busca unificada e rankings |
-| 2 | **Dashboard** | Indicadores gerais e o **viés de lado por região** |
-| 3 | **Campeões** | Estatísticas por campeão, itens finalizados, presença no profissional |
-| 4 | **Partidas** | Análise de uma partida: probabilidade minuto a minuto, **mapa de calor**, modo "e se", leitura de *draft* |
-| 5 | **Competitivo** | Comparação *solo queue* × profissional, por ano |
-| 6 | **Simulador** | Composição (heurística), Estado (modelo de ML) e Explicabilidade (SHAP) |
+| 6 | **Início** | Busca unificada e rankings |
+| 7 | **Dashboard** | Indicadores gerais e o **viés de lado por região** |
+| 8 | **Campeões** | Estatísticas por campeão, itens finalizados, presença no profissional |
+| 9 | **Partidas** | Análise de uma partida: probabilidade minuto a minuto, **mapa de calor**, modo "e se", leitura de *draft* |
+| 10 | **Competitivo** | Comparação *solo queue* × profissional, por ano |
+| 11 | **Simulador** | Aba Estado (modelo de ML e SHAP); as abas Composição (heurística) e Explicabilidade ficam na mesma página |
 
 **Destaques para explicar:**
 - **Mapa de calor:** mostra onde os jogadores estavam em cada minuto, a
