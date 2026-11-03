@@ -4823,7 +4823,17 @@ agregadas; comando ad hoc nesta sessão, ainda sem script próprio):
 Empate técnico; o XGBoost mantém a maior acurácia (critério do Apêndice
 G), a MLP ajustada tem a maior AUC por 0,0004. A conclusão não muda, mas a
 frase da 5.4 e as linhas de RF e MLP do Quadro 3 descrevem configurações
-não ajustadas. Texto do TCC **não alterado**; decisão com o autor.
+não ajustadas.
+
+**Corrigido no texto (Passo 0 da revisão do Resumo, aprovado pelo autor).**
+A 5.4 agora diz que o Quadro 3 traz o XGBoost com os hiperparâmetros da
+busca e os outros dois na configuração de referência, e cita os valores
+ajustados (RF 0,7617 / 0,8468; MLP 0,7619 / 0,8477). A nota do Apêndice C
+descreve as configurações de RF e MLP. `tune_models_full.py --completo`
+passou a medir a melhor combinação como no Quadro 3 (`cross_val_predict`)
+e grava `acuracia_quadro3` e `auc_quadro3` no JSON, que é a fonte dos
+números. `verifica_tcc.py` consistente, `confere_docx.py` conforme, 29
+páginas.
 
 ## Próximos registros pendentes
 

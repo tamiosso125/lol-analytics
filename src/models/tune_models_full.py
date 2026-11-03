@@ -224,9 +224,21 @@ def main() -> None:
             emit(f"melhor : {b.best_params_}")
             emit(f"AUC    : {b.best_score_:.4f}")
             emit(f"tempo  : {time.perf_counter() - t1:.1f}s")
+            # best_score_ e a MEDIA do AUC por fold; o Quadro 3 calcula sobre as
+            # probabilidades agregadas de cross_val_predict. Medir a melhor
+            # combinacao do mesmo jeito do Quadro 3 deixa as duas comparaveis
+            # (2026-11-02: a 5.4 dizia "apos ajuste" com RF/MLP na configuracao
+            # de referencia; o texto passou a citar estes valores).
+            proba = cross_val_predict(b.best_estimator_, X, y, cv=cv,
+                                      method="predict_proba", n_jobs=-1)[:, 1]
+            acc = accuracy_score(y, (proba >= 0.5).astype(int))
+            auc = roc_auc_score(y, proba)
+            emit(f"como no Quadro 3: acuracia {acc:.4f} | AUC-ROC {auc:.4f}")
             resultados[nome] = {
                 "melhor_combinacao": b.best_params_,
                 "auc_melhor": round(float(b.best_score_), 4),
+                "acuracia_quadro3": round(float(acc), 4),
+                "auc_quadro3": round(float(auc), 4),
             }
 
     relatorio = RAIZ / "reports"

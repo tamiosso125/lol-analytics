@@ -697,11 +697,12 @@ Figura — Tela Competitivo: viés de lado e conversão de vantagem de ouro, sol
 
 ### 5.4 Modelagem preditiva e comparação entre modelos (objetivo e)
 
-O Quadro 3 compara os três modelos após ajuste de hiperparâmetros
-(*GridSearchCV*, validação cruzada estratificada de 5 *folds*, semente 42)
-sobre o corte de 15 minutos, no conjunto final de 39.188 partidas, em que
-o azul vence 46,6%. A medição é do retreino de 2026-10-04 e se reproduz
-com `python -m src.models.multi_cutoff_metrics`.
+O Quadro 3 compara os três modelos no corte de 15 minutos (validação
+cruzada estratificada de 5 *folds*, semente 42), no conjunto final de
+39.188 partidas, em que o azul vence 46,6%: o XGBoost com os
+hiperparâmetros da busca em grade (*GridSearchCV*), os outros dois na
+configuração de referência. A medição se reproduz com
+`python -m src.models.multi_cutoff_metrics`.
 
 Quadro — Comparação entre modelos (corte de 15 minutos)
 
@@ -711,7 +712,9 @@ Quadro — Comparação entre modelos (corte de 15 minutos)
 | MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
 | *Random Forest* | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
 
-Os três modelos ficaram próximos. O XGBoost foi adotado em produção pela
+Os três modelos ficaram próximos. Com a mesma busca em grade, a *Random
+Forest* e o MLP chegam a 0,7617 e 0,7619 de acurácia (AUC-ROC de 0,8468 e
+0,8477), e o XGBoost mantém a maior acurácia. Ele foi adotado pela
 estabilidade na faixa intermediária, e não por vencer em todos os cortes:
 aos 10 minutos o MLP o supera em acurácia (0,7020 contra 0,7004) e aos 25
 chega a 0,002 do seu AUC (0,9072 contra 0,9090). Com um modelo treinado para cada
@@ -1219,8 +1222,10 @@ do mesmo benchmark.
 
 Quadro reproduzido por `python -m src.models.multi_cutoff_metrics`, que
 avalia os três modelos nos quatro cortes com validação cruzada estratificada
-de 5 *folds* (semente 42) usando os **mesmos hiperparâmetros de produção**
-(500 árvores, taxa de aprendizado 0,01, profundidade 3), o mesmo desenho
+de 5 *folds* (semente 42) usando, no XGBoost, os **mesmos hiperparâmetros
+de produção** (500 árvores, taxa de aprendizado 0,01, profundidade 3); a
+*Random Forest* (500 árvores) e o MLP (camadas de 64 e 32 neurônios) estão
+na configuração de referência, sem busca em grade. É o mesmo desenho
 do quadro anterior, agora regenerável por comando. Executado em 2026-10-04
 sobre a base de 39.426 partidas. Os valores do corte de 15 min reproduzem os
 já citados na Seção 5.4.

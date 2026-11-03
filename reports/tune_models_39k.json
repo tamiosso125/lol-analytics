@@ -36,7 +36,7 @@
     "posicao_producao_na_grade": 2,
     "mesma_profundidade": true,
     "acuracia_producao": 0.7621,
-    "tempo_segundos": 12.9
+    "tempo_segundos": 39.6
   },
   "RandomForest": {
     "melhor_combinacao": {
@@ -44,7 +44,9 @@
       "min_samples_leaf": 5,
       "n_estimators": 200
     },
-    "auc_melhor": 0.847
+    "auc_melhor": 0.847,
+    "acuracia_quadro3": 0.7617,
+    "auc_quadro3": 0.8468
   },
   "MLP": {
     "melhor_combinacao": {
@@ -53,6 +55,8 @@
         32
       ]
     },
-    "auc_melhor": 0.8478
+    "auc_melhor": 0.8478,
+    "acuracia_quadro3": 0.7619,
+    "auc_quadro3": 0.8477
   }
 }
