@@ -518,6 +518,66 @@ uma lista de rejeições.
 | Guo et al. (2024) | Linguagem natural | Interface NL com decomposição de perguntas (Talk2Data) |
 | Wallner, Wang e Dormann (2023) | Visualização | Tempo e posição juntos; referência do mapa de calor |
 
+### 5.2.2 O que cada estudo diz, conferido no próprio artigo (2026-11-02)
+
+Lidos o resumo e a conclusão dos PDFs em `Downloads/TCC/` e
+`docs/artigos/`, o texto completo do Maymin (acesso aberto) e o resumo do
+SiriusBI no arXiv. O Jadowski e Cunningham foi lido por inteiro em
+2026-10-20 (Parte 5.1). Para cada um: o que o artigo diz com as palavras
+dele, e por que isso justifica a escolha.
+
+| Estudo | O que o artigo diz (conferido) | Por que justifica a escolha |
+|---|---|---|
+| **Hodge et al. (2021)** | Pesquisa anterior ficava na previsão **pré-jogo** e em dados **amadores**; eles fazem "o primeiro estudo de caso abrangente" de previsão **ao vivo** no profissional, em Dota 2, e chegam a **85% após 5 minutos**. Na revisão, citam um trabalho que divide a partida em fases de 15 minutos. | É a referência de que prever pelo **estado da partida** funciona. O seu trabalho leva essa ideia a LoL, com cortes fixos |
+| **Birant e Birant (2023)** | "Pesquisas anteriores enfatizaram a previsão **centrada no jogador**", mas "é necessária uma classificação **centrada no time**, porque a cooperação é essencial". Base pública de LoL com abates, assistências, mortes, dano e ouro por jogador. | Justifica as variáveis como **diferenças entre os times**. Você usa o princípio, não a técnica deles (MOMIL) |
+| **Bahrololloomi et al. (2022)** | Duas métricas de desempenho individual a partir de 2.901 partidas (29.010 linhas de jogador); um modelo de *gradient boosting* chega a 92,7% na nota do jogador, e o peso de cada função (*role*) é estimado por otimização linear. | Mostra o caminho **oposto** (por jogador e por função), que delimita a sua escolha e aparece só nos perfis de jogador |
+| **Jadowski e Cunningham (2022)** | Treinam na primavera de 2020 (882 jogos profissionais) e testam nos 306 do verão: 67%. Medem 54,08% de vitória do azul. Escrevem que 90% é improvável pelas zebras. | Comparação de acurácia e apoio externo ao 53,2% do azul |
+| **Do et al. (2021)** | Rede neural profunda prevê ranqueadas **antes do jogo** pela experiência com o campeão: 75,1%. **Random Forest e SVM ficaram entre 73% e 75%**, e eles leem isso como sinal de que a experiência com o campeão é um bom indicador independentemente do modelo. | Comparação em ranqueadas e um **paralelo direto** do seu empate entre modelos |
+| **Maymin (2021)** | Modelo de probabilidade em jogo, regressão logística com minuto, abates, torres e monstros grandes, calibrada em milhões de partidas; exclui o ouro de propósito; diz que acrescentar variáveis não melhorou; prefere um modelo único a um por minuto. | Ranqueadas sem comparação com o profissional (argumento da 3.6) e três pontos a seu favor (Parte 5.1) |
+| **Guan e Tung (2026)** | *Preprint*. Previsão pré-jogo no profissional com regressão logística, 5.135 jogos de 2024 a 2026, e o *first pick* como covariável. **As duas arquiteturas que comparam são estatisticamente indistinguíveis.** | Apoio à hipótese do *draft* e outro paralelo do empate entre modelos; não sustenta número |
+| **García-Méndez e Arriba-Pérez (2025)** | O esforço em previsão profissional ficou na classificação em lote, "deixando de lado a visualização"; a falta de interpretabilidade é "uma das limitações mais significativas" dos trabalhos anteriores. O sistema deles tem um **módulo de explicabilidade** e passa de 90% de acurácia em *streaming*. | Justifica o SHAP na tela: previsão sem explicação é a lacuna que eles apontam |
+| **Jiang et al. (2025), SiriusBI** | BI com LLM em produção na Tencent (finanças, publicidade, nuvem), diálogo de várias rodadas e mais de 93% de acerto na geração de SQL. | Mostra que LLM gerando SQL sobre dados estruturados funciona em escala; você leva a ideia ao domínio de LoL e mede no próprio domínio |
+| **Guo et al. (2024), Talk2Data** | Interface em linguagem natural que **decompõe** perguntas complexas em simples, com um modelo de *deep learning*; avaliada com estudo de ablação e estudo com 20 usuários. | Fundamento da consulta em linguagem natural. Cuidado: você não implementa decomposição |
+| **Wallner, Wang e Dormann (2023)** | *Storyline visualization* integra tempo e posição numa só vista para resumir partidas de LoL; estudo com 39 participantes respondeu bem a perguntas de local e evento, pior a perguntas de tempo. | Referência do mapa de calor de posicionamento por minuto |
+
+**Dois achados úteis para a banca:**
+
+1. **O empate entre modelos também aparece na literatura.** Do et al.
+   (2021) obtêm 73% a 75% com *Random Forest*, SVM e rede neural, e Guan e
+   Tung (2026) acham as duas arquiteturas indistinguíveis. Se a banca
+   perguntar "não é estranho os três modelos empatarem?": "Não. Do et al. e
+   Guan e Tung também acharam modelos diferentes empatados. Quando as
+   variáveis são poucas e agregadas, o limite está nos dados."
+2. **Fases de jogo têm precedente.** O Hodge et al. citam um trabalho que
+   divide a partida em fases de 15 minutos, e o Maymin cita o Hodge
+   treinando um modelo por minuto. O seu desenho, um modelo por fase, fica
+   entre os dois.
+
+### 5.2.3 Por que cada obra de método está no TCC
+
+As obras de método não são "trabalhos relacionados": cada uma justifica
+uma técnica no ponto em que ela é usada. A regra é citar a obra original
+ou a mais aceita da técnica, mesmo que antiga.
+
+| Obra | Por que esta, e não outra |
+|---|---|
+| Breiman (2001) | Artigo original da *Random Forest* |
+| Chen e Guestrin (2016) | Artigo original do XGBoost |
+| Hornik, Stinchcombe e White (1989) | Prova da aproximação universal, que justifica testar uma rede neural |
+| Grinsztajn, Oyallon e Varoquaux (2022) | Comparação ampla e recente de árvores contra redes em dados tabulares, que é o caso do trabalho |
+| Lundberg e Lee (2017) | Artigo original do SHAP, com a prova das propriedades que o justificam |
+| Ribeiro, Singh e Guestrin (2016) | Artigo original do LIME, a alternativa considerada |
+| Hanley e McNeil (1982) | Interpretação clássica da AUC como probabilidade de ordenar certo um par |
+| Niculescu-Mizil e Caruana (2005) | Estudo clássico de calibração, que mostra que *boosting* pode distorcer probabilidades |
+| Kohavi (1995) | Estudo de referência sobre validação cruzada estratificada |
+| Kaufman et al. (2012) | Definição formal de vazamento de dados e de como evitá-lo |
+| Pedregosa et al. (2011) | Citação oficial do scikit-learn (*GridSearchCV*, MLP, *Random Forest*) |
+| Brown, Cai e DasGupta (2001) | Comparação de intervalos para proporções que recomenda o de Wilson |
+| Holm (1979) | Artigo original da correção de Holm para comparações múltiplas |
+| Wang et al. (2020), RAT-SQL | Mostra que representar as relações do esquema melhora o *text-to-SQL* |
+| Zhong, Yu e Klein (2020) | Discute os limites da acurácia de execução, a métrica do *benchmark* |
+| Prodanov e Freitas (2013); Gil (2002); Creswell e Creswell (2023); Yin (2018) | Manuais de metodologia usados na classificação da pesquisa, como no TCC I |
+
 **Resposta pronta:** "Os trabalhos foram escolhidos para cobrir cada
 camada da plataforma (predição, explicabilidade, linguagem natural e
 visualização), dentro da janela de cinco anos. O núcleo veio do
