@@ -528,15 +528,15 @@ dele, e por que isso justifica a escolha.
 
 | Estudo | O que o artigo diz (conferido) | Por que justifica a escolha |
 |---|---|---|
-| **Hodge et al. (2021)** | Pesquisa anterior ficava na previsão **pré-jogo** e em dados **amadores**; eles fazem "o primeiro estudo de caso abrangente" de previsão **ao vivo** no profissional, em Dota 2, e chegam a **85% após 5 minutos**. Na revisão, citam um trabalho que divide a partida em fases de 15 minutos. | É a referência de que prever pelo **estado da partida** funciona. O seu trabalho leva essa ideia a LoL, com cortes fixos |
-| **Birant e Birant (2023)** | "Pesquisas anteriores enfatizaram a previsão **centrada no jogador**", mas "é necessária uma classificação **centrada no time**, porque a cooperação é essencial". Base pública de LoL com abates, assistências, mortes, dano e ouro por jogador. | Justifica as variáveis como **diferenças entre os times**. Você usa o princípio, não a técnica deles (MOMIL) |
+| **Hodge et al. (2021)** | Pesquisa anterior ficava na previsão **pré-jogo** e em dados **amadores**; eles fazem "o primeiro estudo de caso abrangente" de previsão **ao vivo** no profissional, em Dota 2, e chegam a **85% após 5 minutos**, medido nas previsões ao vivo de **28 jogos** do torneio ESL One Hamburg 2017 (treino com cerca de 5,7 mil partidas de habilidade mista). Na revisão, citam um trabalho que divide a partida em fases de 15 minutos. | É a referência de que prever pelo **estado da partida** funciona. O seu trabalho leva essa ideia a LoL, com cortes fixos |
+| **Birant e Birant (2023)** | "Pesquisas anteriores enfatizaram a previsão **centrada no jogador**", mas "é necessária uma classificação **centrada no time**, porque a cooperação é essencial". Base pública do Kaggle (ranqueadas de NA e EU) com abates, assistências, mortes, dano e ouro por jogador, que são **resumos do fim da partida**. Chegam a **até 95%**, que **não é comparável** com previsão em jogo. | Justifica as variáveis como **diferenças entre os times**. Você usa o princípio, não a técnica deles (MOMIL) |
 | **Bahrololloomi et al. (2022)** | Duas métricas de desempenho individual a partir de 2.901 partidas (29.010 linhas de jogador); um modelo de *gradient boosting* chega a 92,7% na nota do jogador, e o peso de cada função (*role*) é estimado por otimização linear. | Mostra o caminho **oposto** (por jogador e por função), que delimita a sua escolha e aparece só nos perfis de jogador |
 | **Jadowski e Cunningham (2022)** | Treinam na primavera de 2020 (882 jogos profissionais) e testam nos 306 do verão: 67%. Medem 54,08% de vitória do azul. Escrevem que 90% é improvável pelas zebras. | Comparação de acurácia e apoio externo ao 53,2% do azul |
-| **Do et al. (2021)** | Rede neural profunda prevê ranqueadas **antes do jogo** pela experiência com o campeão: 75,1%. **Random Forest e SVM ficaram entre 73% e 75%**, e eles leem isso como sinal de que a experiência com o campeão é um bom indicador independentemente do modelo. | Comparação em ranqueadas e um **paralelo direto** do seu empate entre modelos |
+| **Do et al. (2021)** | Rede neural profunda prevê ranqueadas **antes do jogo** pela experiência com o campeão: 75,1%. **os outros quatro algoritmos testados ficaram entre 72,7% e 75,4%** (*gradient boosting* 75,4%, acima da rede; *Random Forest* 74,7%; SVM 74,3%; kNN 72,7%), e eles leem isso como sinal de que a experiência com o campeão é um bom indicador independentemente do modelo. | Comparação em ranqueadas e um **paralelo direto** do seu empate entre modelos |
 | **Maymin (2021)** | Modelo de probabilidade em jogo, regressão logística com minuto, abates, torres e monstros grandes, calibrada em milhões de partidas; exclui o ouro de propósito; diz que acrescentar variáveis não melhorou; prefere um modelo único a um por minuto. | Ranqueadas sem comparação com o profissional (argumento da 3.6) e três pontos a seu favor (Parte 5.1) |
 | **Guan e Tung (2026)** | *Preprint*. Previsão pré-jogo no profissional com regressão logística, 5.135 jogos de 2024 a 2026, e o *first pick* como covariável. **As duas arquiteturas que comparam são estatisticamente indistinguíveis.** | Apoio à hipótese do *draft* e outro paralelo do empate entre modelos; não sustenta número |
-| **García-Méndez e Arriba-Pérez (2025)** | O esforço em previsão profissional ficou na classificação em lote, "deixando de lado a visualização"; a falta de interpretabilidade é "uma das limitações mais significativas" dos trabalhos anteriores. O sistema deles tem um **módulo de explicabilidade** e passa de 90% de acurácia em *streaming*. | Justifica o SHAP na tela: previsão sem explicação é a lacuna que eles apontam |
-| **Jiang et al. (2025), SiriusBI** | BI com LLM em produção na Tencent (finanças, publicidade, nuvem), diálogo de várias rodadas e mais de 93% de acerto na geração de SQL. | Mostra que LLM gerando SQL sobre dados estruturados funciona em escala; você leva a ideia ao domínio de LoL e mede no próprio domínio |
+| **García-Méndez e Arriba-Pérez (2025)** | O esforço em previsão profissional ficou na classificação em lote, "deixando de lado a visualização"; a falta de interpretabilidade é "uma das limitações mais significativas" dos trabalhos anteriores. O sistema deles tem um **módulo de explicabilidade** e chega a 92,5% de acurácia em *streaming*, **em partidas profissionais de CS:GO** (base do Kaggle com dados da HLTV), e não em LoL. O sistema deles tem também descrições em linguagem natural e um painel visual, como a nossa plataforma. | Justifica o SHAP na tela: previsão sem explicação é a lacuna que eles apontam |
+| **Jiang et al. (2025), SiriusBI** | BI com LLM em produção na Tencent (finanças, publicidade, nuvem), diálogo de várias rodadas e mais de 93% de acerto na geração de SQL (97%, 93% e 96% nos três setores), com um estudo de 40 analistas, 20 com o sistema e 20 sem. | Mostra que LLM gerando SQL sobre dados estruturados funciona em escala; você leva a ideia ao domínio de LoL e mede no próprio domínio |
 | **Guo et al. (2024), Talk2Data** | Interface em linguagem natural que **decompõe** perguntas complexas em simples, com um modelo de *deep learning*; avaliada com estudo de ablação e estudo com 20 usuários. | Fundamento da consulta em linguagem natural. Cuidado: você não implementa decomposição |
 | **Wallner, Wang e Dormann (2023)** | *Storyline visualization* integra tempo e posição numa só vista para resumir partidas de LoL; estudo com 39 participantes respondeu bem a perguntas de local e evento, pior a perguntas de tempo. | Referência do mapa de calor de posicionamento por minuto |
 
@@ -1898,6 +1898,36 @@ com os números. Nada que a conclusão use está só no apêndice."
 medição de custo no TCC; não invente número. Diga que usa um modelo
 pequeno da Anthropic (Haiku), com `max_tokens` 1.200 por consulta, e que o
 custo por pergunta não foi objeto do trabalho.
+
+**42. "Birant e Birant chegam a 95%. Por que o seu é 76%?"** (conferido no
+artigo, 2026-11-02)
+"Os atributos deles são resumos do fim da partida, como abates, assistências
+e ouro por jogador, que o próprio artigo chama de *post-game*. O meu modelo
+só vê o estado até o minuto do corte. Usar o resumo final seria o vazamento
+de dados que Kaufman et al. descrevem: o modelo veria o resultado antes de
+prever."
+
+**43. "García-Méndez e Arriba-Pérez passam de 90%. Por que o seu não?"**
+"O trabalho deles é de CS:GO profissional, com outra base e outras
+variáveis, e chega a 92,5%. Não é o mesmo jogo, nem o mesmo problema. O que
+eu tomo deles é a necessidade de explicar a previsão, e o meu SHAP faz
+isso."
+
+**44. "Hodge chega a 85% com 5 minutos. O seu fica em 76% aos 15."**
+"O 85% é de Dota 2 profissional, medido em 28 jogos ao vivo de um torneio, e
+é um teto ('até'). O meu é a média de validação cruzada em 39 mil partidas de
+elo alto de LoL, outro jogo e outra base. Não são comparáveis diretamente."
+
+**45. "O Maymin escreve que o mapa de calor não é possível com os dados da
+API. O seu sai da API?"** "Sai, mas é mais grosseiro: o dele vem de
+rastreamento óptico a cada segundo; o meu agrega as posições por minuto da
+*timeline-v5*. O texto já admite que o meu é mais simples."
+
+**46. "O que a literatura diz sobre os três modelos empatarem?"** "Do et al.
+(2021) testaram cinco algoritmos e ficaram entre 72,7% e 75,4%, com o
+*gradient boosting* acima da rede neural; Guan e Tung (2026) acharam as duas
+arquiteturas deles estatisticamente indistinguíveis. Com poucas variáveis
+agregadas, o limite está nos dados."
 
 ---
 
