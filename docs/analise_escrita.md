@@ -130,6 +130,42 @@ forma narrativa ("Mattos e Silveira (1998)").
   al.; Guo et al.)" e "(Wallner, Wang e Dormann)" estão sem o ano, que a
   norma exige.
 
+## Resultado da correção (2026-11-03)
+
+Os oito passos foram aplicados ao corpo, cada um verificado
+(`verifica_tcc.py`, `confere_docx.py`) e medido; o documento seguiu em 29
+páginas. Medição repetida com os mesmos scripts, por 1.000 palavras:
+
+| Métrica | Aprovados (mediana) | Antes | Depois |
+|---|---|---|---|
+| ", e não X" | 0,0 | 2,1 | **0,0** (os 4 que restam estão nos Apêndices C, F e G) |
+| "num/numa" | 0,0 | 1,3 | **0,0** |
+| "só" | 0,1 | 1,4 | **0,0** |
+| Datas ISO | 0,0 | 0,6 | **0,0** |
+| Código no corpo | 0,0 | 0,1 | **0,0** |
+| Termos em inglês | 0,7 | 10,7 | **8,4** (o resto é do domínio: *solo queue*, *draft*, *text-to-SQL*, *benchmark*) |
+| Conectivos | 2,7 | 0,0 | **0,6** |
+| Ponto e vírgula | 1,9 | 8,0 | **7,5** (sobram as listas a) a g), os testes (i) a (iv) e as citações) |
+| Parênteses | 13,1 | 27,2 | **25,2** |
+| Remissões | 2,3 | 9,4 | **7,5** |
+| Frase média (palavras) | 31,7 | 33,4 | **30,7** |
+
+O que **não** chegou à faixa dos aprovados, e por quê:
+
+- **Parênteses e remissões** continuam acima. Boa parte é número
+  (estatísticas e tamanhos de amostra) e citação, que um trabalho de dados
+  tem de ter; tirar mais exigiria passar números para quadros, o que
+  custaria páginas.
+- **Termos em inglês** ainda passam do máximo (4,3). Os que sobram não têm
+  tradução estabelecida no meio, ou vêm dos objetivos do TCC I.
+- **Conectivos** subiram de 0 para 0,6; a mediana é 2,7. Acrescentei só onde
+  a relação entre as frases estava implícita, para não encher o texto.
+
+Também mudaram duas coisas fora da lista: a 2.2 ganhou a precisão sobre o
+Grinsztajn et al. (porte médio é cerca de 10 mil exemplos) e
+`verifica_tcc.py` passou a aceitar a data por extenso na frase-síntese do
+teste (ii).
+
 ## Plano de correção (um passo por vez, cada um medido e salvo)
 
 O documento está em 29 páginas, com uma linha de folga. Cada passo é

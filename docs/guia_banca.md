@@ -564,7 +564,7 @@ ou a mais aceita da técnica, mesmo que antiga.
 | Breiman (2001) | Artigo original da *Random Forest* |
 | Chen e Guestrin (2016) | Artigo original do XGBoost |
 | Hornik, Stinchcombe e White (1989) | Prova da aproximação universal, que justifica testar uma rede neural |
-| Grinsztajn, Oyallon e Varoquaux (2022) | Comparação ampla e recente de árvores contra redes em dados tabulares, que é o caso do trabalho |
+| Grinsztajn, Oyallon e Varoquaux (2022) | Comparação ampla e recente de árvores contra redes em dados tabulares (45 bases, treino truncado em 10 mil). Conferido no texto: com treino de 50 mil, a diferença tende a diminuir (indício, sem estudo rigoroso). As nossas 39 mil ficam entre os dois regimes, e o empate do MLP é coerente com isso |
 | Lundberg e Lee (2017) | Artigo original do SHAP, com a prova das propriedades que o justificam |
 | Ribeiro, Singh e Guestrin (2016) | Artigo original do LIME, a alternativa considerada |
 | Hanley e McNeil (1982) | Interpretação clássica da AUC como probabilidade de ordenar certo um par |

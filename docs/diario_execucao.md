@@ -4860,6 +4860,24 @@ dizem que a previsão "só é útil" com explicação; o jogo é CS:GO profissio
 mudou. `verifica_tcc.py` consistente, `confere_docx.py` conforme, 29
 páginas. Resumo e Abstract não citam nenhum dos trechos corrigidos.
 
+## 2026-11-03 — Plano de linguagem executado (oito passos) e Grinsztajn conferido
+
+Os oito passos de `docs/analise_escrita.md` foram aplicados ao corpo, um
+commit por grupo, cada um com `verifica_tcc.py` e `confere_docx.py` e a
+contagem de páginas (29 em todos): (1) citações com ponto e vírgula entre
+autores e ano nas três da 3.6; (2) "num/numa" e "só" saem; (3) datas ISO e
+código saem do corpo; (4) as construções ", e não X" viram afirmações
+diretas; (5) vinte pontos e vírgulas entre orações viram ponto; (6)
+catorze remissões redundantes saem; (7) "features", "dataset", "folds" e
+"pipeline" viram português; (8) cinco conectivos. `verifica_tcc.py` passou
+a aceitar a data por extenso na frase-síntese do teste (ii). Os apêndices
+não foram tocados. Comparação antes e depois em `analise_escrita.md`.
+
+Grinsztajn et al. conferido no texto completo (colado pelo autor): porte
+médio é cerca de 10 mil exemplos, e no Apêndice A.2.2 os autores observam,
+sem estudar a fundo, que a diferença diminui com 50 mil. A 2.2 passou a
+dizer isso.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal
