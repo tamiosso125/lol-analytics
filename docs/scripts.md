@@ -919,6 +919,16 @@ Reexecuta o `GridSearchCV` na base final e **arquiva o log**. É o que dá lastr
 
 Grava `reports/tune_models_39k.log` (texto) e `reports/tune_models_39k.json` (estruturado).
 
+### `src/models/holdout_temporal.py`
+
+Treino no passado, teste no futuro. Responde ao aviso de Kaufman et al. (2012) de que dados que mudam com o tempo e exemplos não independentes podem inflar a validação aleatória. Compara três divisões com o mesmo modelo e as mesmas cinco variáveis: cronológica 80/20, por *patch* (treina nos *patches* 16.10 a 16.13 e testa nos 16.14 a 16.19) e aleatória estratificada de mesmo tamanho de teste. Lê `data/features_phases.csv` e busca a data e o *patch* de cada partida no banco. **Cuidado:** o tempo se mistura com a região (o teste cronológico aos 15 minutos tem 49,7% de NA1 e nenhuma BR1), então o resultado não separa os dois efeitos.
+
+```powershell
+.venv\Scripts\python.exe -m src.models.holdout_temporal   # ~3 min
+```
+
+Grava `reports/holdout_temporal.json` (Apêndice C do TCC; a checagem 20 de `verifica_tcc.py` compara o quadro com ele).
+
 `tune_models.py` — o script original — não servia: ele imprime o resultado e não guarda nada, e foi rodado sobre a base de 10 mil. A afirmação da antiga Seção 5.8 (hoje 6.1 e Apêndice G) ficou semanas sem artefato por causa disso.
 
 Resultado medido em 2026-10-04, sobre as 39.188 linhas do corte de 15 min:
@@ -1129,3 +1139,7 @@ metade do tamanho antes declarado.
 A coluna de ouro do Oracle's Elixir é `golddiffat15`, não `gold_diff`, e há
 cinco linhas de lado azul por jogo: sem deduplicar por `gameid` o script
 conta cinco vezes.
+
+### `src/features/build_features_v2.py`, `src/models/experiment_precisao.py`, `src/models/holdout_precisao.py`, `src/models/experiment_historico.py`
+
+Experimentos 12 a 19 (2026-11-03), exploratórios: não alteram o modelo de produção nem o `data/features.csv`. `build_features_v2` extrai 59 variáveis novas de `frames[: corte + 1]` para a base congelada de `features_phases.csv`; `tests/test_features_v2_sem_vazamento.py` confere que cortar a timeline no corte não muda nenhuma. `experiment_precisao` compara conjuntos de variáveis (trajetória, função, objetivos, campeões, jogadores) com 5 dobras e semente 42 e IC por *bootstrap* pareado. `holdout_precisao` repete com treino no passado e teste no futuro. `experiment_historico` mede o histórico do jogador por estrato de cobertura. Resultados no Apêndice M do TCC. Atenção: a codificação de campeões é ajustada só no treino e o histórico usa só partidas com `game_creation` anterior.

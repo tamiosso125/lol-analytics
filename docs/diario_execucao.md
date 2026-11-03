@@ -4984,3 +4984,110 @@ dizem que o XGBoost é o melhor, só "adotado", e seguem verdadeiros.
   tempo real para features espaciais).
 - Competitivo/pro-play: adiado (ver acima); se retomado, opções já
   levantadas em `project_scope_decisions.md`.
+
+## 2026-11-03 (continuação) — Leitura linear das referências e seis correções aplicadas
+
+**O que foi feito.** Leitura do início ao fim (não por busca) dos 11 estudos de
+domínio e de Hanley e McNeil, Kohavi, Hornik, Breiman, Lundberg e Lee,
+Niculescu-Mizil e Caruana, Holm, Wang et al., Zhong et al., Chen e Guestrin,
+Ribeiro et al., Pedregosa et al., Grinsztajn et al. (v1 do arXiv), Brown et al.
+(págs. 1 a 20 do relatório de 1999) e Kaufman et al. (versão KDD 2011). Os
+resultados, com página e trecho, estão em `docs/conferencia_referencias.md`.
+
+**Aplicado no TCC (com aprovação):**
+- 4.4: citação de Kohavi movida para "estratificada (Kohavi, 1995), com 5
+  dobras" (ele recomenda 10) e páginas da referência corrigidas para 1137-1143.
+- 4.1, 4.2, Resumo e *Abstract*: "abordagem mista" virou "quantitativa" (Creswell
+  e Creswell exigem coleta qualitativa para o método misto) e a citação de Yin
+  foi removida, com a referência (32 para 31; `confere_docx.py` atualizado).
+- Seis correções de intensidade: 2.3 (LIME), 3.2 (Birant, Bahrololloomi,
+  Maymin), 3.4 (Guo e SiriusBI) e 3.5 (Wallner).
+
+**Lição de layout.** A primeira versão das seis correções (cerca de 110
+caracteres a mais) levou o corpo de 29 para 30 páginas, porque um quadro ou
+figura mudou de página e abriu um vão (última página 45% cheia). Reduzidas a
+tamanho líquido ~zero, voltou a 29 páginas, `verifica_tcc.py` consistente e
+`confere_docx.py` conforme. Conferir a contagem a cada edição no corpo.
+
+**Erro meu corrigido.** O guia dizia que Pedregosa et al. (2011) é a origem do
+MLP e do *Random Forest*; o artigo não descreve nenhum dos dois.
+
+**Pendentes.** Correção do Breiman na 2.2 (a frase "reduz a variância do
+conjunto, o que importa quando as variáveis são correlacionadas" não tem apoio;
+proposta de tamanho líquido ~zero aguarda aprovação); conferência da versão de
+2012 do Kaufman (págs. 15:1 a 15:11); teste de treino no passado e teste no
+futuro; slides; roteiro e teste da demonstração; releitura final do documento.
+
+## 2026-11-03 (continuação) — Treino no passado, teste no futuro; correção do Breiman
+
+**Medida nova.** `src/models/holdout_temporal.py` (Apêndice C, Quadro 14;
+`reports/holdout_temporal.json`; checagem 20 de `verifica_tcc.py`, agora são 21)
+responde ao aviso de Kaufman et al. (2012) sobre dados que mudam com o tempo.
+Três divisões sobre as 41.063 partidas (18 mai. a 4 out. 2026, dez *patches*):
+cronológica 80/20, por *patch* (treina 16.10 a 16.13, testa 16.14 a 16.19) e
+aleatória de mesmo tamanho do teste cronológico. **Resultado:** nenhuma divisão
+temporal fica abaixo da aleatória em mais de 0,0004 de AUC-ROC (pior caso: 20
+min, por *patch*); aos 15 min, 0,8545 e 0,8542 contra 0,8432. A regressão
+logística dá o mesmo padrão (até 0,0012 de diferença para o XGBoost).
+**Ressalva registrada no texto:** o teste cronológico aos 15 min tem 49,7% de
+NA1 e nenhuma BR1 (37,7% do treino), então tempo e região se misturam.
+
+**Texto.** O Apêndice C ganhou o quadro e o parágrafo; a linha "Cobertura
+desigual por versão do jogo" das limitações passou a dizer "o *patch* 16.13
+concentra 40,4% das partidas (16.572 de 41.063)" (antes: "a maior parte", que
+era falso) com a evidência; a 6.2 (validade interna) ganhou uma frase e a
+"validade externa" a correção do 40,4%. Corrigida também a 2.2 (Breiman): a
+frase sobre "reduz a variância do conjunto" foi trocada por "reduz a correlação
+entre as árvores, o que limita o ganho de um *ensemble*".
+
+**Guarda de valores antigos.** O quadro novo traz 0,7573 (acurácia aos 15 min
+da divisão aleatória), igual por coincidência ao valor antigo do XGBoost que
+`VALORES_SUBSTITUIDOS` proíbe. Em vez de mudar a semente (o que enviesaria o
+resultado), as linhas do quadro ficaram isentas na checagem 8, com o motivo no
+código.
+
+**Verificação.** Corpo em 29 páginas; `verifica_tcc.py` consistente (21
+checagens; teste de mutação da checagem 20 reprovou como deveria) e
+`confere_docx.py` conforme. Quadro renderizado e conferido a olho.
+
+**Kaufman et al. (2012).** O PDF do artigo de periódico (TKDD v. 6, n. 4, art.
+15; 21 págs.) foi recebido e lido inteiro: a referência do TCC está correta e a
+frase da 4.4 confere. A seção 7 (vazamento por estratificação num colisor) virou
+uma pergunta de defesa, registrada no guia e em `conferencia_referencias.md`.
+Pendência fechada; nenhuma mudança no TCC.
+
+## 2026-11-03 (noite) — Conferência da Riot API e do Oracle's Elixir
+
+Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
+`data/pro/` e o portal oficial (detalhe em `docs/conferencia_referencias.md`).
+
+- **Erro em `src/etl/load_pro.py`.** Cada CSV apagava `WHERE year = ano do
+  arquivo`, mas inseria cada linha com o `year` que ela traz. Jogos de um ano
+  dentro do arquivo do ano anterior (ex.: 2015 no arquivo de 2014) eram
+  apagados quando o arquivo seguinte era carregado: **2.543 jogos perdidos**.
+  O "96.716" registrado acima como correto era o valor errado; o certo é
+  **99.259** (`COUNT(DISTINCT game_id)` após a correção; 198.518 linhas de time
+  e 992.590 de jogador). Correção: apagar por `game_id`. Taxa do azul no total
+  inalterada (53,2%); 2015 passou a 55,0%, 2016 a 53,5%, 2018 a 53,6% e 2025 a
+  53,2%. O benchmark do NLQ não muda (gabarito e SQL gerada rodam no mesmo
+  banco).
+- **Texto.** 96.716 → 99.259 em todo lugar; `verifica_tcc.py` agora proíbe
+  "96.716". "Principais ligas" → "122 ligas, da elite às de desenvolvimento".
+  "Desafiante e Grão-Mestre" → "elo alto (Desafiante a Mestre)": a tabela
+  `players` tem 93% de Mestre, 97,2% das partidas têm ao menos um
+  Desafiante/Grão-Mestre e 2,8% só Mestre. "timeline-v5" não existe na
+  documentação da Riot: é o método de linha do tempo do *match-v5*. Data dos
+  arquivos do Oracle's Elixir: 4 jul. 2026.
+- **Build.** `build_tcc_docx.py` exige `TCC1_REFERENCE_DOCX`; sem ele aborta e
+  o `.docx` não é regenerado (o `finalize` roda mesmo assim sobre o arquivo
+  antigo).
+
+## 2026-11-03 (noite) — Experimentos de precisão e apêndices H a M
+
+**Meta.** Sem meta de valor (decisão do autor): explorar todas as possibilidades. 0,90 de acurácia aos 15 minutos foi descartado por inviável; a literatura achada fica entre 73% e 82% em partida em andamento, e resultados acima disso sem discussão de vazamento são suspeitos.
+
+**Experimentos 12 a 19** (código em `src/features/build_features_v2.py`, `src/models/experiment_precisao.py`, `holdout_precisao.py`, `experiment_historico.py`). Base congelada de 39.426 partidas, 5 dobras, semente 42. Melhor resultado: regressão logística com 64 variáveis, +0,0080 de AUC-ROC aos 15 minutos (0,8483 → 0,8555 na validação cruzada) e +0,0074 aos 25 (0,9163), mantido em treino no passado e teste no futuro (+0,0069 a +0,0089). Por conjunto: função +0,0027, campeões +0,0013, histórico do jogador +0,0011 (e +0,0004 sobre o estado rico, mesmo com 92% das partidas bem cobertas), trajetória e objetivos ~0. Abaixo do critério de +0,01 combinado para mexer no corpo; entra só no Apêndice M. Erro meu corrigido: a "cobertura de 31%" do histórico era métrica errada (diferença de contagem); a real é ~92%.
+
+**TCC.** Apêndices H (fundamentos dos métodos), I (estudos de domínio e comparação), J (procedência dos dados e chaves da Riot), K (objetivos e evidências), L (SHAP por corte, de `reports/shap_importance_phases.json`) e M (experimentos 12 a 19), todos em quadros; seis ponteiros no corpo, sem mudar resultado. A 6.2 ganhou o quinto trabalho futuro (chave de produção da Riot; a documentação não lista dados novos nas APIs padrão). Corpo em 29 páginas. A coleta em andamento mudou o banco (42.137 partidas, BR1 13.010) e o verificador acusou quatro divergências. Cópia completa em `data/backups/lol_analytics_com_coleta_nov03.dump` (3,3 GB, fora do git); as 1.749 partidas novas (`raw_matches.collected_at` de 3/11 a partir das 18h) foram apagadas das sete tabelas e o banco voltou às 41.063 do texto (BR1 11.936, EUW1 11.744, KR 10.204, NA1 7.159, EUN1 20). Para recarregá-las depois da banca: restaurar o dump.
+
+**Comparação com o histórico (git).** O corpo de 20/10 tinha 11.753 palavras; hoje, 8.958. Quase nenhum número se perdeu (só os corrigidos e os valores SHAP de ouro e experiência por corte, agora no Apêndice L).

@@ -1,4 +1,4 @@
-# Guia de estudo para a banca — Bellestraiko (TCC II)
+﻿# Guia de estudo para a banca — Bellestraiko (TCC II)
 
 > Para que serve: entender o projeto inteiro, do porquê de cada decisão até
 > de onde veio cada número, para conseguir responder qualquer pergunta da
@@ -47,7 +47,7 @@ objetivo, metodologia, resultados e conclusão.** Use a mesma ordem no
 pitch: (1) esports geram muitos dados, mas explorar exige ferramentas
 fragmentadas e conhecimento técnico; (2) desenvolvi uma plataforma que
 junta coleta, predição, explicação, visualização e consulta em português;
-(3) pesquisa aplicada, mista, sobre 41.063 partidas e 96.716 jogos
+(3) pesquisa aplicada, mista, sobre 41.063 partidas e 99.259 jogos
 profissionais, com três modelos comparados por validação cruzada
 estratificada; (4) empate técnico entre os três, XGBoost adotado com 76% e
 AUC de 0,85 aos 15 minutos, viés do vermelho que se inverte no
@@ -73,7 +73,7 @@ visualização (*dashboards*) → consulta em linguagem natural.
 | O quê | Número |
 |---|---|
 | Partidas ranqueadas coletadas (solo queue) | **41.063** (5 regiões) |
-| Partidas profissionais incorporadas | **96.716** (2014-2026) |
+| Partidas profissionais incorporadas | **99.259** (2014-2026) |
 | Modelo adotado (os três empataram) | **XGBoost** |
 | Acurácia aos 15 minutos | **0,7621** (≈ 76 de cada 100 partidas certas) |
 | AUC-ROC aos 15 minutos | **0,8473** |
@@ -147,7 +147,7 @@ cumprido? onde?".
 
 | Objetivo | O que pede | Onde está o resultado | Resposta curta |
 |---|---|---|---|
-| **a** | Mapear dados e recursos da Riot API | Seção 5.1 | Usados 4 endpoints: league-v4, account-v1, match-v5, timeline-v5 |
+| **a** | Mapear dados e recursos da Riot API | Seção 5.1 | Usados 4 endpoints: league-v4, account-v1, match-v5 (partida e linha do tempo) |
 | **b** | Identificar quais informações organizar | Seção 5.2 | Quadro 1 (tabelas do banco) e esquema completo no Apêndice A |
 | **c** | Estruturar coleta e tratamento | Seção 5.2 | Coletor resumível, 41.063 partidas |
 | **d** | Avaliar análise de dados para achar padrões | Seção 5.3 | Viés de lado, conversão de vantagem |
@@ -194,13 +194,18 @@ classificou assim:
   caso: descrever os dados coletados, os padrões encontrados (viés de
   lado) e o desempenho dos modelos.
 
-**Quanto à abordagem: mista** (Creswell e Creswell, 2023)
+**Quanto à abordagem: quantitativa** (Creswell e Creswell, 2023)
 - **Quantitativa:** trabalha com números e estatística. Aqui: coleta,
-  análise exploratória, métricas dos modelos.
-- **Qualitativa:** trabalha com interpretação. Aqui: revisão
-  bibliográfica e interpretação dos achados (ex.: a hipótese do
-  *counter-pick* para explicar o viés de lado).
-- **Mista** = as duas juntas.
+  análise exploratória, métricas e comparação dos modelos.
+- **Mista** (o que o TCC dizia até 2026-11-03): o livro define como coletar
+  E integrar dados quantitativos e qualitativos, em um desenho específico.
+  O TCC não coleta dado qualitativo (sem entrevistas, questionários ou
+  documentos analisados como dado); a revisão bibliográfica e a
+  interpretação dos achados dão contexto, mas não são coleta. Por isso o
+  texto passou a dizer "predominantemente quantitativa".
+- **Se a banca perguntar "por que não mista, como no TCC I?":** "o rótulo
+  foi revisto contra a definição de Creswell e Creswell (2023), cap. 1; sem
+  coleta qualitativa, o trabalho é quantitativo."
 
 ### 4.2 Estratégias de pesquisa (Seção 4.2)
 
@@ -210,13 +215,19 @@ São os "procedimentos" usados:
 |---|---|---|---|
 | **Pesquisa bibliográfica** | Estudar o que já foi publicado (artigos, livros) | Os 11 estudos de domínio e as 15 obras de método | Gil (2002) |
 | **Pesquisa documental** | Estudar documentos que não são artigos científicos (manuais, documentação técnica) | A documentação oficial da Riot Games API (Anexo A) | Prodanov e Freitas (2013) |
-| **Estudo de caso / estudo aplicado** | Estudar um caso específico em profundidade | O caso de *League of Legends* | Yin (2018) |
+| **Aplicação delimitada a um domínio** | Não é estratégia nomeada por Yin: o estudo se restringe ao domínio de *League of Legends* | A plataforma e os modelos valem para esse jogo | (sem citação) |
 
 **Diferença entre bibliográfica e documental (pergunta clássica):**
 bibliográfica usa material que já passou por análise de outros autores
 (artigos, livros). Documental usa material "bruto", que ainda não foi
 analisado academicamente (a documentação da API da Riot é um documento
 técnico, não um artigo).
+
+**Por que Yin (2018) saiu:** a definição dele de estudo de caso exige
+muito mais variáveis do que pontos de dados, proposições teóricas prévias
+e fontes de evidência que convergem. O TCC tem dezenas de milhares de
+partidas e cinco variáveis, e as duas fontes são complementares, não
+convergentes. A referência foi removida (agora 31).
 
 ### 4.3 Como a pesquisa bibliográfica foi feita (de verdade)
 
@@ -564,7 +575,7 @@ ou a mais aceita da técnica, mesmo que antiga.
 | Breiman (2001) | Artigo original da *Random Forest* |
 | Chen e Guestrin (2016) | Artigo original do XGBoost |
 | Hornik, Stinchcombe e White (1989) | Prova da aproximação universal, que justifica testar uma rede neural |
-| Grinsztajn, Oyallon e Varoquaux (2022) | Comparação ampla e recente de árvores contra redes em dados tabulares (45 bases, treino truncado em 10 mil). Conferido no texto: com treino de 50 mil, a diferença tende a diminuir (indício, sem estudo rigoroso). As nossas 39 mil ficam entre os dois regimes, e o empate do MLP é coerente com isso |
+| Grinsztajn, Oyallon e Varoquaux (2022) | Comparação ampla e recente de árvores contra redes em dados tabulares (45 bases, treino truncado em 10 mil). Conferido no texto: com treino de 50 mil, a diferença tende a diminuir (indício, sem estudo rigoroso). As nossas 39 mil ficam entre os dois regimes, e o empate do MLP é coerente com isso. **Critério de seleção que importa à defesa (seção 3.1 do artigo):** eles removem bases "fáceis demais", isto é, aquelas em que a regressão logística fica a menos de 5% (relativo) de **ambos** o ResNet e o HistGradientBoosting. Nossa regressão logística (AUC 0,8483 contra 0,8473 do XGBoost) cairia nesse critério: a base não discrimina famílias de modelo, o que explica o empate e fica fora do regime em que o resultado deles é informativo. Também removem séries temporais e alvos determinísticos |
 | Lundberg e Lee (2017) | Artigo original do SHAP, com a prova das propriedades que o justificam |
 | Ribeiro, Singh e Guestrin (2016) | Artigo original do LIME, a alternativa considerada |
 | Hanley e McNeil (1982) | Interpretação clássica da AUC como probabilidade de ordenar certo um par |
@@ -576,7 +587,7 @@ ou a mais aceita da técnica, mesmo que antiga.
 | Holm (1979) | Artigo original da correção de Holm para comparações múltiplas |
 | Wang et al. (2020), RAT-SQL | Mostra que representar as relações do esquema melhora o *text-to-SQL* |
 | Zhong, Yu e Klein (2020) | Discute os limites da acurácia de execução, a métrica do *benchmark* |
-| Prodanov e Freitas (2013); Gil (2002); Creswell e Creswell (2023); Yin (2018) | Manuais de metodologia usados na classificação da pesquisa, como no TCC I |
+| Prodanov e Freitas (2013); Gil (2002); Creswell e Creswell (2023) | Manuais de metodologia usados na classificação da pesquisa, como no TCC I |
 
 **Resposta pronta:** "Os trabalhos foram escolhidos para cobrir cada
 camada da plataforma (predição, explicabilidade, linguagem natural e
@@ -590,10 +601,10 @@ método, e o texto diz isso."
 
 | Obra | O que criou/mostrou | Por que está no TCC |
 |---|---|---|
-| Brown, Cai e DasGupta (2001) | Compara intervalos de confiança para proporções e recomenda o de Wilson em amostras pequenas | Justifica o intervalo de Wilson (Seção 4.5) |
+| Brown, Cai e DasGupta (2001) | Compara intervalos de confiança para proporções; recomenda Wilson ou Jeffreys para n ≤ 40 e, acima disso, diz que Wilson, Jeffreys e Agresti-Coull são muito parecidos (prefere Agresti-Coull pela simplicidade) | Justifica o intervalo de Wilson em vez do usual (Wald), que tem cobertura instável (Seção 4.5). Nossos n são de milhares |
 | Holm (1979) | Correção de Holm para comparações múltiplas | O teste que refutou o "pico" do viés (Seção 4.5) |
-| Kohavi (1995) | Estudo sobre validação cruzada | Justifica a validação cruzada de 5 *folds* (Seção 4.6) |
-| Pedregosa et al. (2011) | A biblioteca scikit-learn | Origem do `GridSearchCV` e do MLP/Random Forest (Seção 4.6) |
+| Kohavi (1995) | Estudo de validação cruzada e *bootstrap*; **recomenda validação cruzada estratificada de 10 dobras**, e diz que 5 dobras tem viés pessimista em bases pequenas | Justifica a validação cruzada estratificada (Seção 4.4). As 5 dobras são escolha de custo, e o Apêndice C mostra que 10 muda no máximo 0,0008 de acurácia |
+| Pedregosa et al. (2011) | A biblioteca scikit-learn: interface única de estimadores, validação cruzada e `GridSearchCV` (seção 4 do artigo). **Não descreve** Random Forest nem MLP (o `MLPClassifier` entrou na versão 0.18, de 2016) | Origem do `GridSearchCV` e da biblioteca usada (Seção 4.4). Os modelos RF e MLP vêm de Breiman (2001) e de Hornik et al. (1989) |
 | Kaufman et al. (2012) | Vazamento de dados: formulação e como evitar | Base da regra "nada do futuro entra" (Seção 4.6) |
 | Hornik, Stinchcombe e White (1989) | Redes com camada escondida aproximam qualquer função | Aproximação universal do MLP (Seção 2.2) |
 | Grinsztajn, Oyallon e Varoquaux (2022) | Em dados tabulares de porte médio, métodos de árvores seguem competitivos com redes neurais | Por que árvores fazem sentido aqui (Seção 2.2) |
@@ -606,16 +617,17 @@ método, e o texto diz isso."
 | Ribeiro, Singh e Guestrin (2016) | LIME | A alternativa ao SHAP (comparada, não usada) |
 | Wang et al. (2020) | RAT-SQL (text-to-SQL ciente do esquema) | Fundamenta a conversão de pergunta em SQL |
 
-### 5.4 As outras 6 referências
+### 5.4 As outras 5 referências
 
-- **Prodanov e Freitas (2013), Gil (2002), Creswell e Creswell (2023),
-  Yin (2018):** livros de metodologia científica (Parte 4).
+- **Prodanov e Freitas (2013), Gil (2002), Creswell e Creswell (2023):**
+  livros de metodologia científica (Parte 4). Yin (2018) foi removido em
+  2026-11-03 (ver 4.2).
 - **Riot Games (APIs):** a documentação oficial da API (Anexo A).
 - **Oracle's Elixir (Downloads):** fonte dos dados profissionais
-  (oracleselixir.com/tools/downloads, acesso em 20 out. 2026; os arquivos
+  (oracleselixir.com/tools/downloads, acesso em 4 jul. 2026; os arquivos
   são baixados do Google Drive que o site aponta).
 
-**Total: 32 referências** = 11 de domínio + 15 de método + 4 de
+**Total: 31 referências** = 11 de domínio + 15 de método + 3 de
 metodologia + 1 de documentação da API + 1 de fonte de dados.
 
 ---
@@ -635,7 +647,7 @@ um pedido no formato combinado e recebe uma resposta com dados. A Riot
 | **league-v4** | Listar os jogadores Desafiante e Grão-Mestre de cada região | "me dá a lista dos melhores da Coreia" |
 | **account-v1** | Descobrir o nome (Riot ID) de um jogador a partir do seu código | "quem é o jogador abc-123?" |
 | **match-v5** | Baixar o resumo de uma partida (quem ganhou, campeões, totais) | "me dá a partida BR1_123" |
-| **timeline-v5** | Baixar a **linha do tempo** da partida, minuto a minuto | "como estava a partida no minuto 15?" |
+| **match-v5 /timeline** | Baixar a **linha do tempo** da partida, minuto a minuto | "como estava a partida no minuto 15?" |
 
 **A *timeline* é o coração do projeto.** Ela tem uma "foto" (chamada
 *frame*) a cada minuto: quanto ouro e XP cada jogador tinha, onde ele
@@ -711,7 +723,7 @@ insuficiente.
 
 - **O que é:** um site que publica, de graça, planilhas (CSV) com
   estatísticas de jogos profissionais de LoL, ano a ano.
-- **O que entrou:** **96.716 jogos** de 2014 a 2026, das principais ligas
+- **O que entrou:** **99.259 jogos** de 2014 a 2026, de 122 ligas, da elite às de desenvolvimento
   (LCK da Coreia, LPL da China, LEC da Europa, LTA, CBLOL do Brasil e
   outras).
 - **Por que foi adicionada:** **não estava no TCC I**. Entrou no TCC II
@@ -1467,7 +1479,7 @@ Todo padrão encontrado passou por 4 testes **antes** de ser aceito:
 
 ### 13.6 A inversão no cenário profissional
 
-No Oracle's Elixir (96.716 jogos), é o **azul** que vence: **53,2%**.
+No Oracle's Elixir (99.259 jogos), é o **azul** que vence: **53,2%**.
 Estável de 2016 a 2026 (entre 52,5% e 55,0%). 2014 (58,2%) e 2015 (55,3%)
 destoam, mas com poucos jogos (814 e 1.702).
 
@@ -1925,7 +1937,7 @@ elo alto de LoL, outro jogo e outra base. Não são comparáveis diretamente."
 **45. "O Maymin escreve que o mapa de calor não é possível com os dados da
 API. O seu sai da API?"** "Sai, mas é mais grosseiro: o dele vem de
 rastreamento óptico a cada segundo; o meu agrega as posições por minuto da
-*timeline-v5*. O texto já admite que o meu é mais simples."
+*match-v5* (linha do tempo). O texto já admite que o meu é mais simples."
 
 **47. "O SiriusBI tem mais de 93% em SQL. Por que o seu é 88%?"** (conferido
 no artigo, 2026-11-02)
@@ -2157,7 +2169,7 @@ para isso que este guia existe.
   7.159; EUN1 20)
 - 39.426 na base congelada dos modelos; 39.309 viraram *features*;
   39.188 no corte de 15 min
-- 96.716 jogos profissionais (2014-2026)
+- 99.259 jogos profissionais (2014-2026)
 - Fila 420; elos Desafiante e Grão-Mestre
 - Limite da API: 20 pedidos/s e 100 a cada 2 min; chave expira em 24 h
 
@@ -2196,8 +2208,8 @@ para isso que este guia existe.
 
 **Documento**
 - 29 páginas do Resumo ao fim das Referências (limite 30, uma linha de folga)
-- 32 referências; 11 Figuras (5 no corpo, 6 telas inteiras no Apêndice F);
-  21 Quadros (6 no corpo, 15 nos apêndices); Apêndices A-G; Anexo A (documentação da Riot)
+- 31 referências; 11 Figuras (5 no corpo, 6 telas inteiras no Apêndice F);
+  33 Quadros (6 no corpo, 27 nos apêndices); Apêndices A-M (H fundamentos dos métodos, I estudos e literatura, J procedência dos dados e chaves da Riot, K objetivos e evidências, L SHAP por corte, M experimentos de precisão); Anexo A (documentação da Riot)
 - limitações: Seção 6.1, com o detalhe no Apêndice G
 - `verifica_tcc.py`: 20/20
 
@@ -2207,3 +2219,91 @@ para isso que este guia existe.
 `docs/handoff.md`, `docs/diario_execucao.md`, código em `src/`,
 artefatos em `reports/`, e `Downloads/TCC/Pesquisa artigos TCC.pdf`
 (levantamento bibliográfico do TCC I).*
+
+---
+
+## Achados da leitura integral dos artigos (2026-11-03), para a defesa
+
+Detalhes e páginas em `docs/conferencia_referencias.md`.
+
+- **"Por que os três modelos empataram?"** Hodge et al. também mediram
+  regressão logística, Random Forest e LightGBM e acharam 77,24% a 77,51%.
+  Guan e Tung acharam que um modelo simples empata com um modelo misto
+  construído como o rival mais forte, e que acrescentar variáveis piora. E
+  Grinsztajn remove bases "fáceis demais", em que a logística fica a menos de
+  5% do ResNet e do *boosting*: a nossa cairia nesse critério.
+- **"Quanto se acerta em partidas profissionais?"** Hodge: 85% é de 28 jogos
+  ao vivo; o número mais robusto é 70,81% a 74,59% em 186 jogos aos 20 min.
+  Jadowski: 67,3% em 306 jogos, antes da partida.
+- **"Por que validação cruzada de 5 dobras?"** Kohavi recomenda 10, e o
+  Apêndice C mostra que a diferença é de até 0,0008. Hodge dividiu por tempo
+  porque as variáveis deles dependem do histórico; as nossas só dependem da
+  própria partida no corte.
+- **"E o ouro?"** Maymin tira o ouro do modelo de vitória por considerá-lo
+  enganoso, e diz que mais variáveis não melhoram. O nosso modelo usa a
+  diferença de ouro como variável principal, e os experimentos com mais
+  variáveis foram negativos, o que é coerente.
+- **"Os 95% do Birant?"** Usam estatísticas de fim de partida; não é previsão
+  em jogo. **"Os 86% do Bahrololloomi?"** Mesma base de cálculo dos pesos, sem
+  teste separado. **"Os 92,51% do García-Méndez?"** Incluem o histórico de cada
+  jogador; só com o time e o placar são ~75%.
+- **"Redes neurais?"** Hornik prova que existe aproximação, mas atribui falhas
+  a aprendizado inadequado, poucas unidades ou relação estocástica entre
+  entrada e alvo. Hodge diz que as redes "não foram convincentes" nessa escala.
+- **"Quem usa elo alto?"** Do et al. cobrem Ferro a Diamante e dizem que não
+  representam o 1% do topo; a nossa base é Challenger/Grandmaster.
+- **"SiriusBI faz o mesmo que o NLQ?"** Não: a métrica deles (UEX) é mais
+  branda, eles têm diálogo em várias rodadas e ajuste fino, e nós temos
+  validação em quatro camadas e um *benchmark* de resultado exato.
+- **"A validação aleatória não infla o resultado, já que os dados mudam com o
+  tempo?"** Kaufman et al. (2012, seções 3.3 e 3.4) avisam exatamente isso.
+  Medido em `holdout_temporal.py` (Apêndice C): treinar nas 80% partidas mais
+  antigas e testar nas 20% mais recentes, ou treinar nos *patches* 16.10 a
+  16.13 e testar nos 16.14 a 16.19, **não reduz a AUC-ROC**. Aos 15 min:
+  0,8545 (cronológica) e 0,8542 (por *patch*) contra 0,8432 da divisão
+  aleatória de mesmo tamanho; a pior diferença é −0,0004 (20 min, por
+  *patch*). **Ressalva:** o tempo se mistura com a região (o teste cronológico
+  aos 15 min tem 49,7% de NA1 e nenhuma BR1), então o teste não separa os dois
+  efeitos; ele só mostra que o modelo generaliza para uma época e uma mistura
+  regional diferentes das do treino.
+- **"O Kaufman: o que a sua regra de corte garante?"** O *no-time-machine
+  requirement* (eq. 3): só vale variável com informação de momento anterior ou
+  igual ao da previsão. O `frames[: corte + 1]` é exatamente isso. O que ele
+  **não** cobre sozinho é a escolha de hiperparâmetros nas mesmas dobras de
+  avaliação (seção 3.4), já documentada.
+- **"E o viés de seleção da coleta? (Kaufman 2012, seção 7)"** O artigo descreve
+  o viés de estratificar num colisor. A nossa coleta parte de jogadores que
+  estão hoje em Desafiante e Grão-Mestre, e eles chegaram lá em parte por
+  vitórias recentes, então a seleção das partidas depende um pouco de
+  resultados passados. O efeito não foi medido. O modelo, porém, só usa cinco
+  números calculados dentro de cada partida, e o SHAP mostra que nenhuma
+  variável suspeita domina (o artigo recomenda exatamente esse tipo de
+  verificação, com uma lista de variáveis mais importantes para um
+  especialista avaliar).
+
+## Correção de 2026-11-03: fontes de dados
+
+- Jogos profissionais: **99.259** (o `load_pro.py` perdia 2.543; agora apaga por `game_id`). Taxa do azul 53,2% inalterada.
+- Elos: jogadores vão de Desafiante a Mestre (93% da tabela `players` é Mestre); 97,2% das partidas têm ao menos um Desafiante/Grão-Mestre, 2,8% só Mestre (769 na KR). Pergunta de defesa provável.
+- "timeline-v5" não é endpoint: é método do *match-v5*.
+- Arquivos do Oracle's Elixir datados de 4 jul. 2026.
+
+## Perguntas novas depois dos experimentos de precisão (2026-11-03)
+
+**"Vocês tentaram variáveis mais ricas para subir a acurácia?"**
+Sim (Apêndice M). Além dos onze experimentos do Quadro 5, testamos mais oito conjuntos: trajetória, diferença por função, objetivos, campeões de cada time e histórico do jogador. O maior ganho, com 64 variáveis e regressão logística, foi +0,0080 de AUC-ROC aos 15 minutos (0,8483 para 0,8555) e +0,0074 aos 25, e se manteve treinando no passado e testando no futuro (+0,0069 a +0,0089). Está abaixo de +0,01. O que mais ajudou foi a diferença por função (+0,0027).
+
+**"Por que não adotaram o modelo novo, se melhorou?"**
+O ganho é real mas pequeno (cerca de 1 ponto de acurácia aos 15 minutos), e trocar o modelo exigiria retreinar, reexportar e revalidar tudo. Fica como trabalho futuro. O que o resultado mostra é que o limite está na informação disponível, não no algoritmo: a regressão logística aproveita as variáveis novas mais que o XGBoost.
+
+**"O histórico dos jogadores não ajudaria?"**
+Testamos (experimento 19), só com partidas anteriores. Mesmo em partidas com 5 ou mais jogadores com 3 ou mais partidas prévias (92% da base), o ganho sobre o estado de jogo foi de +0,0004 aos 15 minutos. A habilidade já aparece no ouro e na experiência. Atenção: numa versão anterior desta análise eu citei cobertura de 31%; era medida errada (diferença de contagem entre os times).
+
+**"Uma chave de produção da Riot traria dados novos?"**
+Não pela documentação: a chave de produção aumenta o limite de requisições (a partir de 500 por 10 segundos e 30.000 por 10 minutos) e libera a API de torneios; as APIs padrão são as mesmas. O que a API pública não expõe (ondas de *minions*, ordem de escolha de campeões) continua fora. A aprovação depende da Riot, que avalia se o produto ajuda jogadores de forma mensurável.
+
+**"Por que 0,90 de acurácia aos 15 minutos não é viável?"**
+A literatura que consultei reporta 73% a 82% em partida em andamento, e resultados muito acima disso sem discussão de vazamento são suspeitos. Aos 25 minutos já temos AUC-ROC de 0,909.
+
+**"E os 2.543 jogos profissionais que faltavam?"**
+Erro do carregador (apagava por ano do arquivo, não por jogo), corrigido. O total passou de 96.716 para 99.259; a taxa do azul no total continua 53,2% (Apêndice J).

@@ -44,7 +44,7 @@ Depois, com PostgreSQL e chave configurados:
 
 ```bash
 python -m src.db                              # 1. aplica o schema
-python -m src.collect.seed_players            # 2. semeia jogadores (Challenger/GM)
+python -m src.collect.seed_players            # 2. semeia jogadores (Challenger/GM/Master)
 python -m src.collect.collect_matches --players 50 --matches-per-player 20
                                               # 3. coleta partidas + timelines
 python notebooks/01_eda.py                    # 4. análise exploratória
@@ -147,7 +147,7 @@ portal da Riot (limites maiores, sem expiração diária).
       e `src/models/tune_models_full.py` para a base final com artefato em
       `reports/tune_models_39k.json`
 - [x] Rodar tudo com dados reais (**41.063 partidas** de *solo queue* em
-      cinco regiões + **96.716 jogos** profissionais). A análise
+      cinco regiões + **99.259 jogos** profissionais). A análise
       descritiva usa a base completa; os modelos foram construídos sobre
       as **39.426 partidas** disponíveis quando o *feature set* foi
       congelado — a última rodada da KR (1.549 partidas) não entrou no

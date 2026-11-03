@@ -15,7 +15,7 @@ cronológico (`docs/diario_execucao.md`), a referência de scripts
 TCC II (CS, Unisinos): plataforma de análise de esports de League of
 Legends com DOIS datasets complementares:
 
-1. **Solo queue** (Riot API): partidas ranqueadas Challenger/GM
+1. **Solo queue** (Riot API): partidas ranqueadas de elo alto (Challenger/GM/Master)
    multi-região (BR1/EUW1/KR/NA1, mais um resíduo EUN1, fila 420) —
    **41.063 partidas** no banco (BR1 11.936, EUW1 11.744, KR 10.204,
    NA1 7.159, EUN1 20) e **39.188 linhas** na base do modelo preditivo
@@ -32,7 +32,7 @@ Legends com DOIS datasets complementares:
    BR1, EUW1 e NA1; as features cobrem 39.309 partidas distintas)
    na Seção 6.1 do TCC (detalhe no Apêndice G). JSON bruto + timelines guardados para
    reprocessamento.
-2. **Competitivo** (Oracle's Elixir): **96.716 jogos** profissionais de
+2. **Competitivo** (Oracle's Elixir): **99.259 jogos** profissionais de
    2014-2026 (LCK/LPL/LEC/LTA/CBLOL etc.), carregados de CSVs anuais.
    Contagem por `game_id` distinto — `pro_games` guarda duas linhas por
    jogo (uma por time), então `COUNT(*)` devolve o dobro.
@@ -185,10 +185,10 @@ perguntas de referência (22 solo queue + 4 competitivo).
   do corte de 10 min é [45,3%, 47,6%], que exclui 50% com folga.
   Mede com `python docs/testa_diferenca_taxas.py`; a bateria
   (`tests/validate_predictions.py`) cobra a constância, não o pico.
-- Competitivo (**96.716 jogos**, 2014-2026): **azul vence 53,2%**.
+- Competitivo (**99.259 jogos**, 2014-2026): **azul vence 53,2%**.
   A série anual é estável a partir de 2016 (52,5% a 55,0%); 2014
   (58,2%) e 2015 (55,3%) divergem sobre amostras de 814 e 1.702 jogos,
-  contra 96.716 no total.
+  contra 99.259 no total.
   Hipótese documentada: counter-pick garantido (solo queue) vs
   prioridade de primeiro pick (pro).
 - Conversão de vantagem: com +2k a +4k de ouro aos 15, o azul vence
@@ -272,12 +272,12 @@ Resumo (página 1) ao fim das Referências, limite 30 (régua corrigida em
 2026-10-23; a antiga parava no início das Referências e dizia "30" quando
 eram 37). Reduzido em 2026-10-28 conforme `docs/plano_reducao_corpo.md`,
 com 6 quadros e 5 figuras recortadas no corpo a pedido do orientador
-(`docs/capturar_figuras_texto.py`). 32 referências, Apêndices A-G (F =
+(`docs/capturar_figuras_texto.py`). 31 referências, Apêndices A-M (H a M novos em 2026-11-03; F =
 telas inteiras, G = limitações em detalhe), Anexo A (documentação da Riot).
 O Apêndice E recebeu as notas de proveniência da Seção 5.3, movidas do
 corpo em 2026-10-20 para abrir espaço às citações novas). Suíte completa verde:
 `tests/smoke_test.py`, `tests/validate_predictions.py` (aprovado com
-ressalvas), `docs/verifica_tcc.py` (20 checagens, consistente),
+ressalvas), `docs/verifica_tcc.py` (22 checagens, consistente),
 `docs/confere_docx.py` (conforme), `frontend` lint + 31/31 testes.
 Nenhuma pendência de texto em aberto — ver a seção "Pendências finais
 antes da entrega" no fim de `docs/tcc2_texto.md` para o histórico

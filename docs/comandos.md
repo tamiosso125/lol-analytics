@@ -171,6 +171,12 @@ resultado está em `reports/`.**
 # e semente; ~10 min. Grava reports/robustez_dobras.json (Apêndice C):
 .venv\Scripts\python.exe -m src.models.robustez_dobras
 
+# Treino no passado, teste no futuro (Kaufman et al., 2012): divisão
+# cronológica 80/20, por patch (treina 16.10 a 16.13, testa 16.14 a 16.19) e
+# aleatória de mesmo tamanho, nos quatro cortes; ~3 min, precisa do banco
+# (data e patch das partidas). Grava reports/holdout_temporal.json (Apêndice C):
+.venv\Scripts\python.exe -m src.models.holdout_temporal
+
 # Baseline (regressão logística) e IC 95% da diferença do XGBoost para os
 # demais modelos, por bootstrap pareado; ~10 min. Grava
 # reports/baseline_e_diferencas.json (Apêndice C):
@@ -251,7 +257,7 @@ Antes de fechar o TCC, duas checagens automáticas. Ambas saem com exit 1
 quando algo diverge, e ambas devem passar.
 
 ```powershell
-# 20 checagens de consistência do texto contra o banco e os artefatos.
+# 22 checagens de consistência do texto contra o banco e os artefatos.
 # A lista completa e o docstring de docs/verifica_tcc.py; a checagem 20
 # confere que o numero aqui afirmado bate com o que a suite imprime, entao
 # este comentario nao pode divergir sem reprovar.
@@ -422,8 +428,22 @@ texto existam de verdade. Ver **5b**, **5c** e **5d**.
 ```
 15. python -m src.models.multi_cutoff_metrics  # Apêndice C + metricas_corte.json
 16. python -m src.models.tune_models_full --completo  # lastro da 5.4, 6.1 e Apêndice G
-17. python docs/verifica_tcc.py               # 20 checagens, exit 0
+17. python docs/verifica_tcc.py               # 22 checagens, exit 0
 18. python docs/build_tcc_docx.py             # gera o .docx
 19. powershell -File docs/finalize-fields.ps1  # Word preenche os campos
 20. python docs/confere_docx.py               # conformidade formal, exit 0
+```
+
+## Experimentos de precisão (2026-11-03, exploratório, não altera o modelo de produção)
+
+```powershell
+# variáveis ricas (base congelada de 39.426 partidas); grava data/features_v2.csv.gz
+.venv\Scripts\python.exe -m src.features.build_features_v2
+.venv\Scripts\python.exe tests\test_features_v2_sem_vazamento.py        # 0 vazamentos em 703 pares
+# experimentos 12 a 18 -> reports/experimentos_precisao.json (Apêndice M)
+.venv\Scripts\python.exe -m src.models.experiment_precisao --cutoffs 15 25
+# treino no passado, teste no futuro com as variáveis novas -> reports/holdout_precisao.json
+.venv\Scripts\python.exe -m src.models.holdout_precisao --cutoffs 15 25
+# experimento 19, histórico do jogador por estrato -> reports/experimento_historico.json
+.venv\Scripts\python.exe -m src.models.experiment_historico --cutoffs 15 25
 ```
