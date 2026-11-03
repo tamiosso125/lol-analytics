@@ -1113,11 +1113,10 @@ Linguistics, 2020. p. 396-411. DOI: 10.18653/v1/2020.emnlp-main.29.
 
 ## APÊNDICE A – Esquema relacional do banco de dados
 
-O banco de dados (PostgreSQL) foi estruturado com as tabelas listadas
-no Quadro a seguir. `raw_matches`/`raw_timelines` preservam o JSON
-bruto retornado pela Riot API (para reprocessamento sem nova coleta);
-as demais são a normalização relacional usada pela análise e pela
-modelagem.
+O banco de dados (PostgreSQL) segue o esquema do quadro a seguir. As
+tabelas `raw_matches` e `raw_timelines` guardam o JSON bruto da Riot API,
+para reprocessar sem nova coleta; as demais são a normalização relacional
+usada pela análise e pela modelagem.
 
 Quadro — Esquema relacional do banco de dados
 
@@ -1135,32 +1134,32 @@ Quadro — Esquema relacional do banco de dados
 | `pro_games` | game_id, league, year, split, playoffs, game_date, patch, side, team_name, win, game_length_s, kills, deaths, dragons, barons, heralds, towers, inhibitors, gold_diff_at15, xp_diff_at15, cs_diff_at15, kill_diff_at15 | PK: game_id+side |
 | `pro_players` | game_id, side, position, player_name, team_name, champion, kills, deaths, assists, win | PK: game_id+side+position |
 
-`item_events` guarda compras/vendas efetivas (`ITEM_UNDO` já resolvido
-no ETL); `items` é o catálogo Data Dragon, usado para JOIN de nome/ícone
-de item. Índices B-tree foram criados sobre as colunas mais usadas em
-filtro (campeão, jogador, versão do jogo, liga) para suportar tanto os
-endpoints da API quanto as consultas geradas pela interface em
-linguagem natural.
+Em `item_events`, as compras e vendas já vêm com os desfazimentos
+resolvidos, e `items` é o catálogo do Data Dragon, usado para resolver nome
+e ícone de item. Índices B-tree cobrem as colunas mais usadas em filtro
+(campeão, jogador, versão do jogo e liga), tanto para a API quanto para as
+consultas geradas pela interface em linguagem natural.
 
 ---
 
 ## APÊNDICE B – Benchmark da interface em linguagem natural
 
-Execução em 2026-10-04 sobre a base de produção de **41.063 partidas**:
-**23/26 = 88% de acurácia de execução**, com o comando
-`python -m src.nlq.evaluate_nlq`, que grava
-`reports/nlq_benchmark.json` com o accuracy, a base, o modelo e o desfecho de
-cada pergunta. É o mesmo número que a execução anterior mediu sobre as 39.426
-partidas da base intermediária, 4% de diferença no volume que não moveu o
-resultado. O mesmo número já havia saído antes, na execução de 2026-09-28
-(24.154 partidas) e em uma de 2026-07-13. Uma
-primeira execução, feita simultaneamente à coleta em background, mediu
-22/26 (85%) com uma falha adicional na pergunta 3 ("win rate do time
-azul"). Repetida a execução sem a interferência de escrita
-concorrente no banco, a pergunta 3 voltou a passar, confirmando que a
-falha extra foi um artefato de leitura durante escrita concorrente
-(contagem mudando entre a consulta gerada e a consulta de referência),
-não um erro real de interpretação. As 26 perguntas de referência:
+Medição de 4 de outubro de 2026 sobre a base de produção de **41.063
+partidas**: **23/26 = 88% de acurácia de execução**, pelo comando
+`python -m src.nlq.evaluate_nlq`, que grava `reports/nlq_benchmark.json` com
+a acurácia, a base, o modelo e o desfecho de cada pergunta.
+
+Quadro — Execuções do benchmark de linguagem natural
+
+| Execução | Base (partidas) | Resultado | Observação |
+|---|---:|---:|---|
+| 13 de julho de 2026 | não registrada | 23/26 | mesmas três falhas |
+| 28 de setembro de 2026 | 24.154 | 23/26 | mesmas três falhas |
+| 4 de outubro de 2026 | 41.063 | 23/26 | medida de referência; a execução anterior, sobre 39.426 partidas, deu o mesmo resultado |
+| Durante a coleta | não registrada | 22/26 | falha extra na pergunta 3 (taxa de vitória do time azul): a contagem mudou entre a consulta gerada e a de referência, por escrita concorrente; sem a coleta, a pergunta voltou a passar |
+
+As 26 perguntas de referência, com a SQL esperada e o resultado da medição
+de referência:
 
 Quadro — Benchmark de 26 perguntas de referência (NLQ)
 
@@ -1193,26 +1192,18 @@ Quadro — Benchmark de 26 perguntas de referência (NLQ)
 | 25 | Quais os 5 campeões mais jogados no competitivo em 2026? | `SELECT pp.champion, COUNT(*) AS jogos FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pg.year = 2026 GROUP BY pp.champion ORDER BY jogos DESC LIMIT 5` | OK |
 | 26 | Qual liga teve mais jogos profissionais em 2026? | `SELECT league, COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE year = 2026 GROUP BY league ORDER BY jogos DESC LIMIT 1` | OK |
 
-As três falhas (perguntas 5, 12, 22) pertencem à mesma família: todas
-envolvem um limiar mínimo de jogos ("com pelo menos N partidas"),
-questão de formatação da resposta (coluna extra ou apresentação),
-não de interpretação incorreta da pergunta ou geração de SQL
-estruturalmente errado, padrão já documentado em execuções anteriores
-do mesmo benchmark.
+As três falhas (perguntas 5, 12 e 22) pertencem à mesma família: todas
+envolvem um limiar mínimo de jogos ("com pelo menos N partidas") e erram na
+formatação da resposta, por coluna extra ou apresentação, sem erro de
+interpretação da pergunta nem de estrutura da SQL.
 
 ---
 
 ## APÊNDICE C – Métricas completas por corte temporal
 
-Quadro reproduzido por `python -m src.models.multi_cutoff_metrics`, que
-avalia os três modelos nos quatro cortes com validação cruzada estratificada
-de 5 dobras (semente 42) usando, no XGBoost, os **mesmos hiperparâmetros
-de produção** (500 árvores, taxa de aprendizado 0,01, profundidade 3); a
-*Random Forest* (500 árvores) e o MLP (camadas de 64 e 32 neurônios) estão
-na configuração de referência, sem busca em grade. É o mesmo desenho
-do quadro anterior, agora regenerável por comando. Executado em 2026-10-04
-sobre a base de 39.426 partidas. Os valores do corte de 15 min reproduzem os
-já citados na Seção 5.4.
+O quadro reúne os três modelos nos quatro cortes, com validação cruzada
+estratificada de 5 dobras (semente 42) sobre a base de 39.426 partidas. Os
+valores do corte de 15 minutos são os do Quadro 3.
 
 Quadro — Métricas completas por corte temporal, comparação entre os três modelos
 
@@ -1231,114 +1222,120 @@ Quadro — Métricas completas por corte temporal, comparação entre os três m
 | 25min | 26.837 | 0,467 | **XGBoost** | 0,8241 | 0,8172 | 0,8034 | 0,8103 | 0,9090 |
 | 25min | 26.837 | 0,467 | MLP | 0,8240 | 0,8171 | 0,8033 | 0,8101 | 0,9072 |
 
-Nota: este quadro e a série de AUC-ROC por fase citada na Seção 5.4
-(0,774 / 0,847 / 0,876 / 0,909) usam os **mesmos** hiperparâmetros de
-produção do XGBoost (500 árvores, *learning rate* 0,01, profundidade 3). A
-versão anterior desta nota afirmava que eram diferentes, e não são:
-`src/models/multi_cutoff_metrics.py` e `src/models/export_model.py` leem a
-mesma configuração. A diferença entre os valores atuais e a série
-histórica de 2026-07-08 (0,767 / 0,842 / 0,872 / 0,907) vem da base de
-treino, que era de 23.133 partidas e passou a 39.426, e não do ajuste. O
-comando que regenera este quadro é
-`python -m src.models.multi_cutoff_metrics`.
+Quadro — Configuração dos três modelos comparados
+
+| Modelo | Configuração | Origem |
+|---|---|---|
+| XGBoost | 500 árvores, taxa de aprendizado 0,01, profundidade 3 | busca em grade sobre a base de 10.295 partidas, mantida na base final (2º lugar entre 27 combinações) |
+| *Random Forest* | 500 árvores, demais parâmetros do scikit-learn | configuração de referência, sem busca em grade |
+| MLP | camadas de 64 e 32 neurônios, variáveis padronizadas, até 500 iterações | configuração de referência, sem busca em grade |
+
+O comando que regenera o quadro de métricas é
+`python -m src.models.multi_cutoff_metrics`, que grava
+`reports/metricas_corte.json`.
 
 ---
 
-## APÊNDICE D – Notas sobre os experimentos negativos
+## APÊNDICE D – Detalhe dos experimentos negativos
 
-Os onze experimentos estão no Quadro 5 da Seção 5.4. Três deles pedem
-detalhe que não cabe no quadro.
+O Quadro 5 da Seção 5.4 lista os onze experimentos de enriquecimento de
+variáveis. Os quadros a seguir detalham três deles, indicam como
+reproduzi-los e registram o efeito do volume de partidas, que foi o único
+acréscimo com ganho real.
 
-*Nota sobre o experimento 4.* A ausência de ganho de AUC da calibração foi
-reexaminada em 2026-10-04, quando a limitação de taxa-base (Apêndice G)
-passou a ser testada contra as alavancas que este apêndice não cobre. O
-resultado é mais forte que "sem ganho": a calibração **piora** também a
-discrepância de taxa-base, de 1,7 para 2,3 pontos percentuais, porque o
-estado de empate total fica fora da distribuição observada e o calibrador o
-extrapola para perto de 50%. A *Random Forest* com 500 árvores e
-profundidade 6 fecha a discrepância (0,6 pp) ao custo de 0,0005 de AUC,
-mas não foi adotada; a justificativa está no Apêndice G. Esse teste não
-figura na tabela porque não é enriquecimento de variáveis, e sim
-caracterização de uma limitação de modelo; o comando é
-`python docs/experimento_calibracao.py`.
+Quadro — Detalhe de três experimentos negativos
 
-*Nota sobre o experimento 10.* Achado em 2026-10-05 ao inspecionar o
-payload bruto real da timeline em busca de evento ainda não testado (não
-pela documentação oficial, que exige login para detalhar *schema*).
-`TURRET_PLATE_DESTROYED` cobre exatamente a janela onde `tower_diff` é
-pouco informativo (torres raramente morrem antes dos 15 min, mas placas
-são batidas o jogo inteiro nessa janela), hipótese concreta, mas o sinal
-de pressão de rota que capta já deve estar redundante com
-`gold_diff`/`xp_diff`. Comando e artefato: `python -m
-src.models.experiment_turret_plates` e
-`reports/experimento_placas_torre.json`.
+| Experimento | Hipótese | Resultado | Leitura |
+|---|---|---|---|
+| 4. Calibração adicional | Calibrar as probabilidades aproximaria o estado de empate total da taxa observada nos dados | Sem ganho de AUC; o desvio no estado de empate sobe de 1,7 para 2,3 pontos percentuais | O estado de empate total fica fora da distribuição observada, e o calibrador o extrapola para perto de 50%. A troca para *Random Forest* de profundidade 6 fecha o desvio (0,6 pp) ao custo de 0,0005 de AUC (Apêndice G) |
+| 10. Placas de torre | As placas destruídas cobrem a janela em que a diferença de torres é pouco informativa: torres raramente caem antes dos 15 minutos, mas as placas são destruídas o tempo todo | Δ AUC de −0,0002 nos cortes de 10 e 15 minutos | O sinal de pressão de rota que a placa capta já está em ouro e experiência. O evento foi encontrado inspecionando a linha do tempo bruta, porque a documentação oficial exige login para detalhar o esquema |
+| 11. Percentis de comportamento | O comportamento do jogador (cooperação e experiência) prevê o resultado | Piloto de 199 partidas: +0,0090 de AUC. Amostra de 2.987 partidas: −0,0031 (cooperação) e +0,0007 (experiência) | Regressão à média: com 199 partidas, o modelo de referência já oscilava 1,8 pp de AUC em relação ao de produção. O endpoint devolve o estado atual do jogador; para evitar dado do futuro, o teste usou as partidas mais recentes da KR, com 0 a 16 dias entre a coleta e a consulta (média de 7,8) |
 
-*Nota sobre o experimento 11.* Único entre os onze que não vem da
-*timeline*: `lol-challenges-v1` devolve o estado comportamental VITALÍCIO
-e ATUAL do jogador, não o estado dele na época de uma partida passada; um
-teste ingênuo sobre o histórico vazaria dado do futuro. Contornado medindo
-sobre as partidas mais recentes da KR (gap de horas/dias entre a coleta e
-a consulta, registrado, não suposto). Um piloto inicial (199 partidas)
-sugeriu `teamwork_pct_diff` com delta +0,0090, maior que qualquer outro
-experimento, mas a escala para 2.987 partidas (gap 0-16 dias, média 7,8)
-devolveu -0,0031, dentro do ruído dos demais. O piloto pequeno era
-regressão à média, não sinal: o próprio *baseline* já oscilava 1,8 pp do
-AUC de produção apenas pelo tamanho da amostra. Comando e artefato: `python -m
-src.models.experiment_challenges_pilot --n-matches 3000` e
-`reports/experimento_challenges_piloto.json`.
+Quadro — Como reproduzir os três experimentos
 
-Em contraste, o aumento de *volume* de partidas produziu ganho real:
-AUC-ROC do XGBoost (corte 15 min) subiu de 0,8214 (10.295 partidas)
-para 0,8393 (23.133 partidas) e para 0,8473 (39.188 partidas) ao longo
-da coleta incremental, um ganho acumulado de 0,0259, cerca de 6× maior
-que o maior ganho de qualquer um dos 11 experimentos de variáveis (0,003),
-e cerca de 130× o menor deles (0,0002).
+| Experimento | Comando | Artefato (em `reports/`) |
+|---|---|---|
+| 4 | `python docs/experimento_calibracao.py` | `experimento_calibracao_veredito.json` |
+| 10 | `python -m src.models.experiment_turret_plates` | `experimento_placas_torre.json` |
+| 11 | `python -m src.models.experiment_challenges_pilot --n-matches 3000` | `experimento_challenges_piloto.json` |
+
+Quadro — Efeito do volume de partidas sobre o AUC-ROC do XGBoost
+
+| Partidas | AUC-ROC aos 15 minutos | Ganho acumulado |
+|---:|---:|---:|
+| 10.295 | 0,8214 | — |
+| 23.133 | 0,8393 | +0,0179 |
+| 39.188 | 0,8473 | +0,0259 |
+
+O ganho acumulado de 0,0259 equivale a cerca de nove vezes o maior ganho de
+um experimento de variáveis (0,003) e a cerca de 130 vezes o menor (0,0002).
 
 ---
 
 ## APÊNDICE E – Proveniência das medições da Seção 5.3
 
-**Histórico do Quadro 2.** O quadro original, medido em 2026-07-06 com BR1
-11.936, EUW1 1.307, NA1 1.367 e KR 1.308 partidas, foi substituído por uma
-segunda rodada de coleta destinada especificamente a ampliar EUW1, KR e NA1, e
-depois pela medição de 2026-10-04, quando EUW1 e KR já haviam quase dobrado
-novamente e a NA1 também foi ampliada. A direção do achado (todas as quatro
-regiões com amostra relevante do lado do vermelho) se manteve idêntica em todas
-as quatro medições. A BR1 não se alterou em nenhum dos quatro levantamentos. A
-NA1, que era o elo mais frágil da generalização, foi ampliada de 1.446 para
-7.159 partidas na rodada final, e a taxa do vermelho passou de 51,9% para
-52,2%. A direção do achado não mudou, e a NA1 deixou de ser limitação.
+Quadro — Partidas por região na primeira e na última medição do viés de lado
 
-**Origem das taxas de conversão de vantagem.** Todas as taxas de conversão da
-Seção 5.3 foram remedidas sobre a base de variáveis congelada (39.309 partidas
-distintas, 39.188 no corte de 15 minutos) pelo script
-`docs/confere_conversao_advantagem.py`, que lê `data/features_phases.csv`.
+| Região | Primeira medição (6 de julho de 2026) | Última medição (4 de outubro de 2026) | Observação |
+|---|---:|---:|---|
+| BR1 | 11.936 | 11.936 | não mudou em nenhum dos quatro levantamentos |
+| EUW1 | 1.307 | 11.744 | |
+| NA1 | 1.367 | 7.159 | 1.446 antes da rodada final; a taxa do vermelho passou de 51,9% para 52,2% |
+| KR | 1.308 | 10.204 | |
 
-**Teste (ii), faixas de duração.** Foi remedido em 2026-10-04 sobre a base atual, porque a
-medição que o texto usava era de 2026-07-08 e de uma base quase metade
-desta: as taxas por faixa de duração total são 46,5% (0 a 25 min, 15.944
-partidas), 47,3% (25 a 30, 13.314), 46,4% (30 a 35, 8.364), 45,6% (35 a 40,
-2.684) e 47,0% (acima de 40, 757). A amplitude é de 1,7 ponto percentual e
-todas as faixas ficam abaixo de 50%: o teste se sustenta, agora com data,
-base e amplitude explícitas.
+A direção do achado, com o vermelho acima de 50% nas quatro regiões, se
+manteve nas quatro medições. A NA1, que era a região mais frágil para a
+generalização, deixou de ser limitação.
 
-**Série anual do cenário profissional.** Vitória do azul por ano nos dados competitivos: 53,6% (2016), 55,0% (2017), 53,7% (2018), 53,2% (2019), 52,7% (2020), 52,6% (2021), 52,5% (2022), 53,3% (2023), 53,1% (2024), 53,3% (2025) e 53,1% (2026). Os dois primeiros anos divergem (58,2% em 2014 e 55,3% em 2015), mas se apoiam em amostras muito menores (814 e 1.702 jogos, contra 96.716 no total), e a diferença é atribuída a essa assimetria de volume, não a uma mudança no padrão.
+Quadro — Origem dos números da Seção 5.3
 
+| Número e base | Script (em `docs/`) | Artefato (em `reports/`) |
+|---|---|---|
+| Vitória do vermelho por região (Quadro 2), sobre 41.063 partidas | consulta SQL agregada por partida, na checagem 6 de `verifica_tcc.py` | `stats_regions.txt` |
+| Vitória do azul em partidas empatadas, por corte, sobre as variáveis congeladas (39.309 partidas) | `taxa_base_por_corte.py` | `taxa_base_por_corte.json` |
+| Comparação de pares com correção de Holm, sobre as variáveis congeladas | `testa_diferenca_taxas.py` | saída no terminal |
+| Vitória do azul por faixa de duração, sobre 41.063 partidas | `testa_faixa_duracao.py` | `faixa_duracao.json` |
+| Conversão de vantagem de ouro, sobre as variáveis congeladas (39.188 aos 15 minutos) | `confere_conversao_advantagem.py` | lê `features_phases.csv`, em `data/` |
+| Série anual do cenário profissional, sobre 96.716 jogos | consulta SQL em `pro_games` | |
+
+Quadro — Vitória do azul por faixa de duração total da partida
+
+| Duração total | Partidas | Vitória do azul |
+|---|---:|---:|
+| 0 a 25 min | 15.944 | 46,5% |
+| 25 a 30 min | 13.314 | 47,3% |
+| 30 a 35 min | 8.364 | 46,4% |
+| 35 a 40 min | 2.684 | 45,6% |
+| acima de 40 min | 757 | 47,0% |
+
+A amplitude é de 1,7 ponto percentual, e todas as faixas ficam abaixo de
+50%. A medição é de 4 de outubro de 2026, sobre as 41.063 partidas.
+
+Quadro — Vitória do azul por ano no cenário profissional
+
+| Ano | Azul | Ano | Azul |
+|---|---:|---|---:|
+| 2014 | 58,2% | 2021 | 52,6% |
+| 2015 | 55,3% | 2022 | 52,5% |
+| 2016 | 53,6% | 2023 | 53,3% |
+| 2017 | 55,0% | 2024 | 53,1% |
+| 2018 | 53,7% | 2025 | 53,3% |
+| 2019 | 53,2% | 2026 | 53,1% |
+| 2020 | 52,7% | Todos os anos | 53,2% |
+
+Os anos de 2014 e 2015 divergem, mas se apoiam em 814 e 1.702 jogos, contra
+96.716 no total, e a diferença é atribuída a esse volume menor, não a uma
+mudança no padrão.
 
 ---
 
 ## APÊNDICE F – Telas completas da plataforma
 
-As seis telas, inteiras, das quais a Seção 5 mostra recortes. Geradas em
-2026-10-28 via Playwright (Chromium, 1440 px de largura, altura ajustada à
-página, sem `full_page`, **tema escuro**) contra a API e o *frontend*
-rodando localmente, com **41.063 partidas** na fila ranqueada, a mesma base
-do Quadro 2 da Seção 5.3. O instante e a base estão em
-`reports/anexo_a/captura.json`, gravado pelo comando que produz as telas
-(`python docs/recapturar_anexo_a.py`); os recortes da Seção 5 têm o próprio
-registro, `reports/figuras_texto/figuras.json`, gravado por
-`python docs/capturar_figuras_texto.py`. O tema escuro é o da própria
-interface, aplicado antes de a página montar, e não um filtro de imagem.
+As seis telas da plataforma, inteiras, das quais a Seção 5 mostra recortes.
+Foram capturadas com a API e a interface rodando localmente sobre as 41.063
+partidas do Quadro 2, em tema escuro, com 1440 px de largura e altura
+ajustada à página. Os comandos que geram as capturas estão em
+`docs/comandos.md`.
 
 | Arquivo | Página |
 |---|---|
@@ -1353,90 +1350,49 @@ interface, aplicado antes de a página montar, e não um filtro de imagem.
 
 ## APÊNDICE G – Limitações em detalhe
 
-Detalhe das limitações resumidas na Seção 6.1, com os números e os
-experimentos de cada uma.
+O quadro a seguir reúne a evidência medida para cada limitação resumida na
+Seção 6.1; os dois seguintes detalham a discrepância de taxa-base do
+modelo.
 
-**A taxa-base do modelo em estado de empate subestima o viés de lado.**
-Com o retreino de 39.188 partidas, a probabilidade prevista para o estado
-"tudo empatado" ficou em 49,2% (10 min), 49,6% (15 min), 51,4% (20 min) e
-49,0% (25 min), enquanto a medição direta sobre os dados brutos, entre
-partidas genuinamente empatadas, dá 46,4% a 47,9% (Seção 5.3): uma
-diferença de **1,7 a 4,7 pontos percentuais conforme o corte**. A série
-do modelo é plana, sem o pico de meio de jogo da primeira versão do
-texto, mas as duas séries não concordam em magnitude, nem sempre em
-direção: aos 20 minutos o modelo projeta 51,4% de vitória azul,
-favorecendo o azul, enquanto o dado bruto dá 46,7%, favorecendo o
-vermelho. A discrepância não decorre de subajuste: uma busca em grade
-completa (27 combinações, 5 dobras) escolheu a **mesma profundidade** de
-produção (3) e terminou 0,0001 de AUC acima dela, de 0,8473 para 0,8475,
-em 2º lugar entre as 27. Testadas as três alavancas que a grade não cobre,
-a conclusão é contraintuitiva: a **calibração piora** a discrepância (de
-1,7 para 2,3 pp na sigmoidal), porque o estado de empate total fica fora
-da distribuição observada e o calibrador o extrapola para perto de 50%; a
-regularização alternativa move o desvio dentro do ruído; e apenas a **troca
-de família** o fecha: uma *Random Forest* com 500 árvores e profundidade 6
-leva o desvio a **0,6 pp** ao custo de 0,0005 de AUC. A discrepância é,
-portanto, uma propriedade da função que o XGBoost aprende neste recorte, e
-não um déficit de ajuste. A troca não foi adotada porque o critério de
-escolha do modelo foi a acurácia no corte de 15 min, e nela a *Random
-Forest* fica em 0,7617 contra 0,7621. É decisão consciente e reversível,
-sem retreino. Comando e artefato: `docs/experimento_calibracao.py` e
+Quadro — Limitações do trabalho e a evidência de cada uma
+
+| Limitação | Evidência medida | Tratamento |
+|---|---|---|
+| Taxa-base do modelo no estado de empate | O modelo prevê 49,0% a 51,4% para o azul, e os dados dão 46,4% a 47,9% | Discrepância de 1,7 a 4,7 pontos percentuais; não é subajuste (quadros seguintes). Mantido o XGBoost |
+| Última rodada de coleta fora do treino | Treino com 39.426 das 41.063 partidas do banco. Das 1.754 partidas do banco sem variáveis, 1.647 são da KR e 107 de BR1, EUW1 e NA1; 117 da base congelada também não geraram linha | Não retreinado: o desempenho do modelo atual está medido e validado (Apêndice C e bateria comportamental), e retreinar invalidaria as duas. Quem quiser o modelo sobre a base completa reexecuta `train_baseline` e `export_model` |
+| Teto de desempenho das variáveis atuais | Onze experimentos sem ganho, dez sobre a linha do tempo e um sobre o endpoint de progressão do jogador. A posição dos jogadores existe na linha do tempo e foi testada (experimento 2) | O próximo ganho depende de dado que a API pública não fornece: a ordem de escolha de campeões (*draft*) e o estado das ondas de *minions* |
+| Ausência de micro-posicionamento | Nenhuma API pública da Riot expõe movimentação de *minions* nem controle de onda | Replays (`.rofl`) e visão computacional sobre o minimapa foram considerados, mas não implementados |
+| Desequilíbrio de amostra por região | BR1 11.936, EUW1 11.744, KR 10.204 e NA1 7.159 partidas (a NA1 tinha 1.446 antes da rodada final). Em três das quatro regiões o intervalo de 95% exclui 50%; a KR tem 50,4%, com intervalo que inclui 50% | O achado de viés de elo alto, além do Brasil, se apoia nas três regiões com evidência firme |
+| Cobertura desigual por versão do jogo | Um único *patch* concentra a maior parte das partidas | Limita a generalização para versões com balanceamento diferente |
+| Monotonicidade isolada por variável | O XGBoost não garante que aumentar apenas a diferença de abates ou de torres nunca reduza a probabilidade prevista, por interações e redundâncias entre variáveis | Comportamento documentado e compreendido, sem restrição formal de monotonicidade (`monotone_constraints`) nesta versão |
+
+Quadro — Taxa de vitória do azul no estado de empate, modelo e dados
+
+| Corte | Modelo (empate total) | Dados (partidas empatadas) | Diferença |
+|---|---:|---:|---:|
+| 10 min | 49,2% | 46,4% | 2,8 pp |
+| 15 min | 49,6% | 47,9% | 1,7 pp |
+| 20 min | 51,4% | 46,7% | 4,7 pp |
+| 25 min | 49,0% | 47,1% | 1,9 pp |
+
+A série do modelo é plana, sem o pico de meio de jogo que uma versão
+anterior do texto atribuía aos dados. As duas séries não concordam em
+magnitude, nem sempre em direção: aos 20 minutos o modelo favorece o azul
+(51,4%), enquanto os dados favorecem o vermelho (46,7% de vitória do azul).
+
+Quadro — Alavancas testadas contra a discrepância de taxa-base
+
+| Alavanca | Resultado | Leitura |
+|---|---|---|
+| Busca em grade completa (27 combinações, 5 dobras) | Escolhe a mesma profundidade da produção (3); AUC de 0,8475 contra 0,8473, com a produção em 2º lugar | Ajuste equivalente: a discrepância não é subajuste |
+| Calibração sigmoidal | Piora o desvio, de 1,7 para 2,3 pp | O estado de empate total fica fora da distribuição observada, e o calibrador o extrapola para perto de 50% |
+| Regularização alternativa | Move o desvio dentro do ruído | Sem efeito |
+| *Random Forest* de 500 árvores e profundidade 6 | Leva o desvio a 0,6 pp | Custa 0,0005 de AUC, e a acurácia fica em 0,7617 contra 0,7621. Não adotada, porque o critério de escolha foi a acurácia aos 15 minutos; a decisão é reversível e dispensa retreino |
+
+A discrepância é, portanto, uma propriedade da função que o XGBoost aprende
+neste recorte; não é um déficit de ajuste. Comando e artefato:
+`docs/experimento_calibracao.py` e
 `reports/experimento_calibracao_veredito.json`.
-
-**O modelo não viu a última rodada de coleta.** As variáveis e a
-modelagem foram construídas sobre 39.426 partidas, e a base do banco tem
-41.063, 1.637 partidas a mais, quase todas da KR (das 1.754 partidas do
-banco que não geraram variáveis, 1.647 são da KR e 107 são de BR1, EUW1 e
-NA1). O conjunto que de fato alimentou o modelo são 39.309 partidas
-distintas, das quais 39.188 chegam ao corte de 15 minutos; as outras 117
-da base congelada não produziram linha em `features_phases.csv`. A
-discussão de volume da Seção 5.4 mediu que o ganho de AUC por volume é da
-ordem de 0,001 por acréscimo relevante, o que situa o efeito desta
-diferença abaixo do que aquela discussão mediu como ganho real, mas não
-nulo. Retreinar foi deixado de fora porque o desempenho do modelo atual já
-está medido e validado contra o Apêndice C e a bateria comportamental, e
-refazê-lo invalidaria as duas coisas sem ganho apurado. Quem quiser o
-modelo treinado sobre a base completa reexecuta `train_baseline` e
-`export_model`.
-
-**Teto de desempenho das variáveis atuais.** Onze experimentos de
-enriquecimento de variáveis não superaram o modelo com as cinco
-variáveis originais (Quadro 5), dez a partir da mesma fonte de dados
-(linha do tempo da partida) e um a partir de uma fonte diferente
-(percentis comportamentais do jogador via `lol-challenges-v1`, Apêndice
-D), o que descarta a hipótese de que o teto fosse apenas da *timeline*
-esgotada. O próximo ganho relevante depende de dado que a API não fornece:
-a ordem de escolha de campeão (*draft*), que a API pública não expõe, e o
-estado das ondas de *minions*. A posição em tempo real **existe** no
-payload da *timeline* (`participantFrames`) e já foi testada sem ganho
-mensurável (experimento 2, dispersão espacial do time), de modo que ela
-não é o que falta.
-
-**Ausência de dados de micro-posicionamento** (movimentação de *minions*,
-controle de onda). Nenhuma API pública da Riot expõe esse nível de
-detalhe; caminhos alternativos (replays `.rofl`, visão computacional sobre
-o minimapa) foram considerados, mas não implementados neste trabalho.
-
-**Desequilíbrio de amostra por região.** Após as rodadas adicionais de
-coleta, BR1 e EUW1 concentram a maior parte dos dados (11.936 e 11.744
-partidas) e a KR cresceu para 10.204; a NA1, que permanecia em 1.446, foi
-ampliada para 7.159 na rodada final, o que reduz a assimetria entre
-regiões sem eliminá-la. O achado de viés de lado "generalizado ao elo
-alto, não específico do Brasil" se apoia nas três regiões com evidência
-estatística firme; três das quatro têm taxa cujo intervalo de 95% exclui
-50%, e a KR fica em 50,4%, com intervalo que inclui 50%.
-
-**Cobertura desigual por versão do jogo** (*patch*). Um único *patch*
-concentra a maior parte das partidas coletadas, o que limita a
-generalização dos achados para versões do jogo com balanceamento
-diferente.
-
-**Monotonicidade isolada por fator.** O XGBoost não garante formalmente
-que aumentar isoladamente a diferença de abates ou de torres nunca reduza
-a probabilidade prevista de vitória, por conta de interações e
-redundâncias entre variáveis. O comportamento é documentado e
-compreendido, mas não corrigido por restrição formal
-(`monotone_constraints`) nesta versão.
 
 ---
 

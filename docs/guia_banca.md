@@ -1328,7 +1328,7 @@ jogos**, do **valor de Shapley**.
 
 ## 12. Os 11 experimentos que não funcionaram (e por que isso é bom)
 
-### 12.1 O que foi tentado (Quadro 5, Seção 5.4; notas no Apêndice D)
+### 12.1 O que foi tentado (Quadro 5, Seção 5.4; detalhe no Apêndice D)
 
 Para tentar melhorar o modelo, foram testadas 11 ideias. **Nenhuma**
 melhorou de forma distinguível de ruído (mudanças de ±0,001 a 0,003 na
@@ -1370,8 +1370,10 @@ A AUC do XGBoost subiu só por aumentar o número de partidas:
 | 23.133 | 0,8393 |
 | 39.188 | 0,8473 |
 
-Ganho total de **0,0259**: cerca de **6 vezes** maior que o melhor
-experimento de *feature* (0,003).
+Ganho total de **0,0259**: cerca de **9 vezes** o maior ganho de um
+experimento de variáveis (0,003) e cerca de 130 vezes o menor (0,0002).
+(Versões anteriores diziam "6 vezes"; 0,0259 ÷ 0,003 dá 8,6. Corrigido em
+2026-11-03 ao reescrever o Apêndice D.)
 
 ### 12.4 Por que resultados negativos são bons para a tese
 
@@ -2170,7 +2172,7 @@ para isso que este guia existe.
 
 **Experimentos**
 - 11 tentativas, nenhuma melhorou
-- Volume: 0,8214 → 0,8393 → 0,8473 (ganho de 0,0259, ~6x o melhor
+- Volume: 0,8214 → 0,8393 → 0,8473 (ganho de 0,0259, ~9x o melhor
   experimento)
 
 **Viés de lado**
@@ -2189,7 +2191,7 @@ para isso que este guia existe.
 **Documento**
 - 29 páginas do Resumo ao fim das Referências (limite 30, uma linha de folga)
 - 32 referências; 11 Figuras (5 no corpo, 6 telas inteiras no Apêndice F);
-  9 Quadros (6 no corpo); Apêndices A-G; Anexo A (documentação da Riot)
+  21 Quadros (6 no corpo, 15 nos apêndices); Apêndices A-G; Anexo A (documentação da Riot)
 - limitações: Seção 6.1, com o detalhe no Apêndice G
 - `verifica_tcc.py`: 20/20
 

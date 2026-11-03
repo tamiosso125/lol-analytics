@@ -825,6 +825,12 @@ Gera `docs/tcc2_final.docx` em 4 passos:
    figuras do corpo onde o markdown tem `Figura — Título | caminho.png`
    (recortes de `reports/figuras_texto/`) e as 6 telas de
    `reports/anexo_a/` no Apêndice F. Sem listas de ilustrações e de quadros.
+   A tabela `Arquivo | Página` do Apêndice F é localizada pelo cabeçalho
+   (`_tabela_de_arquivos`), não por ser a última do documento: desde
+   2026-11-03 há quadros no Apêndice G depois dela. Os quadros de apêndice com
+   comando, caminho ou texto corrido ficam alinhados à esquerda
+   (`QUADROS_ESQUERDA`); todo quadro novo precisa de entrada em
+   `LARGURAS_QUADROS`, com a soma das larguras em torno de 16 cm.
 
 O campo `SEQ` é o que permite a numeração automática: inseriu ou removeu um
 quadro, o Word reenumera.

@@ -4878,6 +4878,36 @@ médio é cerca de 10 mil exemplos, e no Apêndice A.2.2 os autores observam,
 sem estudar a fundo, que a diferença diminui com 50 mil. A 2.2 passou a
 dizer isso.
 
+## 2026-11-03 (continuação) — Apêndices reescritos sem prosa
+
+Decisão do autor: os apêndices não devem ter texto corrido como o D (nenhum
+dos 10 TCC II aprovados tem); imagens, tabelas e quadros são bem-vindos. A
+única restrição do orientador é que o corpo faça sentido sozinho, e todos os
+ponteiros do corpo para apêndices (A, B, C, D, E, F, G) são de detalhe,
+histórico, origem ou comando, não de conteúdo de que a leitura dependa.
+
+Reescritos D, E e G, e enxugados A, B, C e F: a prosa de diário (datas ISO,
+"achado em", versões anteriores da nota) saiu, e o conteúdo virou 12 quadros
+novos (agora 21 no total: 6 no corpo e 15 nos apêndices): execuções do
+benchmark, configuração dos três modelos, detalhe e reprodução dos
+experimentos 4, 10 e 11, efeito do volume de partidas, partidas por região na
+primeira e na última medição, origem dos números da 5.3, faixas de duração,
+série anual do profissional, limitações com a evidência de cada uma, taxa-base
+no empate (modelo × dados, com a diferença por corte) e alavancas testadas.
+Nenhum número foi alterado; as diferenças de taxa-base por corte (2,8, 1,7,
+4,7 e 1,9 pp) são cálculo direto dos valores já citados.
+
+**Erro achado ao reescrever o D:** o texto dizia que o ganho por volume
+(0,0259) era "cerca de 6×" o maior ganho de um experimento (0,003). A conta
+dá 8,6; o "130×" sobre o menor (0,0002) estava certo. O apêndice agora diz
+"cerca de nove vezes", e o guia e o site foram corrigidos.
+
+**Ferramentas:** `verifica_tcc.py` (checagem 17) passou a ler a série das
+faixas de duração de um quadro em vez de um parágrafo, e foi testada nos dois
+sentidos (trocar 46,5% por 46,9% reprova). `build_tcc_docx.py` tinha duas
+suposições de que a tabela de arquivos do Apêndice F é a última do documento;
+agora ela é achada pelo cabeçalho. 29 páginas no corpo, documento total em 50.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

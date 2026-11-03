@@ -601,6 +601,25 @@ def _fonte(doc, texto: str) -> "docx.text.paragraph.Paragraph":
 from docx.text.paragraph import Paragraph
 
 
+def _tabela_de_arquivos(corpo, doc):
+    """Elemento da tabela 'Arquivo | Página' do Apêndice F, ou None.
+
+    Até 2026-11-03 ela era a ÚLTIMA tabela do documento e `tabelas[-1]`
+    bastava. Com quadros no Apêndice G depois dela, a última passou a ser
+    outra: o build tratava o quadro errado como lista de arquivos e parava
+    na primeira tabela sem título.
+    """
+    from docx.table import Table
+
+    achada = None
+    for el in corpo.iterchildren():
+        if el.tag.endswith("}tbl"):
+            celulas = Table(el, doc).rows[0].cells
+            if celulas and celulas[0].text.strip() == "Arquivo":
+                achada = el
+    return achada
+
+
 def numerar_quadros(doc) -> int:
     """Insere legenda+fonte em cima e embaixo de cada tabela do corpo.
 
@@ -614,9 +633,10 @@ def numerar_quadros(doc) -> int:
 
     corpo = doc.element.body
     tabelas = [el for el in corpo.iterchildren() if el.tag.endswith("}tbl")]
-    # a última tabela é a lista de arquivos do Apêndice F, substituída por
-    # figuras mais adiante — não recebe legenda de Quadro
-    alvos = tabelas[:-1] if tabelas else []
+    # a lista de arquivos do Apêndice F é substituída por figuras mais
+    # adiante — não recebe legenda de Quadro
+    arquivos = _tabela_de_arquivos(corpo, doc)
+    alvos = [el for el in tabelas if el is not arquivos]
     n = 0
     for tb in alvos:
         anterior = tb.getprevious()
@@ -635,7 +655,7 @@ def numerar_quadros(doc) -> int:
         larguras = LARGURAS_QUADROS.get(titulo)
         if larguras is None:
             sys.exit(f"sem larguras declaradas para o quadro {titulo!r} em LARGURAS_QUADROS")
-        ajustar_tabela(Table(tb, doc), larguras)
+        ajustar_tabela(Table(tb, doc), larguras, esquerda=titulo in QUADROS_ESQUERDA)
         fonte = _fonte(doc, FONTE_QUADROS)
         tb.addnext(fonte._p)
         n += 1
@@ -713,9 +733,10 @@ def inserir_figuras(doc) -> int:
 
     corpo = doc.element.body
     tabelas = [el for el in corpo.iterchildren() if el.tag.endswith("}tbl")]
-    if not tabelas:
-        sys.exit("tabela do Anexo A não encontrada — o markdown mudou?")
-    alvo = tabelas[-1]
+    alvo = _tabela_de_arquivos(corpo, doc)
+    if alvo is None:
+        sys.exit("tabela de arquivos do Apêndice F (cabeçalho 'Arquivo | Página') "
+                 "não encontrada — o markdown mudou?")
     anterior = alvo.getprevious()
     while anterior is not None and not anterior.tag.endswith("}p"):
         anterior = anterior.getprevious()
@@ -953,7 +974,7 @@ def _bordas_de_quadro(tabela) -> None:
         tblPr.append(bordas)
 
 
-def ajustar_tabela(tabela, larguras_cm: list[float]) -> None:
+def ajustar_tabela(tabela, larguras_cm: list[float], esquerda: bool = False) -> None:
     """Fixa larguras de coluna e reduz o corpo da tabela.
 
     Sem isto o Word distribui as colunas por conteúdo e a coluna `#` de um
@@ -998,6 +1019,8 @@ def ajustar_tabela(tabela, larguras_cm: list[float]) -> None:
                 # de 2 cm isso partia "0,7621" em "0,762 / 1" e "Acurácia" em
                 # "Acurá / cia" no Quadro 2 — visível só renderizando.
                 p.paragraph_format.first_line_indent = Cm(0)
+                if esquerda and p.alignment in (None, WD_ALIGN_PARAGRAPH.JUSTIFY):
+                    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
                 for r in p.runs:
                     r.font.name = "Arial"
                     # 10 pt, como as tabelas do modelo oficial (era 9 pt; 12 pt
@@ -1031,7 +1054,36 @@ LARGURAS_QUADROS = {
     "Esquema relacional do banco de dados": [3.0, 9.5, 3.5],
     "Benchmark de 26 perguntas de referência (NLQ)": [0.8, 4.4, 7.4, 3.4],
     "Métricas completas por corte temporal, comparação entre os três modelos":
-        [1.6, 1.6, 2.0, 2.4, 1.8, 1.8, 1.4, 1.4, 1.8],
+        [1.4, 1.5, 1.45, 2.85, 1.95, 1.8, 1.6, 1.6, 1.75],
+    # apêndices reescritos em quadros (2026-11-03)
+    "Execuções do benchmark de linguagem natural": [4.0, 2.4, 2.2, 7.4],
+    "Configuração dos três modelos comparados": [2.6, 6.2, 7.2],
+    "Detalhe de três experimentos negativos": [2.9, 3.8, 4.1, 5.2],
+    "Como reproduzir os três experimentos": [2.9, 6.1, 7.0],
+    "Efeito do volume de partidas sobre o AUC-ROC do XGBoost": [4.5, 5.5, 6.0],
+    "Partidas por região na primeira e na última medição do viés de lado":
+        [2.0, 4.2, 4.2, 5.6],
+    "Origem dos números da Seção 5.3": [5.4, 5.4, 5.2],
+    "Vitória do azul por faixa de duração total da partida": [5.0, 5.0, 6.0],
+    "Vitória do azul por ano no cenário profissional": [2.5, 5.5, 3.5, 4.5],
+    "Limitações do trabalho e a evidência de cada uma": [3.2, 6.4, 6.4],
+    "Taxa de vitória do azul no estado de empate, modelo e dados":
+        [2.4, 4.4, 5.0, 4.2],
+    "Alavancas testadas contra a discrepância de taxa-base": [3.6, 6.0, 6.4],
+}
+
+# Quadros dos apêndices com comando, caminho ou texto corrido nas células:
+# alinhados à esquerda. Justificado, "python -m src.models..." saía com
+# buracos entre as palavras (visível só renderizando, 2026-11-03).
+QUADROS_ESQUERDA = {
+    "Execuções do benchmark de linguagem natural",
+    "Configuração dos três modelos comparados",
+    "Detalhe de três experimentos negativos",
+    "Como reproduzir os três experimentos",
+    "Origem dos números da Seção 5.3",
+    "Limitações do trabalho e a evidência de cada uma",
+    "Alavancas testadas contra a discrepância de taxa-base",
+    "Partidas por região na primeira e na última medição do viés de lado",
 }
 
 

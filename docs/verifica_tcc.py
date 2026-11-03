@@ -925,25 +925,35 @@ def check_faixa_duracao(t: str) -> None:
             falha(f"teste (ii) L{ln}: a sintese diz que mediu sobre {base_txt} "
                   f"partidas, e a soma do artefato e {base}")
 
-    # (c) o paragrafo de detalhe: a serie com a contagem de cada faixa
-    r2 = _re.search(r"taxas por faixa de dura\u00e7\u00e3o total s\u00e3o (.+?)\.\s*"
-                    r"A amplitude \u00e9 de ([\d,]+) ponto", t, _re.S)
-    if not r2:
-        falha("teste (ii): o paragrafo de detalhe das faixas nao foi encontrado")
+    # (c) o quadro de detalhe (Ap\u00eandice E): a serie com a contagem de cada
+    # faixa. Ate 2026-11-03 era um paragrafo ("as taxas por faixa de duracao
+    # total sao 46,5% (0 a 25 min, 15.944 partidas), ..."); virou quadro
+    # quando os apendices deixaram de ter prosa. A conferencia e a mesma: as
+    # linhas, em ordem, contra o artefato.
+    titulo_q = "Quadro \u2014 Vit\u00f3ria do azul por faixa de dura\u00e7\u00e3o total da partida"
+    i_q = t.find(titulo_q)
+    if i_q < 0:
+        falha("teste (ii): o quadro de detalhe das faixas nao foi encontrado")
     else:
-        serie, amp2 = r2.groups()
-        achados = _re.findall(r"([\d,]+)%\s*\(([^)]*)\)", serie)
-        pct_txt = [a for a, _ in achados]
-        # a contagem e o ULTIMO numero do parenteses ("(0 a 25 min, 15.944
-        # partidas)"); casar o primeiro pega o "0" do rotulo da faixa.
-        n_txt = []
-        for _, dentro in achados:
-            m_n = _re.search(r"[\d.]+(?=[\s]*(?:partidas?|jogos?)\b|$)", dentro)
-            if m_n is None:
-                falha(f"teste (ii): a faixa {dentro!r} nao tem contagem "
-                      "reconhecivel no paragrafo de detalhe")
-            else:
-                n_txt.append(m_n.group(0))
+        pct_txt, n_txt = [], []
+        fim_q = i_q
+        for linha in t[i_q:].split("\n")[1:]:
+            fim_q += len(linha) + 1
+            if not linha.startswith("|"):
+                if pct_txt:
+                    break
+                continue
+            celulas = [c.strip() for c in linha.strip().strip("|").split("|")]
+            if len(celulas) != 3 or set(celulas[0]) <= {"-", ":"} or \
+                    not celulas[2].endswith("%"):
+                continue  # cabecalho e separador
+            n_txt.append(celulas[1])
+            pct_txt.append(celulas[2].rstrip("%"))
+        r2 = _re.search(r"A amplitude \u00e9 de ([\d,]+) ponto", t[fim_q:fim_q + 400])
+        amp2 = r2.group(1) if r2 else None
+        if amp2 is None:
+            falha("teste (ii): a amplitude nao foi encontrada logo apos o quadro "
+                  "de detalhe das faixas")
         if pct_txt != pct_artefato:
             falha(f"teste (ii): taxas no texto {pct_txt} diferem do artefato "
                   f"{pct_artefato}")
