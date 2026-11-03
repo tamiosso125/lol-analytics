@@ -1058,6 +1058,7 @@ LARGURAS_QUADROS = {
     # apêndices reescritos em quadros (2026-11-03)
     "Execuções do benchmark de linguagem natural": [4.0, 2.4, 2.2, 7.4],
     "Configuração dos três modelos comparados": [2.6, 6.2, 7.2],
+    "Validação cruzada com 5 e com 10 dobras": [1.8, 3.0, 2.8, 2.8, 2.8, 2.8],
     "Detalhe de três experimentos negativos": [2.9, 3.8, 4.1, 5.2],
     "Como reproduzir os três experimentos": [2.9, 6.1, 7.0],
     "Efeito do volume de partidas sobre o AUC-ROC do XGBoost": [4.5, 5.5, 6.0],

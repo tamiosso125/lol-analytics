@@ -1124,6 +1124,8 @@ cerca de 7.800, o que deixa a estimativa estável. A parte da recomendação
 que mais importa, a estratificação, foi seguida, e a mesma divisão vale
 para todos os experimentos."
 
+**Medido em 2026-11-03:** rodando de novo com 10 dobras (`src/models/robustez_dobras.py`, Apêndice C), a diferença é de no máximo 0,0008 em acurácia e 0,0006 em AUC, nos quatro cortes e nos três modelos. A resposta agora é "medi, e não muda".
+
 **Não exagere o custo.** A grade do XGBoost sobre as 39.188 partidas levou
 **51,7 segundos** (`reports/tune_models_39k.json`). Se a banca disser "então
 10 dobras custariam dois minutos", concorde: o custo pesava mais nas grades

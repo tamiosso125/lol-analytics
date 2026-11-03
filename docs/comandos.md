@@ -167,6 +167,10 @@ resultado está em `reports/`.**
 .venv\Scripts\python.exe -m src.models.tune_models_full
 .venv\Scripts\python.exe -m src.models.tune_models_full --completo
 
+# Robustez do número de dobras: 5 (trabalho) contra 10 (Kohavi), mesmos modelos
+# e semente; ~10 min. Grava reports/robustez_dobras.json (Apêndice C):
+.venv\Scripts\python.exe -m src.models.robustez_dobras
+
 # Taxa de vitória do azul por corte, no estado de empate
 # + reports/taxa_base_por_corte.json:
 .venv\Scripts\python.exe docs\taxa_base_por_corte.py

@@ -4908,6 +4908,14 @@ sentidos (trocar 46,5% por 46,9% reprova). `build_tcc_docx.py` tinha duas
 suposições de que a tabela de arquivos do Apêndice F é a última do documento;
 agora ela é achada pelo cabeçalho. 29 páginas no corpo, documento total em 50.
 
+## 2026-11-03 (continuação) — Robustez de 5 contra 10 dobras
+
+Criado `src/models/robustez_dobras.py` (documentado em `comandos.md`): mesmos
+modelos e semente de `multi_cutoff_metrics.py`, 5 e 10 dobras. XGBoost nos
+quatro cortes e os três modelos aos 15 min: diferença máxima de 0,0008 em
+acurácia e 0,0006 em AUC-ROC. Entrou como quadro no Apêndice C; o corpo não
+mudou. Responde ao Kohavi (1995), que recomenda 10.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

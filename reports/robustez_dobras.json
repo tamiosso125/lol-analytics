@@ -1,0 +1,75 @@
+{
+  "gerado_em": "2026-11-03",
+  "base_linhas": 139671,
+  "cv": "estratificada, seed 42, 5 e 10 dobras",
+  "resultados": {
+    "10": {
+      "XGBoost": {
+        "5": {
+          "acuracia": 0.7004,
+          "auc": 0.7742
+        },
+        "10": {
+          "acuracia": 0.701,
+          "auc": 0.7741
+        }
+      }
+    },
+    "15": {
+      "XGBoost": {
+        "5": {
+          "acuracia": 0.7621,
+          "auc": 0.8473
+        },
+        "10": {
+          "acuracia": 0.7619,
+          "auc": 0.8474
+        }
+      },
+      "RandomForest": {
+        "5": {
+          "acuracia": 0.7457,
+          "auc": 0.8277
+        },
+        "10": {
+          "acuracia": 0.7459,
+          "auc": 0.8273
+        }
+      },
+      "MLP": {
+        "5": {
+          "acuracia": 0.761,
+          "auc": 0.8455
+        },
+        "10": {
+          "acuracia": 0.7612,
+          "auc": 0.8449
+        }
+      }
+    },
+    "20": {
+      "XGBoost": {
+        "5": {
+          "acuracia": 0.7917,
+          "auc": 0.8762
+        },
+        "10": {
+          "acuracia": 0.7913,
+          "auc": 0.8763
+        }
+      }
+    },
+    "25": {
+      "XGBoost": {
+        "5": {
+          "acuracia": 0.8241,
+          "auc": 0.909
+        },
+        "10": {
+          "acuracia": 0.8249,
+          "auc": 0.909
+        }
+      }
+    }
+  }
+}

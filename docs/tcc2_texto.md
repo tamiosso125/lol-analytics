@@ -1234,6 +1234,23 @@ O comando que regenera o quadro de métricas é
 `python -m src.models.multi_cutoff_metrics`, que grava
 `reports/metricas_corte.json`.
 
+Quadro — Validação cruzada com 5 e com 10 dobras
+
+| Corte | Modelo | Acurácia (5 dobras) | Acurácia (10 dobras) | AUC-ROC (5 dobras) | AUC-ROC (10 dobras) |
+|---|---|---:|---:|---:|---:|
+| 10 min | XGBoost | 0,7004 | 0,7010 | 0,7742 | 0,7741 |
+| 15 min | XGBoost | 0,7621 | 0,7619 | 0,8473 | 0,8474 |
+| 15 min | *Random Forest* | 0,7457 | 0,7459 | 0,8277 | 0,8273 |
+| 15 min | MLP | 0,7610 | 0,7612 | 0,8455 | 0,8449 |
+| 20 min | XGBoost | 0,7917 | 0,7913 | 0,8762 | 0,8763 |
+| 25 min | XGBoost | 0,8241 | 0,8249 | 0,9090 | 0,9090 |
+
+O número de dobras recomendado por Kohavi (1995) é 10. A diferença para as 5
+usadas no trabalho é de no máximo 0,0008 em acurácia e 0,0006 em AUC-ROC, e
+não altera nenhuma conclusão. O comando é
+`python -m src.models.robustez_dobras`, que grava
+`reports/robustez_dobras.json`.
+
 ---
 
 ## APÊNDICE D – Detalhe dos experimentos negativos
