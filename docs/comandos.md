@@ -171,6 +171,11 @@ resultado está em `reports/`.**
 # e semente; ~10 min. Grava reports/robustez_dobras.json (Apêndice C):
 .venv\Scripts\python.exe -m src.models.robustez_dobras
 
+# Baseline (regressão logística) e IC 95% da diferença do XGBoost para os
+# demais modelos, por bootstrap pareado; ~10 min. Grava
+# reports/baseline_e_diferencas.json (Apêndice C):
+.venv\Scripts\python.exe -m src.models.baseline_e_diferencas
+
 # Taxa de vitória do azul por corte, no estado de empate
 # + reports/taxa_base_por_corte.json:
 .venv\Scripts\python.exe docs\taxa_base_por_corte.py

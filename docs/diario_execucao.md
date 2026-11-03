@@ -4916,6 +4916,22 @@ quatro cortes e os três modelos aos 15 min: diferença máxima de 0,0008 em
 acurácia e 0,0006 em AUC-ROC. Entrou como quadro no Apêndice C; o corpo não
 mudou. Responde ao Kohavi (1995), que recomenda 10.
 
+## 2026-11-03 (continuação) — Baseline logístico e IC das diferenças: achado
+
+`src/models/baseline_e_diferencas.py` (documentado em `comandos.md`):
+regressão logística padronizada como baseline e *bootstrap* pareado (1.000
+reamostragens) da diferença do XGBoost para os demais, sobre as previsões
+fora da amostra de 5 dobras. **A regressão logística empata com o XGBoost e
+tem AUC ligeiramente maior** (15 min: 0,7631 / 0,8483 contra 0,7621 / 0,8473;
+XGBoost menos logística = −0,0010, IC −0,0014 a −0,0006; aos 25 min o IC
+inclui zero). XGBoost − MLP = +0,0019 (IC +0,0011 a +0,0026); XGBoost −
+*Random Forest* de referência = +0,0197. Consequência: "empate técnico"
+continua certo em termos práticos (milésimos), mas as diferenças não são
+todas nulas estatisticamente, e o XGBoost não é o melhor numericamente. A
+5.4 ganhou uma frase com o baseline ("o limite está nas cinco variáveis") e
+o Apêndice C um quadro com os intervalos; 29 páginas. Resumo e Abstract não
+dizem que o XGBoost é o melhor, só "adotado", e seguem verdadeiros.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

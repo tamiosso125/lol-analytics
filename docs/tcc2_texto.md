@@ -698,7 +698,10 @@ Quadro — Comparação entre modelos (corte de 15 minutos)
 
 Os três modelos ficaram próximos. Com a mesma busca em grade, a *Random
 Forest* e o MLP chegam a 0,7617 e 0,7619 de acurácia (AUC-ROC de 0,8468 e
-0,8477), e o XGBoost mantém a maior acurácia. Ele foi adotado pela
+0,8477), e o XGBoost mantém a maior acurácia entre os três. Uma regressão
+logística, usada como *baseline* simples, chega a 0,7631 de acurácia e 0,8483
+de AUC-ROC, no mesmo patamar (Apêndice C): o limite está nas cinco variáveis,
+sem depender da complexidade do modelo. O XGBoost foi adotado pela
 estabilidade na faixa intermediária, já que não vence em todos os cortes:
 aos 10 minutos o MLP o supera em acurácia (0,7020 contra 0,7004) e aos 25
 chega a 0,002 do seu AUC (0,9072 contra 0,9090). Com um modelo treinado para cada
@@ -1233,6 +1236,27 @@ Quadro — Configuração dos três modelos comparados
 O comando que regenera o quadro de métricas é
 `python -m src.models.multi_cutoff_metrics`, que grava
 `reports/metricas_corte.json`.
+
+Quadro — Regressão logística como baseline e diferença do XGBoost para os demais modelos
+
+| Corte | Modelo | Acurácia | AUC-ROC | AUC-ROC do XGBoost menos a do modelo (IC de 95%) |
+|---|---|---:|---:|---|
+| 10 min | Regressão logística | 0,7016 | 0,7748 | −0,0006 (−0,0011 a −0,0002) |
+| 15 min | Regressão logística | 0,7631 | 0,8483 | −0,0010 (−0,0014 a −0,0006) |
+| 15 min | MLP | 0,7610 | 0,8455 | +0,0019 (+0,0011 a +0,0026) |
+| 15 min | *Random Forest* (referência) | 0,7457 | 0,8277 | +0,0197 (+0,0180 a +0,0215) |
+| 20 min | Regressão logística | 0,7933 | 0,8771 | −0,0009 (−0,0012 a −0,0006) |
+| 25 min | Regressão logística | 0,8248 | 0,9091 | −0,0002 (−0,0006 a +0,0003) |
+
+O baseline é uma regressão logística com as variáveis padronizadas. Os
+intervalos vêm de *bootstrap* pareado (1.000 reamostragens das mesmas
+partidas para os dois modelos), sobre as previsões fora da amostra da
+validação cruzada de 5 dobras. Na acurácia, a diferença do XGBoost para a
+regressão logística fica entre −0,0007 e −0,0016, com intervalo que inclui
+zero aos 10, 15 e 25 minutos. Todas as diferenças são de milésimos, exceto a
+da *Random Forest* de referência, que a busca em grade elimina (Seção 5.4).
+O comando é `python -m src.models.baseline_e_diferencas`, que grava
+`reports/baseline_e_diferencas.json`.
 
 Quadro — Validação cruzada com 5 e com 10 dobras
 

@@ -1937,6 +1937,10 @@ sobre o meu esquema, sem ajuste do modelo: é a mesma ordem de grandeza, mas
 não é o mesmo teste. O próprio artigo explica que a produção dá mais por
 causa de conhecimento mais completo e consultas mais uniformes."
 
+**48. "Uma regressão logística não faz o mesmo? Por que XGBoost?"** (medido em
+2026-11-03, `src/models/baseline_e_diferencas.py`, Apêndice C)
+"Porque o limite está nas cinco variáveis, não no modelo: uma regressão logística, medida como baseline em 2026-11-03, chega a 0,7631 de acurácia e 0,8483 de AUC aos 15 minutos, no mesmo patamar. O XGBoost ficou 0,0010 abaixo em AUC, com intervalo que exclui zero, mas é uma diferença de milésimos. A comparação com árvores e rede neural era o objetivo e do TCC I, e o XGBoost foi escolhido antes desse baseline ser medido; o que ele oferece é capturar interações caso as variáveis cresçam, e o SHAP de árvore. Com só cinco variáveis, o ganho de complexidade é zero, e o trabalho diz isso."
+
 **46. "O que a literatura diz sobre os três modelos empatarem?"** "Do et al.
 (2021) testaram cinco algoritmos e ficaram entre 72,7% e 75,4%, com o
 *gradient boosting* acima da rede neural; Guan e Tung (2026) acharam as duas

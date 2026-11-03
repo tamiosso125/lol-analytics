@@ -1,0 +1,149 @@
+{
+  "gerado_em": "2026-11-03",
+  "base_linhas": 139671,
+  "cv": "estratificada, 5 dobras, seed 42",
+  "bootstrap": "1000 reamostragens pareadas, IC 95%",
+  "diferencas_formato": "[media, limite inferior, limite superior]",
+  "resultados": {
+    "10": {
+      "n": 39309,
+      "modelos": {
+        "Regressão logística": {
+          "acuracia": 0.7016,
+          "auc": 0.7748
+        },
+        "XGBoost": {
+          "acuracia": 0.7004,
+          "auc": 0.7742
+        }
+      },
+      "diferencas": {
+        "XGBoost - Regressão logística": {
+          "auc": [
+            -0.0006,
+            -0.0011,
+            -0.0002
+          ],
+          "acuracia": [
+            -0.0012,
+            -0.0028,
+            0.0004
+          ]
+        }
+      }
+    },
+    "15": {
+      "n": 39188,
+      "modelos": {
+        "Regressão logística": {
+          "acuracia": 0.7631,
+          "auc": 0.8483
+        },
+        "XGBoost": {
+          "acuracia": 0.7621,
+          "auc": 0.8473
+        },
+        "Random Forest": {
+          "acuracia": 0.7457,
+          "auc": 0.8277
+        },
+        "MLP": {
+          "acuracia": 0.761,
+          "auc": 0.8455
+        }
+      },
+      "diferencas": {
+        "XGBoost - Regressão logística": {
+          "auc": [
+            -0.001,
+            -0.0014,
+            -0.0006
+          ],
+          "acuracia": [
+            -0.001,
+            -0.0026,
+            0.0004
+          ]
+        },
+        "XGBoost - Random Forest": {
+          "auc": [
+            0.0197,
+            0.018,
+            0.0215
+          ],
+          "acuracia": [
+            0.0165,
+            0.0132,
+            0.0195
+          ]
+        },
+        "XGBoost - MLP": {
+          "auc": [
+            0.0019,
+            0.0011,
+            0.0026
+          ],
+          "acuracia": [
+            0.0011,
+            -0.0008,
+            0.003
+          ]
+        }
+      }
+    },
+    "20": {
+      "n": 34337,
+      "modelos": {
+        "Regressão logística": {
+          "acuracia": 0.7933,
+          "auc": 0.8771
+        },
+        "XGBoost": {
+          "acuracia": 0.7917,
+          "auc": 0.8762
+        }
+      },
+      "diferencas": {
+        "XGBoost - Regressão logística": {
+          "auc": [
+            -0.0009,
+            -0.0012,
+            -0.0006
+          ],
+          "acuracia": [
+            -0.0016,
+            -0.003,
+            -0.0003
+          ]
+        }
+      }
+    },
+    "25": {
+      "n": 26837,
+      "modelos": {
+        "Regressão logística": {
+          "acuracia": 0.8248,
+          "auc": 0.9091
+        },
+        "XGBoost": {
+          "acuracia": 0.8241,
+          "auc": 0.909
+        }
+      },
+      "diferencas": {
+        "XGBoost - Regressão logística": {
+          "auc": [
+            -0.0002,
+            -0.0006,
+            0.0003
+          ],
+          "acuracia": [
+            -0.0007,
+            -0.0023,
+            0.001
+          ]
+        }
+      }
+    }
+  }
+}
