@@ -94,7 +94,7 @@ Os esports vêm se consolidando como um campo de crescente relevância
 acadêmica e tecnológica, em função do grande volume de dados gerados por
 partidas, jogadores, equipes e estratégias competitivas. Em *League of
 Legends*, Birant e Birant (2023) destacam que esses dados podem ser
-explorados por modelos de *machine learning* voltados à análise
+explorados por modelos de aprendizado de máquina (*machine learning*) voltados à análise
 competitiva e à predição de resultados. Além do potencial preditivo, a
 análise desses dados pode apoiar a interpretação do jogo, a identificação
 de padrões e a avaliação de desempenho.
@@ -131,7 +131,7 @@ no desenvolvimento de uma plataforma inteligente para exploração de
 informações competitivas em *League of Legends*. A plataforma, batizada
 **Bellestraiko**, é o sistema desenvolvido e implementado ao longo do
 trabalho, que se insere na área da Ciência da Computação e envolve
-ciência de dados, inteligência artificial, *machine learning* e sistemas
+ciência de dados, inteligência artificial, aprendizado de máquina e sistemas
 de informação.
 
 ### 1.2 DELIMITAÇÃO DO TEMA
@@ -203,7 +203,7 @@ aos dados e a geração de descobertas no contexto competitivo estudado.
 
 O trabalho se justifica academicamente por articular áreas centrais da
 Ciência da Computação, como análise de dados, inteligência artificial,
-*machine learning*, sistemas de informação e interação humano-computador,
+aprendizado de máquina, sistemas de informação e interação humano-computador,
 sobre um campo de produção de dados em crescimento. Do ponto de vista
 prático, reunir coleta, tratamento, modelagem e consulta em linguagem
 natural em uma mesma plataforma reduz a dependência de processos
@@ -229,7 +229,7 @@ Jogos competitivos geram grande volume de dados sobre partidas,
 jogadores, equipes e eventos em tempo real, o que faz dos esports um
 campo relevante para a análise de dados. Hodge et al. (2021) mostram que
 é possível prever o resultado de partidas profissionais de Dota 2
-enquanto elas acontecem, com modelos de *machine learning* padrão e
+enquanto elas acontecem, com modelos de aprendizado de máquina padrão e
 engenharia de atributos. Em *League of Legends*, Birant e Birant (2023)
 destacam a modelagem centrada no time, e Bahrololloomi et al. (2022), a
 relação entre métricas de jogadores, funções em jogo (*roles*) e
@@ -305,7 +305,7 @@ inexistente ou responder à pergunta errada. Wang et al. (2020) tratam
 este segundo caso e mostram que representar o esquema com os
 relacionamentos entre tabelas, além dos nomes das colunas, melhora
 a precisão da conversão. Neste trabalho, a correção da consulta não é
-delegada ao modelo: ela é validada antes de tocar o banco (Seção 4.7).
+delegada ao modelo: ela é validada antes de tocar o banco.
 
 ### 2.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
 
@@ -315,7 +315,7 @@ jogadores. Wallner, Wang e Dormann (2023) mostram que visualizações
 espaço-temporais, sobretudo as que integram tempo e localização em uma
 única representação, ajudam a interpretar o comportamento em jogo na
 revisão pós-partida. Esse referencial motivou o mapa de calor de
-posicionamento da análise de partida (Seção 5.5).
+posicionamento da análise de partida.
 
 ---
 
@@ -329,7 +329,7 @@ elas fundamentam é introduzido.
 ### 3.1 ESPORTS COMO FENÔMENO DE PRODUÇÃO E ANÁLISE DE DADOS
 
 Hodge et al. (2021) tratam da predição de vitória em partidas
-profissionais de Dota 2, em tempo real. Com modelos de *machine learning*
+profissionais de Dota 2, em tempo real. Com modelos de aprendizado de máquina
 padrão, engenharia de atributos e otimização, chegam a até 85% de
 acurácia após 5 minutos de jogo, em previsões ao vivo de 28 partidas de um
 torneio, o que estabelece a predição de
@@ -341,8 +341,7 @@ partir do estado da partida, mas não o recorte de *League of Legends*.
 
 Birant e Birant (2023) apresentam uma abordagem de aprendizado
 multi-objetivo e multi-instância (*Multi-Objective Multi-Instance
-Learning*) aplicada a esports e destacam a modelagem centrada no time, e
-não no jogador isolado. É a abordagem adotada aqui, com as variáveis
+Learning*) aplicada a esports e destacam a modelagem centrada no time, em vez do jogador isolado. É a abordagem adotada aqui, com as variáveis
 preditoras construídas como diferenças agregadas entre os dois times.
 Bahrololloomi et al. (2022) percorrem o caminho oposto: predizem a
 vitória a partir das funções (*roles*) e das métricas individuais dos
@@ -369,7 +368,7 @@ learning* com mecanismos de interpretação na predição de vitória em
 partidas profissionais de *Counter-Strike*, em fluxo contínuo (*streaming*).
 Eles apontam a falta de interpretabilidade como uma das principais
 limitações dos trabalhos anteriores, o que orienta a camada de
-explicabilidade da plataforma (Seção 5.5).
+explicabilidade da plataforma.
 
 ### 3.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
 
@@ -379,7 +378,7 @@ contextos corporativos, e Guo et al. (2024), o Talk2Data, interface em
 linguagem natural para análise visual exploratória baseada em
 decomposição de perguntas. Os dois usam modelos de linguagem como camada
 de interação sobre dados estruturados e fundamentam o *text-to-SQL* deste
-trabalho (Seção 4.7), que leva a abordagem ao domínio de *League of
+trabalho, que leva a abordagem ao domínio de *League of
 Legends*.
 
 ### 3.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
@@ -388,15 +387,13 @@ Wallner, Wang e Dormann (2023) estudam a evolução espaço-temporal do
 gameplay em *League of Legends* com a técnica de *storyline
 visualization* e mostram o valor de integrar tempo e localização em uma
 única representação para a interpretação pós-jogo. O estudo é a
-referência do posicionamento minuto a minuto da análise de partida
-(Seção 5.5).
+referência do posicionamento minuto a minuto da análise de partida.
 
 ### 3.6 SÍNTESE E POSIÇÃO DESTE TRABALHO
 
-Os estudos cobrem frentes isoladas: predição de resultados (Seções 3.1 e
-3.2), interpretabilidade da predição (García-Méndez; Arriba-Pérez, 2025),
+Os estudos cobrem frentes isoladas: predição de resultados, interpretabilidade da predição (García-Méndez; Arriba-Pérez, 2025),
 interação em linguagem natural (Jiang et al., 2025; Guo et al., 2024) e visualização
-espaço-temporal (Wallner; Wang; Dormann, 2023). Nenhum é entregue como uma
+espaço-temporal (Wallner; Wang; Dormann, 2023). No entanto, nenhum é entregue como uma
 plataforma que reúna coleta, tratamento, modelagem, explicabilidade,
 visualização e consulta em linguagem natural sobre a mesma base, e é
 essa lacuna de integração que este trabalho ocupa. A distinção também
@@ -436,7 +433,7 @@ possibilidades de modelagem, e descritiva, na caracterização dos dados,
 dos padrões e dos modelos comparados (Gil, 2002). A abordagem é mista
 (Creswell; Creswell, 2023): qualitativa na revisão bibliográfica e na
 interpretação dos achados, quantitativa na coleta, na análise
-exploratória e na comparação entre os modelos de *machine learning*.
+exploratória e na comparação entre os modelos de aprendizado de máquina.
 
 ### 4.2 ESTRATÉGIAS DE PESQUISA
 
@@ -465,7 +462,7 @@ já salvas.
 **96.716 jogos profissionais** de 2014 a 2026, das principais ligas (LCK,
 LPL, LEC, LTA, CBLOL, entre outras), a partir dos arquivos CSV anuais que
 o site publica (Oracle's Elixir, [s.d.]), para comparar o *solo queue* de
-elo alto com o cenário profissional (Seção 5.3).
+elo alto com o cenário profissional.
 
 Os dados são secundários e públicos, sem participação de sujeitos humanos
 como fonte em nenhuma etapa.
@@ -473,7 +470,7 @@ como fonte em nenhuma etapa.
 ### 4.4 ORGANIZAÇÃO E TRATAMENTO DE DADOS
 
 Os dados foram organizados em um banco relacional PostgreSQL, descrito no
-Quadro 1 (Seção 5.2). O tratamento incluiu a normalização da partida
+Quadro 1. O tratamento incluiu a normalização da partida
 bruta de cada fonte, a extração das compras e vendas de itens a partir da
 linha do tempo, com os desfazimentos de compra aplicados, e a
 reconciliação dos nomes de campeão entre a Riot API e o Oracle's Elixir,
@@ -494,8 +491,7 @@ confiança de Wilson sobre a proporção (Brown; Cai; DasGupta, 2001), para
 a significância em amostras menores; e (iv) comparação de pares com
 correção de Holm (Holm, 1979), que corrige a multiplicidade quando várias
 diferenças são testadas na mesma base. O teste (iv) foi decisivo para o
-viés de lado: sem ele, a dispersão entre cortes seria lida como tendência
-(Seção 5.3).
+viés de lado: sem ele, a dispersão entre cortes seria lida como tendência.
 
 ### 4.6 MODELAGEM PREDITIVA E COMPARAÇÃO ENTRE MODELOS
 
@@ -504,16 +500,16 @@ XGBoost, *Random Forest* e uma rede neural do tipo perceptron multicamadas
 (MLP). As variáveis preditoras são as diferenças, azul menos vermelho, de
 ouro, experiência, abates, torres e dragões acumuladas até o corte
 temporal. Há um modelo independente para cada corte (10, 15, 20 e 25
-minutos), e nenhuma informação posterior ao corte entra como *feature*, o
+minutos), e nenhuma informação posterior ao corte entra como variável, o
 que evita o vazamento de dados descrito por Kaufman et al. (2012). A
-validação foi cruzada e estratificada, com 5 *folds* (Kohavi, 1995), e
+validação foi cruzada e estratificada, com 5 dobras (Kohavi, 1995), e
 mediu acurácia, precisão, *recall*, F1 e AUC-ROC. Depois de um modelo de
 referência, os hiperparâmetros foram ajustados por *GridSearchCV*, do
 scikit-learn (Pedregosa et al., 2011), otimizando a AUC-ROC. O modelo de
 produção recebeu curva de calibração e explicações SHAP, globais e por
 predição. Onze experimentos de enriquecimento testaram se outros sinais,
 dez da linha do tempo e um de um endpoint de progressão do jogador,
-melhoravam a previsão (Seção 5.4).
+melhoravam a previsão.
 
 ### 4.7 PROPOSTA DE VISUALIZAÇÃO E INTERFACE EM LINGUAGEM NATURAL
 
@@ -524,7 +520,7 @@ minuto, mapa de calor, leitura de *draft* e modo "e se"), Competitivo
 (*solo queue* × profissional) e Simulador (composição, estado de jogo e
 SHAP). A Seção 5 mostra, recortada, a parte de cada tela que discute. As seis telas completas estão no Apêndice F (Figuras 6 a 11).
 
-A interface em linguagem natural é um *pipeline* *text-to-SQL*: um modelo
+A interface em linguagem natural é um fluxo *text-to-SQL*: um modelo
 de linguagem (Claude) traduz a pergunta em SQL, a consulta é validada
 antes de executar (apenas `SELECT` ou `WITH...SELECT`, sobre uma lista fechada
 de tabelas) e a resposta vem sempre do banco, nunca do conhecimento
@@ -542,7 +538,7 @@ o que vem dos dados (confrontos de rota, sinergias entre campeões e itens
 calculados sobre o histórico de partidas) do que é conhecimento geral do
 modelo sobre o jogo, marcado como tal, sem verificação pelos dados da
 partida. O modelo preditivo não vê itens, posição nem o estado das ondas de *minions*. Qualquer orientação que dependa disso é inferência (Seção
-6.1). Antes da partida, o módulo também lê a composição dos dois times e
+6.1). Além disso, antes da partida, o módulo também lê a composição dos dois times e
 aponta a condição de vitória de cada um, sem usar a predição.
 
 ### 4.8 MATERIAIS E MÉTODOS UTILIZADOS
@@ -574,10 +570,10 @@ duplicar dados já salvos.
 
 ### 5.2 Estruturação da base de dados (objetivos b e c)
 
-A base usada para treinar e comparar os modelos preditivos (Seção 5.4)
+A base usada para treinar e comparar os modelos preditivos
 reúne **39.188 partidas** de *solo queue* no corte de 15 minutos,
 provenientes das **39.426 partidas** que o banco tinha quando o
-conjunto de *features* foi congelado (BR1/EUW1/KR/NA1/EUN1), com JSON
+conjunto de variáveis foi congelado, com JSON
 bruto de partida e linha do tempo preservados para reprocessamento, e
 **96.716 jogos profissionais**
 (2014-2026, Oracle's Elixir). O Quadro 1 resume as tabelas do banco. Os campos e as chaves de cada uma estão no Apêndice A.
@@ -600,7 +596,7 @@ trabalho: 10.295 partidas na primeira base ampla, 23.133 no retreino de
 julho de 2026, 39.426 em 4 de outubro e 41.063 ao fim desse dia, com a região NA1 passando de 1.446
 para 7.159 partidas na rodada final. Era a menor das quatro regiões com
 amostra relevante, e a que mais limitava a generalização do achado de
-viés de lado (Seção 5.3).
+viés de lado.
 
 ### 5.3 Análise exploratória: padrões identificados (objetivo d)
 
@@ -628,9 +624,9 @@ geral, além do Brasil, mas as quatro regiões não o demonstram com a mesma for
 
 (Nota sobre as bases usadas nesta seção e na modelagem: a análise
 descritiva foi medida sobre as **41.063 partidas** que o banco tem ao fim
-da coleta. As *features* e os modelos foram construídos antes da última
+da coleta. As variáveis e os modelos foram construídos antes da última
 rodada da KR, sobre a base anterior de **39.426 partidas**, das quais
-39.309 geraram *features* e 39.188 chegam ao corte de 15 minutos. Por isso a Seção 5.4 e o Apêndice C citam 39.426. As 1.637 partidas de diferença,
+39.309 geraram variáveis preditoras e 39.188 chegam ao corte de 15 minutos. Por isso a Seção 5.4 e o Apêndice C citam 39.426. As 1.637 partidas de diferença,
 quase todas da KR, são uma limitação declarada na Seção 6.1.)
 
 **O viés é estável ao longo da partida.** Uma versão anterior deste texto
@@ -651,15 +647,14 @@ teste (ii) mostra a taxa de vitória do **azul** estável por faixa de
 duração total da partida
 (medido em 4 de outubro de 2026 sobre as 41.063 partidas: 45,6% a 47,3% entre
 as faixas de duração, amplitude de 1,7 ponto percentual, todas abaixo
-de 50%; a série está no Apêndice E), o que
+de 50%), o que
 descarta que partidas longas sejam outro tipo de jogo. O teste (iii), o
 intervalo de Wilson, está aplicado acima, e o teste (iv), a comparação de
 pares com correção de Holm, é o que sustenta a constância.
 
-**Comparação com o cenário profissional.** No dataset competitivo
+**Comparação com o cenário profissional.** Nos dados competitivos
 (Oracle's Elixir, 96.716 jogos), o time azul venceu 53,2% das partidas,
-com série anual estável desde 2016 (entre 52,5% e 55,0%; a série completa
-está no Apêndice E). O viés vai na direção oposta à do *solo queue* de
+com série anual estável desde 2016 (entre 52,5% e 55,0%). O viés vai na direção oposta à do *solo queue* de
 elo alto: a mesma métrica, em dois contextos institucionalmente
 diferentes, produz sinais opostos. Hipótese de explicação: no *solo
 queue*, sem coordenação de *draft*, o *counter-pick* garantido do time
@@ -673,7 +668,7 @@ própria em Guan e Tung (2026), mas isso não comprova a hipótese.
 **Conversão de vantagem.** Com vantagem de ouro entre +2.000 e +4.000 aos
 15 minutos, o azul venceu 81,5% das partidas no profissional (n = 3.294)
 contra 73,7% no *solo queue* (n = 5.166); entre +4.000 e +6.000, 91,7%
-(n = 72) contra 86,3% (n = 3.343). A mesma vantagem material vale mais
+(n = 72) contra 86,3% (n = 3.343). Ou seja, a mesma vantagem material vale mais
 nas mãos de um time coordenado. A diferença na faixa com amostra
 suficiente, de 7,8 pontos percentuais, é pequena em termos absolutos, mas
 significativa (z = 8,3, p < 0,001). A faixa de +4.000 a +6.000 do
@@ -687,7 +682,7 @@ Figura — Tela Competitivo: viés de lado e conversão de vantagem de ouro, sol
 ### 5.4 Modelagem preditiva e comparação entre modelos (objetivo e)
 
 O Quadro 3 compara os três modelos no corte de 15 minutos (validação
-cruzada estratificada de 5 *folds*, semente 42), no conjunto final de
+cruzada estratificada de 5 dobras, semente 42), no conjunto final de
 39.188 partidas, em que o azul vence 46,6%: o XGBoost com os
 hiperparâmetros da busca em grade (*GridSearchCV*), os outros dois na
 configuração de referência. O comando que reproduz a medição está no
@@ -784,10 +779,10 @@ Figura — Simulador, aba Estado: probabilidade de vitória e contribuição de 
 
 ### 5.6 Interface em linguagem natural (objetivo g)
 
-O *pipeline* de consulta em linguagem natural (*text-to-SQL* com
+O fluxo de consulta em linguagem natural (*text-to-SQL* com
 validação estrutural antes da execução) atingiu **88% de acurácia de
 execução**: 23 de 26 perguntas de referência, 22 sobre *solo queue* e 4
-sobre o dataset competitivo. O mesmo resultado saiu em três execuções
+sobre os dados competitivos. O mesmo resultado saiu em três execuções
 em datas diferentes; uma quarta, feita durante a coleta, deu 22 de 26 por
 interferência da escrita no banco (Apêndice B). As três falhas pertencem à mesma família: todas
 pedem um mínimo de jogos e erram na formatação ou em uma coluna a mais na
@@ -825,7 +820,7 @@ previsão e a informação usada. Maymin (2021) trata de eventos individuais
 e Guan e Tung (2026) avaliam o erro de probabilidade (Brier) em vez da
 acurácia, por isso ficam fora da comparação numérica.
 
-As variáveis preditoras, diferenças agregadas entre os dois times, seguem
+Quanto às escolhas de projeto, as variáveis preditoras, diferenças agregadas entre os dois times, seguem
 a modelagem centrada no time de Birant e Birant (2023). A granularidade
 por jogador de Bahrololloomi et al. (2022) entrou apenas nos perfis de
 jogador, fora da modelagem de vitória. A limitação que García-Méndez e
@@ -894,7 +889,7 @@ inversão no circuito profissional sugere origem distinta no *solo
 queue*, hipótese que este trabalho delimita sem comprovar.
 
 Como contribuição além do escopo originalmente delimitado no TCC I, a
-incorporação do dataset competitivo profissional (Oracle's Elixir)
+incorporação dos dados competitivos profissionais (Oracle's Elixir)
 permitiu uma comparação direta entre dois contextos institucionalmente
 diferentes do mesmo jogo, produzindo dois achados quantitativos: a inversão do viés de lado entre
 *solo queue* de elo alto e jogo profissional, e a diferença na conversão
@@ -924,9 +919,8 @@ concentra a maior parte da coleta. Não há base para estender as taxas por
 lado nem a acurácia a outras filas, elos, versões ou jogos, ainda que a
 arquitetura seja reaproveitável.
 
-**Validade interna.** As partidas foram coletadas em janelas de tempo, e
-não amostradas ao longo de todo o histórico. Um padrão sazonal pode estar
-confundido com o que os dados descrevem. A validação cruzada sorteia
+**Validade interna.** As partidas foram coletadas em janelas de tempo, sem amostragem ao longo de todo o histórico. Um padrão sazonal pode estar
+confundido com o que os dados descrevem. Além disso, a validação cruzada sorteia
 partidas ao acaso, e jogadores que se repetem entre partidas tornam as
 dobras menos independentes do que a técnica supõe. Recortes finos, como um
 jogador em um campeão ou um confronto de rota, seguem frágeis mesmo com
@@ -1212,7 +1206,7 @@ do mesmo benchmark.
 
 Quadro reproduzido por `python -m src.models.multi_cutoff_metrics`, que
 avalia os três modelos nos quatro cortes com validação cruzada estratificada
-de 5 *folds* (semente 42) usando, no XGBoost, os **mesmos hiperparâmetros
+de 5 dobras (semente 42) usando, no XGBoost, os **mesmos hiperparâmetros
 de produção** (500 árvores, taxa de aprendizado 0,01, profundidade 3); a
 *Random Forest* (500 árvores) e o MLP (camadas de 64 e 32 neurônios) estão
 na configuração de referência, sem busca em grade. É o mesmo desenho
@@ -1264,7 +1258,7 @@ estado de empate total fica fora da distribuição observada e o calibrador o
 extrapola para perto de 50%. A *Random Forest* com 500 árvores e
 profundidade 6 fecha a discrepância (0,6 pp) ao custo de 0,0005 de AUC,
 mas não foi adotada; a justificativa está no Apêndice G. Esse teste não
-figura na tabela porque não é enriquecimento de *features*, e sim
+figura na tabela porque não é enriquecimento de variáveis, e sim
 caracterização de uma limitação de modelo; o comando é
 `python docs/experimento_calibracao.py`.
 
@@ -1297,7 +1291,7 @@ Em contraste, o aumento de *volume* de partidas produziu ganho real:
 AUC-ROC do XGBoost (corte 15 min) subiu de 0,8214 (10.295 partidas)
 para 0,8393 (23.133 partidas) e para 0,8473 (39.188 partidas) ao longo
 da coleta incremental, um ganho acumulado de 0,0259, cerca de 6× maior
-que o maior ganho de qualquer um dos 11 experimentos de *feature* (0,003),
+que o maior ganho de qualquer um dos 11 experimentos de variáveis (0,003),
 e cerca de 130× o menor deles (0,0002).
 
 ---
@@ -1316,7 +1310,7 @@ NA1, que era o elo mais frágil da generalização, foi ampliada de 1.446 para
 52,2%. A direção do achado não mudou, e a NA1 deixou de ser limitação.
 
 **Origem das taxas de conversão de vantagem.** Todas as taxas de conversão da
-Seção 5.3 foram remedidas sobre a base de *features* congelada (39.309 partidas
+Seção 5.3 foram remedidas sobre a base de variáveis congelada (39.309 partidas
 distintas, 39.188 no corte de 15 minutos) pelo script
 `docs/confere_conversao_advantagem.py`, que lê `data/features_phases.csv`.
 
@@ -1328,7 +1322,7 @@ partidas), 47,3% (25 a 30, 13.314), 46,4% (30 a 35, 8.364), 45,6% (35 a 40,
 todas as faixas ficam abaixo de 50%: o teste se sustenta, agora com data,
 base e amplitude explícitas.
 
-**Série anual do cenário profissional.** Vitória do azul por ano no dataset competitivo: 53,6% (2016), 55,0% (2017), 53,7% (2018), 53,2% (2019), 52,7% (2020), 52,6% (2021), 52,5% (2022), 53,3% (2023), 53,1% (2024), 53,3% (2025) e 53,1% (2026). Os dois primeiros anos divergem (58,2% em 2014 e 55,3% em 2015), mas se apoiam em amostras muito menores (814 e 1.702 jogos, contra 96.716 no total), e a diferença é atribuída a essa assimetria de volume, não a uma mudança no padrão.
+**Série anual do cenário profissional.** Vitória do azul por ano nos dados competitivos: 53,6% (2016), 55,0% (2017), 53,7% (2018), 53,2% (2019), 52,7% (2020), 52,6% (2021), 52,5% (2022), 53,3% (2023), 53,1% (2024), 53,3% (2025) e 53,1% (2026). Os dois primeiros anos divergem (58,2% em 2014 e 55,3% em 2015), mas se apoiam em amostras muito menores (814 e 1.702 jogos, contra 96.716 no total), e a diferença é atribuída a essa assimetria de volume, não a uma mudança no padrão.
 
 
 ---
@@ -1373,7 +1367,7 @@ texto, mas as duas séries não concordam em magnitude, nem sempre em
 direção: aos 20 minutos o modelo projeta 51,4% de vitória azul,
 favorecendo o azul, enquanto o dado bruto dá 46,7%, favorecendo o
 vermelho. A discrepância não decorre de subajuste: uma busca em grade
-completa (27 combinações, 5 *folds*) escolheu a **mesma profundidade** de
+completa (27 combinações, 5 dobras) escolheu a **mesma profundidade** de
 produção (3) e terminou 0,0001 de AUC acima dela, de 0,8473 para 0,8475,
 em 2º lugar entre as 27. Testadas as três alavancas que a grade não cobre,
 a conclusão é contraintuitiva: a **calibração piora** a discrepância (de
@@ -1389,10 +1383,10 @@ Forest* fica em 0,7617 contra 0,7621. É decisão consciente e reversível,
 sem retreino. Comando e artefato: `docs/experimento_calibracao.py` e
 `reports/experimento_calibracao_veredito.json`.
 
-**O modelo não viu a última rodada de coleta.** As *features* e a
+**O modelo não viu a última rodada de coleta.** As variáveis e a
 modelagem foram construídas sobre 39.426 partidas, e a base do banco tem
 41.063, 1.637 partidas a mais, quase todas da KR (das 1.754 partidas do
-banco que não geraram *features*, 1.647 são da KR e 107 são de BR1, EUW1 e
+banco que não geraram variáveis, 1.647 são da KR e 107 são de BR1, EUW1 e
 NA1). O conjunto que de fato alimentou o modelo são 39.309 partidas
 distintas, das quais 39.188 chegam ao corte de 15 minutos; as outras 117
 da base congelada não produziram linha em `features_phases.csv`. A
@@ -1406,7 +1400,7 @@ modelo treinado sobre a base completa reexecuta `train_baseline` e
 `export_model`.
 
 **Teto de desempenho das variáveis atuais.** Onze experimentos de
-enriquecimento de *features* não superaram o modelo com as cinco
+enriquecimento de variáveis não superaram o modelo com as cinco
 variáveis originais (Quadro 5), dez a partir da mesma fonte de dados
 (linha do tempo da partida) e um a partir de uma fonte diferente
 (percentis comportamentais do jogador via `lol-challenges-v1`, Apêndice
