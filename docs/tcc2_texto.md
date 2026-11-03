@@ -46,9 +46,7 @@ modelos (XGBoost, *Random Forest* e uma rede neural MLP) foram comparados
 por validação cruzada estratificada para predizer o vencedor em quatro
 cortes temporais, de 10 a 25 minutos; os três ficaram próximos, e o
 XGBoost, adotado em produção, alcançou acurácia de 0,7621 e AUC-ROC de
-0,8473 no corte de 15 minutos. A análise exploratória identificou viés de
-lado favorável ao time vermelho no *solo queue* de elo alto (56,3% de
-vitórias na região com maior amostra), estável ao longo da partida e
+0,8473 no corte de 15 minutos. Uma regressão logística simples chegou ao mesmo patamar, variáveis mais ricas somaram no máximo 0,008 de AUC-ROC e treinar no passado e testar no futuro não reduziu a AUC-ROC. A análise exploratória identificou viés de lado favorável ao time vermelho no *solo queue* de elo alto (56,3% de vitórias na região com maior amostra; o intervalo exclui 50% em três das quatro regiões), estável ao longo da partida e
 invertido no cenário profissional, em que o azul vence 53,2% dos jogos,
 achado sustentado por testes de robustez. Uma interface *text-to-SQL* com
 validação estrutural atingiu 88% de acurácia de execução em um benchmark de
@@ -72,9 +70,7 @@ models (XGBoost, Random Forest and an MLP neural network) were compared
 through stratified cross-validation to predict the winning team at four
 time cutoffs, from 10 to 25 minutes; the three performed similarly, and
 XGBoost, adopted in production, reached an accuracy of 0.7621 and an
-AUC-ROC of 0.8473 at the 15-minute cutoff. The exploratory analysis
-identified a side bias favoring the red side in high-elo solo queue
-(56.3% win rate in the region with the largest sample), stable
+AUC-ROC of 0.8473 at the 15-minute cutoff. A simple logistic regression reached the same level, richer variables added at most 0.008 of AUC-ROC, and training on the past and testing on the future did not reduce the AUC-ROC. The exploratory analysis identified a side bias favoring the red side in high-elo solo queue (56.3% win rate in the region with the largest sample; the interval excludes 50% in three of the four regions), stable
 throughout the match and reversed in the professional scenario, where
 the blue side wins 53.2% of games, a finding supported by robustness
 tests. A text-to-SQL interface with structural validation achieved 88%
