@@ -13,6 +13,6 @@
     "pergunta": "Quais os 5 campeões mais jogados na posição MIDDLE?",
     "sql_gerada": "SELECT champion_name, COUNT(*) AS jogos\nFROM participants\nWHERE team_position = 'MIDDLE'\nGROUP BY champion_name\nORDER BY jogos DESC\nLIMIT 5;"
   },
-  "capturado_em": "2026-10-28T16:45:40",
+  "capturado_em": "2026-11-03T20:43:45",
   "base_partidas_fila_420": 41063
 }
