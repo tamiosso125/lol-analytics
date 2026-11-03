@@ -1049,8 +1049,7 @@ temporal evolution of gameplay using storyline visualization: a study with Leagu
 Legends. **Proceedings of the ACM on Human-Computer Interaction**, New York, v.
 7, n. CHI PLAY, art. 412, p. 1002-1024, 2023. DOI: 10.1145/3611058.
 
-WANG, Chuhan; SHIN, Yitao; LIU, Bing; POLOZOV, Alexander; RICHARDSON, Sarah.
-RAT-SQL: relation-aware schema encoding and linking for text-to-SQL. In:
+WANG, Bailin; SHIN, Richard; LIU, Xiaodong; POLOZOV, Oleksandr; RICHARDSON, Matthew. RAT-SQL: relation-aware schema encoding and linking for text-to-SQL parsers. In:
 Proceedings of the 58th Annual Meeting of the Association for Computational
 Linguistics. Association for Computational Linguistics, 2020. p. 7567-7578.
 DOI: 10.18653/v1/2020.acl-main.677.
@@ -1096,8 +1095,8 @@ consultas geradas pela interface em linguagem natural.
 
 ## APÊNDICE B – Benchmark da interface em linguagem natural
 
-Medição de 4 de outubro de 2026 sobre a base de produção de **41.063
-partidas**: **23/26 = 88% de acurácia de execução**, pelo comando
+Medição de 3 de novembro de 2026 sobre a base de produção de **41.063
+partidas** (a de 4 de outubro deu o mesmo resultado): **23/26 = 88% de acurácia de execução**, pelo comando
 `python -m src.nlq.evaluate_nlq`, que grava `reports/nlq_benchmark.json` com
 a acurácia, a base, o modelo e o desfecho de cada pergunta.
 
@@ -1108,6 +1107,7 @@ Quadro — Execuções do benchmark de linguagem natural
 | 13 de julho de 2026 | não registrada | 23/26 | mesmas três falhas |
 | 28 de setembro de 2026 | 24.154 | 23/26 | mesmas três falhas |
 | 4 de outubro de 2026 | 41.063 | 23/26 | medida de referência; a execução anterior, sobre 39.426 partidas, deu o mesmo resultado |
+| 3 de novembro de 2026 | 41.063 | 23/26 | mesmas três falhas, depois da correção da carga dos jogos profissionais (perguntas 23 a 26 seguem corretas) |
 | Durante a coleta | não registrada | 22/26 | falha extra na pergunta 3 (taxa de vitória do time azul): a contagem mudou entre a consulta gerada e a de referência, por escrita concorrente; sem a coleta, a pergunta voltou a passar |
 
 As 26 perguntas de referência, com a SQL esperada e o resultado da medição
@@ -1161,18 +1161,18 @@ Quadro — Métricas completas por corte temporal, comparação entre os três m
 
 | Corte | n | Taxa vitória azul | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
 |---|---:|---:|---|---:|---:|---:|---:|---:|
-| 10min | 39.309 | 0,466 | RandomForest | 0,6704 | 0,6515 | 0,6301 | 0,6406 | 0,7341 |
-| 10min | 39.309 | 0,466 | **XGBoost** | 0,7004 | 0,6912 | 0,6461 | 0,6679 | 0,7742 |
-| 10min | 39.309 | 0,466 | MLP | 0,7020 | 0,6861 | 0,6651 | 0,6755 | 0,7735 |
-| 15min | 39.188 | 0,466 | RandomForest | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
-| 15min | 39.188 | 0,466 | **XGBoost** | 0,7621 | 0,7561 | 0,7228 | 0,7391 | 0,8473 |
-| 15min | 39.188 | 0,466 | MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
-| 20min | 34.337 | 0,466 | RandomForest | 0,7785 | 0,7659 | 0,7551 | 0,7604 | 0,8623 |
-| 20min | 34.337 | 0,466 | **XGBoost** | 0,7917 | 0,7817 | 0,7666 | 0,7741 | 0,8762 |
-| 20min | 34.337 | 0,466 | MLP | 0,7866 | 0,7712 | 0,7701 | 0,7707 | 0,8729 |
-| 25min | 26.837 | 0,467 | RandomForest | 0,8147 | 0,8047 | 0,7969 | 0,8008 | 0,8975 |
-| 25min | 26.837 | 0,467 | **XGBoost** | 0,8241 | 0,8172 | 0,8034 | 0,8103 | 0,9090 |
-| 25min | 26.837 | 0,467 | MLP | 0,8240 | 0,8171 | 0,8033 | 0,8101 | 0,9072 |
+| 10 min | 39.309 | 0,466 | *Random Forest* | 0,6704 | 0,6515 | 0,6301 | 0,6406 | 0,7341 |
+| 10 min | 39.309 | 0,466 | **XGBoost** | 0,7004 | 0,6912 | 0,6461 | 0,6679 | 0,7742 |
+| 10 min | 39.309 | 0,466 | MLP | 0,7020 | 0,6861 | 0,6651 | 0,6755 | 0,7735 |
+| 15 min | 39.188 | 0,466 | *Random Forest* | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
+| 15 min | 39.188 | 0,466 | **XGBoost** | 0,7621 | 0,7561 | 0,7228 | 0,7391 | 0,8473 |
+| 15 min | 39.188 | 0,466 | MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
+| 20 min | 34.337 | 0,466 | *Random Forest* | 0,7785 | 0,7659 | 0,7551 | 0,7604 | 0,8623 |
+| 20 min | 34.337 | 0,466 | **XGBoost** | 0,7917 | 0,7817 | 0,7666 | 0,7741 | 0,8762 |
+| 20 min | 34.337 | 0,466 | MLP | 0,7866 | 0,7712 | 0,7701 | 0,7707 | 0,8729 |
+| 25 min | 26.837 | 0,467 | *Random Forest* | 0,8147 | 0,8047 | 0,7969 | 0,8008 | 0,8975 |
+| 25 min | 26.837 | 0,467 | **XGBoost** | 0,8241 | 0,8172 | 0,8034 | 0,8103 | 0,9090 |
+| 25 min | 26.837 | 0,467 | MLP | 0,8240 | 0,8171 | 0,8033 | 0,8101 | 0,9072 |
 
 Quadro — Configuração dos três modelos comparados
 
@@ -1241,8 +1241,7 @@ Quadro — Treino no passado e teste no futuro, XGBoost
 | 25 min | Por *patch* | 16.442 | 10.395 | 0,8277 | 0,9120 | 0,9065 a 0,9172 |
 | 25 min | Aleatória 80/20 | 21.469 | 5.368 | 0,8295 | 0,9111 | 0,9034 a 0,9182 |
 
-Na divisão cronológica, as 80% partidas mais antigas treinam e as 20% mais
-recentes testam; na divisão por *patch*, os *patches* 16.10 a 16.13 treinam e
+Na divisão cronológica, as 80% mais antigas treinam e as 20% mais recentes testam; na divisão por *patch*, os *patches* 16.10 a 16.13 treinam e
 os 16.14 a 16.19 testam; na aleatória, o teste tem o mesmo tamanho do
 cronológico. A pior diferença de AUC-ROC de uma divisão temporal para a
 aleatória é de −0,0004 (20 minutos, por *patch*), dentro do intervalo de
@@ -1539,7 +1538,7 @@ Experimentos 12 a 19, feitos depois dos onze do Quadro 5, sobre a mesma base con
 
 Quadro — Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais
 
-| Experimento | Variáveis acrescentadas | 15 minutos | 25 minutos |
+| Exp. | Variáveis acrescentadas | 15 minutos | 25 minutos |
 |---|---|---|---|
 | 12 | Trajetória: ouro, experiência e abates dos 3 e 5 minutos anteriores (8 variáveis) | +0,0003 (−0,0001 a +0,0006) | +0,0014 (+0,0009 a +0,0019) |
 | 13 | Por função, nível, farm, dano e atributos (37 variáveis) | +0,0027 (+0,0021 a +0,0032) | +0,0018 (+0,0013 a +0,0022) |
