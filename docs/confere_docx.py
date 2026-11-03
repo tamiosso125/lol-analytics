@@ -85,8 +85,10 @@ def main() -> None:
         problemas.append(f"{len(sem_negrito)} título(s) de seção SEM negrito")
     if len(titulos) < 40:
         problemas.append(f"suspiciousamente poucos títulos ({len(titulos)})")
-    if len(refs) != 32:
-        problemas.append(f"referências: esperado 32, achou {len(refs)}")
+    # 31 desde 2026-11-03: Yin (2018) saiu quando a leitura do livro mostrou
+    # que o trabalho não é estudo de caso no sentido dele
+    if len(refs) != 31:
+        problemas.append(f"referências: esperado 31, achou {len(refs)}")
     # Esperado vem do markdown, não de constante (2026-10-28): com quadros e
     # recortes entrando no corpo, o "6" fixo virou falso. Cada linha
     # "Quadro – Título" é um quadro; cada marcador "Figura – ... | x.png" é

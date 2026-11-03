@@ -1,6 +1,6 @@
 """Verificacao de consistencia do texto do TCC II.
 
-20 checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e que
+22 checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e que
 antes eram feitas a mao (e por isso falhavam). Exit code 0 = tudo consistente.
 
 TEXTO E FORMATACAO
@@ -284,11 +284,12 @@ def check_quadro_regioes(t: str) -> None:
 def check_profissional(t: str) -> None:
     """Contagem de jogos profissionais e taxa do azul x banco.
 
-    O texto afirmava 99.259 jogos profissionais; o banco tem 96.716. O erro
-    sobreviveu a dois ciclos de coleta porque ninguem contava. A contagem
+    O texto afirmou 96.716 jogos por semanas, e o correto e 99.259: o
+    load_pro.py apagava por ano do arquivo e perdia 2.543 jogos (corrigido em
+    2026-11-03, apaga por game_id). O erro sobreviveu porque ninguem contava. A contagem
     correta e `COUNT(DISTINCT game_id)`: `pro_games` guarda DUAS linhas por
     jogo (uma por time, nao uma por jogador), entao `COUNT(*)` devolve o
-    dobro — 193.432 — e parece um numero plausivel.
+    dobro — 198.518 — e parece um numero plausivel.
     """
     m = _re_num(r"(\d{2}\.\d{3})\s+(?:jogos|partidas)\s+profissionais", t)
     if not m:
@@ -342,10 +343,10 @@ VALORES_SUBSTITUIDOS: list[tuple[str, str]] = [
     ("46,3%", "taxa do azul aos 15 min, do periodo em que se acreditava no pico"),
     ("84,0%", "conversao de vantagem no profissional, antes da remedicao"),
     ("33.713", "tamanho da base entre 2026-10-03 e 2026-10-04"),
-    ("99.259", "contagem de jogos profissionais, nunca conferida"),
+    ("96.716", "contagem de jogos profissionais com o erro do load_pro.py (corrigido; o certo e 99.259)"),
     # a mesma contagem errada, arredondada: sobreviveu na Introdução até
     # 2026-10-28 porque o literal "99.259" não casava com "~99 mil"
-    ("99 mil", "contagem de jogos profissionais arredondada (o banco tem 96.716)"),
+    ("99 mil", "contagem de jogos profissionais arredondada (o banco tem 99.259)"),
     # rodada final da KR: os numeros que a base de 41.063 substituiu
     ("8.567", "KR antes da rodada final, a contagem que(features) alcançou"),
     ("50,3%", "taxa do vermelho na KR antes da rodada final"),
@@ -372,9 +373,20 @@ def check_residuos(t: str) -> None:
     """Nenhum valor substituido e nenhuma forma refutada pode sobrar no texto."""
     import re as _re
 
+    # O quadro do holdout temporal (Apendice C, 2026-11-03) e uma medida nova:
+    # a divisao aleatoria 80/20 aos 15 min deu acuracia 0,7573 em
+    # reports/holdout_temporal.json, por COINCIDENCIA igual ao valor antigo do
+    # XGBoost (retreino de 39.188). Mudar a semente para evitar o numero seria
+    # enviesar o resultado; as linhas desse quadro ficam isentas, e a checagem
+    # 20 as compara com o artefato.
+    i0 = t.find("Quadro — Treino no passado e teste no futuro")
+    j0 = t.find("\n\n", t.find("|---", i0)) if i0 >= 0 else -1
+    isentas = range(t[:i0].count("\n") + 1, t[:j0].count("\n") + 2) if i0 >= 0 else range(0)
     for valor, porque in VALORES_SUBSTITUIDOS:
         for m in _re.finditer(_re.escape(valor), t):
             linha = t[: m.start()].count("\n") + 1
+            if linha in isentas:
+                continue
             trecho = t.splitlines()[linha - 1].strip()[:78]
             falha(f"linha {linha}: valor substituido {valor} ainda presente "
                   f"({porque}) -> {trecho!r}")
@@ -1258,6 +1270,150 @@ def check_benchmark_nlq(t: str) -> None:
     print("  [OK] accuracy e base do Apêndice B batem com o artefato")
 
 
+def check_holdout_temporal(t: str) -> None:
+    """O quadro do Apêndice C sobre treino no passado bate com o artefato.
+
+    `holdout_temporal.py` grava reports/holdout_temporal.json. O quadro do
+    Apêndice C é a evidência de que a validação cruzada aleatória não infla o
+    resultado (Kaufman et al., 2012). Aqui cada linha do quadro é comparada
+    com o JSON, e a "pior diferença" e a "diferença para a logística" que o
+    texto cita são recalculadas a partir dele.
+    """
+    import json as _json
+    import re as _re
+
+    caminho = RAIZ / "reports" / "holdout_temporal.json"
+    try:
+        j = _json.loads(caminho.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        falha(f"holdout: reports/holdout_temporal.json ausente ou invalido: {exc}")
+        return
+
+    def v(x, casas=4):
+        return f"{x:.{casas}f}".replace(".", ",")
+
+    def n(x):
+        return f"{x:,}".replace(",", ".")
+
+    i = t.find("Quadro — Treino no passado e teste no futuro")
+    if i < 0:
+        falha("holdout: o quadro 'Treino no passado e teste no futuro' nao existe")
+        return
+    bloco = t[i: t.find("\n\n", t.find("|---", i))]
+    linhas = [l for l in bloco.splitlines() if l.startswith("|") and "---" not in l][1:]
+    rotulos = {"Cronológica 80/20": "cronologica", "Por *patch*": "por_patch",
+               "Aleatória 80/20": "aleatoria"}
+    if len(linhas) != 12:
+        falha(f"holdout: o quadro tem {len(linhas)} linhas e eram 12 esperadas")
+    for linha in linhas:
+        c = [x.strip() for x in linha.strip("|").split("|")]
+        corte, div = c[0].split()[0], rotulos.get(c[1])
+        if div is None:
+            falha(f"holdout: divisao desconhecida {c[1]!r}")
+            continue
+        r = j["cortes"][corte][div]["XGBoost"]
+        esperado = [n(r["n_treino"]), n(r["n_teste"]), v(r["acuracia"]), v(r["auc"]),
+                    f"{v(r['auc_ic95'][0])} a {v(r['auc_ic95'][1])}"]
+        if c[2:] != esperado:
+            falha(f"holdout {corte} min {c[1]}: quadro {c[2:]} x artefato {esperado}")
+
+    pior = min(
+        (j["cortes"][c][d]["XGBoost"]["auc"] - j["cortes"][c]["aleatoria"]["XGBoost"]["auc"])
+        for c in j["cortes"] for d in ("cronologica", "por_patch"))
+    dmax = max(abs(j["cortes"][c][d]["XGBoost"]["auc"] - j["cortes"][c][d]["Regressão logística"]["auc"])
+               for c in j["cortes"] for d in j["cortes"][c])
+    resto = t[i: i + 4000]
+    if v(pior) not in resto and v(pior).replace("-", "−") not in resto:
+        falha(f"holdout: a pior diferenca para a aleatoria e {v(pior)} e o texto nao a cita")
+    if v(dmax) not in resto:
+        falha(f"holdout: a diferenca maxima para a logistica e {v(dmax)} e o texto nao a cita")
+    if pior < -0.002:
+        falha(f"holdout: a pior diferenca ({v(pior)}) contradiz 'nao infla o resultado'")
+    if not any(f.startswith("holdout") for f in FALHAS):
+        print(f"  holdout: 12 linhas conferem; pior diferenca {v(pior)}, logistica ate {v(dmax)}")
+
+
+def check_precisao(t: str) -> None:
+    """Apêndice M (experimentos 12 a 19) x artefatos em reports/.
+
+    O quadro de ganhos e o de treino no passado vêm de
+    `experimentos_precisao.json`, `experimento_historico.json` e
+    `holdout_precisao.json`. Cada linha é recomputada a partir deles: o
+    quadro não pode ter número digitado à mão (AGENTS.md: número do TCC sempre
+    vem de artefato). Confere também que o texto não afirma um ganho maior que
+    o medido.
+    """
+    import json as _json
+
+    def lê(nome):
+        return _json.loads((RAIZ / "reports" / nome).read_text(encoding="utf-8"))
+
+    try:
+        exp = lê("experimentos_precisao.json")
+        hist = lê("experimento_historico.json")
+        hold = lê("holdout_precisao.json")
+    except Exception as exc:  # noqa: BLE001
+        falha(f"precisao: artefato ausente ou invalido: {exc}")
+        return
+
+    def f(x, d=4, sinal=False):
+        s = f"{x:+.{d}f}" if sinal else f"{x:.{d}f}"
+        return s.replace("-", "−").replace(".", ",")
+
+    def ic(m, lo, hi):
+        return f"{f(m, 4, True)} ({f(lo, 4, True)} a {f(hi, 4, True)})"
+
+    i = t.find("Quadro — Experimentos 12 a 19")
+    j = t.find("Quadro — Variáveis novas em treino no passado")
+    if i < 0 or j < 0:
+        falha("precisao: os quadros do Apêndice M nao existem")
+        return
+    ganhos = [l for l in t[i:j].splitlines() if l.startswith("|") and "---" not in l][1:]
+    mapa = [("E12_trajetoria", "xgb_prod"), ("E13_funcao", "xgb_prod"), ("E14_objetivos", "xgb_prod"),
+            ("E15_rico", "xgb_prod"), ("E16_campeoes", "xgb_prod"), ("E17_jogadores", "xgb_prod"),
+            ("E18_tudo", "xgb_prod"), ("E18_tudo", "logit")]
+    if len(ganhos) != len(mapa) + 1:
+        falha(f"precisao: o quadro de ganhos tem {len(ganhos)} linhas e eram {len(mapa) + 1}")
+    for linha, (conj, mdl) in zip(ganhos, mapa):
+        c = [x.strip() for x in linha.strip("|").split("|")]
+        esp = [ic(exp[corte][conj][mdl]["delta_auc"], exp[corte][conj][mdl]["ic_lo"],
+                  exp[corte][conj][mdl]["ic_hi"]) for corte in ("15", "25")]
+        if c[2:4] != esp:
+            falha(f"precisao {conj}/{mdl}: quadro {c[2:4]} x artefato {esp}")
+    if len(ganhos) == len(mapa) + 1:
+        c = [x.strip() for x in ganhos[-1].strip("|").split("|")]
+        esp = [ic(*hist[corte]["5+"]["logit"]["dauc_ic"]) for corte in ("15", "25")]
+        if c[2:4] != esp:
+            falha(f"precisao experimento 19: quadro {c[2:4]} x artefato {esp}")
+
+    rot = {"Cronológica 80/20": "cronologica", "Por *patch*": "por_patch", "Aleatória 80/20": "aleatoria"}
+    linhas = [l for l in t[j:j + 3000].splitlines() if l.startswith("|") and "---" not in l][1:]
+    if len(linhas) != 6:
+        falha(f"precisao: o quadro de treino no futuro tem {len(linhas)} linhas e eram 6")
+    for linha in linhas:
+        c = [x.strip() for x in linha.strip("|").split("|")]
+        corte, div = c[0].split()[0], rot.get(c[1])
+        if div is None:
+            falha(f"precisao: divisao desconhecida {c[1]!r}")
+            continue
+        d = hold["cortes"][corte][div]
+        esp = [f(d["base"]["xgb_prod"]["auc"]), f(d["E18_tudo"]["logit"]["auc"]),
+               ic(*d["E18_tudo"]["logit"]["dauc_vs_base_xgb"])]
+        if c[2:] != esp:
+            falha(f"precisao {corte} min {c[1]}: quadro {c[2:]} x artefato {esp}")
+
+    # o texto do apêndice cita o maior ganho: não pode ser maior que o medido
+    maior = max(r["delta_auc"] for c in ("15", "25") for s in exp[c].values() for r in s.values()
+                if "delta_auc" in r and r["n_vars"] > 5 and s is not exp[c].get("pre_jogo"))
+    cita15 = f(exp["15"]["E18_tudo"]["logit"]["delta_auc"], 4, True)
+    if cita15 not in t[i: i + 6000]:
+        falha(f"precisao: o maior ganho aos 15 min e {cita15} e o texto nao o cita")
+    if "+0,008" in t and maior < 0.0075:
+        falha(f"precisao: o texto cita +0,008 mas o maior ganho medido e {f(maior, 4, True)}")
+    if not any(x.startswith("precisao") for x in FALHAS):
+        print(f"  precisao: {len(ganhos)} + {len(linhas)} linhas conferem; maior ganho {f(maior, 4, True)}")
+
+
 def check_contagem_de_checagens() -> None:
     """O numero de checagens que os documentos afirmam tem que ser o real.
 
@@ -1375,7 +1531,11 @@ def main() -> None:
     check_bases_declaradas(t)
     print("19. Accuracy do NLQ: artefato ou declaracao de lacuna")
     check_benchmark_nlq(t)
-    print("20. A contagem de checagens que os docs affirmam e a real")
+    print("20. Treino no passado e teste no futuro: quadro do Apendice C x artefato")
+    check_holdout_temporal(t)
+    print("21. Apendice M (experimentos 12 a 19) x artefatos")
+    check_precisao(t)
+    print("22. A contagem de checagens que os docs affirmam e a real")
     check_contagem_de_checagens()
 
     print()

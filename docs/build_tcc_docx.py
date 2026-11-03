@@ -1,4 +1,4 @@
-"""Gera o .docx do TCC II a partir de `tcc2_texto.md`, no padrao do modelo
+﻿"""Gera o .docx do TCC II a partir de `tcc2_texto.md`, no padrao do modelo
 institucional da UNISINOS.
 
 POR QUE DOCX E NAO LATEX: o modelo que a coordenacao distribui foi produzido em
@@ -1059,6 +1059,7 @@ LARGURAS_QUADROS = {
     "Execuções do benchmark de linguagem natural": [4.0, 2.4, 2.2, 7.4],
     "Configuração dos três modelos comparados": [2.6, 6.2, 7.2],
     "Validação cruzada com 5 e com 10 dobras": [1.8, 3.0, 2.8, 2.8, 2.8, 2.8],
+    "Treino no passado e teste no futuro, XGBoost": [1.6, 3.2, 1.6, 1.6, 2.1, 2.0, 3.9],
     "Regressão logística como baseline e diferença do XGBoost para os demais modelos":
         [1.7, 3.6, 2.0, 2.0, 6.7],
     "Detalhe de três experimentos negativos": [2.9, 3.8, 4.1, 5.2],
@@ -1073,12 +1074,29 @@ LARGURAS_QUADROS = {
     "Taxa de vitória do azul no estado de empate, modelo e dados":
         [2.4, 4.4, 5.0, 4.2],
     "Alavancas testadas contra a discrepância de taxa-base": [3.6, 6.0, 6.4],
+    # apêndices H a M (2026-11-03)
+    "Fundamentos dos métodos usados e o limite de cada um": [3.2, 3.0, 5.6, 4.2],
+    "Estudos de domínio: objeto, resultado e relação com este trabalho": [2.9, 3.6, 5.0, 4.5],
+    "Acurácia relatada nos estudos e neste trabalho": [3.4, 3.8, 3.4, 5.4],
+    "Composição das bases de dados": [4.6, 5.2, 6.2],
+    "Tipos de chave da Riot Games API": [2.4, 3.6, 4.0, 3.2, 2.8],
+    "Objetivos específicos, onde são tratados e a evidência de cada um": [1.8, 3.2, 11.0],
+    "Importância média das variáveis (valor absoluto do SHAP) por corte": [4.8, 2.8, 2.8, 2.8, 2.8],
+    "Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais": [1.8, 5.6, 4.3, 4.3],
+    "Variáveis novas em treino no passado e teste no futuro": [1.6, 3.2, 2.4, 3.0, 5.8],
 }
 
 # Quadros dos apêndices com comando, caminho ou texto corrido nas células:
 # alinhados à esquerda. Justificado, "python -m src.models..." saía com
 # buracos entre as palavras (visível só renderizando, 2026-11-03).
 QUADROS_ESQUERDA = {
+    "Fundamentos dos métodos usados e o limite de cada um",
+    "Estudos de domínio: objeto, resultado e relação com este trabalho",
+    "Acurácia relatada nos estudos e neste trabalho",
+    "Composição das bases de dados",
+    "Tipos de chave da Riot Games API",
+    "Objetivos específicos, onde são tratados e a evidência de cada um",
+    "Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais",
     "Execuções do benchmark de linguagem natural",
     "Configuração dos três modelos comparados",
     "Detalhe de três experimentos negativos",
