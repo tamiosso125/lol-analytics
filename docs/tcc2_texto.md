@@ -33,30 +33,28 @@
 
 ## RESUMO
 
-O crescimento dos esports tem ampliado a geração de dados sobre
-partidas, jogadores, equipes e estratégias competitivas, criando
-oportunidades para a análise de dados. Entretanto, sua exploração
-ainda depende de ferramentas fragmentadas e conhecimento técnico
-específico. Este trabalho desenvolveu uma plataforma inteligente para
-análise de dados de esports em *League of Legends*, integrando coleta
-de dados competitivos, modelagem preditiva com *machine learning* e
-consulta em linguagem natural. O trabalho coletou 41.063 partidas
-ranqueadas de elo alto (cinco regiões) via Riot Games API,
-complementadas por 96.716 partidas profissionais (2014-2026, Oracle's
-Elixir). Treinou e comparou três modelos (XGBoost, *Random Forest* e
-uma rede neural MLP) para predizer o vencedor em quatro cortes
-temporais (10 a 25 min); o XGBoost alcançou o melhor desempenho no
-corte de 15 minutos (acurácia de 0,7621; AUC-ROC de 0,8473). A análise exploratória identificou viés de lado favorável
-ao time vermelho no *solo queue* de elo alto (56,3% de vitórias na
-região com maior amostra), estável ao longo da partida e invertido no
-cenário profissional (o time azul vence 53,2% de 2014 a 2026), achado
-sustentado por testes de robustez. Uma interface em linguagem natural
-(*text-to-SQL* validado estruturalmente) atingiu 88% de acurácia em um
-benchmark de 26 perguntas. A plataforma inclui seis páginas de
-visualização, com predição explicável (SHAP) e mapa de calor de
-posicionamento por partida. Os resultados demonstram a viabilidade de
-integrar coleta, modelagem preditiva, explicabilidade e consulta em
-linguagem natural numa única solução aplicada a esports.
+O crescimento dos esports amplia a geração de dados sobre partidas,
+jogadores e estratégias, mas sua exploração ainda depende de ferramentas
+fragmentadas e de conhecimento técnico. Este trabalho desenvolveu uma
+plataforma inteligente para análise de dados de *League of Legends* que
+integra coleta, modelagem preditiva com *machine learning*,
+explicabilidade, visualização e consulta em linguagem natural. Trata-se
+de pesquisa aplicada, de abordagem mista, sobre 41.063 partidas
+ranqueadas de elo alto em cinco regiões, coletadas via Riot Games API, e
+96.716 jogos profissionais de 2014 a 2026 (Oracle's Elixir). Três
+modelos (XGBoost, *Random Forest* e uma rede neural MLP) foram comparados
+por validação cruzada estratificada para predizer o vencedor em quatro
+cortes temporais, de 10 a 25 minutos; os três ficaram próximos, e o
+XGBoost, adotado em produção, alcançou acurácia de 0,7621 e AUC-ROC de
+0,8473 no corte de 15 minutos. A análise exploratória identificou viés de
+lado favorável ao time vermelho no *solo queue* de elo alto (56,3% de
+vitórias na região com maior amostra), estável ao longo da partida e
+invertido no cenário profissional, em que o azul vence 53,2% dos jogos,
+achado sustentado por testes de robustez. Uma interface *text-to-SQL* com
+validação estrutural atingiu 88% de acurácia de execução num benchmark de
+26 perguntas, e a plataforma reúne seis páginas de visualização com
+predição explicável (SHAP). Os resultados mostram a viabilidade de
+integrar essas etapas numa única solução aplicada a esports.
 
 **Palavras-chave:** esports; *League of Legends*; análise de dados;
 *machine learning*; interface em linguagem natural.
