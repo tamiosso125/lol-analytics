@@ -1002,6 +1002,10 @@ def ajustar_tabela(tabela, larguras_cm: list[float], esquerda: bool = False) -> 
     trPr = tabela.rows[0]._tr.get_or_add_trPr()
     trPr.append(OxmlElement("w:tblHeader"))
     inteiro = len(tabela.rows) <= 12
+    # linha nunca se parte entre páginas (2026-11-03): no Quadro 25 uma linha
+    # terminava com "que a correção de Bonferroni" sozinho na página seguinte
+    for linha in tabela.rows:
+        linha._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
     for i_linha, linha in enumerate(tabela.rows):
         if inteiro and i_linha < len(tabela.rows) - 1:
             for celula in linha.cells:
@@ -1079,10 +1083,10 @@ LARGURAS_QUADROS = {
     "Estudos de domínio: objeto, resultado e relação com este trabalho": [2.9, 3.6, 5.0, 4.5],
     "Acurácia relatada nos estudos e neste trabalho": [3.4, 3.8, 3.4, 5.4],
     "Composição das bases de dados": [4.6, 5.2, 6.2],
-    "Tipos de chave da Riot Games API": [2.4, 3.6, 4.0, 3.2, 2.8],
+    "Tipos de chave da Riot Games API": [3.0, 3.4, 3.8, 3.0, 2.8],
     "Objetivos específicos, onde são tratados e a evidência de cada um": [1.8, 3.2, 11.0],
     "Importância média das variáveis (valor absoluto do SHAP) por corte": [4.8, 2.8, 2.8, 2.8, 2.8],
-    "Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais": [1.8, 5.6, 4.3, 4.3],
+    "Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais": [2.5, 5.2, 4.2, 4.1],
     "Variáveis novas em treino no passado e teste no futuro": [1.6, 3.2, 2.4, 3.0, 5.8],
 }
 
