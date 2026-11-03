@@ -4835,6 +4835,17 @@ e grava `acuracia_quadro3` e `auc_quadro3` no JSON, que é a fonte dos
 números. `verifica_tcc.py` consistente, `confere_docx.py` conforme, 29
 páginas.
 
+**Resumo e Abstract reescritos** contra a estrutura do modelo do professor
+(contexto, objetivo, metodologia, resultados, conclusão; 100 a 250
+palavras). Faltava a metodologia: entram "pesquisa aplicada, de abordagem
+mista" e "validação cruzada estratificada". "O XGBoost alcançou o melhor
+desempenho" vira "os três ficaram próximos, e o XGBoost, adotado em
+produção", coerente com a 5.4 nova; "acurácia" da interface vira "acurácia
+de execução"; "partidas profissionais" vira "jogos". Sai o mapa de calor
+para caber. Abstract traduzido da versão nova, com ajustes de inglês ("its
+use" sem referente, "along the match", *machine learning* sem itálico,
+sem travessões). Resumo 232 palavras, Abstract 227; 29 páginas.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

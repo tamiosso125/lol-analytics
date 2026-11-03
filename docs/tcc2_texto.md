@@ -59,30 +59,28 @@ integrar essas etapas numa única solução aplicada a esports.
 **Palavras-chave:** esports; *League of Legends*; análise de dados;
 *machine learning*; interface em linguagem natural.
 
-**Abstract:** The growth of esports has increased the amount of data
-generated about matches, players, teams and competitive strategies,
-creating opportunities for data analysis. However, its use still
-depends on fragmented tools and specific technical knowledge. This
-work developed an intelligent platform for esports data analysis in
-*League of Legends*, integrating competitive data collection,
-predictive modeling with *machine learning* and natural language
-querying. A total of 41,063 high-elo ranked matches (five regions)
-were collected through the Riot Games API, complemented by 96,716
-professional matches (2014-2026, Oracle's Elixir). Three models —
-XGBoost, Random Forest and a neural network (MLP) — were trained and
-compared to predict the winning team at four time cutoffs (10 to 25
-minutes), with XGBoost achieving the best performance at the 15-minute
-cutoff (accuracy of 0.7621; AUC-ROC of 0.8473). The exploratory
-analysis identified a side bias favoring the red side in high-elo solo
-queue (56.3% win rate in the region with the largest sample), stable
-along the match and reversed in the professional scenario (the blue
-side wins 53.2% from 2014 to 2026) — a finding supported by robustness
-tests. A natural language interface (structurally validated
-text-to-SQL) achieved 88% accuracy on a 26-question benchmark. The
-platform includes six visualization pages, with explainable prediction
-(SHAP) and per-match positional heat maps. The results demonstrate the
-feasibility of integrating data collection, predictive modeling,
-explainability and natural language querying into a single solution
+**Abstract:** The growth of esports increases the data generated about
+matches, players and strategies, but exploring these data still depends
+on fragmented tools and technical expertise. This work developed an
+intelligent platform for *League of Legends* data analysis that
+integrates data collection, predictive modeling with machine learning,
+explainability, visualization and natural language querying. It is
+applied research with a mixed-methods approach, based on 41,063 high-elo
+ranked matches from five regions, collected through the Riot Games API,
+and 96,716 professional games from 2014 to 2026 (Oracle's Elixir). Three
+models (XGBoost, Random Forest and an MLP neural network) were compared
+through stratified cross-validation to predict the winning team at four
+time cutoffs, from 10 to 25 minutes; the three performed similarly, and
+XGBoost, adopted in production, reached an accuracy of 0.7621 and an
+AUC-ROC of 0.8473 at the 15-minute cutoff. The exploratory analysis
+identified a side bias favoring the red side in high-elo solo queue
+(56.3% win rate in the region with the largest sample), stable
+throughout the match and reversed in the professional scenario, where
+the blue side wins 53.2% of games, a finding supported by robustness
+tests. A text-to-SQL interface with structural validation achieved 88%
+execution accuracy on a 26-question benchmark, and the platform comprises
+six visualization pages with explainable predictions (SHAP). The results
+show the feasibility of integrating these stages into a single solution
 applied to esports.
 
 **Key-words:** esports; League of Legends; data analysis; machine
