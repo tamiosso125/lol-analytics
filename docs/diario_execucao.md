@@ -4846,6 +4846,20 @@ para caber. Abstract traduzido da versão nova, com ajustes de inglês ("its
 use" sem referente, "along the match", *machine learning* sem itálico,
 sem travessões). Resumo 232 palavras, Abstract 227; 29 páginas.
 
+## 2026-11-02 (continuação) — Conferência das referências: sete ajustes aplicados
+
+Lidos o texto completo de 11 estudos de domínio e das obras de método de
+acesso aberto, por busca nas frases do TCC (`docs/conferencia_referencias.md`).
+Aplicados no texto: 2.4 (o "diálogo" é do SiriusBI, não do Talk2Data), 3.3 e
+5.7 (García-Méndez apontam a falta de interpretabilidade como limitação, não
+dizem que a previsão "só é útil" com explicação; o jogo é CS:GO profissional),
+2.3 (LIME "dependente" de como a vizinhança é definida, em vez de
+"sensível"), 3.1 (os 85% do Hodge vêm de previsões ao vivo de 28 partidas),
+5.7 (o mapa de calor também cita Maymin, 2021), 2.5 ("motivou" em vez de
+"fundamentou") e 2.1 (Bahrololloomi: "resultado da partida"). Nenhum número
+mudou. `verifica_tcc.py` consistente, `confere_docx.py` conforme, 29
+páginas. Resumo e Abstract não citam nenhum dos trechos corrigidos.
+
 ## Próximos registros pendentes
 
 - **Sprint 0 do planejamento v2**: pedir a Personal API Key no portal

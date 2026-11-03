@@ -530,7 +530,7 @@ dele, e por que isso justifica a escolha.
 |---|---|---|
 | **Hodge et al. (2021)** | Pesquisa anterior ficava na previsão **pré-jogo** e em dados **amadores**; eles fazem "o primeiro estudo de caso abrangente" de previsão **ao vivo** no profissional, em Dota 2, e chegam a **85% após 5 minutos**, medido nas previsões ao vivo de **28 jogos** do torneio ESL One Hamburg 2017 (treino com cerca de 5,7 mil partidas de habilidade mista). Na revisão, citam um trabalho que divide a partida em fases de 15 minutos. | É a referência de que prever pelo **estado da partida** funciona. O seu trabalho leva essa ideia a LoL, com cortes fixos |
 | **Birant e Birant (2023)** | "Pesquisas anteriores enfatizaram a previsão **centrada no jogador**", mas "é necessária uma classificação **centrada no time**, porque a cooperação é essencial". Base pública do Kaggle (ranqueadas de NA e EU) com abates, assistências, mortes, dano e ouro por jogador, que são **resumos do fim da partida**. Chegam a **até 95%**, que **não é comparável** com previsão em jogo. | Justifica as variáveis como **diferenças entre os times**. Você usa o princípio, não a técnica deles (MOMIL) |
-| **Bahrololloomi et al. (2022)** | Duas métricas de desempenho individual a partir de 2.901 partidas (29.010 linhas de jogador); um modelo de *gradient boosting* chega a 92,7% na nota do jogador, e o peso de cada função (*role*) é estimado por otimização linear. | Mostra o caminho **oposto** (por jogador e por função), que delimita a sua escolha e aparece só nos perfis de jogador |
+| **Bahrololloomi et al. (2022)** | Duas métricas de desempenho individual a partir de 2.901 partidas (29.010 linhas de jogador); um modelo de *gradient boosting* chega a 92,7%, mas isso é *100 − MAPE* numa regressão do XP por minuto, e **não** acurácia de classificação; o peso de cada função (*role*) é estimado por otimização linear e resulta quase igual entre as cinco (0,1% de diferença). Os 86% de "previsão de vitória" comparam a soma das notas dos dois times **na própria partida**: é medida de fim de partida, não previsão em jogo. | Mostra o caminho **oposto** (por jogador e por função), que delimita a sua escolha e aparece só nos perfis de jogador |
 | **Jadowski e Cunningham (2022)** | Treinam na primavera de 2020 (882 jogos profissionais) e testam nos 306 do verão: 67%. Medem 54,08% de vitória do azul. Escrevem que 90% é improvável pelas zebras. | Comparação de acurácia e apoio externo ao 53,2% do azul |
 | **Do et al. (2021)** | Rede neural profunda prevê ranqueadas **antes do jogo** pela experiência com o campeão: 75,1%. **os outros quatro algoritmos testados ficaram entre 72,7% e 75,4%** (*gradient boosting* 75,4%, acima da rede; *Random Forest* 74,7%; SVM 74,3%; kNN 72,7%), e eles leem isso como sinal de que a experiência com o campeão é um bom indicador independentemente do modelo. | Comparação em ranqueadas e um **paralelo direto** do seu empate entre modelos |
 | **Maymin (2021)** | Modelo de probabilidade em jogo, regressão logística com minuto, abates, torres e monstros grandes, calibrada em milhões de partidas; exclui o ouro de propósito; diz que acrescentar variáveis não melhorou; prefere um modelo único a um por minuto. | Ranqueadas sem comparação com o profissional (argumento da 3.6) e três pontos a seu favor (Parte 5.1) |
@@ -1922,6 +1922,16 @@ elo alto de LoL, outro jogo e outra base. Não são comparáveis diretamente."
 API. O seu sai da API?"** "Sai, mas é mais grosseiro: o dele vem de
 rastreamento óptico a cada segundo; o meu agrega as posições por minuto da
 *timeline-v5*. O texto já admite que o meu é mais simples."
+
+**47. "O SiriusBI tem mais de 93% em SQL. Por que o seu é 88%?"** (conferido
+no artigo, 2026-11-02)
+"Os 93% a 97% do SiriusBI são de produção, em consultas reais e mais
+simples de três setores da Tencent, com um modelo ajustado nos dados do
+cliente. Nos conjuntos de teste dele, o resultado é menor: 79% a 83% em 182
+consultas industriais e 65% a 69% no BIRD. O meu benchmark tem 26 perguntas
+sobre o meu esquema, sem ajuste do modelo: é a mesma ordem de grandeza, mas
+não é o mesmo teste. O próprio artigo explica que a produção dá mais por
+causa de conhecimento mais completo e consultas mais uniformes."
 
 **46. "O que a literatura diz sobre os três modelos empatarem?"** "Do et al.
 (2021) testaram cinco algoritmos e ficaram entre 72,7% e 75,4%, com o

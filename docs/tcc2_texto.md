@@ -233,7 +233,7 @@ enquanto elas acontecem, com modelos de *machine learning* padrão e
 engenharia de atributos. Em *League of Legends*, Birant e Birant (2023)
 destacam a modelagem centrada no time, e Bahrololloomi et al. (2022), a
 relação entre métricas de jogadores, funções em jogo (*roles*) e
-desempenho competitivo.
+resultado da partida.
 
 ### 2.2 FAMÍLIAS DE MODELOS PREDITIVOS E SUA APLICAÇÃO EM ESPORTS
 
@@ -271,7 +271,8 @@ compreensíveis para o usuário final. Explicar um *ensemble*, porém, não é
 trivial: a saída é a soma de centenas de árvores, e a contribuição de cada
 variável não é diretamente legível. O LIME (Ribeiro, Singh e Guestrin,
 2016) aproxima o modelo por um modelo linear local na vizinhança de cada
-predição, simples de ler, mas sensível à escolha dessa vizinhança. O SHAP
+predição, simples de ler, mas dependente de como essa vizinhança é
+definida. O SHAP
 recorre ao valor de Shapley da teoria dos jogos: a importância de uma
 variável é sua contribuição média para a previsão, sobre todas as
 combinações das demais. Lundberg e Lee (2017) mostram que essa é a única
@@ -295,10 +296,10 @@ na Seção 5.
 
 Interfaces em linguagem natural reduzem a barreira técnica entre o
 usuário e os dados. Jiang et al. (2025) observam que soluções de
-*Business Intelligence* apoiadas por modelos de linguagem favorecem a
-exploração de dados estruturados, e Guo et al. (2024), que diálogo,
-decomposição de perguntas e análise visual tornam essa exploração mais
-intuitiva. O problema técnico central é a geração da consulta: o modelo
+*Business Intelligence* apoiadas por modelos de linguagem, com diálogo em
+várias rodadas, favorecem a exploração de dados estruturados, e Guo et al.
+(2024), que a decomposição de perguntas e a análise visual tornam essa
+exploração mais intuitiva. O problema técnico central é a geração da consulta: o modelo
 produz texto, e o banco exige SQL válido e correto sobre um esquema
 específico. Uma consulta gramaticalmente correta pode citar uma tabela
 inexistente ou responder à pergunta errada. Wang et al. (2020) tratam
@@ -314,7 +315,7 @@ no espaço e no tempo, como movimentação, posicionamento e interação entre
 jogadores. Wallner, Wang e Dormann (2023) mostram que visualizações
 espaço-temporais, sobretudo as que integram tempo e localização numa
 única representação, ajudam a interpretar o comportamento em jogo na
-revisão pós-partida. Esse referencial fundamentou o mapa de calor de
+revisão pós-partida. Esse referencial motivou o mapa de calor de
 posicionamento da análise de partida (Seção 5.5).
 
 ---
@@ -333,7 +334,8 @@ elas fundamentam é introduzido.
 Hodge et al. (2021) tratam da predição de vitória em partidas
 profissionais de Dota 2, em tempo real. Com modelos de *machine learning*
 padrão, engenharia de atributos e otimização, chegam a até 85% de
-acurácia após 5 minutos de jogo, o que estabelece a predição de
+acurácia após 5 minutos de jogo, em previsões ao vivo de 28 partidas de um
+torneio, o que estabelece a predição de
 resultados em esports como problema tratável por modelagem estatística.
 Por tratar de outro jogo, o estudo sustenta a abordagem de prever a
 partir do estado da partida, e não o recorte de *League of Legends*.
@@ -367,10 +369,10 @@ covariáveis do modelo.
 
 García-Méndez e Arriba-Pérez (2025) combinam classificação por *machine
 learning* com mecanismos de interpretação na predição de vitória em
-esports, inclusive em transmissões (*streaming*). Deles vem o pressuposto
-de que um sistema preditivo só é útil ao usuário final quando acompanha a
-previsão de uma explicação dos fatores que a sustentam, que orienta a
-camada de explicabilidade da plataforma (Seção 5.5).
+partidas profissionais de *Counter-Strike*, em fluxo contínuo (*streaming*).
+Eles apontam a falta de interpretabilidade como uma das principais
+limitações dos trabalhos anteriores, o que orienta a camada de
+explicabilidade da plataforma (Seção 5.5).
 
 ### 3.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
 
@@ -835,15 +837,16 @@ acurácia, por isso ficam fora da comparação numérica.
 As variáveis preditoras, diferenças agregadas entre os dois times, seguem
 a modelagem centrada no time de Birant e Birant (2023); a granularidade
 por jogador de Bahrololloomi et al. (2022) entrou só nos perfis de
-jogador, fora da modelagem de vitória. A recomendação de García-Méndez e
-Arriba-Pérez (2025), de que a predição em esports precisa de interpretação
-para ser útil, foi atendida com o SHAP na interface e com um módulo de
-orientação que cita o dado real de cada recomendação. Jiang et al. (2025)
+jogador, fora da modelagem de vitória. A limitação que García-Méndez e
+Arriba-Pérez (2025) apontam nos trabalhos anteriores, a falta de
+interpretação das previsões, foi enfrentada com o SHAP na interface e com um
+módulo de orientação que cita o dado real de cada recomendação. Jiang et al. (2025)
 e Guo et al. (2024) fundamentam a consulta a dados estruturados por
 modelos de linguagem; este trabalho acrescenta a validação da consulta
-antes da execução. O mapa de calor aplica, de forma
-mais simples, a visualização espaço-temporal de Wallner, Wang e Dormann
-(2023), sem a técnica de *storyline* dos autores.
+antes da execução. O mapa de calor aplica, de forma mais simples, a
+integração de tempo e posição de Wallner, Wang e Dormann (2023), sem a
+técnica de *storyline*, e o mapa de calor de posição de Maymin (2021), que
+parte de rastreamento a cada segundo, e não do minuto da *timeline*.
 
 ---
 

@@ -51,10 +51,23 @@ são só leitura e não produzem número do TCC.
 | Kaufman et al. (2012) | vazamento de dados | **Confere** (resumo): informação sobre o alvo que não deveria estar disponível |
 | Holm (1979) | correção para comparações múltiplas | **Confere** |
 
-## Ajustes propostos no TCC (aguardam aprovação)
+## Ajustes no TCC (aplicados em 2026-11-02)
 
-Nenhum muda número. Cada um é do mesmo tamanho ou pouco maior; as páginas
-são medidas depois.
+Os seis ajustes abaixo, mais um sétimo na 2.1 ("desempenho competitivo" de
+Bahrololloomi et al. virou "resultado da partida": o artigo estuda partidas
+ranqueadas e o peso das funções no resultado), foram aplicados. Nenhum muda
+número, e o documento seguiu em 29 páginas (`verifica_tcc.py` consistente,
+`confere_docx.py` conforme). No ajuste 4 a 2.5 também trocou "fundamentou"
+por "motivou". O texto de cada ajuste está na coluna "Proposta".
+
+**Leitura completa de quatro artigos (anexados em 2026-11-02):**
+Bahrololloomi, García-Méndez, Guo (Talk2Data) e Jiang (SiriusBI, versão do
+PVLDB). Confirmaram os achados: Guo não tem diálogo; García-Méndez usa
+CS:GO profissional (Kaggle/HLTV) e 92,51%; SiriusBI traz 97%, 93% e 96%
+por setor e estudo com 40 analistas. Novidade da leitura de Bahrololloomi:
+os "92,7%" são *100 − MAPE* numa regressão de XP por minuto, e os "86%" de
+previsão de vitória comparam a soma das notas dos dois times **na própria
+partida** (medida de fim de partida, não previsão em jogo).
 
 | # | Seção | Hoje | Proposta |
 |---|---|---|---|
