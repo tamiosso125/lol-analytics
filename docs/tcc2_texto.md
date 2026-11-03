@@ -249,16 +249,16 @@ variância do conjunto, o que importa quando as variáveis preditoras são
 correlacionadas, como ouro, abates e torres, que evoluem juntos ao longo
 da partida.
 
-A segunda é o *gradient boosting*, representado pelo XGBoost (Chen e
-Guestrin, 2016), que constrói as árvores em sequência, cada uma ajustada
+A segunda é o *gradient boosting*, representado pelo XGBoost (Chen; Guestrin, 2016), que constrói as árvores em sequência, cada uma ajustada
 ao resíduo das anteriores, com otimização de segunda ordem e
 regularização explícita. Em dados tabulares, como os deste trabalho, os
 métodos baseados em árvores seguem competitivos frente a redes neurais em
-amostras de porte médio (Grinsztajn, Oyallon e Varoquaux, 2022).
+amostras de porte médio, de cerca de 10 mil exemplos, com indício de que a
+diferença diminui em amostras maiores (Grinsztajn; Oyallon; Varoquaux,
+2022).
 
 A terceira são as redes neurais *feedforward*, ou perceptrons multicamada
-(MLP). Com capacidade de aproximação universal (Hornik, Stinchcombe e
-White, 1989), elas capturam interações sem que precisem ser
+(MLP). Com capacidade de aproximação universal (Hornik; Stinchcombe; White, 1989), elas capturam interações sem que precisem ser
 especificadas, mas exigem mais dados e mais cuidado com escala e
 regularização, restrição relevante numa amostra de dezenas de milhares de
 partidas, e não de milhões.
@@ -269,8 +269,7 @@ García-Méndez e Arriba-Pérez (2025) mostram que a predição em esports pode
 combinar classificação e interpretação, tornando os fatores da previsão
 compreensíveis para o usuário final. Explicar um *ensemble*, porém, não é
 trivial: a saída é a soma de centenas de árvores, e a contribuição de cada
-variável não é diretamente legível. O LIME (Ribeiro, Singh e Guestrin,
-2016) aproxima o modelo por um modelo linear local na vizinhança de cada
+variável não é diretamente legível. O LIME (Ribeiro; Singh; Guestrin, 2016) aproxima o modelo por um modelo linear local na vizinhança de cada
 predição, simples de ler, mas dependente de como essa vizinhança é
 definida. O SHAP
 recorre ao valor de Shapley da teoria dos jogos: a importância de uma
@@ -324,9 +323,7 @@ posicionamento da análise de partida (Seção 5.5).
 
 Esta seção descreve os onze estudos de domínio que sustentam a pesquisa,
 com o objeto, a abordagem e a contribuição de cada um para o problema
-aqui tratado. As obras de método (Breiman, 2001; Chen e Guestrin, 2016;
-Hanley e McNeil, 1982; Lundberg e Lee, 2017; Ribeiro, Singh e Guestrin,
-2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
+aqui tratado. As obras de método (Breiman, 2001; Chen; Guestrin, 2016; Hanley; McNeil, 1982; Lundberg; Lee, 2017; Ribeiro; Singh; Guestrin, 2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
 elas fundamentam é introduzido.
 
 ### 3.1 ESPORTS COMO FENÔMENO DE PRODUÇÃO E ANÁLISE DE DADOS
@@ -397,9 +394,9 @@ referência do posicionamento minuto a minuto da análise de partida
 ### 3.6 SÍNTESE E POSIÇÃO DESTE TRABALHO
 
 Os estudos cobrem frentes isoladas: predição de resultados (Seções 3.1 e
-3.2), interpretabilidade da predição (García-Méndez e Arriba-Pérez),
-interação em linguagem natural (Jiang et al.; Guo et al.) e visualização
-espaço-temporal (Wallner, Wang e Dormann). Nenhum é entregue como uma
+3.2), interpretabilidade da predição (García-Méndez; Arriba-Pérez, 2025),
+interação em linguagem natural (Jiang et al., 2025; Guo et al., 2024) e visualização
+espaço-temporal (Wallner; Wang; Dormann, 2023). Nenhum é entregue como uma
 plataforma que reúna coleta, tratamento, modelagem, explicabilidade,
 visualização e consulta em linguagem natural sobre a mesma base, e é
 essa lacuna de integração que este trabalho ocupa. A distinção também
@@ -432,8 +429,7 @@ preditiva e os recursos de visualização e consulta.
 ### 4.1 NATUREZA E ABORDAGEM DA PESQUISA
 
 Quanto à natureza, trata-se de pesquisa aplicada, que busca conhecimento
-voltado à solução de um problema específico e de uso prático (Prodanov e
-Freitas, 2013): aqui, uma plataforma para coletar, organizar e analisar
+voltado à solução de um problema específico e de uso prático (Prodanov; Freitas, 2013): aqui, uma plataforma para coletar, organizar e analisar
 dados competitivos de *League of Legends*. Quanto aos objetivos, a
 pesquisa é exploratória, na investigação da Riot Games API e das
 possibilidades de modelagem, e descritiva, na caracterização dos dados,
@@ -494,7 +490,7 @@ profissional). Nenhum padrão foi aceito como resultado sem passar por
 quatro testes de robustez: (i) replicação restrita a uma região, contra
 o efeito de mistura regional; (ii) comparação por duração total da
 partida, contra a confusão com "jogos longos"; (iii) intervalo de
-confiança de Wilson sobre a proporção (Brown, Cai e DasGupta, 2001), para
+confiança de Wilson sobre a proporção (Brown; Cai; DasGupta, 2001), para
 a significância em amostras menores; e (iv) comparação de pares com
 correção de Holm (Holm, 1979), que corrige a multiplicidade quando várias
 diferenças são testadas na mesma base. O teste (iv) foi decisivo para o
@@ -739,7 +735,7 @@ jogo: as placas de defesa das torres caem por volta dos 14 minutos, e
 antes disso destruir uma torre é raro e pouco informativo. É a
 justificativa concreta para treinar um modelo *por fase*, e não um único
 modelo genérico. A calibração, preocupação conhecida em modelos de
-*boosting* (Niculescu-Mizil e Caruana, 2005), não exigiu correção: a curva
+*boosting* (Niculescu-Mizil; Caruana, 2005), não exigiu correção: a curva
 de calibração mostrou o XGBoost já bem calibrado.
 
 Figura — Importância média de cada variável (|SHAP|) nos quatro cortes temporais | reports/figuras_texto/fig_shap_fases.png
