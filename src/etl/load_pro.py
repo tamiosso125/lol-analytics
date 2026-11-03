@@ -4,8 +4,8 @@ O CSV tem 12 linhas por jogo: 10 de jogador (position top/jng/mid/bot/
 sup) e 2 de time (position = 'team'). Linhas com datacompleteness
 'partial' são carregadas mesmo assim (algumas ligas não reportam os
 cortes de 15 min — as colunas ficam NULL), mas jogos sem game_id são
-descartados. Idempotente por ano: apaga as linhas do(s) ano(s) sendo
-recarregado(s) antes de inserir.
+descartados. Idempotente por jogo: apaga as linhas dos game_id presentes
+no arquivo antes de inserir.
 
 Uso:  python -m src.etl.load_pro            (todos os CSVs em data/pro/)
       python -m src.etl.load_pro --year 2026
@@ -74,8 +74,14 @@ def load_csv(path: str) -> None:
     conn = get_conn()
     conn.autocommit = True
     with conn.cursor() as cur:
-        cur.execute("DELETE FROM pro_players WHERE game_id IN (SELECT game_id FROM pro_games WHERE year = %s)", (year,))
-        cur.execute("DELETE FROM pro_games WHERE year = %s", (year,))
+        # Apaga por game_id e não por ano (2026-11-03): o CSV de um ano traz
+        # jogos cujo `year` é o seguinte (ex.: jogos de 2015 no arquivo de
+        # 2014). Apagar por ano do arquivo removia esses jogos quando o
+        # arquivo seguinte era carregado: 2.543 jogos perdidos (96.716 no
+        # banco contra 99.259 nos CSVs).
+        ids = [str(g) for g in df["gameid"].unique()]
+        cur.execute("DELETE FROM pro_players WHERE game_id = ANY(%s)", (ids,))
+        cur.execute("DELETE FROM pro_games WHERE game_id = ANY(%s)", (ids,))
         execute_values(
             cur,
             """INSERT INTO pro_games
