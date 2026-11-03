@@ -503,3 +503,7 @@ linhas. (b) Ajustar 4.3a, Quadro 1 e 6.2 para os elos reais. (c) Trocar
 "principais ligas" por "122 ligas, da elite às de desenvolvimento". (d) Escrever
 "*match-v5* (partida e linha do tempo)". (e) Declarar 04/07/2026 como data dos
 arquivos.
+
+## Erro de autoria encontrado em 2026-11-03 (Wang et al., 2020)
+
+A referência do RAT-SQL trazia os coautores errados (WANG, Chuhan; SHIN, Yitao; LIU, Bing; POLOZOV, Alexander; RICHARDSON, Sarah) e o título sem "Parsers". Conferido no ACL Anthology (2020.acl-main.677) e no arXiv 1911.04942: **WANG, Bailin; SHIN, Richard; LIU, Xiaodong; POLOZOV, Oleksandr; RICHARDSON, Matthew**, título "RAT-SQL: relation-aware schema encoding and linking for text-to-SQL parsers", p. 7567-7578. Corrigido no TCC. As leituras anteriores conferiam as afirmações atribuídas a cada obra, não os prenomes dos autores. Também conferidos nesta data, e corretos: Wallner, Wang e Dormann (2023) e Guo et al. (2024).
