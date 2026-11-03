@@ -86,7 +86,7 @@ export function Competitivo() {
           {p.games.toLocaleString("pt-BR")} jogos profissionais de {p.year} (LPL, LCK, LEC e
           mais — dados do Oracle's Elixir; o acervo completo cobre 2014-2026), lado a lado
           com as {s ? s.matches.toLocaleString("pt-BR") : "…"} partidas de solo queue
-          Challenger/GM da plataforma (cinco regiões). Mesmas métricas, dois contextos — e nem sempre a
+          de elo alto da plataforma (cinco regiões). Mesmas métricas, dois contextos — e nem sempre a
           mesma conclusão.
         </PageHeader>
         <label className="flex shrink-0 items-center gap-2 pb-1 text-xs text-muted-ink">
@@ -155,7 +155,7 @@ export function Competitivo() {
               <SideBar label="Competitivo 2026 (mundial)" blueWr={p.blue_win_rate} />
               {/* "BR" saiu do rótulo em 2026-10-28: o número vem das cinco
                   regiões coletadas (41.063 partidas), não só do BR1 */}
-              <SideBar label="Solo queue Challenger/GM (cinco regiões)" blueWr={s.blue_win_rate} />
+              <SideBar label="Solo queue de elo alto (cinco regiões)" blueWr={s.blue_win_rate} />
             </>
           )}
           {/* Sem "a literatura aponta...": frase sem fonte, tirada do Dashboard e da

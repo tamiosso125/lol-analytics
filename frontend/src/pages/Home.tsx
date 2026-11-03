@@ -267,8 +267,8 @@ export function Home() {
             Bellestraiko
           </h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-secondary-ink">
-            {h.total_matches.toLocaleString("pt-BR")} partidas ranqueadas de Challenger e
-            Grandmaster do Brasil, destiladas em insights com o porquê de cada um. Explore o{" "}
+            {h.total_matches.toLocaleString("pt-BR")} partidas ranqueadas de elo alto
+            (Desafiante a Mestre) em cinco regiões, destiladas em insights com o porquê de cada um. Explore o{" "}
             <Link to="/dashboard" className="text-gold hover:underline">
               dashboard
             </Link>

@@ -207,7 +207,7 @@ export function Dashboard() {
                   ))}
                 </div>
                 <Takeaway>
-                  neste dataset (Challenger/GM, múltiplas regiões) o vermelho vence mais no
+                  neste dataset (elo alto, múltiplas regiões) o vermelho vence mais no
                   agregado — embora o viés varie por região (ver "Viés de lado por região"
                   abaixo): mais forte no BR, quase neutro no KR. No jogo profissional (Oracle's
                   Elixir) o padrão se inverte e o azul vence mais. Hipótese: counter-pick

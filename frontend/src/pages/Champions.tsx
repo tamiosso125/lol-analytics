@@ -63,7 +63,7 @@ export function Champions() {
   return (
     <div className="space-y-5">
       <PageHeader eyebrow="Estatísticas" title="Campeões">
-        Estatísticas por campeão nas partidas coletadas (ranqueada solo, Challenger/GM, cinco regiões).
+        Estatísticas por campeão nas partidas coletadas (ranqueada solo, elo alto, cinco regiões).
         Clique num campeão para ver detalhes e matchups.
       </PageHeader>
 
