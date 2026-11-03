@@ -30,7 +30,7 @@ Legends com DOIS datasets complementares:
    retreinados — a diferença de 1.637 partidas é limitação declarada
    (das 1.754 partidas sem *features*, 1.647 são da KR e 107 são de
    BR1, EUW1 e NA1; as features cobrem 39.309 partidas distintas)
-   na Seção 5.8 do TCC. JSON bruto + timelines guardados para
+   na Seção 6.1 do TCC (detalhe no Apêndice G). JSON bruto + timelines guardados para
    reprocessamento.
 2. **Competitivo** (Oracle's Elixir): **96.716 jogos** profissionais de
    2014-2026 (LCK/LPL/LEC/LTA/CBLOL etc.), carregados de CSVs anuais.
@@ -139,7 +139,7 @@ Modelo em produção, solo queue **39.188 partidas** no corte de 15 min
 (retreino de 2026-10-04 — números do CV 5-fold com semente 42 e
 hiperparâmetros de produção 500/0,01/3; o `GridSearchCV` sobre as 39 mil
 linhas devolveu ajuste equivalente, 200 árvores a taxa 0,05, o que
-confirma que a limitação de taxa-base registrada na Seção 5.8 do TCC não
+confirma que a limitação de taxa-base registrada na Seção 6.1 e no Apêndice G do TCC não
 é subajuste):
 
 | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |

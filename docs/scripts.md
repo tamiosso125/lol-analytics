@@ -750,7 +750,7 @@ como acerto infla o número (foi o que mascarou `tower_diff`/15min como
 
 Classificação dos não-OK, por **propriedade** e não por lista de casos:
 - `LIMITADO` (1): `kill_diff`/15min — direção em 60%, SHAP 0,070. A
-  Seção 5.8 do TCC nomeia explicitamente "abates e torres" ao declarar
+  Seção 6.1 do TCC (e o Apêndice G) nomeia "abates e torres" ao declarar
   a não-garantia de monotonicidade isolada.
 - `NEUTRO` (3): `tower_diff`/10min (SHAP 0,004), `tower_diff`/15min
   (0,014) e `kill_diff`/25min (0,009) — abaixo do limiar de 0,05, ou
@@ -813,20 +813,21 @@ Gera `docs/tcc2_final.docx` em 4 passos:
    daqui que vem fonte, margens e espaçamento (A4, 3/2/3/2 cm, Arial 12,
    entrelinha 1,5, justificado). Também `--shift-heading-level-by=-1`, porque
    no markdown a seção de 1º grau é `##`.
-   **Não** usar `--toc`: o sumário é montado no passo 3, senão o documento
-   fica com dois. **Não** usar `--number-sections`: o markdown já traz a
+   **Não** usar `--toc`: o documento não tem sumário (nenhum dos 10 TCC II
+   aprovados tem). **Não** usar `--number-sections`: o markdown já traz a
    numeração, e a flag duplicava ("1  1 INTRODUÇÃO") e numerava
    REFERÊNCIAS/APÊNDICES como seções 7..13.
 3. **Monta o pré-textual** — capa, folha de rosto, Resumo/Palavras-chave/
-   Abstract/Key-words e campo do SUMÁRIO, que o pandoc não faz. Zera a
-   contagem de páginas no início do corpo.
+   Abstract/Key-words, que o pandoc não faz, com quebra de seção depois da
+   folha de rosto. A numeração impressa começa em 1 no Resumo.
 4. **Numera Quadros e insere Figuras** — legenda com campo `SEQ` acima,
-   fonte (estilo `Fonte das ilustrações` do TCC 1) abaixo, e as 6 capturas de
-   `reports/anexo_a/` no lugar da tabela que as listava. Adiciona as páginas
-   de Lista de Ilustrações e Lista de Quadros (`TOC \c`).
+   fonte (estilo `Fonte das ilustrações` do TCC 1) abaixo. Insere as 5
+   figuras do corpo onde o markdown tem `Figura — Título | caminho.png`
+   (recortes de `reports/figuras_texto/`) e as 6 telas de
+   `reports/anexo_a/` no Apêndice F. Sem listas de ilustrações e de quadros.
 
 O campo `SEQ` é o que permite a numeração automática: inseriu ou removeu um
-quadro, o Word reenumera e as listas se reconstroem.
+quadro, o Word reenumera.
 
 **Uso:**
 ```powershell
@@ -836,10 +837,10 @@ $env:TCC1_REFERENCE_DOCX = 'C:\...\TCC_Final.docx'   # só estilo, não conteúd
 
 ### `docs/finalize-fields.ps1`
 
-Campos do Word (`TOC`, `TOC \c`, `SEQ`, `PAGE`) nascem vazios — só o Word os
-preenche. Este script abre o `.docx`, atualiza os campos em duas passadas
-(a primeira gera o sumário, a segunda preenche os números que a inserção do
-próprio sumário desloca), repagina e salva.
+Campos do Word (`SEQ`, `PAGE`) nascem vazios — só o Word os preenche. Este
+script abre o `.docx`, atualiza os campos, repagina, salva e mede o corpo:
+do Resumo à página anterior ao primeiro APÊNDICE ou ANEXO, com o número
+impresso da última página das Referências.
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File docs\finalize-fields.ps1
@@ -903,16 +904,16 @@ telas de erro — o sintoma é um PNG de 24 KB, idêntico entre páginas.
 
 ### `src/models/tune_models_full.py`
 
-Reexecuta o `GridSearchCV` na base final e **arquiva o log**. É o que dá lastro à afirmação da Seção 5.8 de que a limitação de taxa-base **não é subajuste**.
+Reexecuta o `GridSearchCV` na base final e **arquiva o log**. É o que dá lastro à afirmação da Seção 6.1 e do Apêndice G de que a limitação de taxa-base **não é subajuste**, e, com `--completo`, aos valores dos três modelos ajustados que a Seção 5.4 cita.
 
 ```powershell
 .venv\Scripts\python.exe -m src.models.tune_models_full            # só o XGBoost, ~50s
-.venv\Scripts\python.exe -m src.models.tune_models_full --completo # + RandomForest e MLP
+.venv\Scripts\python.exe -m src.models.tune_models_full --completo # + RandomForest e MLP, ~6 min
 ```
 
 Grava `reports/tune_models_39k.log` (texto) e `reports/tune_models_39k.json` (estruturado).
 
-`tune_models.py` — o script original — não servia: ele imprime o resultado e não guarda nada, e foi rodado sobre a base de 10 mil. A afirmação da 5.8 ficou semanas sem artefato por causa disso.
+`tune_models.py` — o script original — não servia: ele imprime o resultado e não guarda nada, e foi rodado sobre a base de 10 mil. A afirmação da antiga Seção 5.8 (hoje 6.1 e Apêndice G) ficou semanas sem artefato por causa disso.
 
 Resultado medido em 2026-10-04, sobre as 39.188 linhas do corte de 15 min:
 
@@ -923,7 +924,22 @@ Resultado medido em 2026-10-04, sobre as 39.188 linhas do corte de 15 min:
 | Profundidade | **a mesma: 3** |
 | Delta | **+0,0001** |
 
-Ou seja: a afirmação da 5.8 estava correta, e agora é verificável por comando.
+Ou seja: a afirmação estava correta, e agora é verificável por comando.
+
+Com `--completo` (2026-11-02), a melhor combinação de *Random Forest* e MLP
+também é medida como no Quadro 3 (`cross_val_predict`, probabilidades
+agregadas), porque o `best_score_` da grade é a média por *fold* e não é
+diretamente comparável:
+
+| 15 min, 39.188 linhas | melhor combinação | acurácia | AUC-ROC |
+|---|---|---:|---:|
+| XGBoost (produção) | 500 / 0,01 / 3 | 0,7621 | 0,8473 |
+| MLP | `(32,)`, `alpha=0.001` | 0,7619 | 0,8477 |
+| *Random Forest* | 200 árvores, `max_depth=6`, `min_samples_leaf=5` | 0,7617 | 0,8468 |
+
+Empate técnico, com o XGBoost na maior acurácia. Antes disso, a 5.4 dizia
+que o Quadro 3 comparava os três ajustados, mas *Random Forest* e MLP
+estavam na configuração de referência.
 
 A checagem 12 de `docs/verifica_tcc.py` confronta o texto com esse JSON e falha com exit 1 se o delta passar de 0,005, se a profundidade divergir, ou se o número medido não estiver no texto. Testada nos dois sentidos.
 
@@ -998,7 +1014,7 @@ registradas no código:
 ### `docs/experimento_calibracao.py` e `docs/reavalia_calibracao.py`
 
 Teste **D1**: calibração e regularização alternativa contra a discrepância
-de taxa-base da Seção 5.8. São as duas alavancas que a grade de
+de taxa-base da Seção 6.1 e do Apêndice G. São as duas alavancas que a grade de
 hiperparâmetros não cobre — ela variou só `n_estimators`,
 `learning_rate` e `max_depth`, e a discrepância é justamente de
 taxa-base.

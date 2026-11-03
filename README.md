@@ -152,7 +152,7 @@ portal da Riot (limites maiores, sem expiração diária).
       as **39.426 partidas** disponíveis quando o *feature set* foi
       congelado — a última rodada da KR (1.549 partidas) não entrou no
       retreino, e a diferença está registrada como limitação na Seção
-      5.8 do TCC. Métricas do modelo de produção (XGBoost, corte de 15
+      6.1 do TCC (detalhe no Apêndice G). Métricas do modelo de produção (XGBoost, corte de 15
       min, 39.188 linhas): acurácia **0,7621**,
       AUC-ROC **0,8473** — em `docs/diario_execucao.md`, entrada de 2026-10-04,
       e reproduzível com `python -m src.models.multi_cutoff_metrics`

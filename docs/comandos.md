@@ -154,13 +154,16 @@ São os comandos que produzem os números citados no texto. Regra do projeto:
 resultado está em `reports/`.**
 
 ```powershell
-# Quadro do Apêndice C (4 cortes × 3 modelos) + reports/metricas_corte.json:
-# usa os hiperparâmetros DE PRODUÇÃO e CV 5-fold com semente 42.
+# Quadros 3 e 4, Apêndice C (4 cortes × 3 modelos) + reports/metricas_corte.json:
+# XGBoost com os hiperparâmetros DE PRODUÇÃO, Random Forest e MLP na
+# configuração de referência; CV 5-fold com semente 42.
 .venv\Scripts\python.exe -m src.models.multi_cutoff_metrics
 
 # GridSearchCV na base final + reports/tune_models_39k.log/.json (~50s só
-# com XGBoost). Sustenta a afirmação da 5.8 de que a limitação de
-# taxa-base NÃO é subajuste. --completo acrescenta RF e MLP (muito lento):
+# com XGBoost). Sustenta a afirmação da 6.1 e do Apêndice G de que a
+# limitação de taxa-base NÃO é subajuste. --completo acrescenta RF e MLP
+# (~6 min) e mede a melhor combinação como no Quadro 3: são os valores
+# ajustados que a 5.4 cita (acuracia_quadro3 / auc_quadro3 no JSON):
 .venv\Scripts\python.exe -m src.models.tune_models_full
 .venv\Scripts\python.exe -m src.models.tune_models_full --completo
 
@@ -183,7 +186,7 @@ resultado está em `reports/`.**
 
 ```powershell
 # Teste D1: calibração e regularização alternativa contra a discrepância de
-# taxa-base da Seção 5.8. LENTO (~40 min): cada variante roda validação
+# taxa-base da Seção 6.1 e do Apêndice G. LENTO (~40 min): cada variante roda validação
 # cruzada aninhada sobre 39.188 linhas. Grava
 # reports/experimento_calibracao.json, e o veredito sai de
 # reports/experimento_calibracao_veredito.json:
@@ -221,11 +224,11 @@ resultado está em `reports/`.**
 
 | artefato | quem consome |
 |---|---|
-| `reports/metricas_corte.json` | Quadro 2 e Apêndice C; checagem 5 |
-| `reports/tune_models_39k.json` | Seção 5.8; checagem 12 |
-| `reports/taxa_base_por_corte.json` | Seção 5.3 e 5.8 |
+| `reports/metricas_corte.json` | Quadros 3 e 4 e Apêndice C; checagem 5 |
+| `reports/tune_models_39k.json` | Seção 5.4 (três modelos ajustados), 6.1 e Apêndice G; checagem 12 |
+| `reports/taxa_base_por_corte.json` | Seção 5.3, 6.1 e Apêndice G |
 | `reports/faixa_duracao.json` | Seção 4.5 e 5.3 (teste ii) |
-| `reports/experimento_calibracao_veredito.json` | Seção 5.8 e Apêndice D; checagem 14 |
+| `reports/experimento_calibracao_veredito.json` | Apêndices D e G; checagem 14 |
 | `reports/experimento_placas_torre.json` | Seção 5.4 e Apêndice D (experimento 10) |
 | `reports/experimento_challenges_piloto.json` | Seção 5.4 e Apêndice D (experimento 11) |
 
@@ -335,18 +338,20 @@ Sempre que alterar `docs/tcc2_texto.md`, regere o entregável:
 # o conteúdo dele não é lido. Ajuste o caminho para o seu arquivo.
 $env:TCC1_REFERENCE_DOCX = 'C:\Users\Home\Downloads\TCC\TCC_Final.docx'
 
-# 1. markdown -> .docx (pandoc gera o corpo; python-docx monta
-#    capa/folha/numeração de Quadros/insere as 6 figuras do Anexo A)
+# 1. markdown -> .docx (pandoc gera o corpo; python-docx monta capa,
+#    folha de rosto, numeração de Quadros e Figuras, insere as 5 figuras
+#    do corpo e as 6 telas do Apêndice F)
 .\.venv\Scripts\python.exe docs\build_tcc_docx.py
 
-# 2. o Word preenche SUMÁRIO, LISTA DE QUADROS e a numeração dos campos SEQ
+# 2. o Word preenche a numeração dos campos SEQ e PAGE (não há sumário nem
+#    listas: nenhum dos 10 TCC II aprovados usa)
 powershell -ExecutionPolicy Bypass -File docs\finalize-fields.ps1
 ```
 
-O passo 2 não é opcional: campos `TOC`/`SEQ` nascem vazios e sem ele o
-documento sai com o sumário em branco e os Quadros sem número. O script
-também repagina e reporta a contagem final de páginas — útil para conferir
-o limite de 25–30 do corpo.
+O passo 2 não é opcional: campos `SEQ` nascem vazios e sem ele o
+documento sai com Quadros e Figuras sem número. O script também repagina e
+reporta a contagem final de páginas — útil para conferir o limite de 30,
+contadas do Resumo ao fim das Referências.
 
 Precisa de `pandoc` no PATH (`winget install JohnMacFarlane.Pandoc`) e
 `python-docx` no venv. Detalhes em `docs/scripts.md`.
@@ -407,7 +412,7 @@ texto existam de verdade. Ver **5b**, **5c** e **5d**.
 
 ```
 15. python -m src.models.multi_cutoff_metrics  # Apêndice C + metricas_corte.json
-16. python -m src.models.tune_models_full     # lastro da 5.8
+16. python -m src.models.tune_models_full --completo  # lastro da 5.4, 6.1 e Apêndice G
 17. python docs/verifica_tcc.py               # 20 checagens, exit 0
 18. python docs/build_tcc_docx.py             # gera o .docx
 19. powershell -File docs/finalize-fields.ps1  # Word preenche os campos
