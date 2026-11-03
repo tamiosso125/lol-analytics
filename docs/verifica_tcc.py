@@ -901,7 +901,10 @@ def check_faixa_duracao(t: str) -> None:
 
     # (b) TODAS as frases-sintese, nao so a primeira
     padrao_sintese = (
-        r"medido em \S+ sobre as ([\d.]+) partidas: ([\d,]+)%\s*a\s*([\d,]+)%"
+        # A data pode vir como 2026-10-04 ou por extenso ("4 de outubro de
+        # 2026", 2026-11-02: o texto saiu do formato de diário); o que a
+        # checagem exige é base, faixa e amplitude, não o formato da data.
+        r"medido em (?:\S+|\d{1,2} de \w+ de \d{4}) sobre as ([\d.]+) partidas: ([\d,]+)%\s*a\s*([\d,]+)%"
         r"\s+entre\s+as\s+faixas\s+de\s+dura\u00e7\u00e3o,\s*amplitude\s+de\s+"
         r"([\d,]+)\s+ponto")
     sintetese = list(_re.finditer(padrao_sintese, t))

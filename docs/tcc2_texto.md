@@ -51,10 +51,10 @@ lado favorável ao time vermelho no *solo queue* de elo alto (56,3% de
 vitórias na região com maior amostra), estável ao longo da partida e
 invertido no cenário profissional, em que o azul vence 53,2% dos jogos,
 achado sustentado por testes de robustez. Uma interface *text-to-SQL* com
-validação estrutural atingiu 88% de acurácia de execução num benchmark de
+validação estrutural atingiu 88% de acurácia de execução em um benchmark de
 26 perguntas, e a plataforma reúne seis páginas de visualização com
 predição explicável (SHAP). Os resultados mostram a viabilidade de
-integrar essas etapas numa única solução aplicada a esports.
+integrar essas etapas em uma única solução aplicada a esports.
 
 **Palavras-chave:** esports; *League of Legends*; análise de dados;
 *machine learning*; interface em linguagem natural.
@@ -206,7 +206,7 @@ Ciência da Computação, como análise de dados, inteligência artificial,
 *machine learning*, sistemas de informação e interação humano-computador,
 sobre um campo de produção de dados em crescimento. Do ponto de vista
 prático, reunir coleta, tratamento, modelagem e consulta em linguagem
-natural numa mesma plataforma reduz a dependência de processos
+natural em uma mesma plataforma reduz a dependência de processos
 fragmentados e de ferramentas que exigem conhecimento técnico elevado, e
 oferece uma contribuição aplicável à interpretação de desempenho, ao
 acompanhamento de tendências competitivas e à análise de partidas.
@@ -260,7 +260,7 @@ diferença diminui em amostras maiores (Grinsztajn; Oyallon; Varoquaux,
 A terceira são as redes neurais *feedforward*, ou perceptrons multicamada
 (MLP). Com capacidade de aproximação universal (Hornik; Stinchcombe; White, 1989), elas capturam interações sem que precisem ser
 especificadas, mas exigem mais dados e mais cuidado com escala e
-regularização, restrição relevante numa amostra de dezenas de milhares de
+regularização, restrição relevante em uma amostra de dezenas de milhares de
 partidas, e não de milhões.
 
 ### 2.3 EXPLICABILIDADE E AVALIAÇÃO DE MODELOS PREDITIVOS
@@ -303,7 +303,7 @@ produz texto, e o banco exige SQL válido e correto sobre um esquema
 específico. Uma consulta gramaticalmente correta pode citar uma tabela
 inexistente ou responder à pergunta errada. Wang et al. (2020) tratam
 este segundo caso e mostram que representar o esquema com os
-relacionamentos entre tabelas, e não só com os nomes das colunas, melhora
+relacionamentos entre tabelas, e não apenas com os nomes das colunas, melhora
 a precisão da conversão. Neste trabalho, a correção da consulta não é
 delegada ao modelo: ela é validada antes de tocar o banco (Seção 4.7).
 
@@ -312,7 +312,7 @@ delegada ao modelo: ela é validada antes de tocar o banco (Seção 4.7).
 A análise de esports também precisa representar informações que evoluem
 no espaço e no tempo, como movimentação, posicionamento e interação entre
 jogadores. Wallner, Wang e Dormann (2023) mostram que visualizações
-espaço-temporais, sobretudo as que integram tempo e localização numa
+espaço-temporais, sobretudo as que integram tempo e localização em uma
 única representação, ajudam a interpretar o comportamento em jogo na
 revisão pós-partida. Esse referencial motivou o mapa de calor de
 posicionamento da análise de partida (Seção 5.5).
@@ -346,7 +346,7 @@ não no jogador isolado. É a abordagem adotada aqui, com as variáveis
 preditoras construídas como diferenças agregadas entre os dois times.
 Bahrololloomi et al. (2022) percorrem o caminho oposto: predizem a
 vitória a partir das funções (*roles*) e das métricas individuais dos
-jogadores. Este trabalho usa esse nível de agregação só nos perfis de
+jogadores. Este trabalho usa esse nível de agregação apenas nos perfis de
 jogador.
 
 Outros estudos preveem partidas de *League of Legends* com insumos
@@ -386,7 +386,7 @@ Legends*.
 
 Wallner, Wang e Dormann (2023) estudam a evolução espaço-temporal do
 gameplay em *League of Legends* com a técnica de *storyline
-visualization* e mostram o valor de integrar tempo e localização numa
+visualization* e mostram o valor de integrar tempo e localização em uma
 única representação para a interpretação pós-jogo. O estudo é a
 referência do posicionamento minuto a minuto da análise de partida
 (Seção 5.5).
@@ -457,7 +457,7 @@ requisições da chave de desenvolvedor. O *account-v1* resolveu o Riot ID,
 e o *match-v5* e o *timeline-v5* trouxeram cada partida e sua linha do
 tempo minuto a minuto. A coleta cobriu cinco regiões (BR1, EUW1, KR, NA1 e
 EUN1, esta com amostra insuficiente e fora da leitura) na fila 420
-(ranqueada solo/duo), num total de **41.063 partidas**. Como a chave de desenvolvedor
+(ranqueada solo/duo), em um total de **41.063 partidas**. Como a chave de desenvolvedor
 expira a cada 24 horas, o coletor retoma de onde parou e pula as partidas
 já salvas.
 
@@ -475,7 +475,7 @@ como fonte em nenhuma etapa.
 Os dados foram organizados em um banco relacional PostgreSQL, descrito no
 Quadro 1 (Seção 5.2). O tratamento incluiu a normalização da partida
 bruta de cada fonte, a extração das compras e vendas de itens a partir da
-linha do tempo, com os desfazimentos (`ITEM_UNDO`) aplicados, e a
+linha do tempo, com os desfazimentos de compra aplicados, e a
 reconciliação dos nomes de campeão entre a Riot API e o Oracle's Elixir,
 que usam convenções diferentes. O catálogo de itens, derivado do Data
 Dragon da Riot, permite resolver nome e ícone de item por consulta ao
@@ -527,9 +527,9 @@ seis telas completas estão no Apêndice F (Figuras 6 a 11).
 
 A interface em linguagem natural é um *pipeline* *text-to-SQL*: um modelo
 de linguagem (Claude) traduz a pergunta em SQL, a consulta é validada
-antes de executar (só `SELECT` ou `WITH...SELECT`, sobre uma lista fechada
+antes de executar (apenas `SELECT` ou `WITH...SELECT`, sobre uma lista fechada
 de tabelas) e a resposta vem sempre do banco, nunca do conhecimento
-genérico do modelo. A acurácia foi medida num *benchmark* de 26 perguntas
+genérico do modelo. A acurácia foi medida em um *benchmark* de 26 perguntas
 de referência com SQL esperado, sobre o *solo queue* e o competitivo. A
 métrica é a acurácia de execução, que compara o resultado da consulta
 gerada com o da consulta de referência; Zhong, Yu e Klein (2020) discutem
@@ -600,7 +600,7 @@ Quadro — Tabelas do banco de dados e o que cada uma guarda
 
 A coleta seguiu de forma incremental e o volume cresceu ao longo do
 trabalho: 10.295 partidas na primeira base ampla, 23.133 no retreino de
-2026-07-06, 39.426 em 2026-10-04 e 41.063 ao fim do dia, com a região NA1 passando de 1.446
+julho de 2026, 39.426 em 4 de outubro e 41.063 ao fim desse dia, com a região NA1 passando de 1.446
 para 7.159 partidas na rodada final. Era a menor das quatro regiões com
 amostra relevante, e a que mais limitava a generalização do achado de
 viés de lado (Seção 5.3).
@@ -609,7 +609,7 @@ viés de lado (Seção 5.3).
 
 **Viés de lado no *solo queue* de elo alto.** No agregado das cinco
 regiões, o time vermelho venceu mais que o azul, com intensidade variável
-por região. O Quadro 2 traz a medição direta em SQL, de 2026-10-04, sobre
+por região. O Quadro 2 traz a medição direta em SQL, de 4 de outubro de 2026, sobre
 as 41.063 partidas; o histórico das medições está no Apêndice E.
 
 Quadro — Vitória do time vermelho por região
@@ -626,7 +626,7 @@ A direção é a mesma nas quatro regiões com amostra relevante, mas a força
 da evidência não é uniforme. Em BR1, EUW1 e NA1 o intervalo de confiança
 de 95% exclui 50%; na KR, com 50,4% e intervalo [49,5%, 51,4%], o
 intervalo inclui 50%, e o viés não é distinguível de zero. A BR1 sustenta
-a assimetria com folga ([55,4%, 57,2%]). O padrão é de elo alto, e não só
+a assimetria com folga ([55,4%, 57,2%]). O padrão é de elo alto, e não apenas
 brasileiro, mas as quatro regiões não o demonstram com a mesma força.
 
 (Nota sobre as bases usadas nesta seção e na modelagem: a análise
@@ -654,7 +654,7 @@ Os quatro testes de robustez da Seção 4.5 se aplicam aqui. O teste (i),
 restrito à BR1, reproduz a assimetria e descarta mistura regional. O
 teste (ii) mostra a taxa de vitória do **azul** estável por faixa de
 duração total da partida
-(medido em 2026-10-04 sobre as 41.063 partidas: 45,6% a 47,3% entre
+(medido em 4 de outubro de 2026 sobre as 41.063 partidas: 45,6% a 47,3% entre
 as faixas de duração, amplitude de 1,7 ponto percentual, todas abaixo
 de 50%; a série está no Apêndice E), o que
 descarta que partidas longas sejam outro tipo de jogo. O teste (iii), o
@@ -682,7 +682,7 @@ contra 73,7% no *solo queue* (n = 5.166); entre +4.000 e +6.000, 91,7%
 nas mãos de um time coordenado. A diferença na faixa com amostra
 suficiente, de 7,8 pontos percentuais, é pequena em termos absolutos, mas
 significativa (z = 8,3, p < 0,001); a faixa de +4.000 a +6.000 do
-profissional, com 72 jogos, é só indicativa. A origem das taxas está no
+profissional, com 72 jogos, é apenas indicativa. A origem das taxas está no
 Apêndice E. A Figura 1 mostra as duas comparações na tela Competitivo,
 com o cenário profissional restrito a 2026; por isso o azul aparece com
 53,1%, e não com os 53,2% do acervo completo.
@@ -695,8 +695,8 @@ O Quadro 3 compara os três modelos no corte de 15 minutos (validação
 cruzada estratificada de 5 *folds*, semente 42), no conjunto final de
 39.188 partidas, em que o azul vence 46,6%: o XGBoost com os
 hiperparâmetros da busca em grade (*GridSearchCV*), os outros dois na
-configuração de referência. A medição se reproduz com
-`python -m src.models.multi_cutoff_metrics`.
+configuração de referência. O comando que reproduz a medição está no
+Apêndice C.
 
 Quadro — Comparação entre modelos (corte de 15 minutos)
 
@@ -742,8 +742,8 @@ Figura — Importância média de cada variável (|SHAP|) nos quatro cortes temp
 
 **Experimentos negativos.** Onze tentativas de enriquecer o conjunto de
 variáveis não produziram ganho distinguível de ruído (Quadro 5); o único
-caso de piora mensurável foi o tipo do dragão (`monsterSubType`: AUC-ROC
-de 0,8319 para 0,8295). As notas sobre três delas estão no Apêndice D. Já
+caso de piora mensurável foi o tipo do dragão (AUC-ROC de 0,8319 para
+0,8295). As notas sobre três delas estão no Apêndice D. Já
 o aumento do *volume* de partidas produziu ganho real: o AUC-ROC do
 XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133) e para
 0,8473 (39.188). Com as variáveis de estado agregado que a API oferece, isso
@@ -795,7 +795,7 @@ execução**: 23 de 26 perguntas de referência, 22 sobre *solo queue* e 4
 sobre o dataset competitivo. O mesmo resultado saiu em três execuções
 em datas diferentes; uma quarta, feita durante a coleta, deu 22 de 26 por
 interferência da escrita no banco (Apêndice B). As três falhas pertencem à mesma família: todas
-pedem um mínimo de jogos e erram na formatação ou numa coluna a mais na
+pedem um mínimo de jogos e erram na formatação ou em uma coluna a mais na
 resposta, não na interpretação da pergunta. O Quadro 6 agrupa as 26
 perguntas pelo tipo de consulta que exigem.
 
@@ -818,21 +818,21 @@ Figura — Consulta em linguagem natural: pergunta, SQL gerada e resultado | rep
 ### 5.7 Os resultados frente à literatura
 
 Hodge et al. (2021) chegam a 85% de acurácia após 5 minutos em partidas
-profissionais de Dota 2, mas tratam só da previsão; este trabalho leva a
+profissionais de Dota 2, mas tratam apenas da previsão; este trabalho leva a
 predição por fases a *League of Legends* e a integra a explicabilidade,
-visualização e consulta numa mesma solução. Entre os estudos de *League of
+visualização e consulta em uma mesma solução. Entre os estudos de *League of
 Legends*, Jadowski e Cunningham (2022) reportam 67% de acerto em jogos
 profissionais e Do et al. (2021), 75,1% antes de a partida começar, a
 partir da experiência com o campeão. As acurácias deste trabalho, de 70,0%
 a 82,4% conforme o corte, ficam na mesma ordem de grandeza, mas a
-comparação é só indicativa: mudam o nível dos jogadores, o momento da
+comparação é apenas indicativa: mudam o nível dos jogadores, o momento da
 previsão e a informação usada. Maymin (2021) trata de eventos individuais
 e Guan e Tung (2026) avaliam o erro de probabilidade (Brier) em vez da
 acurácia, por isso ficam fora da comparação numérica.
 
 As variáveis preditoras, diferenças agregadas entre os dois times, seguem
 a modelagem centrada no time de Birant e Birant (2023); a granularidade
-por jogador de Bahrololloomi et al. (2022) entrou só nos perfis de
+por jogador de Bahrololloomi et al. (2022) entrou apenas nos perfis de
 jogador, fora da modelagem de vitória. A limitação que García-Méndez e
 Arriba-Pérez (2025) apontam nos trabalhos anteriores, a falta de
 interpretação das previsões, foi enfrentada com o SHAP na interface e com um
@@ -934,7 +934,7 @@ não amostradas ao longo de todo o histórico; um padrão sazonal pode estar
 confundido com o que os dados descrevem. A validação cruzada sorteia
 partidas ao acaso, e jogadores que se repetem entre partidas tornam as
 dobras menos independentes do que a técnica supõe. Recortes finos, como um
-jogador num campeão ou um confronto de rota, seguem frágeis mesmo com
+jogador em um campeão ou um confronto de rota, seguem frágeis mesmo com
 41.063 partidas, apesar do encolhimento estatístico (*shrinkage*) em
 direção à média.
 
@@ -942,12 +942,12 @@ direção à média.
 estado de empate total, de 49,0% a 51,4% conforme o corte, subestima o
 viés de lado medido nos dados (46,4% a 47,9%). A discrepância não é
 subajuste: a busca em grade completa ficou 0,0001 de AUC acima da
-produção (de 0,8473 para 0,8475, em 2º lugar entre 27 combinações), e só a
+produção (de 0,8473 para 0,8475, em 2º lugar entre 27 combinações), e apenas a
 troca para *Random Forest* a fecha (0,6 pp), ao custo de 0,0005 de AUC.
 O modelo foi treinado sobre 39.426 partidas, e não sobre as 41.063 do
 banco, e não foi retreinado para não invalidar as validações já feitas. E
 o XGBoost não garante monotonicidade isolada por variável, por não usar
-restrição formal (`monotone_constraints`).
+restrição formal de monotonicidade.
 
 ### 6.2 TRABALHOS FUTUROS
 
@@ -1294,7 +1294,7 @@ sugeriu `teamwork_pct_diff` com delta +0,0090, maior que qualquer outro
 experimento, mas a escala para 2.987 partidas (gap 0-16 dias, média 7,8)
 devolveu -0,0031, dentro do ruído dos demais. O piloto pequeno era
 regressão à média, não sinal: o próprio *baseline* já oscilava 1,8 pp do
-AUC de produção só pelo tamanho da amostra. Comando e artefato: `python -m
+AUC de produção apenas pelo tamanho da amostra. Comando e artefato: `python -m
 src.models.experiment_challenges_pilot --n-matches 3000` e
 `reports/experimento_challenges_piloto.json`.
 
@@ -1384,7 +1384,7 @@ em 2º lugar entre as 27. Testadas as três alavancas que a grade não cobre,
 a conclusão é contraintuitiva: a **calibração piora** a discrepância (de
 1,7 para 2,3 pp na sigmoidal), porque o estado de empate total fica fora
 da distribuição observada e o calibrador o extrapola para perto de 50%; a
-regularização alternativa move o desvio dentro do ruído; e só a **troca
+regularização alternativa move o desvio dentro do ruído; e apenas a **troca
 de família** o fecha: uma *Random Forest* com 500 árvores e profundidade 6
 leva o desvio a **0,6 pp** ao custo de 0,0005 de AUC. A discrepância é,
 portanto, uma propriedade da função que o XGBoost aprende neste recorte, e
@@ -1415,7 +1415,7 @@ enriquecimento de *features* não superaram o modelo com as cinco
 variáveis originais (Quadro 5), dez a partir da mesma fonte de dados
 (linha do tempo da partida) e um a partir de uma fonte diferente
 (percentis comportamentais do jogador via `lol-challenges-v1`, Apêndice
-D), o que descarta a hipótese de que o teto fosse só da *timeline*
+D), o que descarta a hipótese de que o teto fosse apenas da *timeline*
 esgotada. O próximo ganho relevante depende de dado que a API não fornece:
 a ordem de escolha de campeão (*draft*), que a API pública não expõe, e o
 estado das ondas de *minions*. A posição em tempo real **existe** no
