@@ -39,9 +39,9 @@ fragmentadas e de conhecimento técnico. Este trabalho desenvolveu uma
 plataforma inteligente para análise de dados de *League of Legends* que
 integra coleta, modelagem preditiva com *machine learning*,
 explicabilidade, visualização e consulta em linguagem natural. Trata-se
-de pesquisa aplicada, de abordagem mista, sobre 41.063 partidas
+de pesquisa aplicada, de abordagem quantitativa, sobre 41.063 partidas
 ranqueadas de elo alto em cinco regiões, coletadas via Riot Games API, e
-96.716 jogos profissionais de 2014 a 2026 (Oracle's Elixir). Três
+99.259 jogos profissionais de 2014 a 2026 (Oracle's Elixir). Três
 modelos (XGBoost, *Random Forest* e uma rede neural MLP) foram comparados
 por validação cruzada estratificada para predizer o vencedor em quatro
 cortes temporais, de 10 a 25 minutos; os três ficaram próximos, e o
@@ -65,9 +65,9 @@ on fragmented tools and technical expertise. This work developed an
 intelligent platform for *League of Legends* data analysis that
 integrates data collection, predictive modeling with machine learning,
 explainability, visualization and natural language querying. It is
-applied research with a mixed-methods approach, based on 41,063 high-elo
+applied research with a quantitative approach, based on 41,063 high-elo
 ranked matches from five regions, collected through the Riot Games API,
-and 96,716 professional games from 2014 to 2026 (Oracle's Elixir). Three
+and 99,259 professional games from 2014 to 2026 (Oracle's Elixir). Three
 models (XGBoost, Random Forest and an MLP neural network) were compared
 through stratified cross-validation to predict the winning team at four
 time cutoffs, from 10 to 25 minutes; the three performed similarly, and
@@ -83,8 +83,7 @@ six visualization pages with explainable predictions (SHAP). The results
 show the feasibility of integrating these stages into a single solution
 applied to esports.
 
-**Key-words:** esports; League of Legends; data analysis; machine
-learning; natural language interface.
+**Key-words:** esports; *League of Legends*; data analysis; *machine learning*; natural language interface.
 
 ---
 
@@ -114,7 +113,7 @@ uma plataforma inteligente para análise de dados de esports, com foco em
 dados competitivos, modelagem preditiva com técnicas de *machine learning*
 e mecanismos de visualização e consulta em linguagem natural. Além do
 escopo previsto no TCC I, a base foi complementada com dados
-profissionais (Oracle's Elixir, 96.716 jogos de 2014 a 2026), o que
+profissionais (Oracle's Elixir, 99.259 jogos de 2014 a 2026), o que
 permitiu comparar os padrões do *solo queue* com os do cenário
 competitivo profissional.
 
@@ -193,7 +192,7 @@ e) comparar o desempenho de modelos de *machine learning*, com foco em
 XGBoost, *Random Forest* e redes neurais, no contexto dos dados
 analisados;
 
-f) propor dashboards para visualização das informações e dos
+f) propor *dashboards* para visualização das informações e dos
 resultados analíticos produzidos pela plataforma;
 
 g) propor uma interface em linguagem natural para facilitar a consulta
@@ -219,7 +218,7 @@ Esta seção define os conceitos usados no restante do trabalho: análise de
 dados em esports, as famílias de modelos preditivos comparadas,
 explicabilidade e avaliação de modelos, interfaces em linguagem natural e
 visualização analítica. As obras originais dos métodos aplicados são
-citadas pela propriedade técnica que justifica o uso. Os estudos do
+citadas pela propriedade técnica que justifica o uso (Apêndice H). Os estudos do
 domínio são descritos autor a autor na Seção 3 e confrontados com os
 resultados na Seção 5.7.
 
@@ -228,7 +227,7 @@ resultados na Seção 5.7.
 Jogos competitivos geram grande volume de dados sobre partidas,
 jogadores, equipes e eventos em tempo real, o que faz dos esports um
 campo relevante para a análise de dados. Hodge et al. (2021) mostram que
-é possível prever o resultado de partidas profissionais de Dota 2
+é possível prever o resultado de partidas profissionais de *Dota 2*
 enquanto elas acontecem, com modelos de aprendizado de máquina padrão e
 engenharia de atributos. Em *League of Legends*, Birant e Birant (2023)
 destacam a modelagem centrada no time, e Bahrololloomi et al. (2022), a
@@ -244,10 +243,7 @@ três por medição.
 A primeira são os *ensembles* de árvores de decisão, em particular a
 *Random Forest* (Breiman, 2001), que combina *bagging*, em que cada árvore
 treina sobre uma amostra *bootstrap*, com a seleção aleatória de
-variáveis em cada nó. Isso faz as árvores divergirem entre si e reduz a
-variância do conjunto, o que importa quando as variáveis preditoras são
-correlacionadas, como ouro, abates e torres, que evoluem juntos ao longo
-da partida.
+variáveis em cada nó. Isso reduz a correlação entre as árvores, que limita o ganho de um *ensemble* e pesa aqui, porque as variáveis preditoras (ouro, abates e torres) evoluem juntas na partida.
 
 A segunda é o *gradient boosting*, representado pelo XGBoost (Chen; Guestrin, 2016), que constrói as árvores em sequência, cada uma ajustada
 ao resíduo das anteriores, com otimização de segunda ordem e
@@ -270,8 +266,7 @@ combinar classificação e interpretação, tornando os fatores da previsão
 compreensíveis para o usuário final. Explicar um *ensemble*, porém, não é
 trivial: a saída é a soma de centenas de árvores, e a contribuição de cada
 variável não é diretamente legível. O LIME (Ribeiro; Singh; Guestrin, 2016) aproxima o modelo por um modelo linear local na vizinhança de cada
-predição, simples de ler, mas dependente de como essa vizinhança é
-definida. O SHAP
+predição, simples de ler, mas pouco fiel se o modelo for muito não linear na vizinhança. O SHAP
 recorre ao valor de Shapley da teoria dos jogos: a importância de uma
 variável é sua contribuição média para a previsão, sobre todas as
 combinações das demais. Lundberg e Lee (2017) mostram que essa é a única
@@ -304,8 +299,7 @@ específico. Uma consulta gramaticalmente correta pode citar uma tabela
 inexistente ou responder à pergunta errada. Wang et al. (2020) tratam
 este segundo caso e mostram que representar o esquema com os
 relacionamentos entre tabelas, além dos nomes das colunas, melhora
-a precisão da conversão. Neste trabalho, a correção da consulta não é
-delegada ao modelo: ela é validada antes de tocar o banco.
+a precisão da conversão. Neste trabalho, a segurança da consulta não é delegada ao modelo: ela é validada antes de tocar o banco, e a correção semântica é medida no *benchmark* (Seção 5.6).
 
 ### 2.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
 
@@ -321,15 +315,15 @@ posicionamento da análise de partida.
 
 ## 3 TRABALHOS RELACIONADOS
 
-Esta seção descreve os onze estudos de domínio que sustentam a pesquisa,
+Esta seção descreve os onze estudos de domínio que sustentam a pesquisa (Apêndice I),
 com o objeto, a abordagem e a contribuição de cada um para o problema
-aqui tratado. As obras de método (Breiman, 2001; Chen; Guestrin, 2016; Hanley; McNeil, 1982; Lundberg; Lee, 2017; Ribeiro; Singh; Guestrin, 2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
+aqui tratado. As principais obras de método (Breiman, 2001; Chen; Guestrin, 2016; Hanley; McNeil, 1982; Lundberg; Lee, 2017; Ribeiro; Singh; Guestrin, 2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
 elas fundamentam é introduzido.
 
 ### 3.1 ESPORTS COMO FENÔMENO DE PRODUÇÃO E ANÁLISE DE DADOS
 
 Hodge et al. (2021) tratam da predição de vitória em partidas
-profissionais de Dota 2, em tempo real. Com modelos de aprendizado de máquina
+profissionais de *Dota 2*, em tempo real. Com modelos de aprendizado de máquina
 padrão, engenharia de atributos e otimização, chegam a até 85% de
 acurácia após 5 minutos de jogo, em previsões ao vivo de 28 partidas de um
 torneio, o que estabelece a predição de
@@ -341,12 +335,9 @@ partir do estado da partida, mas não o recorte de *League of Legends*.
 
 Birant e Birant (2023) apresentam uma abordagem de aprendizado
 multi-objetivo e multi-instância (*Multi-Objective Multi-Instance
-Learning*) aplicada a esports e destacam a modelagem centrada no time, em vez do jogador isolado. É a abordagem adotada aqui, com as variáveis
+Learning*) aplicada a esports e destacam a modelagem centrada no time, em vez do jogador isolado. É a orientação adotada aqui, com as variáveis
 preditoras construídas como diferenças agregadas entre os dois times.
-Bahrololloomi et al. (2022) percorrem o caminho oposto: predizem a
-vitória a partir das funções (*roles*) e das métricas individuais dos
-jogadores. Este trabalho usa esse nível de agregação apenas nos perfis de
-jogador.
+Bahrololloomi et al. (2022) percorrem o caminho oposto: predizem a vitória a partir das métricas individuais dos jogadores e concluem que o peso de cada função é desprezível. Aqui, esse nível só aparece nos perfis de jogador.
 
 Outros estudos preveem partidas de *League of Legends* com insumos
 diferentes. Jadowski e Cunningham (2022) ajustam classificadores
@@ -355,8 +346,7 @@ estatísticos a métricas das ligas profissionais de 2020 e acertam 67% dos
 antes de elas começarem, a partir da experiência de cada jogador com o
 campeão escolhido, e chegam a 75,1% de acurácia com uma rede neural
 profunda. Maymin (2021) calibra um modelo de probabilidade de vitória com
-dados de milhões de partidas ranqueadas e avalia cada ação individual pelo
-efeito que tem nessa probabilidade. Guan e Tung (2026), em um *preprint*
+dados de milhões de partidas ranqueadas e avalia abates e mortes pelo efeito que têm nessa probabilidade. Guan e Tung (2026), em um *preprint*
 ainda sem revisão por pares, fazem previsão pré-jogo no cenário
 profissional e tratam o lado do mapa e a prioridade de escolha como
 covariáveis do modelo.
@@ -377,7 +367,7 @@ Intelligence* apoiada por modelos de linguagem para análise de dados em
 contextos corporativos, e Guo et al. (2024), o Talk2Data, interface em
 linguagem natural para análise visual exploratória baseada em
 decomposição de perguntas. Os dois usam modelos de linguagem como camada
-de interação sobre dados estruturados e fundamentam o *text-to-SQL* deste
+de interação sobre dados estruturados e motivam o *text-to-SQL* deste
 trabalho, que leva a abordagem ao domínio de *League of
 Legends*.
 
@@ -385,15 +375,14 @@ Legends*.
 
 Wallner, Wang e Dormann (2023) estudam a evolução espaço-temporal do
 gameplay em *League of Legends* com a técnica de *storyline
-visualization* e mostram o valor de integrar tempo e localização em uma
-única representação para a interpretação pós-jogo. O estudo é a
+visualization* e mostram que integrar tempo e localização numa só vista é viável para a interpretação pós-jogo. O estudo é a
 referência do posicionamento minuto a minuto da análise de partida.
 
 ### 3.6 SÍNTESE E POSIÇÃO DESTE TRABALHO
 
-Os estudos cobrem frentes isoladas: predição de resultados, interpretabilidade da predição (García-Méndez; Arriba-Pérez, 2025),
+Os estudos revisados cobrem frentes isoladas: predição de resultados, interpretabilidade da predição (García-Méndez; Arriba-Pérez, 2025),
 interação em linguagem natural (Jiang et al., 2025; Guo et al., 2024) e visualização
-espaço-temporal (Wallner; Wang; Dormann, 2023). No entanto, nenhum é entregue como uma
+espaço-temporal (Wallner; Wang; Dormann, 2023). No entanto, nenhum deles é entregue como uma
 plataforma que reúna coleta, tratamento, modelagem, explicabilidade,
 visualização e consulta em linguagem natural sobre a mesma base, e é
 essa lacuna de integração que este trabalho ocupa. A distinção também
@@ -430,17 +419,16 @@ voltado à solução de um problema específico e de uso prático (Prodanov; Fre
 dados competitivos de *League of Legends*. Quanto aos objetivos, a
 pesquisa é exploratória, na investigação da Riot Games API e das
 possibilidades de modelagem, e descritiva, na caracterização dos dados,
-dos padrões e dos modelos comparados (Gil, 2002). A abordagem é mista
-(Creswell; Creswell, 2023): qualitativa na revisão bibliográfica e na
-interpretação dos achados, quantitativa na coleta, na análise
-exploratória e na comparação entre os modelos de aprendizado de máquina.
+dos padrões e dos modelos comparados (Gil, 2002). A abordagem é predominantemente quantitativa (Creswell; Creswell, 2023): a coleta,
+a análise exploratória e a comparação entre os modelos de aprendizado de máquina
+trabalham com dados numéricos, e a revisão bibliográfica e a interpretação dos
+achados dão o contexto.
 
 ### 4.2 ESTRATÉGIAS DE PESQUISA
 
-O trabalho foi desenvolvido por meio de pesquisa bibliográfica (Gil,
-2002), pesquisa documental sobre a documentação oficial da Riot Games API
-(Prodanov; Freitas, 2013) e estudo aplicado com recorte de caso no domínio
-de *League of Legends* (Yin, 2018).
+O trabalho foi desenvolvido por meio de pesquisa bibliográfica (Gil, 2002) e de
+pesquisa documental sobre a documentação oficial da Riot Games API (Prodanov;
+Freitas, 2013), com aplicação delimitada ao domínio de *League of Legends*.
 
 ### 4.3 COLETA DE DADOS
 
@@ -448,20 +436,20 @@ A coleta usou duas fontes. A segunda foi incorporada durante o TCC II,
 além do escopo previsto no TCC I.
 
 **a) Riot Games API (*solo queue*).** O endpoint *league-v4* identificou
-os jogadores dos elos Desafiante e Grão-Mestre, recorte de escopo: uma
+os jogadores de elo alto (Desafiante a Mestre), recorte de escopo: uma
 população fechada, que a API lista por inteiro e que cabe no limite de
 requisições da chave de desenvolvedor. O *account-v1* resolveu o Riot ID,
-e o *match-v5* e o *timeline-v5* trouxeram cada partida e sua linha do
-tempo minuto a minuto. A coleta cobriu cinco regiões (BR1, EUW1, KR, NA1 e
+e o *match-v5* trouxe cada partida e sua linha do tempo minuto a
+minuto. A coleta cobriu cinco regiões (BR1, EUW1, KR, NA1 e
 EUN1, esta com amostra insuficiente e fora da leitura) na fila 420
 (ranqueada solo/duo), em um total de **41.063 partidas**. Como a chave de desenvolvedor
 expira a cada 24 horas, o coletor retoma de onde parou e pula as partidas
 já salvas.
 
 **b) Oracle's Elixir (cenário profissional).** Foram incorporados
-**96.716 jogos profissionais** de 2014 a 2026, das principais ligas (LCK,
-LPL, LEC, LTA, CBLOL, entre outras), a partir dos arquivos CSV anuais que
-o site publica (Oracle's Elixir, [s.d.]), para comparar o *solo queue* de
+**99.259 jogos profissionais** de 2014 a 2026, de 122 ligas, da elite às de
+desenvolvimento, a partir dos arquivos CSV anuais que o site publica
+(Oracle's Elixir, [s.d.]; arquivos de 4 jul. 2026; Apêndice J), para comparar o *solo queue* de
 elo alto com o cenário profissional.
 
 Os dados são secundários e públicos, sem participação de sujeitos humanos
@@ -472,8 +460,7 @@ como fonte em nenhuma etapa.
 Os dados foram organizados em um banco relacional PostgreSQL, descrito no
 Quadro 1. O tratamento incluiu a normalização da partida
 bruta de cada fonte, a extração das compras e vendas de itens a partir da
-linha do tempo, com os desfazimentos de compra aplicados, e a
-reconciliação dos nomes de campeão entre a Riot API e o Oracle's Elixir,
+linha do tempo, com os desfazimentos de compra aplicados, e, na consulta, a reconciliação dos nomes de campeão entre a Riot API e o Oracle's Elixir,
 que usam convenções diferentes. O catálogo de itens, derivado do Data
 Dragon da Riot, permite resolver nome e ícone de item por consulta ao
 banco, sem depender da memória de um modelo de linguagem.
@@ -502,7 +489,7 @@ ouro, experiência, abates, torres e dragões acumuladas até o corte
 temporal. Há um modelo independente para cada corte (10, 15, 20 e 25
 minutos), e nenhuma informação posterior ao corte entra como variável, o
 que evita o vazamento de dados descrito por Kaufman et al. (2012). A
-validação foi cruzada e estratificada, com 5 dobras (Kohavi, 1995), e
+validação foi cruzada e estratificada (Kohavi, 1995), com 5 dobras, e
 mediu acurácia, precisão, *recall*, F1 e AUC-ROC. Depois de um modelo de
 referência, os hiperparâmetros foram ajustados por *GridSearchCV*, do
 scikit-learn (Pedregosa et al., 2011), otimizando a AUC-ROC. O modelo de
@@ -514,7 +501,7 @@ melhoravam a previsão.
 ### 4.7 PROPOSTA DE VISUALIZAÇÃO E INTERFACE EM LINGUAGEM NATURAL
 
 A camada de apresentação é uma aplicação web em React com TypeScript, que
-consome uma API própria em FastAPI, com seis páginas: Início (busca),
+consome uma API própria em FastAPI, com seis páginas de visualização: Início (busca),
 Dashboard (indicadores agregados), Campeões, Partidas (análise minuto a
 minuto, mapa de calor, leitura de *draft* e modo "e se"), Competitivo
 (*solo queue* × profissional) e Simulador (composição, estado de jogo e
@@ -523,8 +510,7 @@ SHAP). A Seção 5 mostra, recortada, a parte de cada tela que discute. As seis 
 A interface em linguagem natural é um fluxo *text-to-SQL*: um modelo
 de linguagem (Claude) traduz a pergunta em SQL, a consulta é validada
 antes de executar (apenas `SELECT` ou `WITH...SELECT`, sobre uma lista fechada
-de tabelas) e a resposta vem sempre do banco, nunca do conhecimento
-genérico do modelo. A acurácia foi medida em um *benchmark* de 26 perguntas
+de tabelas) e o resultado vem sempre do banco, nunca do conhecimento genérico do modelo; a explicação pode acrescentar, rotulada como "Leitura de jogo", uma nota de conhecimento geral. A acurácia foi medida em um *benchmark* de 26 perguntas
 de referência com SQL esperado, sobre o *solo queue* e o competitivo. A
 métrica é a acurácia de execução, que compara o resultado da consulta
 gerada com o da consulta de referência. Zhong, Yu e Klein (2020) discutem
@@ -556,12 +542,11 @@ O desenvolvimento e a execução foram feitos localmente, em Windows.
 ## 5 RESULTADOS E ANÁLISE
 
 Esta seção apresenta os resultados obtidos, organizados de acordo com
-os objetivos específicos definidos na Seção 1.4.2.
+os objetivos específicos definidos na Seção 1.4.2 (Apêndice K).
 
 ### 5.1 Mapeamento de dados e recursos da Riot Games API (objetivo a)
 
-Foram mapeados e utilizados os endpoints *league-v4*, *account-v1*,
-*match-v5* e *timeline-v5* da Riot Games API (Anexo A), além da documentação
+Foram mapeados e utilizados os endpoints *league-v4*, *account-v1* e *match-v5* (partida e linha do tempo) da Riot Games API (Anexo A), além da documentação
 técnica necessária para compreender limitações de taxa de requisição e
 o ciclo de expiração da chave de desenvolvedor (24 horas). Esse
 mapeamento orientou o desenho de um coletor resumível, capaz de operar
@@ -570,19 +555,13 @@ duplicar dados já salvos.
 
 ### 5.2 Estruturação da base de dados (objetivos b e c)
 
-A base usada para treinar e comparar os modelos preditivos
-reúne **39.188 partidas** de *solo queue* no corte de 15 minutos,
-provenientes das **39.426 partidas** que o banco tinha quando o
-conjunto de variáveis foi congelado, com JSON
-bruto de partida e linha do tempo preservados para reprocessamento, e
-**96.716 jogos profissionais**
-(2014-2026, Oracle's Elixir). O Quadro 1 resume as tabelas do banco. Os campos e as chaves de cada uma estão no Apêndice A.
+A base de modelagem reúne **39.188 partidas** de *solo queue* no corte de 15 minutos, provenientes das **39.426 partidas** que o banco tinha quando o conjunto de variáveis foi congelado. O banco guarda o JSON bruto de partida e linha do tempo para reprocessamento e **99.259 jogos profissionais** (2014-2026, Oracle's Elixir). O Quadro 1 resume as tabelas do banco. Os campos e as chaves de cada uma estão no Apêndice A.
 
 Quadro — Tabelas do banco de dados e o que cada uma guarda
 
 | Tabela | Conteúdo |
 |---|---|
-| `players` | jogadores Desafiante e Grão-Mestre obtidos pela *league-v4* |
+| `players` | jogadores de elo alto (Desafiante a Mestre), da *league-v4* |
 | `raw_matches`, `raw_timelines` | JSON bruto da partida e da linha do tempo, para reprocessar sem nova coleta |
 | `matches` | uma linha por partida: região, fila, versão do jogo e duração |
 | `teams` | resultado e objetivos de cada time na partida |
@@ -619,8 +598,7 @@ A direção é a mesma nas quatro regiões com amostra relevante, mas a força
 da evidência não é uniforme. Em BR1, EUW1 e NA1 o intervalo de confiança
 de 95% exclui 50%; na KR, com 50,4% e intervalo [49,5%, 51,4%], o
 intervalo inclui 50%, e o viés não é distinguível de zero. A BR1 sustenta
-a assimetria com folga ([55,4%, 57,2%]). O padrão se estende ao elo alto em
-geral, além do Brasil, mas as quatro regiões não o demonstram com a mesma força.
+a assimetria com folga ([55,4%, 57,2%]). O padrão não se limita ao Brasil, mas as quatro regiões não o demonstram com a mesma força.
 
 (Nota sobre as bases usadas nesta seção e na modelagem: a análise
 descritiva foi medida sobre as **41.063 partidas** que o banco tem ao fim
@@ -629,9 +607,7 @@ rodada da KR, sobre a base anterior de **39.426 partidas**, das quais
 39.309 geraram variáveis preditoras e 39.188 chegam ao corte de 15 minutos. Por isso a Seção 5.4 e o Apêndice C citam 39.426. As 1.637 partidas de diferença,
 quase todas da KR, são uma limitação declarada na Seção 6.1.)
 
-**O viés é estável ao longo da partida.** Uma versão anterior deste texto
-afirmava que ele atingia um pico no meio do jogo. A base ampliada não
-confirma essa forma. Entre as partidas empatadas em cada corte (diferença
+**O viés é estável ao longo da partida.** Com amostras menores, parecia haver um pico no meio do jogo. A base ampliada não confirma essa forma. Entre as partidas empatadas em cada corte (diferença
 de ouro menor que 500), o azul venceu 46,4% aos 10 minutos (n = 7.349),
 47,9% aos 15 (n = 3.970), 46,7% aos 20 (n = 2.423) e 47,1% aos 25
 (n = 1.430). Nenhuma diferença entre pares sobrevive à correção de Holm
@@ -653,7 +629,7 @@ intervalo de Wilson, está aplicado acima, e o teste (iv), a comparação de
 pares com correção de Holm, é o que sustenta a constância.
 
 **Comparação com o cenário profissional.** Nos dados competitivos
-(Oracle's Elixir, 96.716 jogos), o time azul venceu 53,2% das partidas,
+(Oracle's Elixir, 99.259 jogos), o time azul venceu 53,2% das partidas,
 com série anual estável desde 2016 (entre 52,5% e 55,0%). O viés vai na direção oposta à do *solo queue* de
 elo alto: a mesma métrica, em dois contextos institucionalmente
 diferentes, produz sinais opostos. Hipótese de explicação: no *solo
@@ -700,11 +676,9 @@ Os três modelos ficaram próximos. Com a mesma busca em grade, a *Random
 Forest* e o MLP chegam a 0,7617 e 0,7619 de acurácia (AUC-ROC de 0,8468 e
 0,8477), e o XGBoost mantém a maior acurácia entre os três. Uma regressão
 logística, usada como *baseline* simples, chega a 0,7631 de acurácia e 0,8483
-de AUC-ROC, no mesmo patamar (Apêndice C): o limite está nas cinco variáveis,
-sem depender da complexidade do modelo. O XGBoost foi adotado pela
+de AUC-ROC, no mesmo patamar (Apêndice C): o limite está na informação das variáveis, não na complexidade do modelo. O XGBoost foi adotado pela
 estabilidade na faixa intermediária, já que não vence em todos os cortes:
-aos 10 minutos o MLP o supera em acurácia (0,7020 contra 0,7004) e aos 25
-chega a 0,002 do seu AUC (0,9072 contra 0,9090). Com um modelo treinado para cada
+aos 10 minutos o MLP o supera em acurácia (0,7020 contra 0,7004) e aos 25 o MLP chega a 0,002 do AUC do XGBoost (0,9072 contra 0,9090). Com um modelo treinado para cada
 corte, com os mesmos hiperparâmetros e sobre a base de 39.426 partidas, o
 desempenho cresce conforme a partida avança: AUC-ROC de 0,774 aos 10
 minutos a 0,909 aos 25 (Quadro 4). As métricas dos três modelos nos
@@ -722,21 +696,17 @@ Quadro — Desempenho do XGBoost por corte temporal
 Na importância das variáveis (SHAP, média do valor absoluto), as
 diferenças de ouro e de experiência dominam em todos os cortes. A
 diferença de torres é quase irrelevante até os 20 minutos (0,0044 aos 10,
-0,0060 aos 15 e 0,0031 aos 20) e salta para 0,0928 aos 25, cerca de 15
-vezes o valor dos 15 minutos (Figura 2). É coerente com a mecânica do
+0,0060 aos 15 e 0,0031 aos 20) e salta para 0,0928 aos 25, cerca de 15 vezes o valor dos 15 minutos (Figura 2 e Apêndice L). É coerente com a mecânica do
 jogo: as placas de defesa das torres caem por volta dos 14 minutos, e
 antes disso destruir uma torre é raro e pouco informativo. É a
 justificativa concreta para treinar um modelo *por fase* em vez de um
 único modelo genérico. A calibração, preocupação conhecida em modelos de
-*boosting* (Niculescu-Mizil; Caruana, 2005), não exigiu correção: a curva
-de calibração mostrou o XGBoost já bem calibrado.
+*boosting* (Niculescu-Mizil; Caruana, 2005), não exigiu correção: o XGBoost já estava bem calibrado.
 
 Figura — Importância média de cada variável (|SHAP|) nos quatro cortes temporais | reports/figuras_texto/fig_shap_fases.png
 
 **Experimentos negativos.** Onze tentativas de enriquecer o conjunto de
-variáveis não produziram ganho distinguível de ruído (Quadro 5). O único
-caso de piora mensurável foi o tipo do dragão (AUC-ROC de 0,8319 para
-0,8295). As notas sobre três delas estão no Apêndice D. Já
+variáveis não produziram ganho distinguível de ruído (Quadro 5). As maiores quedas numéricas foram a cooperação do jogador (−0,0031, sobre 2.987 partidas) e o tipo do dragão (AUC-ROC de 0,8319 para 0,8295). As notas sobre três delas estão no Apêndice D. Já
 o aumento do *volume* de partidas produziu ganho real: o AUC-ROC do
 XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133) e para
 0,8473 (39.188). Com as variáveis de estado agregado que a API oferece, isso
@@ -811,7 +781,7 @@ Figura — Consulta em linguagem natural: pergunta, SQL gerada e resultado | rep
 ### 5.7 Os resultados frente à literatura
 
 Hodge et al. (2021) chegam a 85% de acurácia após 5 minutos em partidas
-profissionais de Dota 2, mas tratam apenas da previsão. Este trabalho leva a
+profissionais de *Dota 2*, mas tratam apenas da previsão. Este trabalho leva a
 predição por fases a *League of Legends* e a integra a explicabilidade,
 visualização e consulta em uma mesma solução. Entre os estudos de *League of
 Legends*, Jadowski e Cunningham (2022) reportam 67% de acerto em jogos
@@ -829,8 +799,7 @@ por jogador de Bahrololloomi et al. (2022) entrou apenas nos perfis de
 jogador, fora da modelagem de vitória. A limitação que García-Méndez e
 Arriba-Pérez (2025) apontam nos trabalhos anteriores, a falta de
 interpretação das previsões, foi enfrentada com o SHAP na interface e com um
-módulo de orientação que cita o dado real de cada recomendação. Jiang et al. (2025)
-e Guo et al. (2024) fundamentam a consulta a dados estruturados por
+módulo de orientação que separa o dado real do conhecimento geral. Jiang et al. (2025) e Guo et al. (2024) motivam a consulta a dados estruturados por
 modelos de linguagem. Este trabalho acrescenta a validação da consulta
 antes da execução. O mapa de calor aplica, de forma mais simples, a
 integração de tempo e posição de Wallner, Wang e Dormann (2023), sem a
@@ -850,16 +819,14 @@ resultados apresentados na Seção 5 indicam que o objetivo geral foi
 alcançado, com evidência para cada objetivo específico:
 
 a) os dados e recursos da Riot Games API foram mapeados e utilizados de
-forma sistemática (endpoints *league-v4*, *account-v1*, *match-v5* e
-*timeline-v5*);
+forma sistemática (endpoints *league-v4*, *account-v1* e *match-v5*, com linha do tempo);
 
 b) as informações relevantes de partidas, jogadores e estatísticas
 foram identificadas e organizadas em um esquema relacional específico;
 
 c) foi estruturado e executado um processo de coleta, tratamento e
 organização capaz de escalar de um piloto de ~100 partidas para uma
-base de 41.063 partidas de *solo queue* somadas a 96.716 partidas
-profissionais;
+base de 41.063 partidas de *solo queue* somadas a 99.259 jogos profissionais;
 
 d) técnicas de análise de dados identificaram padrões relevantes,
 incluindo o viés de lado no *solo queue* de elo alto, sua constância
@@ -904,28 +871,26 @@ Registrar o que o trabalho não sustenta é parte da conclusão. Nenhuma das
 limitações a seguir invalida os achados. Elas delimitam até onde eles
 valem. O detalhe e os experimentos de cada uma estão no Apêndice G.
 
-**Validade de construto.** A *timeline-v5* não registra o estado das ondas
+**Validade de construto.** A linha do tempo do *match-v5* não registra o estado das ondas
 de *minions* nem a ordem de escolha de campeões (*draft*), e nenhuma API
 pública da Riot expõe micro-posicionamento. Onze experimentos de
 enriquecimento não superaram as cinco variáveis originais (Quadro 5),
 inclusive a posição dos jogadores, que existe na *timeline* e foi testada.
-O próximo ganho provável depende do que a fonte não tem. Que parte do erro
+Variáveis mais ricas somam até +0,008 de AUC-ROC (Apêndice M); um ganho maior provavelmente depende do que a fonte não tem. Que parte do erro
 do modelo venha dessa informação ausente é hipótese, não resultado medido.
 Por isso nenhuma orientação da plataforma que dependa de itemização ou de
 ondas vem do modelo, e a interface a marca como inferência geral.
 
 **Validade externa.** Os resultados de *solo queue* vêm da fila ranqueada,
-nas faixas Desafiante e Grão-Mestre, em cinco regiões, quatro delas com
+nas faixas Desafiante a Mestre, em cinco regiões, quatro delas com
 amostra suficiente e desiguais entre si: BR1 e EUW1 concentram a maior
-parte das partidas, e a KR tem intervalo que inclui 50%. Um único *patch*
-concentra a maior parte da coleta. Não há base para estender as taxas por
+parte das partidas, e a KR tem intervalo que inclui 50%. O *patch* 16.13 concentra 40,4% da coleta. Não há base para estender as taxas por
 lado nem a acurácia a outras filas, elos, versões ou jogos, ainda que a
 arquitetura seja reaproveitável.
 
 **Validade interna.** As partidas foram coletadas em janelas de tempo, sem amostragem ao longo de todo o histórico. Um padrão sazonal pode estar
 confundido com o que os dados descrevem. Além disso, a validação cruzada sorteia
-partidas ao acaso, e jogadores que se repetem entre partidas tornam as
-dobras menos independentes do que a técnica supõe. Recortes finos, como um
+partidas ao acaso, e jogadores que se repetem entre partidas tornam as dobras menos independentes do que a técnica supõe. Treinar no passado e testar no futuro, porém, não reduziu a AUC-ROC (Apêndice C). Recortes finos, como um
 jogador em um campeão ou um confronto de rota, seguem frágeis mesmo com
 41.063 partidas, apesar do encolhimento estatístico (*shrinkage*) em
 direção à média.
@@ -943,17 +908,8 @@ restrição formal de monotonicidade.
 
 ### 6.2 TRABALHOS FUTUROS
 
-Ficam registrados quatro caminhos. O primeiro é a extensão da predição
-para o cenário de partidas ao vivo, não implementada nesta versão mas
-considerada na arquitetura desde o início: a camada de predição aceita
-estado de jogo arbitrário por fase, não apenas dados pré-processados de
-um conjunto fixo, de modo que a barreira é de dados em tempo real, não
-de modelo. O segundo é a inclusão de seleção de campeão competitiva no
-simulador de time. O terceiro é a investigação de restrições de
-monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto
-é a extensão do recorte de validade externa, que passaria por coletar
-outras filas e, eventualmente, outro jogo, de modo a testar se o viés
-de lado descreve o jogo ou o modo de jogar de uma população específica.
+Ficam registrados cinco caminhos. O primeiro é a extensão da predição para partidas ao vivo, não implementada, mas prevista na arquitetura: a camada de predição aceita estado de jogo arbitrário por fase, e a barreira é de dados em tempo real, não de modelo. O segundo é a inclusão de seleção de campeão competitiva no simulador de time. O terceiro é a investigação de restrições de monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O quinto é pedir à Riot uma chave de produção, sujeita a aprovação, para ampliar o limite de requisições; a documentação não lista dados novos nas APIs padrão (Apêndice J), então o estado das ondas segue fora do alcance.
+
 ---
 
 ## REFERÊNCIAS
@@ -1058,7 +1014,7 @@ KOHAVI, Ron. A study of cross-validation and bootstrap for accuracy estimation
 and model selection. In: INTERNATIONAL JOINT CONFERENCE ON ARTIFICIAL
 INTELLIGENCE, 14., 1995. **Proceedings of the 14th International Joint
 Conference on Artificial Intelligence (IJCAI-95)**. San Mateo: Morgan Kaufmann,
-1995. p. 1137-1145.
+1995. p. 1137-1143.
 
 LUNDBERG, Scott M.; LEE, Su-In. A unified approach to interpreting model
 predictions. In: Advances in Neural Information Processing Systems 30 (NIPS 2017). 2017. p. 4765-4774. Disponível em: https://arxiv.org/abs/1705.07874.
@@ -1075,7 +1031,7 @@ supervised learning. In: INTERNATIONAL CONFERENCE ON MACHINE LEARNING, 22.,
 
 ORACLE'S ELIXIR. **Downloads**: dados de partidas profissionais de League of
 Legends. [S. l.], [s. d.]. Disponível em:
-https://oracleselixir.com/tools/downloads. Acesso em: 20 out. 2026.
+https://oracleselixir.com/tools/downloads. Acesso em: 4 jul. 2026.
 
 PEDREGOSA, Fabian et al. Scikit-learn: machine learning in Python. **Journal of
 Machine Learning Research**, [S. l.], v. 12, p. 2825-2830, 2011.
@@ -1102,9 +1058,6 @@ RAT-SQL: relation-aware schema encoding and linking for text-to-SQL. In:
 Proceedings of the 58th Annual Meeting of the Association for Computational
 Linguistics. Association for Computational Linguistics, 2020. p. 7567-7578.
 DOI: 10.18653/v1/2020.acl-main.677.
-
-YIN, Robert K. **Case study research and applications: design and methods**. 6.
-ed. Thousand Oaks: SAGE Publications, 2018.
 
 ZHONG, Ruiqi; YU, Tao; KLEIN, Dan. Semantic evaluation for text-to-SQL with
 distilled test suites. In: CONFERENCE ON EMPIRICAL METHODS IN NATURAL LANGUAGE
@@ -1275,14 +1228,46 @@ não altera nenhuma conclusão. O comando é
 `python -m src.models.robustez_dobras`, que grava
 `reports/robustez_dobras.json`.
 
+Quadro — Treino no passado e teste no futuro, XGBoost
+
+| Corte | Divisão | Treino | Teste | Acurácia | AUC-ROC | IC 95% da AUC-ROC |
+|---|---|---:|---:|---:|---:|---|
+| 10 min | Cronológica 80/20 | 31.447 | 7.862 | 0,7038 | 0,7789 | 0,7691 a 0,7888 |
+| 10 min | Por *patch* | 23.457 | 15.852 | 0,7080 | 0,7832 | 0,7763 a 0,7905 |
+| 10 min | Aleatória 80/20 | 31.447 | 7.862 | 0,7008 | 0,7723 | 0,7631 a 0,7834 |
+| 15 min | Cronológica 80/20 | 31.350 | 7.838 | 0,7710 | 0,8545 | 0,8458 a 0,8629 |
+| 15 min | Por *patch* | 23.376 | 15.812 | 0,7679 | 0,8542 | 0,8483 a 0,8598 |
+| 15 min | Aleatória 80/20 | 31.350 | 7.838 | 0,7573 | 0,8432 | 0,8330 a 0,8517 |
+| 20 min | Cronológica 80/20 | 27.469 | 6.868 | 0,7989 | 0,8829 | 0,8750 a 0,8897 |
+| 20 min | Por *patch* | 20.609 | 13.728 | 0,7981 | 0,8810 | 0,8749 a 0,8864 |
+| 20 min | Aleatória 80/20 | 27.469 | 6.868 | 0,7964 | 0,8814 | 0,8731 a 0,8890 |
+| 25 min | Cronológica 80/20 | 21.469 | 5.368 | 0,8333 | 0,9142 | 0,9072 a 0,9213 |
+| 25 min | Por *patch* | 16.442 | 10.395 | 0,8277 | 0,9120 | 0,9065 a 0,9172 |
+| 25 min | Aleatória 80/20 | 21.469 | 5.368 | 0,8295 | 0,9111 | 0,9034 a 0,9182 |
+
+Na divisão cronológica, as 80% partidas mais antigas treinam e as 20% mais
+recentes testam; na divisão por *patch*, os *patches* 16.10 a 16.13 treinam e
+os 16.14 a 16.19 testam; na aleatória, o teste tem o mesmo tamanho do
+cronológico. A pior diferença de AUC-ROC de uma divisão temporal para a
+aleatória é de −0,0004 (20 minutos, por *patch*), dentro do intervalo de
+confiança, de modo que misturar épocas na validação cruzada não infla o
+resultado. Esta é a resposta ao aviso de Kaufman et al. (2012) sobre dados que
+mudam com o tempo. A regressão logística dá o mesmo padrão, com diferença de
+até 0,0012 de AUC-ROC para o XGBoost em todas as divisões. A ressalva é que a
+região se mistura ao tempo: aos 15 minutos, o teste cronológico tem
+49,7% de NA1 e nenhuma partida de BR1, que é 37,7% do treino. O resultado vale
+também para uma composição regional diferente da do treino, mas não separa o
+efeito do tempo do efeito da região. O comando é
+`python -m src.models.holdout_temporal`, que grava
+`reports/holdout_temporal.json`.
+
 ---
 
 ## APÊNDICE D – Detalhe dos experimentos negativos
 
 O Quadro 5 da Seção 5.4 lista os onze experimentos de enriquecimento de
 variáveis. Os quadros a seguir detalham três deles, indicam como
-reproduzi-los e registram o efeito do volume de partidas, que foi o único
-acréscimo com ganho real.
+reproduzi-los e registram o efeito do volume de partidas, o acréscimo de maior ganho. Os experimentos 12 a 19, com ganho pequeno e real, estão no Apêndice M.
 
 Quadro — Detalhe de três experimentos negativos
 
@@ -1308,8 +1293,7 @@ Quadro — Efeito do volume de partidas sobre o AUC-ROC do XGBoost
 | 23.133 | 0,8393 | +0,0179 |
 | 39.188 | 0,8473 | +0,0259 |
 
-O ganho acumulado de 0,0259 equivale a cerca de nove vezes o maior ganho de
-um experimento de variáveis (0,003) e a cerca de 130 vezes o menor (0,0002).
+O ganho acumulado de 0,0259 equivale a cerca de nove vezes o maior ganho entre os onze experimentos (0,003), a cerca de 130 vezes o menor (0,0002) e a cerca de três vezes o maior ganho do Apêndice M (+0,0080, medido em outra base).
 
 ---
 
@@ -1337,7 +1321,7 @@ Quadro — Origem dos números da Seção 5.3
 | Comparação de pares com correção de Holm, sobre as variáveis congeladas | `testa_diferenca_taxas.py` | saída no terminal |
 | Vitória do azul por faixa de duração, sobre 41.063 partidas | `testa_faixa_duracao.py` | `faixa_duracao.json` |
 | Conversão de vantagem de ouro, sobre as variáveis congeladas (39.188 aos 15 minutos) | `confere_conversao_advantagem.py` | lê `features_phases.csv`, em `data/` |
-| Série anual do cenário profissional, sobre 96.716 jogos | consulta SQL em `pro_games` | |
+| Série anual do cenário profissional, sobre 99.259 jogos | consulta SQL em `pro_games` | |
 
 Quadro — Vitória do azul por faixa de duração total da partida
 
@@ -1357,15 +1341,15 @@ Quadro — Vitória do azul por ano no cenário profissional
 | Ano | Azul | Ano | Azul |
 |---|---:|---|---:|
 | 2014 | 58,2% | 2021 | 52,6% |
-| 2015 | 55,3% | 2022 | 52,5% |
-| 2016 | 53,6% | 2023 | 53,3% |
+| 2015 | 55,0% | 2022 | 52,5% |
+| 2016 | 53,5% | 2023 | 53,3% |
 | 2017 | 55,0% | 2024 | 53,1% |
-| 2018 | 53,7% | 2025 | 53,3% |
+| 2018 | 53,6% | 2025 | 53,2% |
 | 2019 | 53,2% | 2026 | 53,1% |
 | 2020 | 52,7% | Todos os anos | 53,2% |
 
-Os anos de 2014 e 2015 divergem, mas se apoiam em 814 e 1.702 jogos, contra
-96.716 no total, e a diferença é atribuída a esse volume menor, não a uma
+Os anos de 2014 e 2015 divergem, mas se apoiam em 814 e 1.806 jogos, contra
+99.259 no total, e a diferença é atribuída a esse volume menor, não a uma
 mudança no padrão.
 
 ---
@@ -1401,10 +1385,10 @@ Quadro — Limitações do trabalho e a evidência de cada uma
 |---|---|---|
 | Taxa-base do modelo no estado de empate | O modelo prevê 49,0% a 51,4% para o azul, e os dados dão 46,4% a 47,9% | Discrepância de 1,7 a 4,7 pontos percentuais; não é subajuste (quadros seguintes). Mantido o XGBoost |
 | Última rodada de coleta fora do treino | Treino com 39.426 das 41.063 partidas do banco. Das 1.754 partidas do banco sem variáveis, 1.647 são da KR e 107 de BR1, EUW1 e NA1; 117 da base congelada também não geraram linha | Não retreinado: o desempenho do modelo atual está medido e validado (Apêndice C e bateria comportamental), e retreinar invalidaria as duas. Quem quiser o modelo sobre a base completa reexecuta `train_baseline` e `export_model` |
-| Teto de desempenho das variáveis atuais | Onze experimentos sem ganho, dez sobre a linha do tempo e um sobre o endpoint de progressão do jogador. A posição dos jogadores existe na linha do tempo e foi testada (experimento 2) | O próximo ganho depende de dado que a API pública não fornece: a ordem de escolha de campeões (*draft*) e o estado das ondas de *minions* |
+| Teto de desempenho das variáveis atuais | Onze experimentos sem ganho, dez sobre a linha do tempo e um sobre o endpoint de progressão do jogador. A posição dos jogadores existe na linha do tempo e foi testada (experimento 2). Os experimentos 12 a 19, com 59 variáveis novas, somam até +0,0080 de AUC-ROC aos 15 minutos (Apêndice M) | O ganho maior provavelmente depende de dado que a API pública não fornece: a ordem de escolha de campeões (*draft*) e o estado das ondas de *minions*. O histórico do jogador não acrescenta ao estado de jogo |
 | Ausência de micro-posicionamento | Nenhuma API pública da Riot expõe movimentação de *minions* nem controle de onda | Replays (`.rofl`) e visão computacional sobre o minimapa foram considerados, mas não implementados |
 | Desequilíbrio de amostra por região | BR1 11.936, EUW1 11.744, KR 10.204 e NA1 7.159 partidas (a NA1 tinha 1.446 antes da rodada final). Em três das quatro regiões o intervalo de 95% exclui 50%; a KR tem 50,4%, com intervalo que inclui 50% | O achado de viés de elo alto, além do Brasil, se apoia nas três regiões com evidência firme |
-| Cobertura desigual por versão do jogo | Um único *patch* concentra a maior parte das partidas | Limita a generalização para versões com balanceamento diferente |
+| Cobertura desigual por versão do jogo | O *patch* 16.13 concentra 40,4% das partidas (16.572 de 41.063), em dez *patches* de 16.10 a 16.19 | Treinar nos *patches* 16.10 a 16.13 e testar nos 16.14 a 16.19 não reduz a AUC-ROC (Apêndice C). A generalização para versões com balanceamento muito diferente segue sem medida |
 | Monotonicidade isolada por variável | O XGBoost não garante que aumentar apenas a diferença de abates ou de torres nunca reduza a probabilidade prevista, por interações e redundâncias entre variáveis | Comportamento documentado e compreendido, sem restrição formal de monotonicidade (`monotone_constraints`) nesta versão |
 
 Quadro — Taxa de vitória do azul no estado de empate, modelo e dados
@@ -1416,8 +1400,7 @@ Quadro — Taxa de vitória do azul no estado de empate, modelo e dados
 | 20 min | 51,4% | 46,7% | 4,7 pp |
 | 25 min | 49,0% | 47,1% | 1,9 pp |
 
-A série do modelo é plana, sem o pico de meio de jogo que uma versão
-anterior do texto atribuía aos dados. As duas séries não concordam em
+A série do modelo é plana, sem o pico de meio de jogo que amostras menores sugeriam. As duas séries não concordam em
 magnitude, nem sempre em direção: aos 20 minutos o modelo favorece o azul
 (51,4%), enquanto os dados favorecem o vermelho (46,7% de vitória do azul).
 
@@ -1437,12 +1420,164 @@ neste recorte; não é um déficit de ajuste. Comando e artefato:
 
 ---
 
+## APÊNDICE H – Fundamentos dos métodos usados
+
+O quadro resume, para cada método, o papel que ele tem neste trabalho, a propriedade que justifica o uso e o limite que o próprio autor da obra ou a medição deste trabalho aponta. As referências completas estão na lista de Referências.
+
+Quadro — Fundamentos dos métodos usados e o limite de cada um
+
+| Método | Papel neste trabalho | Propriedade que o justifica | Limite |
+|---|---|---|---|
+| *Random Forest* (Breiman, 2001) | Classificador comparado | *Bagging* com seleção aleatória de variáveis em cada nó, o que reduz a correlação entre as árvores | As variáveis preditoras evoluem juntas na partida, o que limita o ganho do conjunto |
+| XGBoost (Chen; Guestrin, 2016) | Modelo de produção | Árvores em sequência, cada uma ajustada ao resíduo das anteriores, com otimização de segunda ordem e regularização | Não garante monotonicidade isolada por variável |
+| Rede neural MLP (Hornik; Stinchcombe; White, 1989) | Classificador comparado | Aproximação universal: captura interações sem especificá-las | Exige mais dados e cuidado com escala e regularização |
+| Dados tabulares (Grinsztajn; Oyallon; Varoquaux, 2022) | Motivo de comparar árvores e redes | Árvores seguem competitivas em amostras de cerca de 10 mil exemplos | A diferença diminui em amostras maiores |
+| LIME (Ribeiro; Singh; Guestrin, 2016) | Alternativa não adotada | Modelo linear local, simples de ler | Pouco fiel se o modelo for muito não linear na vizinhança |
+| SHAP (Lundberg; Lee, 2017) | Explicação por variável, global e por previsão | Valor de Shapley: atribuição aditiva com consistência e importância nula para variável ausente | Explica o modelo, não o jogo |
+| AUC-ROC (Hanley; McNeil, 1982) | Métrica ao lado da acurácia | Equivale à probabilidade de um caso positivo receber pontuação maior que um negativo | Mede discriminação, não calibração |
+| Calibração (Niculescu-Mizil; Caruana, 2005) | Curva de calibração do modelo de produção | Calibração é preocupação conhecida em modelos de *boosting* | Não exigiu correção neste trabalho |
+| Validação cruzada estratificada (Kohavi, 1995) | Cinco dobras, semente 42 | Estima o desempenho com a proporção de classes preservada | O autor recomenda 10 dobras; a diferença para 5 é de até 0,0008 (Apêndice C) |
+| Vazamento de dados (Kaufman et al., 2012) | Variáveis só do estado até o corte | Prever com informação que não existiria no momento da previsão invalida o resultado | A coleta pode ter viés de seleção, não medido |
+| Intervalo de Wilson (Brown; Cai; DasGupta, 2001) | Intervalo de confiança das proporções | Funciona melhor que o intervalo usual em amostras menores | Supõe observações independentes |
+| Correção de Holm (Holm, 1979) | Comparação de pares de cortes | Controla a multiplicidade quando várias diferenças são testadas | Controla o erro do conjunto de testes, com menos perda de poder que a correção de Bonferroni |
+| Esquema no *text-to-SQL* (Wang et al., 2020) | Contexto da consulta gerada | Representar o esquema com os relacionamentos entre tabelas melhora a precisão da conversão | Consulta correta na forma pode responder à pergunta errada |
+| Acurácia de execução (Zhong; Yu; Klein, 2020) | Métrica do *benchmark* de linguagem natural | Compara o resultado da consulta gerada com o da consulta de referência | Propõem avaliar sobre vários bancos de teste, o que o *benchmark* feito sobre uma base não faz |
+
+---
+
+## APÊNDICE I – Estudos de domínio e comparação com a literatura
+
+O primeiro quadro reúne os onze estudos de domínio da Seção 3; o segundo, a acurácia que cada um relata contra a deste trabalho. A comparação é apenas indicativa: mudam o jogo, o nível dos jogadores, o momento da previsão e a informação usada.
+
+Quadro — Estudos de domínio: objeto, resultado e relação com este trabalho
+
+| Estudo | Objeto | Resultado relatado | Relação com este trabalho |
+|---|---|---|---|
+| Hodge et al. (2021) | *Dota 2* profissional, previsão em tempo real | Até 85% de acurácia após 5 minutos, em previsões ao vivo de 28 partidas de um torneio | Sustenta prever a partir do estado da partida; outro jogo |
+| Birant e Birant (2023) | Esports, aprendizado multi-objetivo e multi-instância | Destaca a modelagem centrada no time | Orientação adotada: variáveis como diferenças entre os times |
+| Bahrololloomi et al. (2022) | *League of Legends*, métricas individuais | Prediz a vitória pelas métricas dos jogadores; o peso de cada função é desprezível | Esse nível só aparece nos perfis de jogador |
+| Jadowski e Cunningham (2022) | *League of Legends*, ligas profissionais de 2020 | 67% de acerto em 306 jogos da etapa seguinte; 54,08% de vitórias do azul em 882 jogos | Comparação indicativa; coerente com a vitória do azul no profissional |
+| Do et al. (2021) | *League of Legends*, ranqueadas, antes da partida | 75,1% com rede neural profunda, pela experiência do jogador com o campeão | Momento da previsão diferente |
+| Maymin (2021) | *League of Legends*, milhões de partidas ranqueadas | Probabilidade de vitória calibrada; avalia abates e mortes pelo efeito nela | Eventos individuais; fora da comparação numérica; origem do mapa de calor de posição |
+| Guan e Tung (2026) | *League of Legends* profissional, antes da partida (*preprint*) | Avalia o erro de probabilidade (Brier); lado do mapa e prioridade de escolha como covariáveis | Fora da comparação numérica |
+| García-Méndez e Arriba-Pérez (2025) | *Counter-Strike* profissional, fluxo contínuo | Classificação com interpretação; aponta a falta de interpretabilidade nos trabalhos anteriores | Orienta a camada de explicabilidade |
+| Jiang et al. (2025) | SiriusBI, *Business Intelligence* com modelos de linguagem | Exploração de dados estruturados com diálogo em várias rodadas | Motiva o *text-to-SQL* |
+| Guo et al. (2024) | Talk2Data, análise visual por decomposição de perguntas | Exploração de dados mais intuitiva | Motiva o *text-to-SQL* |
+| Wallner, Wang e Dormann (2023) | *League of Legends*, visualização de linhas narrativas (*storyline*) | Integrar tempo e localização numa só vista é viável para a interpretação pós-jogo | Referência do mapa de calor de posicionamento |
+
+Quadro — Acurácia relatada nos estudos e neste trabalho
+
+| Estudo | Momento da previsão | Acurácia relatada | Comparável? |
+|---|---|---|---|
+| Hodge et al. (2021) | 5 minutos, *Dota 2* | Até 85% | Não: outro jogo |
+| Jadowski e Cunningham (2022) | Jogos da etapa seguinte, profissional | 67% | Indicativa |
+| Do et al. (2021) | Antes da partida, ranqueadas | 75,1% | Indicativa |
+| Maymin (2021) | Eventos individuais | Sem acurácia comparável | Não |
+| Guan e Tung (2026) | Antes da partida, profissional | Erro de probabilidade (Brier) | Não |
+| Este trabalho | 10 a 25 minutos, ranqueadas de elo alto | 70,0% a 82,4% | Na mesma ordem de grandeza |
+
+---
+
+## APÊNDICE J – Procedência dos dados e chaves da Riot Games API
+
+O primeiro quadro reúne medições sobre a composição das duas bases, feitas em 3 de novembro de 2026, sobre as 41.063 partidas e os 99.259 jogos descritos na Seção 4.3. As consultas estão registradas em `docs/conferencia_referencias.md`. O segundo quadro resume os tipos de chave da Riot Games API, conforme o portal de desenvolvedores consultado na mesma data.
+
+Quadro — Composição das bases de dados
+
+| Aspecto | Medida | Observação |
+|---|---|---|
+| Jogos profissionais nos arquivos | 99.259 jogos únicos, de 122 ligas | Arquivos do Oracle’s Elixir de 4 de julho de 2026 |
+| Concentração por liga | 40,0% em 22 ligas principais e 60,0% nas outras 100 | As outras são de desenvolvimento, acadêmicas e regionais |
+| Vitória do azul por grupo de ligas | 53,4% nas principais e 53,0% nas demais | A conclusão não depende da mistura |
+| Carga no banco | 2.543 jogos perdidos por erro do carregador, corrigido | O carregador apagava por ano do arquivo; agora apaga por jogo |
+| Jogadores da tabela `players` | 60.680, dos quais 93% de Mestre | A semeadura incluiu a faixa Mestre |
+| Partidas com ao menos um Desafiante ou Grão-Mestre | 97,2% das 41.063 | Média de 5,4 jogadores desses elos por partida |
+| Partidas só com jogadores de Mestre | 2,8% (1.163), das quais 769 na KR | Na KR, a última rodada de coleta desceu no ladder |
+| Elo dos participantes com elo conhecido | 25% Desafiante, 31% Grão-Mestre e 44% Mestre | Elo da tabela `players`, não o da data da partida |
+
+Quadro — Tipos de chave da Riot Games API
+
+| Tipo | Como obter | Limite de requisições | APIs | Validade |
+|---|---|---|---|---|
+| Desenvolvimento | Concedida ao entrar no portal | Não informado | Não informado | Desativa a cada 24 horas |
+| Pessoal | Registro do produto, sem verificação | 20 por segundo e 100 por 2 minutos | APIs padrão | Não informada |
+| Produção | Registro do projeto, em geral com protótipo, e aprovação | A partir de 500 por 10 segundos e 30.000 por 10 minutos, ampliável | APIs padrão e API de torneios | Não informada |
+
+---
+
+## APÊNDICE K – Objetivos, evidências e onde estão
+
+Quadro — Objetivos específicos, onde são tratados e a evidência de cada um
+
+| Objetivo | Seção | Evidência |
+|---|---|---|
+| a | 5.1 e Anexo A | Endpoints *league-v4*, *account-v1* e *match-v5*; coletor resumível e dentro dos limites de taxa |
+| b | 5.2 e Apêndice A | Quadro 1: onze tabelas relacionais para partidas, jogadores, estatísticas, itens e jogos profissionais |
+| c | 4.3 e 5.2 | 41.063 partidas de *solo queue* e 99.259 jogos profissionais; coleta e carga re-executáveis |
+| d | 5.3 e Apêndice E | Quadro 2 e viés de lado com quatro testes de robustez; inversão no profissional; conversão de vantagem |
+| e | 5.4 e Apêndice C | Quadros 3 e 4: três modelos comparados em quatro cortes; XGBoost em produção |
+| f | 5.5 e Apêndice F | Seis páginas de visualização; Figuras 3 e 4 no texto |
+| g | 5.6 e Apêndice B | 23 de 26 perguntas corretas (88%), Quadro 6 |
+
+---
+
+## APÊNDICE L – Importância das variáveis por corte
+
+Valor médio absoluto do SHAP de cada variável, no modelo XGBoost de cada corte. Artefato: `reports/shap_importance_phases.json`.
+
+Quadro — Importância média das variáveis (valor absoluto do SHAP) por corte
+
+| Variável | 10 min | 15 min | 20 min | 25 min |
+|---|---:|---:|---:|---:|
+| Diferença de ouro | 0,6643 | 0,8989 | 1,0693 | 1,0642 |
+| Diferença de experiência | 0,2741 | 0,4073 | 0,4855 | 0,8104 |
+| Diferença de abates | 0,0209 | 0,0680 | 0,0166 | 0,0028 |
+| Diferença de torres | 0,0044 | 0,0060 | 0,0031 | 0,0928 |
+| Diferença de dragões | 0,1879 | 0,2267 | 0,2650 | 0,2567 |
+
+---
+
+## APÊNDICE M – Experimentos de precisão
+
+Experimentos 12 a 19, feitos depois dos onze do Quadro 5, sobre a mesma base congelada de 39.426 partidas, com o mesmo protocolo (validação cruzada estratificada de 5 dobras, semente 42). Todas as variáveis vêm de `frames[: corte + 1]` da linha do tempo; as de campeão e de jogador usam só informação anterior à partida (teste `tests/test_features_v2_sem_vazamento.py`, 703 pares de partida e corte sem vazamento). O ganho é a diferença de AUC-ROC contra o XGBoost de produção com as cinco variáveis originais (0,8476 aos 15 minutos e 0,9089 aos 25 nesta base), com intervalo de 95% por *bootstrap* pareado.
+
+Quadro — Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais
+
+| Experimento | Variáveis acrescentadas | 15 minutos | 25 minutos |
+|---|---|---|---|
+| 12 | Trajetória: ouro, experiência e abates dos 3 e 5 minutos anteriores (8 variáveis) | +0,0003 (−0,0001 a +0,0006) | +0,0014 (+0,0009 a +0,0019) |
+| 13 | Por função, nível, farm, dano e atributos (37 variáveis) | +0,0027 (+0,0021 a +0,0032) | +0,0018 (+0,0013 a +0,0022) |
+| 14 | Objetivos: arauto, barão, vastilarvas, inibidor, placas, primeiros abate e torre (7 variáveis) | +0,0002 (+0,0001 a +0,0003) | +0,0001 (+0,0000 a +0,0002) |
+| 15 | Estado rico: 12 a 14 juntos (52 variáveis) | +0,0028 (+0,0022 a +0,0034) | +0,0025 (+0,0020 a +0,0031) |
+| 16 | Campeões de cada time, taxa de vitória calculada fora da dobra (2 variáveis) | +0,0013 (+0,0008 a +0,0018) | +0,0020 (+0,0016 a +0,0024) |
+| 17 | Histórico prévio do jogador, só com partidas anteriores (5 variáveis) | +0,0011 (+0,0008 a +0,0015) | +0,0004 (+0,0002 a +0,0006) |
+| 18 | Tudo junto (59 variáveis), XGBoost | +0,0044 (+0,0037 a +0,0051) | +0,0040 (+0,0034 a +0,0047) |
+| 18 | Tudo junto (59 variáveis), regressão logística | +0,0080 (+0,0068 a +0,0093) | +0,0074 (+0,0062 a +0,0087) |
+| 19 | Histórico do jogador sobre o estado rico, partidas com 5 ou mais jogadores com histórico, regressão logística | +0,0004 (+0,0001 a +0,0006) | +0,0001 (−0,0001 a +0,0003) |
+
+O maior ganho, com todas as variáveis e regressão logística, é de +0,0080 de AUC-ROC aos 15 minutos e de +0,0074 aos 25. A regressão logística aproveita as variáveis novas mais que o XGBoost, o que indica que o limite está na informação disponível e não no algoritmo. Campeões e histórico do jogador, sozinhos, dão AUC-ROC de 0,56 aos 15 minutos. O histórico do jogador não acrescenta ao estado de jogo mesmo nas partidas bem cobertas (experimento 19). Comando: `python -m src.models.experiment_precisao`; artefatos: `reports/experimentos_precisao.json` e `reports/experimento_historico.json`.
+
+Quadro — Variáveis novas em treino no passado e teste no futuro
+
+| Corte | Divisão | XGBoost, 5 variáveis | Regressão logística, 64 variáveis | Ganho de AUC-ROC |
+|---|---|---:|---:|---|
+| 15 min | Cronológica 80/20 | 0,8545 | 0,8633 | +0,0089 (+0,0059 a +0,0113) |
+| 15 min | Por *patch* | 0,8542 | 0,8623 | +0,0080 (+0,0061 a +0,0097) |
+| 15 min | Aleatória 80/20 | 0,8432 | 0,8510 | +0,0077 (+0,0053 a +0,0103) |
+| 25 min | Cronológica 80/20 | 0,9142 | 0,9211 | +0,0069 (+0,0044 a +0,0095) |
+| 25 min | Por *patch* | 0,9120 | 0,9202 | +0,0083 (+0,0066 a +0,0100) |
+| 25 min | Aleatória 80/20 | 0,9111 | 0,9188 | +0,0077 (+0,0049 a +0,0105) |
+
+O ganho se mantém quando se treina no passado e se testa no futuro, e a referência reproduz o Apêndice C. Comando: `python -m src.models.holdout_precisao`; artefato: `reports/holdout_precisao.json`.
+
+---
+
 ## ANEXO A – Documentação da Riot Games API
 
 Referência: RIOT GAMES. **APIs**. Disponível em:
 https://developer.riotgames.com/apis. Endpoints utilizados: *league-v4*
-(elos Desafiante/Grão-Mestre), *account-v1* (resolução de Riot ID),
-*match-v5* e *timeline-v5* (dados de partida e linha do tempo).
+(elos Desafiante a Mestre), *account-v1* (resolução de Riot ID),
+*match-v5* (dados de partida e linha do tempo).
 
 ---
 
@@ -1543,7 +1678,7 @@ acima e não se repetem aqui.
 
 Antes de entregar, a suíte completa passa:
 `tests/smoke_test.py` (exit 0), `tests/validate_predictions.py`
-(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (20 checagens de
+(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (22 checagens de
 consistência do texto contra o banco e os artefatos, exit 0),
 `docs/confere_docx.py` (conformidade formal do `.docx`, exit 0), e
 `cd frontend; npm run lint; npm run test` (31/31).
