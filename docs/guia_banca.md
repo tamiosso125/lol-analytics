@@ -42,6 +42,18 @@
 
 ## 1. O projeto em 5 minutos
 
+**O Resumo do TCC (versão de 2026-11-02) segue a ordem contexto,
+objetivo, metodologia, resultados e conclusão.** Use a mesma ordem no
+pitch: (1) esports geram muitos dados, mas explorar exige ferramentas
+fragmentadas e conhecimento técnico; (2) desenvolvi uma plataforma que
+junta coleta, predição, explicação, visualização e consulta em português;
+(3) pesquisa aplicada, mista, sobre 41.063 partidas e 96.716 jogos
+profissionais, com três modelos comparados por validação cruzada
+estratificada; (4) empate técnico entre os três, XGBoost adotado com 76% e
+AUC de 0,85 aos 15 minutos, viés do vermelho que se inverte no
+profissional, 88% na consulta em português; (5) dá para integrar tudo numa
+solução só.
+
 **Em uma frase:** foi construída uma plataforma (chamada **Bellestraiko**)
 que coleta dados reais de partidas de *League of Legends*, organiza tudo
 num banco de dados, usa *machine learning* para estimar quem vai vencer uma
@@ -62,7 +74,7 @@ visualização (*dashboards*) → consulta em linguagem natural.
 |---|---|
 | Partidas ranqueadas coletadas (solo queue) | **41.063** (5 regiões) |
 | Partidas profissionais incorporadas | **96.716** (2014-2026) |
-| Melhor modelo | **XGBoost** |
+| Modelo adotado (os três empataram) | **XGBoost** |
 | Acurácia aos 15 minutos | **0,7621** (≈ 76 de cada 100 partidas certas) |
 | AUC-ROC aos 15 minutos | **0,8473** |
 | Viés de lado no solo queue | vermelho vence mais (56,3% na BR1) |
@@ -139,7 +151,7 @@ cumprido? onde?".
 | **b** | Identificar quais informações organizar | Seção 5.2 | Quadro 1 (tabelas do banco) e esquema completo no Apêndice A |
 | **c** | Estruturar coleta e tratamento | Seção 5.2 | Coletor resumível, 41.063 partidas |
 | **d** | Avaliar análise de dados para achar padrões | Seção 5.3 | Viés de lado, conversão de vantagem |
-| **e** | Comparar XGBoost, Random Forest e redes neurais | Seção 5.4 | XGBoost venceu: 0,7621 / 0,8473 |
+| **e** | Comparar XGBoost, Random Forest e redes neurais | Seção 5.4 | Empate técnico; XGBoost adotado: 0,7621 / 0,8473 |
 | **f** | Propor *dashboards* | Seção 5.5 | 6 páginas de visualização |
 | **g** | Propor interface em linguagem natural | Seção 5.6 | 88% de acerto (23/26) |
 
@@ -528,7 +540,7 @@ método, e o texto diz isso."
 | Niculescu-Mizil e Caruana (2005) | Calibração de probabilidades; *boosting* pode distorcê-las | Contexto da curva de calibração (Seção 5.4) |
 | Zhong, Yu e Klein (2020) | Limites da acurácia de execução em *text-to-SQL*; propõe vários bancos de teste | Limitação do *benchmark* de 26 perguntas (Seção 4.7) |
 | Breiman (2001) | Random Forest | Um dos 3 modelos comparados |
-| Chen e Guestrin (2016) | XGBoost | O modelo vencedor |
+| Chen e Guestrin (2016) | XGBoost | O modelo adotado em produção |
 | Hanley e McNeil (1982) | O significado da AUC-ROC | Justifica a métrica principal |
 | Lundberg e Lee (2017) | SHAP | A técnica de explicação usada |
 | Ribeiro, Singh e Guestrin (2016) | LIME | A alternativa ao SHAP (comparada, não usada) |
@@ -859,7 +871,7 @@ tem mais ouro costuma ter mais abates e mais torres). O sorteio de
 
 **No projeto:** 500 árvores na comparação final.
 
-### 9.4 XGBoost (Chen e Guestrin, 2016) — O VENCEDOR
+### 9.4 XGBoost (Chen e Guestrin, 2016), o modelo adotado
 
 **O nome:** *eXtreme Gradient Boosting*.
 
@@ -893,8 +905,11 @@ aprende sozinho dos dados. Hiperparâmetros são configurações que
 **você** escolhe antes de treinar.
 
 **Por que o XGBoost foi escolhido como modelo de produção (Seção 5.4):**
-- Teve a **melhor acurácia e AUC no corte de 15 minutos** (0,7621 /
-  0,8473), o corte usado como padrão.
+- Teve a **maior acurácia no corte de 15 minutos** (0,7621), o corte
+  padrão, também contra a *Random Forest* e o MLP ajustados (0,7617 e
+  0,7619). Na AUC, o MLP ajustado fica 0,0004 acima (0,8477 contra
+  0,8473). Ou seja: **empate técnico** (Seção 5.4, texto corrigido em
+  2026-11-02).
 - **Mas atenção, a escolha não foi porque ele ganhou em tudo.** Aos 10
   minutos o MLP teve acurácia um pouco maior (0,7020 contra 0,7004) e aos
   25 minutos o MLP quase empatou na AUC (0,9072 contra 0,9090). O texto
@@ -979,13 +994,14 @@ explicação: para árvores o SHAP usa o `TreeExplainer`, exato e rápido; para
 uma rede do scikit-learn usaria o `KernelExplainer`, aproximado e muito
 mais lento, ruim para a tela interativa.
 
-**PONTO DE ATENÇÃO, a comparação do Quadro 3 (achado em 2026-11-02).** A
-5.4 diz que o Quadro 3 compara os três "após ajuste de hiperparâmetros",
-mas na base final só o XGBoost passou pela busca em grade; a *Random
-Forest* (500 árvores, sem limite de profundidade) e o MLP (64, 32) estão na
-configuração de referência. A busca foi rodada para os outros dois sobre as
-mesmas 39.188 partidas (`tune_models_full --completo`, gravado em
-`reports/tune_models_39k.json`) e medida do mesmo jeito do Quadro 3:
+**A comparação do Quadro 3 (achado e corrigido no texto em 2026-11-02).**
+A 5.4 dizia que o Quadro 3 comparava os três "após ajuste de
+hiperparâmetros", mas na base final só o XGBoost passou pela busca em
+grade; a *Random Forest* (500 árvores, sem limite de profundidade) e o MLP
+(64, 32) estão na configuração de referência. Agora a 5.4 diz isso e cita a
+busca feita também para os outros dois, sobre as mesmas 39.188 partidas
+(`tune_models_full --completo`, gravado em `reports/tune_models_39k.json`),
+medida do mesmo jeito do Quadro 3:
 
 | 15 min | Acurácia | AUC |
 |---|---|---|
@@ -994,10 +1010,11 @@ mesmas 39.188 partidas (`tune_models_full --completo`, gravado em
 | *Random Forest* ajustada: 200 árvores, profundidade 6, folha 5 | 0,7617 | 0,8468 |
 
 Empate técnico. O XGBoost segue com a maior acurácia, o critério do
-Apêndice G, e a conclusão não muda. Mas o Quadro 3 subestima a *Random
-Forest* e o MLP, e a banca pode notar que o Apêndice G cita uma *Random
-Forest* de profundidade 6 a 0,0005 da AUC do XGBoost, enquanto o Quadro 3
-dá 0,8277 a ela. **Resposta pronta:** "Na base final, ajustei por busca em
+Apêndice G, e a conclusão não muda. Se a banca comparar o Quadro 3
+(*Random Forest* com 0,8277) com o Apêndice G (*Random Forest* de
+profundidade 6 a 0,0005 do XGBoost), a resposta está na própria 5.4: o
+quadro traz a configuração de referência, e a frase seguinte, a ajustada.
+**Resposta pronta:** "Na base final, ajustei por busca em
 grade o XGBoost. Rodando a mesma busca para a *Random Forest* e a rede, os
 três ficam a menos de 0,001 em AUC e em acurácia. É empate técnico, e o
 XGBoost segue com a maior acurácia, o critério que defini."
@@ -1587,8 +1604,8 @@ mais, use as partes do guia.
 "Construí uma plataforma que coleta partidas reais de *League of
 Legends*, prevê o vencedor a partir do estado do jogo num minuto
 específico, explica a previsão e deixa o usuário perguntar sobre os dados
-em português. O melhor modelo foi o XGBoost, com 76% de acurácia e AUC de
-0,85 aos 15 minutos."
+em português. Os três modelos comparados empataram, e o adotado, o
+XGBoost, acerta 76% aos 15 minutos, com AUC de 0,85."
 
 **2. "Por que 76% é um bom resultado?"**
 "Porque o chute mais simples, que é sempre apostar no vermelho, acerta
@@ -1612,8 +1629,10 @@ colar com o gabarito."
 **5. "Por que XGBoost e não uma rede neural profunda?"**
 "Comparei três famílias por medição. Para dados em tabela, com dezenas de
 milhares de linhas, métodos de árvores seguem competitivos com redes
-neurais (Grinsztajn et al., 2022), e foi o que aconteceu: o MLP ficou muito
-perto, mas abaixo, e redes neurais precisam de mais dados. O XGBoost também se integra com o SHAP de árvore,
+neurais (Grinsztajn et al., 2022), e foi o que aconteceu: a rede (MLP)
+empatou com o XGBoost, sem superar as árvores de forma distinguível. Uma
+rede profunda pediria muito mais dados e não teria o que explorar em cinco
+números por partida. O XGBoost também se integra com o SHAP de árvore,
 que dá explicações exatas."
 
 **6. "O MLP ganhou aos 10 minutos. Por que não usaram ele?"**
@@ -2042,6 +2061,8 @@ para isso que este guia existe.
 - AUC por corte: 0,774 / 0,847 / 0,876 / 0,909
 - Taxa de vitória do azul na amostra: 46,6%
 - Busca em grade: 27 combinações, produção em 2º lugar (0,8473 x 0,8475)
+- Com os três ajustados (15 min): XGBoost 0,7621 / 0,8473; MLP 0,7619 /
+  0,8477; *Random Forest* 0,7617 / 0,8468 (empate técnico)
 
 **Explicabilidade**
 - Ouro e XP dominam; torres saltam de ~0,006 para 0,0928 aos 25 min
