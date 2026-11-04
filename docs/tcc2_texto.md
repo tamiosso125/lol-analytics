@@ -316,7 +316,7 @@ com o objeto, a abordagem e a contribuição de cada um para o problema
 aqui tratado. As principais obras de método (Breiman, 2001; Chen; Guestrin, 2016; Hanley; McNeil, 1982; Lundberg; Lee, 2017; Ribeiro; Singh; Guestrin, 2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
 elas fundamentam é introduzido.
 
-### 3.1 ESPORTS COMO FENÔMENO DE PRODUÇÃO E ANÁLISE DE DADOS
+### 3.1 PREDIÇÃO DE VITÓRIA EM DOTA 2
 
 Hodge et al. (2021) tratam da predição de vitória em partidas
 profissionais de *Dota 2*, em tempo real. Com modelos de aprendizado de máquina
@@ -327,7 +327,7 @@ resultados em esports como problema tratável por modelagem estatística.
 Por tratar de outro jogo, o estudo sustenta a abordagem de prever a
 partir do estado da partida, mas não o recorte de *League of Legends*.
 
-### 3.2 MACHINE LEARNING APLICADO A LEAGUE OF LEGENDS E ESPORTS
+### 3.2 ESTUDOS DE PREDIÇÃO EM LEAGUE OF LEGENDS
 
 Birant e Birant (2023) apresentam uma abordagem de aprendizado
 multi-objetivo e multi-instância (*Multi-Objective Multi-Instance
@@ -347,7 +347,7 @@ ainda sem revisão por pares, fazem previsão pré-jogo no cenário
 profissional e tratam o lado do mapa e a prioridade de escolha como
 covariáveis do modelo.
 
-### 3.3 EXPLICABILIDADE E ANÁLISE PREDITIVA
+### 3.3 PREDIÇÃO COM INTERPRETAÇÃO EM COUNTER-STRIKE
 
 García-Méndez e Arriba-Pérez (2025) combinam classificação por *machine
 learning* com mecanismos de interpretação na predição de vitória em
@@ -356,7 +356,7 @@ Eles apontam a falta de interpretabilidade como uma das principais
 limitações dos trabalhos anteriores, o que orienta a camada de
 explicabilidade da plataforma.
 
-### 3.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTICA
+### 3.4 SISTEMAS DE CONSULTA EM LINGUAGEM NATURAL SOBRE DADOS
 
 Jiang et al. (2025) apresentam o SiriusBI, solução de *Business
 Intelligence* apoiada por modelos de linguagem para análise de dados em
@@ -367,7 +367,7 @@ de interação sobre dados estruturados e motivam o *text-to-SQL* deste
 trabalho, que leva a abordagem ao domínio de *League of
 Legends*.
 
-### 3.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
+### 3.5 VISUALIZAÇÃO ESPAÇO-TEMPORAL DE PARTIDAS
 
 Wallner, Wang e Dormann (2023) estudam a evolução espaço-temporal do
 gameplay em *League of Legends* com a técnica de *storyline
