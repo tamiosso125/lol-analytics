@@ -1,0 +1,80 @@
+{
+  "capturado_em": "2026-11-03T21:14:07",
+  "base_partidas_fila_420": 41063,
+  "viewport": [
+    1920,
+    1080
+  ],
+  "match_id": "NA1_5653867149",
+  "prints": [
+    {
+      "arquivo": "10_inicio.png",
+      "rota": "/"
+    },
+    {
+      "arquivo": "11_dashboard_topo.png",
+      "rota": "/dashboard"
+    },
+    {
+      "arquivo": "12_dashboard_baixo.png",
+      "rota": "/dashboard"
+    },
+    {
+      "arquivo": "13_campeoes_lista.png",
+      "rota": "/campeoes"
+    },
+    {
+      "arquivo": "14_campeao_detalhe.png",
+      "rota": "/campeoes/Jayce"
+    },
+    {
+      "arquivo": "15_competitivo_vies.png",
+      "rota": "/competitivo"
+    },
+    {
+      "arquivo": "16_competitivo_baixo.png",
+      "rota": "/competitivo"
+    },
+    {
+      "arquivo": "17_partida_mapa.png",
+      "rota": "/partidas/NA1_5653867149"
+    },
+    {
+      "arquivo": "18_partida_baixo.png",
+      "rota": "/partidas/NA1_5653867149"
+    },
+    {
+      "arquivo": "19_simulador_composicao.png",
+      "rota": "/simulador"
+    },
+    {
+      "arquivo": "20_simulador_estado.png",
+      "rota": "/simulador"
+    },
+    {
+      "arquivo": "21_simulador_explicabilidade.png",
+      "rota": "/simulador"
+    },
+    {
+      "arquivo": "22_consulta_solo.png",
+      "rota": "/consulta"
+    },
+    {
+      "arquivo": "23_consulta_competitivo.png",
+      "rota": "/consulta"
+    },
+    {
+      "arquivo": "24_jogador_profissional.png",
+      "rota": "/competitivo/jogadores/Faker"
+    },
+    {
+      "arquivo": "25_consulta_explicacao.png",
+      "rota": "/consulta"
+    },
+    {
+      "arquivo": "26_jogador_solo.png",
+      "rota": "/jogadores/hL0diL2TxVOEoSFKnuZ6oI5OJBb7js9b_c0NVhMaVBQKd22NCEVI-ZYxyM_MlqymhaO8A_pp4qBCdQ"
+    }
+  ],
+  "falhas": []
+}
