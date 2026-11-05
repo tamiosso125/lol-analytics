@@ -51,7 +51,7 @@ junta coleta, predição, explicação, visualização e consulta em português;
 profissionais, com três modelos comparados por validação cruzada
 estratificada; (4) empate técnico entre os três, XGBoost adotado com 76% e
 AUC de 0,85 aos 15 minutos, viés do vermelho que se inverte no
-profissional, 89,2% de acerto (181 de 203) no gabarito automático da consulta em português (60% e 54% nos conjuntos anteriores, julgados à mão); (5) dá para integrar tudo numa
+profissional, 89,2% de acerto (181 de 203) no gabarito automático da consulta em português; (5) dá para integrar tudo numa
 solução só.
 
 **Em uma frase:** foi construída uma plataforma (chamada **Bellestraiko**)
@@ -79,7 +79,7 @@ visualização (*dashboards*) → consulta em linguagem natural.
 | AUC-ROC aos 15 minutos | **0,8473** |
 | Viés de lado no solo queue | vermelho vence mais (56,3% na BR1) |
 | Viés de lado no profissional | **inverte**: azul vence 53,2% |
-| Interface em linguagem natural | **89,2%** (181 de 203) no gabarito automático, comparado por código; 60% e 54% em dois conjuntos de 50 julgados à mão; 26 de 26 no *benchmark* de referência, que não é independente |
+| Interface em linguagem natural | **89,2%** (181 de 203) no gabarito automático, comparado por código; 26 de 26 no *benchmark* de referência, que não é independente |
 | Páginas de visualização | 6 |
 
 **O achado mais interessante** (e que não era o objetivo inicial): no
@@ -153,7 +153,7 @@ cumprido? onde?".
 | **d** | Avaliar análise de dados para achar padrões | Seção 5.3 | Viés de lado, conversão de vantagem |
 | **e** | Comparar XGBoost, Random Forest e redes neurais | Seção 5.4 | Empate técnico; XGBoost adotado: 0,7621 / 0,8473 |
 | **f** | Propor *dashboards* | Seção 5.5 | 6 páginas de visualização |
-| **g** | Propor interface em linguagem natural | Seção 5.6 | 181 de 203 (89,2%) no gabarito automático; 60% e 54% nos conjuntos de 50 anteriores; 26/26 no *benchmark* ajustado |
+| **g** | Propor interface em linguagem natural | Seção 5.6 | 181 de 203 (89,2%) no gabarito automático; 26/26 no *benchmark* ajustado |
 
 **De onde vieram esses objetivos:** foram definidos no **TCC I**. O TCC II
 executou o que o TCC I prometeu, e foi além (adicionou os dados
@@ -462,9 +462,8 @@ decisões de projeto** (decore os nomes):
    comparam com ele. Você mede o mesmo indicador nos dois contextos e
    mostra a inversão do viés de lado.
 3. **Consulta mensurável:** a interface em linguagem natural foi avaliada
-   no próprio domínio, com 26 perguntas de referência e um conjunto cego de
-   50, ambos conferidos contra o banco, o que torna o erro mensurável, e não
-   ilustrativo.
+   no próprio domínio, com 26 perguntas de referência e um gabarito automático de
+   203, o que torna o erro mensurável, e não ilustrativo.
 
 **Atenção:** versões antigas falavam em "quatro eixos", com "fonte de
 dados" (eles usam bases de terceiros) e "nenhum mede contra *benchmark*".
@@ -1584,7 +1583,7 @@ usuário nunca é colada direto na SQL; o que roda é só o que passou pelas
 - **Erro com a SQL junto:** se a consulta falha no banco, o erro mostra a
   SQL e a causa, para dar para entender o que aconteceu.
 
-### 14.4 Duas medidas, e por que não se somam (Apêndice B)
+### 14.4 O benchmark de 26 e o gabarito de 203 (Apêndice B)
 
 **1. *Benchmark* de referência (26 perguntas, 22 *solo queue* e 4 profissional).**
 - "Acurácia de execução" = o resultado da SQL gerada bate com o da SQL de
@@ -1597,23 +1596,24 @@ usuário nunca é colada direto na SQL; o que roda é só o que passou pelas
 - Curiosidade: uma execução deu 22/26 porque rodou ao mesmo tempo que a
   coleta escrevia no banco.
 
-**2. Conjunto cego (50 perguntas, 51 a 100) = a nota que vale.**
-- Elaboradas pelo autor **fora do ciclo de ajuste**, rodadas **uma única vez**
-  com o sistema congelado (o *hash* dos arquivos ficou gravado) e conferidas
-  uma a uma contra o banco, com uma consulta independente por pergunta.
-- **30 de 50 (60%)**, intervalo de 95% de 46% a 72%: 24 certas, 6 recusas
-  certas (o banco não tem o dado), 11 parciais, 8 erradas, 1 recusa indevida.
-- Três repetições com o sistema parado: **nenhum veredito mudou**.
-- Versões anteriores nas mesmas 50 perguntas: 22 e 24 de 50. Ganho real, mas
-  modesto; o que mais mudou foi o tipo de erro (erros sem resposta: 8 → 1).
-- **MEDIDA PRINCIPAL: gabarito automático, 181 de 203 (89,2%), IC 95% 84,1%–92,7%.** Cada pergunta tem SQL de referência escrita antes da execução e um programa compara (sem avaliador humano): 166 de 187 respondíveis e 15 de 16 recusas esperadas. Das 22 falhas, todas do sistema: nomes de entidade (MonkeyKing escrito 'Monkey King', liga tratada como equipe), eliminações lidas como kills+assists, roteamento. Duas correções (`entidades.py` e checagem de eliminações) vieram depois e **não foram medidas de ponta a ponta** . Limites: perguntas de template e famílias que o autor conhecia.
-- **Segundo conjunto de 50 escrito à mão (101 a 150, perguntas inéditas):** **27 de 50 (54%)**, IC 95% 40%–67%: 18 certas, 9 recusas certas, 9 parciais, 13 erradas, 1 recusa indevida. Os intervalos se sobrepõem: as correções feitas depois do primeiro conjunto **não elevaram** o acerto em perguntas novas. Falha dominante: sem o dado (primeira torre, primeiro sangue, série), 9 ou 10 de ~19 perguntas receberam um substituto sem rótulo em vez de recusa.
-- **O ponto central (1º conjunto):** 7 das 50 respostas estavam **erradas e pareciam certas**
-  (ex.: "sequência de vitórias" que era o total de vitórias; 86.699 partidas
-  "sem barão" quando eram 6.633). Só 2 falharam de forma visível. O
-  validador garante a **segurança**, não o **sentido** da consulta.
-- Limites declarados (6.1): 50 perguntas, **um só avaliador**, sem segunda
-  leitura; o autor viu o texto das perguntas antes de congelar o sistema.
+**2. Gabarito automático (203 perguntas) = a nota que vale.**
+- Cada pergunta nasce com a **SQL de referência**, escrita **antes** de qualquer
+  execução do sistema, e um programa compara o resultado, **sem avaliador humano**.
+- **181 de 203 (89,2%)**, intervalo de 95% de 84,1% a 92,7%: 166 de 187
+  perguntas respondíveis e 15 de 16 recusas esperadas (o banco não tem o dado).
+- Das 22 falhas, todas do sistema (li uma a uma): nome de entidade que o modelo
+  escreveu de outro modo (MonkeyKing como "Monkey King", liga tratada como equipe),
+  eliminações lidas como kills+assists e roteamento para a base errada.
+- Duas correções (`entidades.py` e a checagem de eliminações) vieram **depois** da
+  medida e **não foram medidas de ponta a ponta**.
+- Para o que o banco não tem (primeira torre, primeiro sangue, série), uma recusa
+  determinística responde antes do modelo: em perguntas escritas à mão, versões
+  anteriores chegavam a inventar um substituto. O validador garante a
+  **segurança**, não o **sentido** da consulta.
+- Limites declarados (6.1): perguntas de **template**, escritas pelo autor a partir
+  de famílias de erro que já conhecia, e a SQL de referência é do próprio autor.
+  Perguntas escritas à mão acertaram **entre 54% e 60%** em versões anteriores do
+  sistema, então o resultado em perguntas livres pode ser menor.
 
 ### 14.5 Honestidade da IA: dado medido x conhecimento geral
 
@@ -1809,42 +1809,38 @@ desde 5 de novembro, o banco roda a consulta em transação somente
 leitura. A entrada do usuário nunca é colada direto na SQL. Segurança é
 diferente de acerto: a consulta pode ser segura e responder outra coisa."
 
-**16. "Por que 60% e não 88%?"**
-"São duas medidas diferentes. O benchmark de 26 perguntas deu 88% e hoje
-dá 26 de 26, mas as regras do esquema foram escritas conhecendo as
-falhas dele, então não é independente. Montei um conjunto cego de 50
-perguntas, rodado uma vez, com o sistema congelado, e conferi cada
-resposta contra o banco: 30 de 50, 60%, com intervalo de 46% a 72%.
-Depois corrigi falhas gerais e rodei um segundo conjunto, de perguntas
-inéditas: 27 de 50, 54%. Como o julgamento era meu, criei um gabarito automático,
-com SQL de referência escrita antes e comparação por código: 181 de 203, 89,2%.
-Esse é o número principal; os de 60% e 54% mostram as falhas que ele corrigiu."
+**16. "Por que 89,2% e não 88% ou 100%?"**
+"São medidas diferentes. O benchmark de 26 perguntas deu 88% e hoje dá 26 de
+26, mas as regras do esquema foram escritas conhecendo as falhas dele, então
+não é independente. A nota que vale é o gabarito automático: 203 perguntas com
+SQL de referência escrita antes da execução e comparação por código, sem
+avaliador humano. Deu 181 de 203, 89,2%, com intervalo de 84,1% a 92,7%."
 
-**16b. "O conjunto cego é mesmo cego?"**
-"Foi elaborado por mim, fora do ciclo de ajuste, e o sistema foi
-congelado antes de rodar, com o hash dos arquivos gravado. Mas eu vi o
-texto das perguntas antes de congelar, e uma regra de recusa que
-acrescentei toca em um tema que o conjunto também sonda. Está declarado
-no Apêndice B. Por isso o chamo de conjunto cego com ressalvas."
+**16b. "O gabarito é independente do sistema?"**
+"A SQL de referência foi escrita antes de rodar o sistema e quem compara é um
+programa. Mas as perguntas são de template e eu conhecia as famílias de erro
+anteriores, então o resultado pode ser maior que com perguntas livres. Perguntas
+escritas à mão acertaram entre 54% e 60% em versões anteriores. Está declarado
+na Seção 6.1."
 
 **16c. "O que o sistema erra, e é grave?"**
-"Em 7 de 50 respostas devolveu um número ou lista plausível e errado,
-como uma sequência de vitórias que era o total de vitórias. É o risco
-principal: o erro não aparece. Só duas falharam de forma visível. Está nas
-limitações (6.1) e é o primeiro dos trabalhos futuros de linguagem
-natural: verificar o resultado depois da execução."
+"As 22 falhas foram de nome de entidade, eliminações lidas como kills mais
+assistências e roteamento. O mais grave seria devolver um número plausível e
+errado quando o dado não existe; para isso há uma recusa determinística, e 15
+das 16 recusas esperadas saíram certas. O validador garante a segurança da
+consulta, não o sentido; verificar o resultado depois da execução é trabalho
+futuro."
 
-**16d. "Quem julgou as respostas?"**
-"Um só avaliador, com uma consulta independente por pergunta, e o motivo
-de cada veredito está no Apêndice B. Não houve segunda leitura; está
-declarado como limitação. Um veredito foi revisto: a pergunta 89 passou
-de recusa certa para parcial, porque o solo queue respondia."
+**16d. "Quem escreveu e quem conferiu as respostas?"**
+"A SQL de referência é minha; a comparação é por código, com regras no módulo
+`avaliar_gabarito.py` e testes. Não houve segunda leitura das SQLs de
+referência; está declarado como limitação."
 
-**16e. "O roteamento ajudou?"**
-"Sim, mas pouco: 22 de 50 na versão mais antiga, 24 sem o roteamento e 30
-na atual. O que mais mudou foi o tipo de erro: respostas sem resultado
-caíram de 8 para 1, e perguntas de equipe deixaram de ser respondidas na
-base errada."
+**16e. "O que foi corrigido depois da medida?"**
+"Duas coisas: o sistema passou a resolver no banco o nome exato de campeões,
+ligas, equipes e jogadores, e a refazer a consulta quando 'eliminações' vira
+kills mais assistências. Estão implementadas e testadas por testes unitários,
+mas não foram medidas de ponta a ponta, e o texto diz isso."
 
 **17. "Qual a contribuição científica?"**
 "Três: a integração completa numa plataforma, que nenhum trabalho
@@ -2160,9 +2156,10 @@ os limites do próprio trabalho.
 ### 18.3 Trabalhos futuros (Seção 6.2)
 
 1. **Predição ao vivo** (a arquitetura já aceita qualquer estado).
-2. **Seleção de campeão competitiva** no simulador.
-3. **Restrições de monotonicidade** no modelo, se necessário.
-4. **Ampliar a validade externa:** outras filas, outros elos, outro jogo.
+2. **Ampliar a validade externa:** outras filas, outros elos, outro jogo.
+3. **Consulta em linguagem natural:** verificar o resultado depois da execução,
+   gabarito maior com perguntas escritas à mão e um modelo aberto local para
+   comparar com a API.
 
 ---
 

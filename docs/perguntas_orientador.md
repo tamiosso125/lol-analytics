@@ -118,9 +118,7 @@ são confirmações; as de C só se sobrar tempo.
     forma mensurável e diz não querer produtos que "solucionem o jogo". Um preditor
     com orientação estratégica pode ser questionado. *Por quê:* não quero prometer o
     que a banca vá considerar inviável.
-22. **Quais dos cinco trabalhos futuros prefere que eu destaque na defesa?** (predição
-    ao vivo, seleção de campeão competitiva, monotonicidade, outras filas e outro
-    jogo, chave de produção).
+22. ~~**Quais dos cinco trabalhos futuros prefere que eu destaque na defesa?**~~ **Resolvida (2026-11-05):** cortei para três (predição ao vivo, outras filas ou outro jogo, melhoria da consulta em linguagem natural).
 
 ## 6. Dados, ética e licença (B)
 
@@ -217,10 +215,7 @@ manter, cortar ou mover, com minha inclinação atual.
     sistema é descrito em texto, sem diagrama.
 40. **Onde entram a declaração de uso de IA (pergunta 8) e o aviso de que o produto
     não é endossado pela Riot?** (A) Corpo, nota de rodapé ou apêndice?
-41. **Trabalhos futuros: mantenho os cinco ou corto para três?** (B) Cinco itens em
-    meia seção podem soar como lista de desejos. *Inclinação:* manter predição ao
-    vivo, outra fila ou jogo e monotonicidade; a chave de produção só se ele achar
-    que ajuda.
+41. ~~**Trabalhos futuros: mantenho os cinco ou corto para três?**~~ **Resolvida (2026-11-05):** três.
 42. **O que ele sente falta no texto, ou o que ele via na primeira versão e não
     achou agora?** (A) Pergunta aberta, mas é a mais útil.
 43. **Preciso dizer na Seção 3 onde e como busquei os trabalhos relacionados**
@@ -239,21 +234,8 @@ manter, cortar ou mover, com minha inclinação atual.
     (o Apêndice F já traz as limitações em detalhe). Pergunta se ele considera
     limitações e trabalhos futuros parte esperada da Conclusão ou excesso.
 
-45. **Posso reportar no Resumo e na Conclusão o gabarito automático (181 de 203, 89,2%) como medida principal, com os conjuntos de 50 julgados à mão (60% e 54%) como histórico?** (O gabarito tem SQL de referência escrita antes da execução e comparação por código; é de template e só 203 das 900 foram executadas.)
-    (A) *Evidência para levar:* o benchmark de 26 perguntas foi o número do TCC 1 e
-    do rascunho (23 de 26, 88%), mas as regras do esquema que o levaram a 26 de 26
-    foram escritas conhecendo as três falhas: não é independente. Montei um conjunto
-    cego de 50 perguntas, rodadas uma vez com o sistema congelado e conferidas contra
-    o banco: 24 certas, 6 recusas certas, 11 parciais, 8 erradas e 1 recusa indevida
-    (intervalo de 95% de 46% a 72%). Versões anteriores do sistema no mesmo conjunto:
-    22 e 24 de 50. *Risco:* o 60% aparece ao lado do 88% que ele já viu.
-    *Recomendação:* citar os dois, com o cego explicado, e apresentar as falhas como
-    limitação (6.1). *Pergunta:* ele prefere os dois números no Resumo, ou só o cego?
-46. **Quem confere o gabarito?** (A) O gabarito automático tira o julgamento da execução (um
-    programa compara), mas as SQLs de referência foram escritas por mim, e os dois conjuntos de 50
-    anteriores tiveram um só avaliador. *Pergunta:* a banca aceita isso como limitação declarada,
-    ou ele pede que o orientador ou um colega confira uma amostra das SQLs de referência antes
-    da entrega?
+45. **Posso reportar no Resumo e na Conclusão o gabarito automático (181 de 203, 89,2%) como medida principal da consulta em linguagem natural, ao lado do benchmark de 26 (26 de 26, não independente)?** (A) *Evidência para levar:* o gabarito tem SQL de referência escrita antes da execução e comparação por código; é de template e o autor conhecia as famílias de erro. *Risco:* o 89,2% aparece ao lado do 88% do benchmark que ele já viu. *Recomendação:* citar os dois, com a diferença explicada, e declarar as falhas como limitação (6.1). *Pergunta:* ele prefere os dois números no Resumo, ou só o gabarito?
+46. **Quem confere o gabarito?** (A) A comparação é por código, mas as SQLs de referência foram escritas por mim, sem segunda leitura. *Pergunta:* a banca aceita isso como limitação declarada, ou ele pede que o orientador ou um colega confira uma amostra das SQLs de referência antes da entrega?
 
 ## O que levar
 

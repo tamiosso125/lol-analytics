@@ -1272,76 +1272,34 @@ def check_benchmark_nlq(t: str) -> None:
 
 
 def check_cego_nlq(t: str) -> None:
-    """O conjunto cego do NLQ: contagens do texto x `reports/nlq_cego_vereditos.json`.
+    """O gabarito automático do NLQ: números do texto x `reports/nlq_gabarito_resultado_203.json`.
 
-    A 5.6, o Quadro 6, o Resumo e a Conclusão citam o acerto do cego e as
-    contagens por veredito. Cada número tem de sair do artefato de vereditos, não
-    da memória de quem escreveu (o 31/50 inicial estava errado por um veredito).
+    O Resumo, a 5.6, o Quadro do Apêndice B e a Conclusão citam o acerto do gabarito. Cada
+    número tem de sair do artefato, não da memória de quem escreveu.
     """
     import json
 
-    caminho = RAIZ / "reports" / "nlq_cego_vereditos.json"
-    comp = RAIZ / "reports" / "nlq_cego_comparacao.json"
-    if not caminho.exists() or not comp.exists():
-        falha("NLQ cego: faltam reports/nlq_cego_vereditos.json ou nlq_cego_comparacao.json")
-        return
-    v = json.loads(caminho.read_text(encoding="utf-8"))
-    c = v["contagem"]
-    estrito = c["C"] + c["RC"]
-    if sum(c.values()) != 50 or len(v["vereditos"]) != 50:
-        falha(f"NLQ cego: o artefato não tem 50 vereditos ({sum(c.values())})")
-        return
-    esperadas = [
-        f"{c['C']} respostas certas e {c['RC']} recusas corretas (o banco não tem o dado), {c['P']} parciais, "
-        f"{c['E']} erradas e {c['RE']} recusa indevida",
-        f"{estrito} de 50 certas ({round(estrito / 50 * 100)}%)",
-        f"| **Atual** | **{c['C']}** | **{c['RC']}** | **{c['P']}** | **{c['E'] + c['RE']}** | **{estrito}** |",
-    ]
-    for e in esperadas:
-        # o markdown quebra linha: normaliza espaços antes de procurar
-        if e not in " ".join(t.split()).replace("| ** ", "| **"):
-            falha(f"NLQ cego: o texto não traz '{e}' (confira o artefato de vereditos)")
-            return
-    cmp = json.loads(comp.read_text(encoding="utf-8"))["versoes"]
-    for nome, rotulo in (("antes_de_tudo (3b7e353)", "Antes das melhorias"),
-                         ("antes_do_roteamento (66bfe7a)", "Sem o roteamento")):
-        r = cmp[nome]["resumo"]
-        linha = (f"| {rotulo} | {r['C']} | {r['RC']} | {r['P']} | {r['E'] + r['RE']} | "
-                 f"{r['acerto_estrito']} | {cmp[nome]['erros_totais']} |")
-        if linha not in t:
-            falha(f"NLQ cego: a linha do quadro de versões '{rotulo}' diverge do artefato: {linha}")
-            return
-    # segundo conjunto cego (101-150): contagens do texto x artefato
-    c2p = RAIZ / "reports" / "nlq_cego_v2_vereditos.json"
-    if not c2p.exists():
-        falha("NLQ cego v2: falta reports/nlq_cego_v2_vereditos.json")
-        return
-    v2 = json.loads(c2p.read_text(encoding="utf-8"))
-    k = v2["contagem"]
-    est2 = k["C"] + k["RC"]
-    if sum(k.values()) != 50 or len(v2["vereditos"]) != 50 or v2["acerto_estrito"] != est2:
-        falha("NLQ cego v2: o artefato não fecha em 50 vereditos")
-        return
-    plano = " ".join(t.split())
-    for e in (f"{est2} de 50 certas ({round(est2 / 50 * 100)}%)",
-              f"{k['C']} certas, {k['RC']} recusas corretas, {k['P']} parciais, {k['E']} erradas e {k['RE']} recusa indevida"):
-        if e not in plano:
-            falha(f"NLQ cego v2: o texto não traz '{e}' (confira o artefato de vereditos)")
-            return
-    # gabarito automático (medida principal): números do texto x artefato
     gp = RAIZ / "reports" / "nlq_gabarito_resultado_203.json"
     if not gp.exists():
         falha("NLQ gabarito: falta reports/nlq_gabarito_resultado_203.json")
         return
     g = json.loads(gp.read_text(encoding="utf-8"))["resumo"]
-    pct_g = f"{g['pct']:.1f}".replace(".", ",")
-    for e in (f"{g['certas']} de {g['executadas']} ({pct_g}%)",
+    plano = " ".join(t.split())
+    pct = f"{g['pct']:.1f}".replace(".", ",")
+    for e in (f"{g['certas']} de {g['executadas']} ({pct}%)",
               f"{g['respondiveis']['certas']} de {g['respondiveis']['total']} perguntas respondíveis",
               f"{g['recusas_esperadas']['certas']} de {g['recusas_esperadas']['total']} recusas esperadas"):
         if e not in plano:
             falha(f"NLQ gabarito: o texto não traz '{e}' (confira o artefato)")
             return
-    print(f"  [OK] conjunto cego: {estrito}/50 e quadro de versões conferem; v2 {est2}/50; gabarito {g['certas']}/{g['executadas']} confere")
+    # o quadro por família soma o mesmo total do resumo
+    linhas = [l for l in t.splitlines() if l.startswith("| ") and any(l.startswith(f"| {f} |") for f in g["por_familia"])]
+    soma = sum(int(l.split("|")[4]) for l in linhas)
+    certas = sum(int(l.split("|")[3]) for l in linhas)
+    if (soma, certas) != (g["executadas"], g["certas"]):
+        falha(f"NLQ gabarito: o quadro por família soma {certas}/{soma}, o artefato tem {g['certas']}/{g['executadas']}")
+        return
+    print(f"  [OK] gabarito automático: {g['certas']}/{g['executadas']} e o quadro por família conferem com o artefato")
 
 
 def check_holdout_temporal(t: str) -> None:
