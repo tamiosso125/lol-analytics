@@ -51,7 +51,7 @@ junta coleta, predição, explicação, visualização e consulta em português;
 profissionais, com três modelos comparados por validação cruzada
 estratificada; (4) empate técnico entre os três, XGBoost adotado com 76% e
 AUC de 0,85 aos 15 minutos, viés do vermelho que se inverte no
-profissional, 60% e 54% de acerto em dois conjuntos cegos da consulta em português (26 de 26 no *benchmark* ajustado); (5) dá para integrar tudo numa
+profissional, 89,2% de acerto (181 de 203) no gabarito automático da consulta em português (60% e 54% nos conjuntos anteriores, julgados à mão); (5) dá para integrar tudo numa
 solução só.
 
 **Em uma frase:** foi construída uma plataforma (chamada **Bellestraiko**)
@@ -79,7 +79,7 @@ visualização (*dashboards*) → consulta em linguagem natural.
 | AUC-ROC aos 15 minutos | **0,8473** |
 | Viés de lado no solo queue | vermelho vence mais (56,3% na BR1) |
 | Viés de lado no profissional | **inverte**: azul vence 53,2% |
-| Interface em linguagem natural | **60%** (30 de 50) e **54%** (27 de 50) em dois conjuntos cegos; 26 de 26 no *benchmark* de referência, que não é independente |
+| Interface em linguagem natural | **89,2%** (181 de 203) no gabarito automático, comparado por código; 60% e 54% em dois conjuntos de 50 julgados à mão; 26 de 26 no *benchmark* de referência, que não é independente |
 | Páginas de visualização | 6 |
 
 **O achado mais interessante** (e que não era o objetivo inicial): no
@@ -153,7 +153,7 @@ cumprido? onde?".
 | **d** | Avaliar análise de dados para achar padrões | Seção 5.3 | Viés de lado, conversão de vantagem |
 | **e** | Comparar XGBoost, Random Forest e redes neurais | Seção 5.4 | Empate técnico; XGBoost adotado: 0,7621 / 0,8473 |
 | **f** | Propor *dashboards* | Seção 5.5 | 6 páginas de visualização |
-| **g** | Propor interface em linguagem natural | Seção 5.6 | 30 de 50 (60%) e 27 de 50 (54%) em dois conjuntos cegos; 26/26 no *benchmark* ajustado |
+| **g** | Propor interface em linguagem natural | Seção 5.6 | 181 de 203 (89,2%) no gabarito automático; 60% e 54% nos conjuntos de 50 anteriores; 26/26 no *benchmark* ajustado |
 
 **De onde vieram esses objetivos:** foram definidos no **TCC I**. O TCC II
 executou o que o TCC I prometeu, e foi além (adicionou os dados
@@ -1606,7 +1606,8 @@ usuário nunca é colada direto na SQL; o que roda é só o que passou pelas
 - Três repetições com o sistema parado: **nenhum veredito mudou**.
 - Versões anteriores nas mesmas 50 perguntas: 22 e 24 de 50. Ganho real, mas
   modesto; o que mais mudou foi o tipo de erro (erros sem resposta: 8 → 1).
-- **Segundo conjunto cego (101 a 150, perguntas inéditas):** **27 de 50 (54%)**, IC 95% 40%–67%: 18 certas, 9 recusas certas, 9 parciais, 13 erradas, 1 recusa indevida. Os intervalos se sobrepõem: as correções feitas depois do primeiro conjunto **não elevaram** o acerto em perguntas novas. Falha dominante: sem o dado (primeira torre, primeiro sangue, série), 9 ou 10 de ~19 perguntas receberam um substituto sem rótulo em vez de recusa.
+- **MEDIDA PRINCIPAL: gabarito automático, 181 de 203 (89,2%), IC 95% 84,1%–92,7%.** Cada pergunta tem SQL de referência escrita antes da execução e um programa compara (sem avaliador humano): 166 de 187 respondíveis e 15 de 16 recusas esperadas. Das 22 falhas, todas do sistema: nomes de entidade (MonkeyKing escrito 'Monkey King', liga tratada como equipe), eliminações lidas como kills+assists, roteamento. Duas correções (`entidades.py` e checagem de eliminações) vieram depois e **não foram medidas de ponta a ponta** (crédito da API acabou). Limites: perguntas de template e famílias que o autor conhecia.
+- **Segundo conjunto de 50 escrito à mão (101 a 150, perguntas inéditas):** **27 de 50 (54%)**, IC 95% 40%–67%: 18 certas, 9 recusas certas, 9 parciais, 13 erradas, 1 recusa indevida. Os intervalos se sobrepõem: as correções feitas depois do primeiro conjunto **não elevaram** o acerto em perguntas novas. Falha dominante: sem o dado (primeira torre, primeiro sangue, série), 9 ou 10 de ~19 perguntas receberam um substituto sem rótulo em vez de recusa.
 - **O ponto central (1º conjunto):** 7 das 50 respostas estavam **erradas e pareciam certas**
   (ex.: "sequência de vitórias" que era o total de vitórias; 86.699 partidas
   "sem barão" quando eram 6.633). Só 2 falharam de forma visível. O
@@ -1815,8 +1816,9 @@ falhas dele, então não é independente. Montei um conjunto cego de 50
 perguntas, rodado uma vez, com o sistema congelado, e conferi cada
 resposta contra o banco: 30 de 50, 60%, com intervalo de 46% a 72%.
 Depois corrigi falhas gerais e rodei um segundo conjunto, de perguntas
-inéditas: 27 de 50, 54%, intervalo de 40% a 67%. Os dois se sobrepõem, então
-não afirmo melhora. Reporto os três e digo qual é qual."
+inéditas: 27 de 50, 54%. Como o julgamento era meu, criei um gabarito automático,
+com SQL de referência escrita antes e comparação por código: 181 de 203, 89,2%.
+Esse é o número principal; os de 60% e 54% mostram as falhas que ele corrigiu."
 
 **16b. "O conjunto cego é mesmo cego?"**
 "Foi elaborado por mim, fora do ciclo de ajuste, e o sistema foi

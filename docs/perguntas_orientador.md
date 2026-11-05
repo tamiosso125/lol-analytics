@@ -236,7 +236,7 @@ manter, cortar ou mover, com minha inclinação atual.
     (o Apêndice F já traz as limitações em detalhe). Pergunta se ele considera
     limitações e trabalhos futuros parte esperada da Conclusão ou excesso.
 
-45. **Posso reportar no Resumo e na Conclusão os dois conjuntos cegos (30 de 50, 60%, e 27 de 50, 54%) ao lado do benchmark de 26 (26 de 26)?**
+45. **Posso reportar no Resumo e na Conclusão o gabarito automático (181 de 203, 89,2%) como medida principal, com os conjuntos de 50 julgados à mão (60% e 54%) como histórico?** (O gabarito tem SQL de referência escrita antes da execução e comparação por código; é de template e só 203 das 900 foram executadas.)
     (A) *Evidência para levar:* o benchmark de 26 perguntas foi o número do TCC 1 e
     do rascunho (23 de 26, 88%), mas as regras do esquema que o levaram a 26 de 26
     foram escritas conhecendo as três falhas: não é independente. Montei um conjunto

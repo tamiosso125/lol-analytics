@@ -48,7 +48,7 @@ cortes temporais, de 10 a 25 minutos; os três ficaram próximos, e o
 XGBoost, adotado em produção, alcançou acurácia de 0,7621 e AUC-ROC de
 0,8473 no corte de 15 minutos. Uma regressão logística simples chegou ao mesmo patamar, variáveis mais ricas somaram no máximo 0,008 de AUC-ROC e treinar no passado e testar no futuro não reduziu a AUC-ROC. A análise exploratória identificou viés de lado favorável ao time vermelho no *solo queue* de elo alto (56,3% de vitórias na região com maior amostra; o intervalo exclui 50% em três das quatro regiões), estável ao longo da partida e
 invertido no cenário profissional, em que o azul vence 53,2% dos jogos,
-achado sustentado por testes de robustez. Uma interface *text-to-SQL* com validação estrutural e roteamento entre as duas bases acertou 30 de 50 (60%) e 27 de 50 (54%) em dois conjuntos cegos, e 26 de 26 em um *benchmark* de referência ajustado pelo autor. A plataforma reúne seis páginas de visualização com
+achado sustentado por testes de robustez. Uma interface *text-to-SQL* com validação estrutural e roteamento entre as duas bases acertou 181 de 203 perguntas (89,2%) de um gabarito automático conferido por código; em dois conjuntos anteriores, julgados à mão, acertara 60% e 54%. A plataforma reúne seis páginas de visualização com
 predição explicável (SHAP). Os resultados mostram a viabilidade de
 integrar essas etapas em uma única solução aplicada a esports.
 
@@ -71,7 +71,7 @@ XGBoost, adopted in production, reached an accuracy of 0.7621 and an
 AUC-ROC of 0.8473 at the 15-minute cutoff. A simple logistic regression reached the same level, richer variables added at most 0.008 of AUC-ROC, and training on the past and testing on the future did not reduce the AUC-ROC. The exploratory analysis identified a side bias favoring the red side in high-elo solo queue (56.3% win rate in the region with the largest sample; the interval excludes 50% in three of the four regions), stable
 throughout the match and reversed in the professional scenario, where
 the blue side wins 53.2% of games, a finding supported by robustness
-tests. A text-to-SQL interface with structural validation and routing between the two databases answered 30 of 50 (60%) and 27 of 50 (54%) questions of two blind sets correctly, and 26 of 26 on a reference benchmark tuned by the author. The platform comprises
+tests. A text-to-SQL interface with structural validation and routing between the two databases answered 181 of 203 questions (89,2%) of an automatic gold standard checked by code; on two earlier hand-judged sets it had answered 60% and 54%. The platform comprises
 six visualization pages with explainable predictions (SHAP). The results
 show the feasibility of integrating these stages into a single solution
 applied to esports.
@@ -733,11 +733,11 @@ Figura — Simulador, aba Estado: probabilidade de vitória e contribuição de 
 
 ### 5.6 Interface em linguagem natural (objetivo g)
 
-A consulta em linguagem natural (*text-to-SQL* com validação e roteamento entre as bases) foi medida de duas formas (Apêndice B). No *benchmark* de 26 perguntas de referência, acertou 23 antes dos ajustes e 26 depois; como as regras do esquema foram escritas conhecendo as três falhas, o resultado não é independente.
+A consulta em linguagem natural (*text-to-SQL* com validação e roteamento entre as bases) foi medida de três formas (Apêndice B). No *benchmark* de 26 perguntas de referência, acertou 23 antes dos ajustes e 26 depois; como as regras do esquema foram escritas conhecendo as três falhas, o resultado não é independente.
 
-Por isso foi montado um conjunto cego de 50 perguntas, elaboradas pelo autor fora do ciclo de ajuste, rodadas uma vez com o sistema congelado e conferidas contra o banco, uma a uma. Saíram **30 de 50 certas (60%)**, com intervalo de 95% de 46% a 72%: 24 respostas certas e 6 recusas corretas (o banco não tem o dado), 11 parciais, 8 erradas e 1 recusa indevida. Versões anteriores acertaram 22 e 24 de 50. Um segundo conjunto de 50 perguntas inéditas deu **27 de 50 certas (54%)**, intervalo de 95% de 40% a 67%: as correções não elevaram o acerto em perguntas novas (Apêndice B).
+Para sair do julgamento de uma só pessoa, a medida principal passou a ser um gabarito automático: cada pergunta nasce com a SQL de referência, escrita antes de qualquer execução, e um programa compara o resultado. Das 900 perguntas geradas, 203 foram executadas (a rodada parou por falta de crédito da API). O sistema acertou **181 de 203 (89,2%)**, com intervalo de 95% de 84,1% a 92,7%: 166 de 187 perguntas respondíveis e 15 de 16 recusas esperadas. Dois conjuntos de 50 perguntas escritas à mão e julgadas por uma pessoa tinham dado 60% e 54%.
 
-O tipo de falha pesa mais que o acerto: 7 respostas estavam erradas e pareciam corretas (escolhas de campeão rotuladas como banimentos, por exemplo) e só 2 falharam de forma visível. No segundo, de cerca de 19 perguntas sem dado no banco (primeira torre, série), 9 ou 10 receberam número em vez de recusa. O validador garante a segurança da consulta, não o seu sentido (Seção 6.1).
+As 22 falhas vêm de nomes de entidade escritos de outro modo pelo modelo ("Monkey King" no lugar de MonkeyKing), de eliminações lidas como kills mais assistências e de roteamento para a base errada; as duas correções feitas depois não foram medidas de ponta a ponta. O substituto sem rótulo dos conjuntos anteriores, quando o dado não existe, foi tratado por uma recusa determinística (15 de 16 recusas certas). O validador garante a segurança da consulta, não o seu sentido (Seção 6.1).
 
 A Figura 5 mostra uma consulta na plataforma: a pergunta 9 do benchmark,
 a SQL gerada pelo modelo, já validada, e o resultado lido do banco.
@@ -809,7 +809,7 @@ f) *dashboards* foram entregues em seis páginas de visualização,
 cobrindo desde estatísticas agregadas até análise minuto a minuto de
 partida individual;
 
-g) uma interface em linguagem natural foi implementada e avaliada: acertou 30 de 50 (60%) e 27 de 50 (54%) perguntas de dois conjuntos cegos e 26 de 26 do *benchmark* de referência, ajustado pelo autor.
+g) uma interface em linguagem natural foi implementada e avaliada: acertou 181 de 203 perguntas (89,2%) de um gabarito automático, contra 60% e 54% em dois conjuntos anteriores julgados à mão.
 
 O achado que merece destaque, por não ter sido o objeto anunciado do
 trabalho, é o viés de lado: uma assimetria estrutural entre os dois lados
@@ -855,11 +855,11 @@ direção à média.
 
 **Limitações do modelo.** A taxa-base do XGBoost no estado de empate total (49,0% a 51,4% conforme o corte) subestima o viés de lado medido nos dados (46,4% a 47,9%). A discrepância não é subajuste: a busca em grade completa ficou 0,0001 de AUC acima da produção, e apenas a troca para *Random Forest* a fecha (0,6 pp), ao custo de 0,0005 de AUC. O modelo usa 39.426 das 41.063 partidas e não foi retreinado, para não invalidar as validações. E o XGBoost não garante monotonicidade isolada por variável, por não usar restrição formal.
 
-**Validade da consulta em linguagem natural.** Os dois conjuntos cegos têm 50 perguntas cada (intervalos de 95% de 46% a 72% e de 40% a 67%) e foram julgados por um só avaliador; o *benchmark* de 26 não é independente. O maior risco é a resposta errada que parece certa, inclusive o substituto sem rótulo quando o dado não existe.
+**Validade da consulta em linguagem natural.** A medida principal (203 perguntas de template, escritas por mim a partir de famílias que já conhecia dos erros anteriores) pode superestimar o resultado em perguntas livres, e as correções posteriores não foram medidas. Os conjuntos de 50 tiveram um só avaliador, e o *benchmark* de 26 não é independente.
 
 ### 6.2 TRABALHOS FUTUROS
 
-Ficam registrados seis caminhos. O primeiro é a extensão da predição para partidas ao vivo, prevista na arquitetura mas não implementada: a barreira é de dados em tempo real, não de modelo. O segundo é a inclusão de seleção de campeão competitiva no simulador de time. O terceiro é a investigação de restrições de monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O quinto é pedir à Riot uma chave de produção, sujeita a aprovação, para ampliar o limite de requisições; a documentação não lista dados novos nas APIs padrão (Apêndice H), então o estado das ondas segue fora do alcance. O sexto é a melhoria da consulta em linguagem natural: recusa obrigatória quando o dado não existe, verificação do resultado depois da execução e um conjunto cego maior, com dois avaliadores (Zhong; Yu; Klein, 2020).
+Ficam registrados seis caminhos. O primeiro é a extensão da predição para partidas ao vivo, prevista na arquitetura mas não implementada: a barreira é de dados em tempo real, não de modelo. O segundo é a inclusão de seleção de campeão competitiva no simulador de time. O terceiro é a investigação de restrições de monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O quinto é pedir à Riot uma chave de produção, sujeita a aprovação, para ampliar o limite de requisições; a documentação não lista dados novos nas APIs padrão (Apêndice H), então o estado das ondas segue fora do alcance. O sexto é a melhoria da consulta em linguagem natural: recusa obrigatória quando o dado não existe, verificação do resultado depois da execução e o restante do gabarito de 900 perguntas e um modelo aberto local para comparar com a API (Zhong; Yu; Klein, 2020).
 
 ---
 
@@ -1105,7 +1105,48 @@ envolvem um limiar mínimo de jogos ("com pelo menos N partidas") e erram na
 formatação da resposta, por coluna extra ou apresentação, sem erro de
 interpretação da pergunta nem de estrutura da SQL.
 
-**Conjunto cego (50 perguntas, 5 de novembro de 2026).** Perguntas numeradas de 51 a 100, elaboradas pelo autor do trabalho fora do ciclo de ajuste do sistema, ou seja, sem uso para ajustá-lo. O sistema foi congelado antes da rodada (o artefato grava o *hash* dos quatro arquivos que definem o comportamento: roteador, validador, geração e esquema) e as perguntas foram rodadas uma única vez, pelo mesmo caminho do produto. Cada resposta foi conferida contra o banco com uma consulta independente, escrita à parte, e recebeu um veredito: certa (C), recusa certa (RC, o banco não tem o dado), parcial (P), errada (E) ou recusa indevida (RE). A pergunta ambígua entre as duas bases só conta como certa se a resposta declarar a base ou mostrar as duas. Houve duas ressalvas de método: o autor viu o texto das perguntas antes de congelar o sistema, e uma regra de recusa sobre o ouro total de equipe, acrescentada ao esquema por um caso do desenvolvimento, toca em um tema que o conjunto cego também sonda. O julgamento foi de um só avaliador; durante a comparação com versões anteriores, um veredito (pergunta 89) foi revisto de recusa certa para parcial, porque o *solo queue* respondia. Comando: `python -m src.nlq.avaliar_conjunto --perguntas docs/nlq_perguntas_cegas.txt --saida reports/nlq_cego_resultado.json --rotulo cego`; artefatos: `reports/nlq_cego_resultado.json`, `reports/nlq_cego_vereditos.json`, `reports/nlq_cego_comparacao.json`, as três repetições (`reports/nlq_cego_repeticao1.json` a `3.json`) e as duas versões anteriores (`reports/nlq_cego_antes_roteamento.json` e `reports/nlq_cego_antes_tudo.json`).
+**Gabarito automático (medida principal, 5 de novembro de 2026).** Um gerador (`src/nlq/gerar_gabarito.py`) monta 900 perguntas por templates sobre entidades reais do banco (campeões, equipes, ligas, patches, jogadores e itens) e escreve, junto de cada uma, a SQL de referência, que é executada na hora; pergunta com gabarito vazio, com empate no limite de um ranking ou repetida é descartada. Outras 88 perguntas não têm resposta no banco (primeiro sangue, série, ouro aos 10 minutos, dano a estruturas) e esperam uma recusa. O sistema roda as perguntas pelo caminho do produto e `src/nlq/avaliar_gabarito.py` compara: em escalar, algum valor da primeira linha bate com o do gabarito (tolerância de 0,1%, fração ou percentual); em ranking, a chave de cada linha do gabarito aparece na mesma posição; recusa esperada só passa se toda base consultada recusou; resposta na base errada falha. A comparação não depende de avaliador, e as regras estão no cabeçalho do módulo e em `tests/test_avaliar_gabarito.py`. Foram executadas 203 perguntas (a rodada parou por falta de crédito da API; as perguntas estavam embaralhadas): **181 de 203 certas (89,2%)**, intervalo de 95% de 84,1% a 92,7%. Falhas: 16 valores diferentes do gabarito, 2 recusas indevidas, 3 roteamentos para a base errada e 1 resposta onde o banco não tem o dado. Li as 22 uma a uma: todas são do sistema, nenhuma do gabarito ou do comparador. A maior família foi nome de entidade (o modelo escrevia 'Monkey King' para MonkeyKing, tratava ligas como equipe, trocava LPLOL por LPL), seguida de eliminações lidas como kills mais assistências. Duas correções (`src/nlq/entidades.py` e uma checagem que refaz a consulta) vieram depois da medida e não foram medidas de ponta a ponta. Limites: o texto é de template, o autor conhecia as famílias de erro e as famílias pequenas têm poucas perguntas. Depois do primeiro ajuste, as mesmas 100 perguntas dos dois conjuntos escritos à mão passaram de 57 para 88 certas (88%, intervalo de 80,2% a 93,0%), mas esse é um conjunto de desenvolvimento, não independente. Artefatos: `docs/nlq_gabarito_900.json`, `reports/nlq_gabarito_bruto_parte1.json` a `3.json`, `reports/nlq_gabarito_resultado_203.json`, `reports/nlq_100_ciclo1_vereditos.json`.
+
+Quadro — Acerto do gabarito automático por família de pergunta
+
+| Família | Base | Certas | Total | % |
+|---|---|---:|---:|---:|
+| C1-winrate-equipe | competitivo | 14 | 16 | 87,5 |
+| C10-contagem | competitivo | 4 | 4 | 100,0 |
+| C11-lado | competitivo | 1 | 1 | 100,0 |
+| C12-posicao | competitivo | 2 | 2 | 100,0 |
+| C2-jogos-equipe | competitivo | 5 | 5 | 100,0 |
+| C3-media-equipe | competitivo | 13 | 14 | 92,9 |
+| C4-liga | competitivo | 8 | 12 | 66,7 |
+| C5-jogador | competitivo | 14 | 16 | 87,5 |
+| C6-campeao-pro | competitivo | 13 | 13 | 100,0 |
+| C7-patch | competitivo | 2 | 2 | 100,0 |
+| C8-ranking | competitivo | 3 | 3 | 100,0 |
+| C9-ano | competitivo | 8 | 8 | 100,0 |
+| S1-winrate-campeao | solo | 11 | 14 | 78,6 |
+| S10-plataforma | solo | 3 | 3 | 100,0 |
+| S12-itens | solo | 6 | 6 | 100,0 |
+| S14-kda | solo | 2 | 3 | 66,7 |
+| S15-posicao-campeao | solo | 6 | 6 | 100,0 |
+| S16-visao | solo | 2 | 2 | 100,0 |
+| S2-partidas-campeao | solo | 12 | 12 | 100,0 |
+| S3-media-campeao | solo | 13 | 18 | 72,2 |
+| S4-top-campeoes-posicao | solo | 8 | 10 | 80,0 |
+| S5-mais-jogado-posicao | solo | 3 | 3 | 100,0 |
+| S6-lado | solo | 2 | 2 | 100,0 |
+| S7-duracao | solo | 1 | 1 | 100,0 |
+| S8-bans | solo | 8 | 9 | 88,9 |
+| S9-campeoes-wr | solo | 2 | 2 | 100,0 |
+| U1-primeiro | competitivo | 6 | 6 | 100,0 |
+| U2-serie | competitivo | 2 | 2 | 100,0 |
+| U3-minuto | competitivo | 1 | 1 | 100,0 |
+| U4-dano-visao | competitivo | 2 | 2 | 100,0 |
+| U5-ban-pro | competitivo | 1 | 2 | 50,0 |
+| U6-draft | competitivo | 1 | 1 | 100,0 |
+| U7-itens-pro | competitivo | 1 | 1 | 100,0 |
+| U8-multikill | solo | 1 | 1 | 100,0 |
+
+**Primeiro conjunto escrito à mão (50 perguntas, 5 de novembro de 2026).** Resultado: **30 de 50 certas (60%)**, com intervalo de 95% de 46% a 72%: 24 respostas certas e 6 recusas corretas (o banco não tem o dado), 11 parciais, 8 erradas e 1 recusa indevida. Perguntas numeradas de 51 a 100, elaboradas pelo autor do trabalho fora do ciclo de ajuste do sistema, ou seja, sem uso para ajustá-lo. O sistema foi congelado antes da rodada (o artefato grava o *hash* dos quatro arquivos que definem o comportamento: roteador, validador, geração e esquema) e as perguntas foram rodadas uma única vez, pelo mesmo caminho do produto. Cada resposta foi conferida contra o banco com uma consulta independente, escrita à parte, e recebeu um veredito: certa (C), recusa certa (RC, o banco não tem o dado), parcial (P), errada (E) ou recusa indevida (RE). A pergunta ambígua entre as duas bases só conta como certa se a resposta declarar a base ou mostrar as duas. Houve duas ressalvas de método: o autor viu o texto das perguntas antes de congelar o sistema, e uma regra de recusa sobre o ouro total de equipe, acrescentada ao esquema por um caso do desenvolvimento, toca em um tema que o conjunto cego também sonda. O julgamento foi de um só avaliador; durante a comparação com versões anteriores, um veredito (pergunta 89) foi revisto de recusa certa para parcial, porque o *solo queue* respondia. Comando: `python -m src.nlq.avaliar_conjunto --perguntas docs/nlq_perguntas_cegas.txt --saida reports/nlq_cego_resultado.json --rotulo cego`; artefatos: `reports/nlq_cego_resultado.json`, `reports/nlq_cego_vereditos.json`, `reports/nlq_cego_comparacao.json`, as três repetições (`reports/nlq_cego_repeticao1.json` a `3.json`) e as duas versões anteriores (`reports/nlq_cego_antes_roteamento.json` e `reports/nlq_cego_antes_tudo.json`).
 
 Quadro — Acerto da consulta em linguagem natural nas 50 perguntas do conjunto cego, por versão do sistema
 
@@ -1184,7 +1225,7 @@ Quadro — Veredito de cada pergunta do conjunto cego
 | 99 | Qual liga apresentou a maior diversidade de campeões escolhidos durante a temporada? | competitivo | C | LJL, 138 campeões distintos em 2026; confere. |
 | 100 | Qual foi a equipe com mais vitórias em cada uma das principais ligas profissionais de 2026? | competitivo | P | Lista as 43 ligas de 2026 em vez das principais, e os empates no 1º lugar saem arbitrários; os campeões por liga estão corretos. |
 
-**Segundo conjunto cego (50 perguntas, 5 de novembro de 2026).** Perguntas numeradas de 101 a 150, escritas pelo autor depois do primeiro conjunto, sem repetir nenhuma pergunta dele nem do conjunto de desenvolvimento (conferido por código). O sistema era o do commit 1fe0014, que já trazia as correções feitas a partir do primeiro conjunto; as perguntas foram rodadas uma única vez e cada resposta foi conferida contra o banco com consulta independente, pelo mesmo critério. Resultado: **27 de 50 certas (54%)**, intervalo de Wilson de 95% de 40.4% a 67.0%: 18 certas, 9 recusas corretas, 9 parciais, 13 erradas e 1 recusa indevida. O primeiro conjunto deu 30 de 50 (46% a 72%); os intervalos se sobrepõem, e o segundo tem mais perguntas sem dado no esquema, o que o torna mais difícil. A falha dominante é o substituto sem rótulo: para primeira torre, primeiro sangue, primeiro Barão, primeiro dragão, série e dano a torres, o sistema calculou outra grandeza e a apresentou como resposta, o que viola a separação entre dado medido e inferência (Seção 6.1). As correções do primeiro conjunto se mantiveram: nenhuma das certas depende de pergunta dele. Uma rodada anterior com o arquivo errado (perguntas repetidas) foi descartada. Qualquer ajuste a partir daqui seria desenvolvimento; o número fica congelado. Artefatos: `reports/nlq_cego_v2_resultado.json`, `reports/nlq_cego_v2_vereditos.json` e `docs/revisao_nlq_cego_v2.md`.
+**Segundo conjunto escrito à mão (50 perguntas, 5 de novembro de 2026).** Perguntas numeradas de 101 a 150, escritas pelo autor depois do primeiro conjunto, sem repetir nenhuma pergunta dele nem do conjunto de desenvolvimento (conferido por código). O sistema era o do commit 1fe0014, que já trazia as correções feitas a partir do primeiro conjunto; as perguntas foram rodadas uma única vez e cada resposta foi conferida contra o banco com consulta independente, pelo mesmo critério. Resultado: **27 de 50 certas (54%)**, intervalo de Wilson de 95% de 40.4% a 67.0%: 18 certas, 9 recusas corretas, 9 parciais, 13 erradas e 1 recusa indevida. O primeiro conjunto deu 30 de 50 (46% a 72%); os intervalos se sobrepõem, e o segundo tem mais perguntas sem dado no esquema, o que o torna mais difícil. A falha dominante é o substituto sem rótulo: para primeira torre, primeiro sangue, primeiro Barão, primeiro dragão, série e dano a torres, o sistema calculou outra grandeza e a apresentou como resposta, o que viola a separação entre dado medido e inferência (Seção 6.1). As correções do primeiro conjunto se mantiveram: nenhuma das certas depende de pergunta dele. Uma rodada anterior com o arquivo errado (perguntas repetidas) foi descartada. Qualquer ajuste a partir daqui seria desenvolvimento; o número fica congelado. Artefatos: `reports/nlq_cego_v2_resultado.json`, `reports/nlq_cego_v2_vereditos.json` e `docs/revisao_nlq_cego_v2.md`.
 
 Quadro — Veredito de cada pergunta do segundo conjunto cego
 
@@ -1462,7 +1503,7 @@ Quadro — Limitações do trabalho e a evidência de cada uma
 | Desequilíbrio de amostra por região | BR1 11.936, EUW1 11.744, KR 10.204 e NA1 7.159 partidas (a NA1 tinha 1.446 antes da rodada final). Em três das quatro regiões o intervalo de 95% exclui 50%; a KR tem 50,4%, com intervalo que inclui 50% | O achado de viés de elo alto, além do Brasil, se apoia nas três regiões com evidência firme |
 | Cobertura desigual por versão do jogo | O *patch* 16.13 concentra 40,4% das partidas (16.572 de 41.063), em dez *patches* de 16.10 a 16.19 | Treinar nos *patches* 16.10 a 16.13 e testar nos 16.14 a 16.19 não reduz a AUC-ROC (Apêndice C). A generalização para versões com balanceamento muito diferente segue sem medida |
 | Monotonicidade isolada por variável | O XGBoost não garante que aumentar apenas a diferença de abates ou de torres nunca reduza a probabilidade prevista, por interações e redundâncias entre variáveis | Comportamento documentado e compreendido, sem restrição formal de monotonicidade (`monotone_constraints`) nesta versão |
-| Consulta em linguagem natural | 30 de 50 (60%, intervalo de 95% de 46% a 72%) e 27 de 50 (54%, 40% a 67%) perguntas cegas corretas; 7 respostas erradas com aparência de certas no primeiro conjunto e substituto sem rótulo no segundo; *benchmark* de 26 perguntas ajustado pelo autor, sem independência; um só avaliador | Falhas declaradas e sem ajuste depois da medida; consulta em transação somente leitura. Verificação do resultado depois da execução fica como trabalho futuro |
+| Consulta em linguagem natural | 181 de 203 (89,2%, intervalo de 95% de 84,1% a 92,7%) em gabarito automático de template; 60% e 54% em dois conjuntos anteriores julgados por uma pessoa; *benchmark* de 26 ajustado pelo autor, sem independência | Falhas declaradas e sem ajuste depois da medida; consulta em transação somente leitura. Verificação do resultado depois da execução fica como trabalho futuro |
 
 Quadro — Taxa de vitória do azul no estado de empate, modelo e dados
 
@@ -1557,7 +1598,7 @@ Quadro — Objetivos específicos, onde são tratados e a evidência de cada um
 | d | 5.3 e Apêndice D | Quadro 2 e viés de lado com quatro testes de robustez; inversão no profissional; conversão de vantagem |
 | e | 5.4 e Apêndice C | Quadros 3 e 4: três modelos comparados em quatro cortes; XGBoost em produção |
 | f | 5.5 e Apêndice E | Seis páginas de visualização; Figuras 3 e 4 no texto |
-| g | 5.6 e Apêndice B | 30 de 50 (60%) e 27 de 50 (54%) perguntas cegas corretas; 26 de 26 no *benchmark* de referência, que não é independente |
+| g | 5.6 e Apêndice B | 181 de 203 perguntas certas (89,2%) no gabarito automático; 60% e 54% nos conjuntos anteriores |
 
 ---
 

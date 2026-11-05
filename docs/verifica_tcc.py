@@ -1328,7 +1328,20 @@ def check_cego_nlq(t: str) -> None:
         if e not in plano:
             falha(f"NLQ cego v2: o texto não traz '{e}' (confira o artefato de vereditos)")
             return
-    print(f"  [OK] conjunto cego: {estrito}/50 e as contagens do quadro de versões batem com os artefatos; v2 {est2}/50 confere")
+    # gabarito automático (medida principal): números do texto x artefato
+    gp = RAIZ / "reports" / "nlq_gabarito_resultado_203.json"
+    if not gp.exists():
+        falha("NLQ gabarito: falta reports/nlq_gabarito_resultado_203.json")
+        return
+    g = json.loads(gp.read_text(encoding="utf-8"))["resumo"]
+    pct_g = f"{g['pct']:.1f}".replace(".", ",")
+    for e in (f"{g['certas']} de {g['executadas']} ({pct_g}%)",
+              f"{g['respondiveis']['certas']} de {g['respondiveis']['total']} perguntas respondíveis",
+              f"{g['recusas_esperadas']['certas']} de {g['recusas_esperadas']['total']} recusas esperadas"):
+        if e not in plano:
+            falha(f"NLQ gabarito: o texto não traz '{e}' (confira o artefato)")
+            return
+    print(f"  [OK] conjunto cego: {estrito}/50 e quadro de versões conferem; v2 {est2}/50; gabarito {g['certas']}/{g['executadas']} confere")
 
 
 def check_holdout_temporal(t: str) -> None:

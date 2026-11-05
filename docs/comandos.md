@@ -336,7 +336,7 @@ trava: sem ela o script grava a tela de erro e reporta sucesso.
 > silenciosamente 2×. O benchmark de 26 perguntas **não é independente** (as
 > regras do esquema foram escritas conhecendo as 3 falhas antigas): hoje dá 26/26.
 > As medidas independentes são os dois conjuntos cegos: 30/50 (60%) em
-> `reports/nlq_cego_vereditos.json` e 27/50 (54%) em `reports/nlq_cego_v2_vereditos.json`. A consulta roda em transação somente leitura
+> `reports/nlq_cego_vereditos.json` e 27/50 (54%) em `reports/nlq_cego_v2_vereditos.json`; a medida principal é o gabarito automático (181/203, 89,2%): `python -m src.nlq.gerar_gabarito` (gera), `python -m src.nlq.avaliar_conjunto --perguntas docs/nlq_perguntas_203.txt --saida reports/x.json` (roda) e `python -m src.nlq.avaliar_gabarito --resultado reports/x.json --saida reports/y.json` (compara). A consulta roda em transação somente leitura
 > (`tests/test_run_query_readonly.py`).
 >
 > O comando exige `ANTHROPIC_API_KEY`. Sem ela o Apêndice B fica sem

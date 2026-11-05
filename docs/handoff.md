@@ -161,7 +161,7 @@ NLQ (2026-11-05): três medidas, que não se somam. **Referência** (26 pergunta
 23/26 antes dos ajustes, **26/26 hoje, não independente** (regras escritas
 conhecendo as 3 falhas). **Desenvolvimento** (50): sem nota. **Cego** (50,
 rodado uma vez com o sistema congelado, conferido contra o banco):
-**30/50 (60%)**, IC 95% 46%–72%; 7 respostas erradas com aparência de certas. **Segundo cego (101–150, `docs/nlq_perguntas_v2_novas.txt`, rodado uma vez no commit 1fe0014): 27/50 (54%)**, IC 95% 40%–67%; falha dominante = substituto sem rótulo quando o dado não existe (`reports/nlq_cego_v2_vereditos.json`, `docs/revisao_nlq_cego_v2.md`).
+**Medida principal: gabarito automático (`docs/nlq_gabarito_900.json`, `src/nlq/gerar_gabarito.py` + `avaliar_gabarito.py`): 181/203 (89,2%), IC 95% 84,1%–92,7%** (`reports/nlq_gabarito_resultado_203.json`; só 203 das 900 foram executadas, o crédito da API acabou). Antes: 30/50 (60%) e 27/50 (54%) julgados à mão; 7 respostas erradas com aparência de certas no primeiro. `entidades.py` e a checagem de eliminações vieram DEPOIS da medida e não foram medidas de ponta a ponta. **Segundo cego (101–150, `docs/nlq_perguntas_v2_novas.txt`, rodado uma vez no commit 1fe0014): 27/50 (54%)**, IC 95% 40%–67%; falha dominante = substituto sem rótulo quando o dado não existe (`reports/nlq_cego_v2_vereditos.json`, `docs/revisao_nlq_cego_v2.md`).
 Versões anteriores no mesmo cego: 22/50 e 24/50. Três repetições: 0 vereditos
 mudaram. Roteador solo/competitivo/ambos em `src/nlq/route.py`; consulta em
 transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
