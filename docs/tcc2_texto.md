@@ -228,12 +228,10 @@ resultado da partida.
 
 Esses estudos delimitam o espaço de escolha da modelagem, mas não decidem
 qual família de modelos é adequada a este problema. O trabalho comparou
-três por medição.
-
-A primeira são os *ensembles* de árvores de decisão, em particular a
+três por medição. A primeira são os *ensembles* de árvores de decisão, em particular a
 *Random Forest* (Breiman, 2001), que combina *bagging*, em que cada árvore
 treina sobre uma amostra *bootstrap*, com a seleção aleatória de
-variáveis em cada nó. Isso reduz a correlação entre as árvores, que limita o ganho de um *ensemble* e pesa aqui, porque as variáveis preditoras (ouro, abates e torres) evoluem juntas na partida.
+variáveis em cada nó. Isso reduz a correlação entre as árvores, que limitaria o ganho do *ensemble*; a redução importa aqui porque as variáveis preditoras (ouro, abates e torres) evoluem juntas na partida.
 
 A segunda é o *gradient boosting*, representado pelo XGBoost (Chen; Guestrin, 2016), que constrói as árvores em sequência, cada uma ajustada
 ao resíduo das anteriores, com otimização de segunda ordem e
@@ -255,8 +253,8 @@ García-Méndez e Arriba-Pérez (2025) mostram que a predição em esports pode
 combinar classificação e interpretação, tornando os fatores da previsão
 compreensíveis para o usuário final. Explicar um *ensemble*, porém, não é
 trivial: a saída é a soma de centenas de árvores, e a contribuição de cada
-variável não é diretamente legível. O LIME (Ribeiro; Singh; Guestrin, 2016) aproxima o modelo por um modelo linear local na vizinhança de cada
-predição, simples de ler, mas pouco fiel se o modelo for muito não linear na vizinhança. O SHAP
+variável não é diretamente legível. O LIME (*Local Interpretable Model-agnostic Explanations*) (Ribeiro; Singh; Guestrin, 2016) aproxima o modelo por um modelo linear local na vizinhança de cada
+predição, simples de ler, mas pouco fiel se o modelo for muito não linear na vizinhança. O SHAP (*SHapley Additive exPlanations*)
 recorre ao valor de Shapley da teoria dos jogos: a importância de uma
 variável é sua contribuição média para a previsão, sobre todas as
 combinações das demais. Lundberg e Lee (2017) mostram que essa é a única
@@ -289,7 +287,7 @@ específico. Uma consulta gramaticalmente correta pode citar uma tabela
 inexistente ou responder à pergunta errada. Wang et al. (2020) tratam
 este segundo caso e mostram que representar o esquema com os
 relacionamentos entre tabelas, além dos nomes das colunas, melhora
-a precisão da conversão. Neste trabalho, a segurança da consulta não é delegada ao modelo: ela é validada antes de tocar o banco, e a correção semântica é medida no *benchmark* (Seção 5.6).
+a precisão da conversão. Neste trabalho, a segurança da consulta não é delegada ao modelo: ela é validada antes de tocar o banco, e a correção semântica é medida no *benchmark* e no gabarito automático (Seção 5.6).
 
 ### 2.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPORTS
 

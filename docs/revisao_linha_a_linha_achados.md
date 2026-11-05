@@ -101,3 +101,23 @@ a–g da Conclusão; "cinco seções, além desta introdução" confere com as S
 
 Fica para B12 (passada global): "esports" nunca em itálico (consistente, mas estrangeirismo) e a
 alternância entre "aprendizado de máquina" e *machine learning* depois da definição na linha 87.
+
+## B3 — 2 Fundamentação teórica (linhas 205–302; páginas 4 a 6 do artigo)
+
+Conferido e ok: cada subseção sustenta algo usado na Seção 5 (famílias de modelos → 5.4; SHAP →
+simulador; AUC-ROC e taxa-base → 5.4; NL → 5.6; espaço-temporal → mapa de calor); citações de
+domínio dentro dos 5 anos (Hodge 2021, Bahrololloomi 2022, Grinsztajn 2022, Birant 2023, Wallner
+2023, Guo 2024, García-Méndez 2025, Jiang 2025), e as frases sobre elas já foram conferidas
+contra os artigos (`docs/conferencia_referencias.md`); MLP e AUC-ROC definidos na primeira vez.
+Tamanho: 928 palavras, perto do menor dos colegas (893).
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 3.1 | 236 | R3 #10 | português | "Isso reduz a correlação entre as árvores, que limita o ganho de um *ensemble* e pesa aqui, porque…": o sujeito de "pesa" é ambíguo | "Isso reduz a correlação entre as árvores, que limitaria o ganho do *ensemble*; a redução importa aqui porque as variáveis preditoras (ouro, abates e torres) evoluem juntas na partida." | 0 |
+| 3.2 | 258 e 260 | R3 #6 | consistência | LIME e SHAP aparecem sem a forma por extenso (MLP e AUC-ROC têm) | "O LIME (*Local Interpretable Model-agnostic Explanations*) (Ribeiro; Singh; Guestrin, 2016)…" e "O SHAP (*SHapley Additive exPlanations*) recorre…" | +1 linha |
+| 3.3 | 292 | R3 #6 | consistência | "a correção semântica é medida no *benchmark* (Seção 5.6)": desde 05/11 a medida principal é o gabarito automático | "…é medida no *benchmark* e no gabarito automático (Seção 5.6)." | 0 |
+| 3.4 | 229–231 | R1 #10 (ME p. 3: 1 ou 2 parágrafos por subseção) | formato | A 2.2 tem quatro parágrafos, um deles de duas linhas ("Esses estudos delimitam…") | Juntar esse parágrafo curto ao seguinte ("…O trabalho comparou três por medição. A primeira são os *ensembles*…") | −1 linha |
+| 3.5 | 234, 238, 247, 258, 262, 274 | R1 #9 (ME p. 3: referências até 5 anos) | formato | Breiman (2001), Chen e Guestrin (2016), Hornik et al. (1989), Ribeiro et al. (2016), Lundberg e Lee (2017) e Hanley e McNeil (1982) passam dos 5 anos | **Manter**: são as obras originais dos métodos, e o parágrafo de abertura (linhas 210–211) já diz por que são citadas. Resposta pronta no guia da banca (pergunta 20) | 0 |
+| 3.6 | 270–272 | R3 | argumento | Um resultado da amostra ("o azul vence 46,6%") aparece na Fundamentação | **Manter**: é o exemplo que justifica a AUC-ROC; o número é conferido pelo `verifica_tcc.py` | 0 |
+
+**Aplicado (2026-11-05): 3.1 a 3.4.** 3.5 e 3.6 mantidos.
