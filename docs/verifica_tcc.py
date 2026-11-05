@@ -1490,6 +1490,82 @@ def check_precisao(t: str) -> None:
         print(f"  precisao: {len(ganhos)} + {len(linhas)} + {len(chaves) if ant else 0} (experimentos 1 a 10) + 10 (Quadro 5) linhas conferem; maior ganho {f(maior, 4, True)}")
 
 
+def check_coach(t: str) -> None:
+    """Auditoria do coach (Seção 4.7 e Apêndice B) x `reports/coach_audit.json`.
+
+    O quadro do Apêndice B e a frase da 4.7 não podem ter número digitado à mão.
+    Cada número que o detector não achou nos dados tem que ter revisão em
+    `coach_audit_revisao.json`, na mesma ordem, e a conta de "estatística
+    inventada" sai das classes dessa revisão (qualquer classe fora das três
+    aceitas conta como invenção). A frase da 4.7 só pode dizer "nenhum" se a
+    contagem for zero.
+    """
+    import json as _json
+    from collections import Counter
+
+    try:
+        aud = _json.loads((RAIZ / "reports" / "coach_audit.json").read_text(encoding="utf-8"))
+        rev = _json.loads((RAIZ / "reports" / "coach_audit_revisao.json").read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        falha(f"coach: artefato ausente ou invalido: {exc}")
+        return
+    r = aud["resumo"]
+    sinal = [(c["n"], s["token"]) for c in aud["casos"] for s in c["sinalizados"]]
+    revis = [(x["caso"], x["token"]) for x in rev["sinalizados"]]
+    if sinal != revis:
+        falha(f"coach: ha {len(sinal)} numeros sinalizados e a revisao manual cobre {len(revis)} (ou em outra ordem)")
+        return
+    classes = Counter(x["classe"] for x in rev["sinalizados"])
+    aceitas = {"derivado", "formato", "conhecimento_geral"}
+    inventadas = sum(v for k, v in classes.items() if k not in aceitas)
+    lida = rev["ressalva_final_lida"]
+    esperado = {
+        "Respostas auditadas": f"{r['casos']} ({r['casos'] // 3} por modo)",
+        "Números nas respostas": f"{r['numeros_total']}, dos quais {r['numeros_tempo_ou_formato']} de tempo de jogo ou formato",
+        "Não encontrados nos dados": f"{r['numeros_sinalizados']}, em {r['casos_com_sinalizado']} respostas",
+        "Estatística inventada, após a revisão": (
+            f"{inventadas} ({classes['derivado']} derivados dos dados, {classes['formato']} de formato, "
+            f"{classes['conhecimento_geral']} limiares de conhecimento geral)"),
+        "Porcentagens com correspondente nos dados":
+            f"{r['percentuais'] - r['percentuais_sem_correspondente']} de {r['percentuais']}",
+        "Contagens de jogos ou partidas com correspondente":
+            f"{r['contagens_de_jogos'] - r['contagens_sem_correspondente']} de {r['contagens_de_jogos']}",
+        "Ressalva final de limites": (
+            f"{lida['com_ressalva']} de {lida['casos']} ({r['ressalva_final_heuristica']} pelo detector, "
+            f"{lida['com_ressalva'] - r['ressalva_final_heuristica']} por leitura)"),
+        "Itens sugeridos que vêm da lista real fornecida":
+            f"{r['itens_nos_dados_fornecidos']} de {r['itens_sugeridos']}",
+    }
+    i = t.find("Quadro — Auditoria de fundamentação do coach")
+    if i < 0:
+        falha("coach: o quadro da auditoria nao existe no Apendice B")
+        return
+    tabela, comecou = [], False
+    for l in t[i:i + 2500].splitlines():
+        if l.startswith("|"):
+            comecou = True
+            if "---" not in l:
+                tabela.append(l)
+        elif comecou:
+            break  # fim do quadro: não ler o quadro seguinte
+    achado = {}
+    for linha in tabela[1:]:
+        c = [x.strip() for x in linha.strip("|").split("|")]
+        achado[c[0]] = c[1]
+    if set(achado) != set(esperado):
+        falha(f"coach: linhas do quadro {sorted(achado)} x esperadas {sorted(esperado)}")
+    for k, v in esperado.items():
+        if k in achado and achado[k] != v:
+            falha(f"coach: '{k}': quadro {achado[k]!r} x artefato {v!r}")
+    plano = " ".join(t.split())
+    if f"Em {r['casos']} respostas auditadas" not in plano:
+        falha(f"coach: a Secao 4.7 nao cita as {r['casos']} respostas auditadas")
+    if inventadas and "nenhum número estatístico estava fora dos dados fornecidos" in plano:
+        falha(f"coach: a Secao 4.7 diz que nenhum numero estava fora dos dados e a revisao tem {inventadas} invencoes")
+    if not any(x.startswith("coach") for x in FALHAS):
+        print(f"  coach: quadro de {len(esperado)} linhas, {len(revis)} sinalizados revisados, {inventadas} invencoes")
+
+
 def check_contagem_de_checagens() -> None:
     """O numero de checagens que os documentos afirmam tem que ser o real.
 
@@ -1611,6 +1687,7 @@ def main() -> None:
     check_holdout_temporal(t)
     print("21. Apendice M (experimentos 12 a 19) x artefatos")
     check_precisao(t)
+    check_coach(t)
     print("22. A contagem de checagens que os docs affirmam e a real")
     check_contagem_de_checagens()
 

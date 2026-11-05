@@ -1061,6 +1061,7 @@ LARGURAS_QUADROS = {
         [1.4, 1.5, 1.45, 2.85, 1.95, 1.8, 1.6, 1.6, 1.75],
     # apêndices reescritos em quadros (2026-11-03)
     "Execuções do benchmark de linguagem natural": [4.0, 2.4, 2.2, 7.4],
+    "Auditoria de fundamentação do coach (36 respostas)": [7.0, 9.0],
     "Configuração dos três modelos comparados": [2.6, 6.2, 7.2],
     "Validação cruzada com 5 e com 10 dobras": [1.8, 3.0, 2.8, 2.8, 2.8, 2.8],
     "Treino no passado e teste no futuro, XGBoost": [1.6, 3.2, 1.6, 1.6, 2.1, 2.0, 3.9],
@@ -1099,6 +1100,7 @@ QUADROS_ESQUERDA = {
     "Experimentos 1 a 10: ganho de AUC-ROC contra as cinco variáveis originais",
     "Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais",
     "Execuções do benchmark de linguagem natural",
+    "Auditoria de fundamentação do coach (36 respostas)",
     "Configuração dos três modelos comparados",
     "Origem dos números da Seção 5.3",
     "Limitações do trabalho e a evidência de cada uma",

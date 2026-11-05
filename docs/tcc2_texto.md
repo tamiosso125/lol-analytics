@@ -520,8 +520,7 @@ o que vem dos dados (confrontos de rota, sinergias entre campeões e itens
 calculados sobre o histórico de partidas) do que é conhecimento geral do
 modelo sobre o jogo, marcado como tal, sem verificação pelos dados da
 partida. O modelo preditivo não vê itens, posição nem o estado das ondas de *minions*. Qualquer orientação que dependa disso é inferência (Seção
-6.1). Além disso, antes da partida, o módulo também lê a composição dos dois times e
-aponta a condição de vitória de cada um, sem usar a predição.
+6.1). Em 36 respostas auditadas, nenhum número estatístico estava fora dos dados fornecidos e todas terminaram com a ressalva de limites; afirmações qualitativas não foram avaliadas (Apêndice B). Antes da partida, o módulo também lê a composição e aponta a condição de vitória de cada time, sem usar a predição.
 
 ### 4.8 MATERIAIS E MÉTODOS UTILIZADOS
 
@@ -1089,7 +1088,7 @@ consultas geradas pela interface em linguagem natural.
 
 ---
 
-## APÊNDICE B – Benchmark da interface em linguagem natural
+## APÊNDICE B – Benchmark da interface em linguagem natural e auditoria do coach
 
 Medição de 3 de novembro de 2026 sobre a base de produção de **41.063
 partidas** (a de 4 de outubro deu o mesmo resultado): **23/26 = 88% de acurácia de execução**, pelo comando
@@ -1144,6 +1143,23 @@ As três falhas (perguntas 5, 12 e 22) pertencem à mesma família: todas
 envolvem um limiar mínimo de jogos ("com pelo menos N partidas") e erram na
 formatação da resposta, por coluna extra ou apresentação, sem erro de
 interpretação da pergunta nem de estrutura da SQL.
+
+Auditoria do coach, de 4 de novembro de 2026: 36 respostas do módulo de orientação estratégica, geradas pelo mesmo caminho do produto sobre partidas reais (12 de cada modo: partida completa, composição e só estado; cortes de 15, 20 e 25 minutos). Cada número da resposta foi conferido contra os dados fornecidos à IA (o prompt sem as instruções), e os 13 que o detector não encontrou nos dados foram revisados à mão. A saída da IA varia entre execuções (temperatura 0,4), e o quadro é de uma execução. Comando: `python -m src.coach.audit_grounding --n 36`; artefatos: `reports/coach_audit.json` e `reports/coach_audit_revisao.json`.
+
+Quadro — Auditoria de fundamentação do coach (36 respostas)
+
+| Medida | Resultado |
+|---|---|
+| Respostas auditadas | 36 (12 por modo) |
+| Números nas respostas | 453, dos quais 87 de tempo de jogo ou formato |
+| Não encontrados nos dados | 13, em 9 respostas |
+| Estatística inventada, após a revisão | 0 (8 derivados dos dados, 2 de formato, 3 limiares de conhecimento geral) |
+| Porcentagens com correspondente nos dados | 167 de 167 |
+| Contagens de jogos ou partidas com correspondente | 52 de 52 |
+| Ressalva final de limites | 36 de 36 (35 pelo detector, 1 por leitura) |
+| Itens sugeridos que vêm da lista real fornecida | 87 de 87 |
+
+A auditoria mede número, não afirmação qualitativa nem a correção do conhecimento geral. No caso 5, por exemplo, a resposta diz que dois campeões estão "muito atrasados em ouro e experiência", mas nesse modo os dados trazem só a diferença do time. Dos três limiares de conhecimento geral, o de "4-5k de ouro" num cenário hipotético é o mais limítrofe.
 
 ---
 
