@@ -655,7 +655,9 @@ Os três modelos ficaram próximos. Com a mesma busca em grade, a *Random
 Forest* e o MLP chegam a 0,7617 e 0,7619 de acurácia (AUC-ROC de 0,8468 e
 0,8477), e o XGBoost mantém a maior acurácia entre os três. Uma regressão
 logística, usada como *baseline* simples, chega a 0,7631 de acurácia e 0,8483
-de AUC-ROC (Apêndice C) e fica à frente do XGBoost por milésimos (0,0010 de AUC-ROC aos 15 minutos; o intervalo exclui zero aos 10, 15 e 20): o limite está na informação das variáveis, não na complexidade do modelo. O XGBoost foi mantido por ser a escolha anterior ao baseline e já sustentar a interface; trocá-lo não mudaria o resultado prático. Com um modelo treinado para cada
+de AUC-ROC (Apêndice C) e fica à frente do XGBoost por milésimos (0,0010 de AUC-ROC aos 15 minutos; o intervalo exclui zero aos 10, 15 e 20): o limite está na informação das variáveis, não na complexidade do modelo. O XGBoost foi mantido por ser a escolha anterior ao *baseline* e já sustentar a interface; trocá-lo não mudaria o resultado prático.
+
+Com um modelo treinado para cada
 corte, com os mesmos hiperparâmetros e sobre a base de 39.426 partidas, o
 desempenho cresce conforme a partida avança: AUC-ROC de 0,774 aos 10
 minutos a 0,909 aos 25 (Quadro 4). As métricas dos três modelos nos
@@ -683,13 +685,13 @@ justificativa concreta para treinar um modelo *por fase* em vez de um
 Figura — Importância média de cada variável (|SHAP|) nos quatro cortes temporais | reports/figuras_texto/fig_shap_fases.png
 
 **Experimentos de enriquecimento.** Onze tentativas de enriquecer o conjunto de
-variáveis não produziram ganho relevante (Quadro 5): refeitas na base congelada, dez deram no máximo +0,0007 de AUC-ROC; a 11, que não dá para refazer, deu −0,0031. Oito conjuntos novos (12 a 19) somaram no máximo +0,0080, com regressão logística, mantido treinando no passado e testando no futuro (Apêndice K). Já o volume de partidas deu ganho real: o AUC-ROC do
+variáveis não produziram ganho relevante (Quadro 5): refeitas na base congelada, dez deram no máximo +0,0007 de AUC-ROC; a 11, que não dá para refazer, deu −0,0031. Oito conjuntos novos (12 a 19) somaram no máximo +0,0080, com regressão logística, e o ganho se manteve ao treinar no passado e testar no futuro (Apêndice K). Já o volume de partidas deu ganho real: o AUC-ROC do
 XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133) e para
 0,8473 (39.188). Isso é consistente com um desempenho limitado mais pelo volume de dados do que
 pela engenharia de novas variáveis, embora três pontos não bastem para
 afirmá-lo.
 
-Quadro — Experimentos negativos de enriquecimento de *features*
+Quadro — Experimentos negativos de enriquecimento de variáveis
 
 | # | Experimento | Δ AUC-ROC aos 15 e aos 25 min |
 |---|---|---|
@@ -708,7 +710,7 @@ Quadro — Experimentos negativos de enriquecimento de *features*
 ### 5.5 Dashboards (objetivo f)
 
 Foram entregues seis páginas de visualização: Início, Dashboard,
-Campeões, Partidas, Competitivo e Simulador. O simulador separa a
+Campeões, Partidas (análise de uma partida, aberta a partir das outras páginas), Competitivo e Simulador; a consulta em linguagem natural tem página própria (Seção 5.6). O simulador separa a
 estimativa por composição de time, uma heurística de taxa de vitória
 histórica sinalizada como tal na interface, da predição feita pelo modelo
 de produção a partir do estado de jogo.

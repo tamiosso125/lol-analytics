@@ -178,3 +178,23 @@ junto do resultado (R3 #9).
 Fica para B12: "solo queue" sem itálico na legenda da Figura 1 (o corpo usa itálico).
 
 **Aplicado (2026-11-05): 6.1 a 6.4.**
+
+## B7 — 5.4 e 5.5 (linhas 637–726; páginas 12 a 15 do artigo)
+
+Conferido e ok: Quadros 3, 4 e 5 e Figuras 2, 3 e 4 chamados antes e comentados depois; a
+comparação deixa claro que só o XGBoost foi ajustado no Quadro 3 e dá os números dos outros dois
+ajustados; o *baseline* logístico aparece com a conclusão honesta ("o limite está na informação
+das variáveis"); a mecânica das placas de torre (queda aos 14 minutos) está correta; números
+conferidos pelo `verifica_tcc.py`.
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 7.1 | 654–662 | R3 #10 | formato | Um parágrafo só junta a comparação ajustada, o *baseline* logístico, a decisão de manter o XGBoost e o desempenho por corte | Partir em dois antes de "Com um modelo treinado para cada corte…" | +1 linha |
+| 7.2 | 658 | R3 #7 | consistência | "…por ser a escolha anterior ao baseline": sem itálico, duas linhas depois de *baseline* em itálico | "*baseline*" | 0 |
+| 7.3 | 686 | R3 #10 | português | "…somaram no máximo +0,0080, com regressão logística, mantido treinando no passado e testando no futuro": "mantido" não tem sujeito claro | "…somaram no máximo +0,0080, com regressão logística, e o ganho se manteve ao treinar no passado e testar no futuro (Apêndice K)." | 0 |
+| 7.4 | 692 e `build_tcc_docx.py` | R3 #6 | consistência | O título do Quadro 5 diz "*features*"; o texto inteiro diz "variáveis" | "Quadro — Experimentos negativos de enriquecimento de variáveis" (e a mesma chave em `LARGURAS_QUADROS`) | 0 |
+| 7.5 | 710–711 | R3 #6 | consistência | As seis páginas listadas incluem "Partidas", que não está no menu da plataforma (o menu tem Consulta NL no lugar); quem abrir a plataforma na banca não acha essa página | "…Campeões, Partidas (análise de uma partida, aberta a partir das outras páginas), Competitivo e Simulador; a consulta em linguagem natural tem página própria (Seção 5.6)." | +1 linha |
+
+**Soma do bloco:** +2 linhas.
+
+**Aplicado (2026-11-05): 7.1 a 7.5.**

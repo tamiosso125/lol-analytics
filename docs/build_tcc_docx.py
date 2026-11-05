@@ -1066,7 +1066,7 @@ LARGURAS_QUADROS = {
     "Vitória do time vermelho por região": [2.8, 4.2, 9.0],
     "Comparação entre modelos (corte de 15 minutos)": [3.4, 2.5, 2.3, 2.1, 2.3, 3.4],
     "Desempenho do XGBoost por corte temporal": [3.0, 4.0, 4.5, 4.5],
-    "Experimentos negativos de enriquecimento de features": [0.9, 6.1, 9.0],
+    "Experimentos negativos de enriquecimento de variáveis": [0.9, 6.1, 9.0],
     "Acerto da consulta em linguagem natural nas 50 perguntas do conjunto cego, por versão do sistema":
         [3.4, 1.6, 1.9, 1.9, 2.8, 2.0, 2.4],
     # apêndices
