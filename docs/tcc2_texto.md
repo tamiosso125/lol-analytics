@@ -48,11 +48,7 @@ cortes temporais, de 10 a 25 minutos; os três ficaram próximos, e o
 XGBoost, adotado em produção, alcançou acurácia de 0,7621 e AUC-ROC de
 0,8473 no corte de 15 minutos. Uma regressão logística simples chegou ao mesmo patamar, variáveis mais ricas somaram no máximo 0,008 de AUC-ROC e treinar no passado e testar no futuro não reduziu a AUC-ROC. A análise exploratória identificou viés de lado favorável ao time vermelho no *solo queue* de elo alto (56,3% de vitórias na região com maior amostra; o intervalo exclui 50% em três das quatro regiões), estável ao longo da partida e
 invertido no cenário profissional, em que o azul vence 53,2% dos jogos,
-achado sustentado por testes de robustez. Uma interface *text-to-SQL* com
-validação estrutural e roteamento entre as duas bases acertou 30 de 50
-perguntas (60%) de um conjunto cego, conferido contra o banco; no *benchmark*
-de 26 perguntas de referência, ajustado pelo autor, chegou a 26 (23 antes dos
-ajustes). A plataforma reúne seis páginas de visualização com
+achado sustentado por testes de robustez. Uma interface *text-to-SQL* com validação estrutural e roteamento entre as duas bases acertou 30 de 50 perguntas (60%) de um conjunto cego, conferido contra o banco, e 26 de 26 em um *benchmark* de referência ajustado pelo autor. A plataforma reúne seis páginas de visualização com
 predição explicável (SHAP). Os resultados mostram a viabilidade de
 integrar essas etapas em uma única solução aplicada a esports.
 
@@ -75,10 +71,7 @@ XGBoost, adopted in production, reached an accuracy of 0.7621 and an
 AUC-ROC of 0.8473 at the 15-minute cutoff. A simple logistic regression reached the same level, richer variables added at most 0.008 of AUC-ROC, and training on the past and testing on the future did not reduce the AUC-ROC. The exploratory analysis identified a side bias favoring the red side in high-elo solo queue (56.3% win rate in the region with the largest sample; the interval excludes 50% in three of the four regions), stable
 throughout the match and reversed in the professional scenario, where
 the blue side wins 53.2% of games, a finding supported by robustness
-tests. A text-to-SQL interface with structural validation and routing between the
-two databases answered 30 of 50 questions (60%) of a blind set correctly,
-checked against the database; on the 26-question reference benchmark, tuned by
-the author, it reached 26 (23 before tuning). The platform comprises
+tests. A text-to-SQL interface with structural validation and routing between the two databases answered 30 of 50 questions (60%) of a blind set correctly, checked against the database, and 26 of 26 on a reference benchmark tuned by the author. The platform comprises
 six visualization pages with explainable predictions (SHAP). The results
 show the feasibility of integrating these stages into a single solution
 applied to esports.
@@ -500,19 +493,12 @@ melhoravam a previsão.
 
 ### 4.7 PROPOSTA DE VISUALIZAÇÃO E INTERFACE EM LINGUAGEM NATURAL
 
-A camada de apresentação é uma aplicação web em React com TypeScript, que
-consome uma API própria em FastAPI, com seis páginas de visualização: Início (busca),
-Dashboard (indicadores agregados), Campeões, Partidas (análise minuto a
-minuto, mapa de calor, leitura de *draft* e modo "e se"), Competitivo
-(*solo queue* × profissional) e Simulador (composição, estado de jogo e
-SHAP). A Seção 5 mostra, recortada, a parte de cada tela que discute. As seis telas completas estão no Apêndice E (Figuras 6 a 11).
+A camada de apresentação é uma aplicação web em React com TypeScript, que consome uma API própria em FastAPI, com seis páginas de visualização, descritas na Seção 5.5. As seis telas completas estão no Apêndice E (Figuras 6 a 11).
 
 A interface em linguagem natural é um fluxo *text-to-SQL*: um modelo
 de linguagem (Claude) traduz a pergunta em SQL, a consulta é validada
 antes de executar (apenas `SELECT` ou `WITH...SELECT`, sobre uma lista fechada
-de tabelas) e o resultado vem sempre do banco, nunca do conhecimento genérico do modelo; a explicação pode acrescentar, rotulada como "Leitura de jogo", uma nota de conhecimento geral. Antes de gerar a SQL, a pergunta é classificada como *solo queue*, competitiva ou ambas, por regras sobre o esquema e, no que sobra, por um modelo pequeno; a consulta não pode misturar as duas bases, uma falha do banco leva a no máximo uma nova tentativa com a mensagem de erro, e a execução ocorre em transação somente leitura. A acurácia foi medida em um *benchmark* de 26 perguntas
-de referência com SQL esperado, sobre o *solo queue* e o competitivo, e em um conjunto cego de 50 perguntas, conferido pela comparação com o banco (Apêndice B). A
-métrica do primeiro é a acurácia de execução, que compara o resultado da consulta
+de tabelas) e o resultado vem sempre do banco, nunca do conhecimento genérico do modelo; a explicação pode acrescentar, rotulada como "Leitura de jogo", uma nota de conhecimento geral. Antes da SQL, a pergunta é roteada para o *solo queue*, o competitivo ou ambos (regras sobre o esquema e, no resíduo, um modelo pequeno); a consulta não mistura as bases, tem no máximo uma nova tentativa após erro do banco e roda em transação somente leitura. A acurácia foi medida em um *benchmark* de 26 perguntas de referência, com SQL esperada, e em um conjunto cego de 50, conferido contra o banco (Apêndice B). A métrica do primeiro é a acurácia de execução, que compara o resultado da consulta
 gerada com o da consulta de referência. Zhong, Yu e Klein (2020) discutem
 seus limites e propõem avaliar a mesma consulta sobre vários bancos de
 teste, o que este *benchmark*, feito sobre uma única base, não faz.
@@ -747,11 +733,11 @@ Figura — Simulador, aba Estado: probabilidade de vitória e contribuição de 
 
 ### 5.6 Interface em linguagem natural (objetivo g)
 
-O fluxo de consulta em linguagem natural (*text-to-SQL* com validação estrutural e roteamento entre as bases) foi medido de duas formas (Apêndice B). No *benchmark* de 26 perguntas de referência, acertou 23 antes dos ajustes e 26 depois; como as regras do esquema foram escritas conhecendo as três falhas, o 26 de 26 não é independente.
+A consulta em linguagem natural (*text-to-SQL* com validação e roteamento entre as bases) foi medida de duas formas (Apêndice B). No *benchmark* de 26 perguntas de referência, acertou 23 antes dos ajustes e 26 depois; como as regras do esquema foram escritas conhecendo as três falhas, o resultado não é independente.
 
-Por isso foi montado um conjunto cego de 50 perguntas, elaboradas pelo autor fora do ciclo de ajuste, rodadas uma única vez com o sistema congelado e conferidas contra o banco, uma a uma, com consulta independente. Das 50, 24 saíram certas, 6 foram recusas corretas, 11 parciais, 8 erradas e 1 recusa indevida (recusa correta é a que ocorre quando o banco não tem o dado): **30 de 50 (60%)**, com intervalo de 95% de 46% a 72%. Três repetições com o sistema parado não mudaram nenhum veredito. O Apêndice B compara versões anteriores do sistema sobre as mesmas perguntas, com um critério mais brando: o ganho é real, mas modesto (de 22 para 30 acertos), e os erros que não devolvem resposta caíram de 8 para 1.
+Por isso foi montado um conjunto cego de 50 perguntas, elaboradas pelo autor fora do ciclo de ajuste, rodadas uma vez com o sistema congelado e conferidas contra o banco, uma a uma. Saíram **30 de 50 certas (60%)**, com intervalo de 95% de 46% a 72%: 24 respostas certas e 6 recusas corretas (o banco não tem o dado), 11 parciais, 8 erradas e 1 recusa indevida. Três repetições não mudaram nenhum veredito. Duas versões anteriores acertaram 22 e 24 de 50 (Apêndice B): o ganho é real, mas modesto.
 
-O tipo de falha pesa mais que o acerto. Sete das 50 respostas estavam erradas e pareciam corretas (por exemplo, uma "sequência de vitórias" que era o total de vitórias, e escolhas de campeão rotuladas como banimentos em um competitivo que não os registra); só duas falharam de forma visível. O validador garante a segurança da consulta, não o seu sentido (Seção 6.1).
+O tipo de falha pesa mais que o acerto: 7 respostas estavam erradas e pareciam corretas (por exemplo, escolhas de campeão rotuladas como banimentos em um competitivo que não os registra) e só 2 falharam de forma visível. O validador garante a segurança da consulta, não o seu sentido (Seção 6.1).
 
 A Figura 5 mostra uma consulta na plataforma: a pergunta 9 do benchmark,
 a SQL gerada pelo modelo, já validada, e o resultado lido do banco.
@@ -823,28 +809,19 @@ f) *dashboards* foram entregues em seis páginas de visualização,
 cobrindo desde estatísticas agregadas até análise minuto a minuto de
 partida individual;
 
-g) uma interface em linguagem natural foi implementada e avaliada:
-acertou 30 de 50 perguntas (60%) de um conjunto cego e 26 de 26 do
-*benchmark* de referência, ajustado pelo autor, com falhas concentradas em
-agregações de equipe e filtros de amostra.
+g) uma interface em linguagem natural foi implementada e avaliada: acertou 30 de 50 perguntas (60%) de um conjunto cego e 26 de 26 do *benchmark* de referência, ajustado pelo autor.
 
 O achado que merece destaque, por não ter sido o objeto anunciado do
 trabalho, é o viés de lado: uma assimetria estrutural entre os dois lados
 do mapa, estatisticamente firme em três das quatro regiões coletadas
 (BR1, EUW1, NA1; a KR tem intervalo de confiança que inclui 50%) e com
-sinal invertido no jogo profissional. O valor é duplo: é um fator de
-confusão que qualquer modelo preditivo sobre *solo queue* precisa
-controlar, já que o lado carrega informação sobre o resultado sem refletir
-o estado da partida; e a
-inversão no circuito profissional sugere origem distinta no *solo
-queue*, hipótese que este trabalho delimita sem comprovar.
-
-Como contribuição além do escopo originalmente delimitado no TCC I, a
-incorporação dos dados competitivos profissionais (Oracle's Elixir)
-permitiu uma comparação direta entre dois contextos institucionalmente
-diferentes do mesmo jogo, produzindo dois achados quantitativos: a inversão do viés de lado entre
-*solo queue* de elo alto e jogo profissional, e a diferença na conversão
-de vantagem material em vitória entre os dois contextos.
+sinal invertido no jogo profissional. Ele é um fator de confusão que
+qualquer modelo preditivo sobre *solo queue* precisa controlar, e a
+inversão no circuito profissional sugere origem distinta no *solo queue*,
+hipótese que este trabalho delimita sem comprovar. A incorporação dos
+dados profissionais (Oracle's Elixir), além do escopo do TCC I, permitiu
+ainda medir a diferença na conversão de vantagem material em vitória
+entre os dois contextos.
 
 ### 6.1 LIMITAÇÕES E AMEAÇAS À VALIDADE
 
@@ -876,22 +853,13 @@ jogador em um campeão ou um confronto de rota, seguem frágeis mesmo com
 41.063 partidas, apesar do encolhimento estatístico (*shrinkage*) em
 direção à média.
 
-**Limitações do modelo.** Três ficam em aberto. A taxa-base do XGBoost no
-estado de empate total, de 49,0% a 51,4% conforme o corte, subestima o
-viés de lado medido nos dados (46,4% a 47,9%). A discrepância não é
-subajuste: a busca em grade completa ficou 0,0001 de AUC acima da
-produção (de 0,8473 para 0,8475, em 2º lugar entre 27 combinações), e apenas a
-troca para *Random Forest* a fecha (0,6 pp), ao custo de 0,0005 de AUC.
-O modelo foi treinado sobre 39.426 das 41.063 partidas do banco e não foi
-retreinado, para não invalidar as validações já feitas. E
-o XGBoost não garante monotonicidade isolada por variável, por não usar
-restrição formal de monotonicidade.
+**Limitações do modelo.** A taxa-base do XGBoost no estado de empate total (49,0% a 51,4% conforme o corte) subestima o viés de lado medido nos dados (46,4% a 47,9%). A discrepância não é subajuste: a busca em grade completa ficou 0,0001 de AUC acima da produção, e apenas a troca para *Random Forest* a fecha (0,6 pp), ao custo de 0,0005 de AUC. O modelo foi treinado sobre 39.426 das 41.063 partidas do banco e não foi retreinado, para não invalidar as validações já feitas. E o XGBoost não garante monotonicidade isolada por variável, por não usar restrição formal.
 
-**Validade da consulta em linguagem natural.** O conjunto cego tem 50 perguntas (intervalo de 95% do acerto de 46% a 72%) e foi julgado por um único avaliador, com a consulta que confirma cada veredito no Apêndice B. O *benchmark* de 26 perguntas não é independente. O maior risco é a resposta errada que parece certa (7 de 50). Três repetições deram os mesmos vereditos, mas mudanças no esquema alteraram respostas no desenvolvimento e, nas perguntas ambíguas, o resultado depende do roteador.
+**Validade da consulta em linguagem natural.** O conjunto cego tem 50 perguntas (intervalo de 95% de 46% a 72%) e foi julgado por um só avaliador; o *benchmark* de 26 não é independente. O maior risco é a resposta errada que parece certa (7 de 50), e nas perguntas ambíguas o resultado depende do roteador.
 
 ### 6.2 TRABALHOS FUTUROS
 
-Ficam registrados seis caminhos. O primeiro é a extensão da predição para partidas ao vivo, não implementada, mas prevista na arquitetura: a camada de predição aceita estado de jogo arbitrário por fase, e a barreira é de dados em tempo real, não de modelo. O segundo é a inclusão de seleção de campeão competitiva no simulador de time. O terceiro é a investigação de restrições de monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O quinto é pedir à Riot uma chave de produção, sujeita a aprovação, para ampliar o limite de requisições; a documentação não lista dados novos nas APIs padrão (Apêndice H), então o estado das ondas segue fora do alcance. O sexto é a melhoria da consulta em linguagem natural, onde o conjunto cego mostrou as falhas silenciosas: filtro de amostra mínima, verificação do resultado depois da execução e um conjunto cego maior, com dois avaliadores e mais de um banco de teste (Zhong; Yu; Klein, 2020).
+Ficam registrados seis caminhos. O primeiro é a extensão da predição para partidas ao vivo, prevista na arquitetura mas não implementada: a barreira é de dados em tempo real, não de modelo. O segundo é a inclusão de seleção de campeão competitiva no simulador de time. O terceiro é a investigação de restrições de monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O quinto é pedir à Riot uma chave de produção, sujeita a aprovação, para ampliar o limite de requisições; a documentação não lista dados novos nas APIs padrão (Apêndice H), então o estado das ondas segue fora do alcance. O sexto é a melhoria da consulta em linguagem natural: filtro de amostra mínima, verificação do resultado depois da execução e um conjunto cego maior, com dois avaliadores (Zhong; Yu; Klein, 2020).
 
 ---
 

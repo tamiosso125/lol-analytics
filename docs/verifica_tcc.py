@@ -1292,9 +1292,9 @@ def check_cego_nlq(t: str) -> None:
         falha(f"NLQ cego: o artefato não tem 50 vereditos ({sum(c.values())})")
         return
     esperadas = [
-        f"{c['C']} saíram certas, {c['RC']} foram recusas corretas, {c['P']} parciais, "
+        f"{c['C']} respostas certas e {c['RC']} recusas corretas (o banco não tem o dado), {c['P']} parciais, "
         f"{c['E']} erradas e {c['RE']} recusa indevida",
-        f"{estrito} de 50 (60%)" if round(estrito / 50 * 100) == 60 else f"{estrito} de 50 ({round(estrito / 50 * 100)}%)",
+        f"{estrito} de 50 certas ({round(estrito / 50 * 100)}%)",
         f"| **Atual** | **{c['C']}** | **{c['RC']}** | **{c['P']}** | **{c['E'] + c['RE']}** | **{estrito}** |",
     ]
     for e in esperadas:
