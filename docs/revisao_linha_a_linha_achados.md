@@ -138,3 +138,24 @@ Tamanho: 828 palavras, dentro da faixa dos colegas (409–1.703).
 | 4.3 | 306 | pergunta 3 ao orientador | formato | O texto não diz onde nem como os estudos foram buscados | **Aguardar o orientador** (pergunta 3). Se ele pedir, uma frase no parágrafo de abertura | 0 agora |
 
 **Aplicado (2026-11-05): 4.1.** 4.2 decidido em B12, conforme a folga; 4.3 aguarda o orientador.
+
+## B5 — 4 Metodologia (linhas 397–518; páginas 7 a 9 do artigo)
+
+Conferido e ok (R1 #12): natureza (aplicada), objetivos (exploratória e descritiva) e abordagem
+(predominantemente quantitativa), cada uma com referência; estratégias (bibliográfica e
+documental); coleta com fontes, elo, fila, regiões e volume; tratamento; quatro testes de robustez
+com referência; modelagem sem vazamento, com validação e métricas; *software* sem referência na
+4.8. Tamanho: 1.278 palavras, dentro da faixa (1.037–3.819).
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 5.1 | 473–487 | R3 #2 (todo resultado tem método) | argumento | A 5.4 apresenta três coisas que a 4.6 não descreve: a regressão logística usada como *baseline*, os oito experimentos de precisão (12 a 19, Apêndice K) e o treino no passado com teste no futuro (Apêndice C) | Acrescentar ao fim da 4.6: "Uma regressão logística serviu de *baseline* simples. Outros oito conjuntos de variáveis foram testados depois (Apêndice K), e a estabilidade no tempo foi verificada treinando nas partidas mais antigas e testando nas mais recentes (Apêndice C)." | +2 linhas |
+| 5.2 | 431–433 | R3 #6 | consistência | "EUN1, esta com amostra insuficiente e fora da leitura": "fora da leitura" é vago, e o leitor do Resumo vê "cinco regiões" sem saber por que a análise usa quatro | "…e EUN1, com só 20 partidas e por isso fora da análise por região)…" | 0 |
+| 5.3 | 493–496 | R3 #2 | argumento | A 4.7 descreve o fluxo, mas não a recusa determinística de dado ausente, que a 5.6 cita e que fazia parte do sistema medido no gabarito | Depois de "…roda em transação somente leitura.": "Perguntas sobre o que o banco não registra, como primeiro sangue ou série, recebem uma recusa antes de chegar ao modelo." | +1 linha |
+| 5.4 | 499 | R3 #6 | consistência | "o que este *benchmark*, feito sobre uma única base, não faz": desde 05/11 são duas medidas (*benchmark* e gabarito) | "o que esta avaliação, feita sobre uma única base, não faz." | 0 |
+| 5.5 | 512–518 | R1 #12 (ME p. 7: "descrição de hardware, software, materiais usados") | formato | Há *software*, mas não o *hardware* | Trocar "O desenvolvimento e a execução foram feitos localmente, em Windows." por "O desenvolvimento e a execução foram feitos localmente, em um computador com Windows 11, processador Intel Core i5-13400F e 32 GB de memória." | 0 |
+| 5.6 | 449 e 572 | R3 #4 | formato | A 4.4 cita o Quadro 1, que só aparece na 5.2 | **Manter**: a chamada vem antes do quadro, como pede o critério; só registro | 0 |
+
+**Soma do bloco:** +3 linhas.
+
+**Aplicado (2026-11-05): 5.1 a 5.5.** 5.6 mantido.

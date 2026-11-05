@@ -429,7 +429,7 @@ população fechada, que a API lista por inteiro e que cabe no limite de
 requisições da chave de desenvolvedor. O *account-v1* resolveu o Riot ID,
 e o *match-v5* trouxe cada partida e sua linha do tempo minuto a
 minuto. A coleta cobriu cinco regiões (BR1, EUW1, KR, NA1 e
-EUN1, esta com amostra insuficiente e fora da leitura) na fila 420
+EUN1, com só 20 partidas e por isso fora da análise por região) na fila 420
 (ranqueada solo/duo), em um total de **41.063 partidas**. Como a chave de desenvolvedor
 expira a cada 24 horas, o coletor retoma de onde parou e pula as partidas
 já salvas.
@@ -484,7 +484,7 @@ scikit-learn (Pedregosa et al., 2011), otimizando a AUC-ROC. O modelo de
 produção recebeu curva de calibração e explicações SHAP, globais e por
 predição. Onze experimentos de enriquecimento testaram se outros sinais,
 dez da linha do tempo e um de um endpoint de progressão do jogador,
-melhoravam a previsão.
+melhoravam a previsão. Uma regressão logística serviu de *baseline* simples. Outros oito conjuntos de variáveis foram testados depois (Apêndice K), e a estabilidade no tempo foi verificada treinando nas partidas mais antigas e testando nas mais recentes (Apêndice C).
 
 ### 4.7 PROPOSTA DE VISUALIZAÇÃO E INTERFACE EM LINGUAGEM NATURAL
 
@@ -493,10 +493,10 @@ A camada de apresentação é uma aplicação web em React com TypeScript, que c
 A interface em linguagem natural é um fluxo *text-to-SQL*: um modelo
 de linguagem (Claude) traduz a pergunta em SQL, a consulta é validada
 antes de executar (apenas `SELECT` ou `WITH...SELECT`, sobre uma lista fechada
-de tabelas) e o resultado vem sempre do banco, nunca do conhecimento genérico do modelo; a explicação pode acrescentar, rotulada como "Leitura de jogo", uma nota de conhecimento geral. Antes da SQL, a pergunta é roteada para o *solo queue*, o competitivo ou ambos (regras sobre o esquema e, no resíduo, um modelo pequeno); a consulta não mistura as bases, tem no máximo uma nova tentativa após erro do banco e roda em transação somente leitura. A acurácia foi medida em um *benchmark* de 26 perguntas de referência, com SQL esperada, e em um gabarito automático de 203 perguntas, comparado por código (Apêndice B). A métrica de ambos é a acurácia de execução, que compara o resultado da consulta
+de tabelas) e o resultado vem sempre do banco, nunca do conhecimento genérico do modelo; a explicação pode acrescentar, rotulada como "Leitura de jogo", uma nota de conhecimento geral. Antes da SQL, a pergunta é roteada para o *solo queue*, o competitivo ou ambos (regras sobre o esquema e, no resíduo, um modelo pequeno); a consulta não mistura as bases, tem no máximo uma nova tentativa após erro do banco e roda em transação somente leitura. Perguntas sobre o que o banco não registra, como primeiro sangue ou série, recebem uma recusa antes de chegar ao modelo. A acurácia foi medida em um *benchmark* de 26 perguntas de referência, com SQL esperada, e em um gabarito automático de 203 perguntas, comparado por código (Apêndice B). A métrica de ambos é a acurácia de execução, que compara o resultado da consulta
 gerada com o da consulta de referência. Zhong, Yu e Klein (2020) discutem
 seus limites e propõem avaliar a mesma consulta sobre vários bancos de
-teste, o que este *benchmark*, feito sobre uma única base, não faz.
+teste, o que esta avaliação, feita sobre uma única base, não faz.
 
 O módulo de orientação estratégica (*coach*) traduz a probabilidade e as
 contribuições SHAP de um estado de jogo em recomendações em linguagem
@@ -515,7 +515,7 @@ TypeScript e Recharts. A interface em linguagem natural e o módulo de
 orientação estratégica (*coach*) usam a API da Anthropic (modelo Claude).
 Testes automatizados cobrem o *backend* (testes de fumaça e uma bateria de
 validação comportamental do modelo de produção) e o *frontend* (Vitest).
-O desenvolvimento e a execução foram feitos localmente, em Windows.
+O desenvolvimento e a execução foram feitos localmente, em um computador com Windows 11, processador Intel Core i5-13400F e 32 GB de memória.
 
 ---
 
