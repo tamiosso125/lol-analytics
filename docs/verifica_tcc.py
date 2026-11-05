@@ -477,7 +477,7 @@ def check_figuras_citadas(t: str) -> None:
     import re as _re
 
     # 2026-10-28: 5 recortes no corpo (marcador "Figura – ... | arquivo.png")
-    # + as 6 telas inteiras do Apêndice F (era Anexo A). O total vem do texto,
+    # + as 6 telas inteiras do Apêndice E (era Anexo A). O total vem do texto,
     # não de constante: um marcador novo entra na conta sozinho.
     n_texto = len(_re.findall(r"(?m)^Figura\s*[—–-].*\|\s*\S+\.png\s*$", t))
     total = n_texto + 6
@@ -1334,7 +1334,7 @@ def check_holdout_temporal(t: str) -> None:
 
 
 def check_precisao(t: str) -> None:
-    """Apêndice M (experimentos 12 a 19) x artefatos em reports/.
+    """Apêndice J (experimentos 1 a 19) x artefatos em reports/.
 
     O quadro de ganhos e o de treino no passado vêm de
     `experimentos_precisao.json`, `experimento_historico.json` e
@@ -1366,7 +1366,7 @@ def check_precisao(t: str) -> None:
     i = t.find("Quadro — Experimentos 12 a 19")
     j = t.find("Quadro — Variáveis novas em treino no passado")
     if i < 0 or j < 0:
-        falha("precisao: os quadros do Apêndice M nao existem")
+        falha("precisao: os quadros do Apêndice J nao existem")
         return
     ganhos = [l for l in t[i:j].splitlines() if l.startswith("|") and "---" not in l][1:]
     mapa = [("E12_trajetoria", "xgb_prod"), ("E13_funcao", "xgb_prod"), ("E14_objetivos", "xgb_prod"),
@@ -1385,6 +1385,82 @@ def check_precisao(t: str) -> None:
         esp = [ic(*hist[corte]["5+"]["logit"]["dauc_ic"]) for corte in ("15", "25")]
         if c[2:4] != esp:
             falha(f"precisao experimento 19: quadro {c[2:4]} x artefato {esp}")
+
+    # experimentos 1 a 10, refeitos em 2026-11-04 (`experimentos_antigos.json`): o
+    # quadro do Apêndice J e o Quadro 5 do corpo saem do mesmo artefato
+    try:
+        ant = lê("experimentos_antigos.json")
+    except Exception as exc:  # noqa: BLE001
+        falha(f"precisao: experimentos_antigos.json ausente ou invalido: {exc}")
+        ant = None
+    ia = t.find("Quadro — Experimentos 1 a 10")
+    if ant is not None and (ia < 0 or ia > i):
+        falha("precisao: o quadro dos experimentos 1 a 10 nao existe antes do dos experimentos 12 a 19")
+    elif ant is not None:
+        def d_(corte, chave):
+            if chave == "tuning":
+                return ant[corte]["tuning_aninhado"]
+            if chave in ("sigmoide", "isotonica"):
+                return ant[corte]["calibracao"][chave]
+            return ant[corte][chave]["xgb_prod"]
+
+        chaves = ["A01_barao_arauto", "A02_dispersao", "tuning", "sigmoide", "isotonica", "A05_ouro_itens",
+                  "A06_ofensivas", "A06_defensivas", "A08_visao_ambas", "A09_dragoes_tipo", "A10_placas"]
+        linhas_a = [l for l in t[ia:i].splitlines() if l.startswith("|") and "---" not in l][1:]
+        if len(linhas_a) != len(chaves) + 1:
+            falha(f"precisao: o quadro dos experimentos 1 a 10 tem {len(linhas_a)} linhas e eram {len(chaves) + 1}")
+        for linha, chave in zip(linhas_a, chaves):
+            c = [x.strip() for x in linha.strip("|").split("|")]
+            esp = [ic(d_(corte, chave)["delta_auc"], d_(corte, chave)["ic_lo"], d_(corte, chave)["ic_hi"])
+                   for corte in ("15", "25")]
+            if c[2:4] != esp:
+                falha(f"precisao antigos {chave}: quadro {c[2:4]} x artefato {esp}")
+        # Quadro 5 do corpo: o delta aos 15 e aos 25 minutos de cada linha
+        q5i = t.find("Quadro — Experimentos negativos de enriquecimento")
+        q5 = [l for l in t[q5i:q5i + 3000].splitlines() if l.startswith("|") and "---" not in l][1:11]
+        q5chaves = ["A01_barao_arauto", "A02_dispersao", "tuning", "sigmoide", "A05_ouro_itens", "A06_ofensivas",
+                    "A05_ouro_itens", "A08_visao_ambas", "A09_dragoes_tipo", "A10_placas"]
+        if len(q5) != 10:
+            falha(f"precisao: o Quadro 5 tem {len(q5)} linhas de experimento e eram 10")
+        for linha, chave in zip(q5, q5chaves):
+            c = [x.strip() for x in linha.strip("|").split("|")]
+            esp = f"{f(d_('15', chave)['delta_auc'], 4, True)} e {f(d_('25', chave)['delta_auc'], 4, True)}"
+            if c[2] != esp:
+                falha(f"precisao Quadro 5, experimento {c[0]}: {c[2]!r} x artefato {esp!r}")
+        maior_a = max(d_(c_, k)["delta_auc"] for c_ in ("15", "25") for k in chaves)
+        if f(maior_a, 4, True) != "+0,0007":
+            falha(f"precisao: o texto cita +0,0007 como maior ganho dos experimentos 1 a 10 e o medido e {f(maior_a, 4, True)}")
+        # a Seção 5.4 cita os dois ganhos máximos: o dos experimentos 1 a 10 e o de 12 a 19
+        pi = t.find("**Experimentos de enriquecimento.**")
+        par = t[pi:t.find("afirmá-lo.", pi)] if pi >= 0 else ""
+        if not par:
+            falha("precisao: o paragrafo 'Experimentos de enriquecimento' da Secao 5.4 nao existe")
+        else:
+            for esperado, quem in ((f(maior_a, 4, True), "experimentos 1 a 10"),
+                                   (f(exp["15"]["E18_tudo"]["logit"]["delta_auc"], 4, True), "experimentos 12 a 19")):
+                if esperado not in par:
+                    falha(f"precisao: a Secao 5.4 nao cita o maior ganho dos {quem} ({esperado})")
+
+    # Seção 5.4: a frase sobre a regressão logística sai de `baseline_e_diferencas.json`
+    # (logística à frente do XGBoost por milésimos; o intervalo exclui zero em alguns cortes)
+    try:
+        base = lê("baseline_e_diferencas.json")["resultados"]
+        dif = "XGBoost - Regressão logística"
+        d15 = base["15"]["diferencas"][dif]["auc"]
+        exclui = [c for c in ("10", "15", "20", "25")
+                  if base[c]["diferencas"][dif]["auc"][2] < 0 or base[c]["diferencas"][dif]["auc"][1] > 0]
+        lista = ", ".join(exclui[:-1]) + " e " + exclui[-1] if len(exclui) > 1 else "".join(exclui)
+        esperado = [
+            f"chega a {f(base['15']['modelos']['Regressão logística']['acuracia'])} de acurácia e "
+            f"{f(base['15']['modelos']['Regressão logística']['auc'])}",
+            f"({f(-d15[0])} de AUC-ROC aos 15 minutos; o intervalo exclui zero aos {lista})",
+        ]
+        flat = " ".join(t.split())
+        for e_ in esperado:
+            if e_ not in flat:
+                falha(f"precisao 5.4: a frase da regressao logistica nao traz {e_!r} (artefato do baseline)")
+    except Exception as exc:  # noqa: BLE001
+        falha(f"precisao: baseline_e_diferencas.json ausente ou invalido: {exc}")
 
     rot = {"Cronológica 80/20": "cronologica", "Por *patch*": "por_patch", "Aleatória 80/20": "aleatoria"}
     linhas = [l for l in t[j:j + 3000].splitlines() if l.startswith("|") and "---" not in l][1:]
@@ -1411,7 +1487,7 @@ def check_precisao(t: str) -> None:
     if "+0,008" in t and maior < 0.0075:
         falha(f"precisao: o texto cita +0,008 mas o maior ganho medido e {f(maior, 4, True)}")
     if not any(x.startswith("precisao") for x in FALHAS):
-        print(f"  precisao: {len(ganhos)} + {len(linhas)} linhas conferem; maior ganho {f(maior, 4, True)}")
+        print(f"  precisao: {len(ganhos)} + {len(linhas)} + {len(chaves) if ant else 0} (experimentos 1 a 10) + 10 (Quadro 5) linhas conferem; maior ganho {f(maior, 4, True)}")
 
 
 def check_contagem_de_checagens() -> None:

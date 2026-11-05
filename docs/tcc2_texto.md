@@ -214,7 +214,7 @@ Esta seção define os conceitos usados no restante do trabalho: análise de
 dados em esports, as famílias de modelos preditivos comparadas,
 explicabilidade e avaliação de modelos, interfaces em linguagem natural e
 visualização analítica. As obras originais dos métodos aplicados são
-citadas pela propriedade técnica que justifica o uso (Apêndice H). Os estudos do
+citadas pela propriedade técnica que justifica o uso (Apêndice G). Os estudos do
 domínio são descritos autor a autor na Seção 3 e confrontados com os
 resultados na Seção 5.7.
 
@@ -311,7 +311,7 @@ posicionamento da análise de partida.
 
 ## 3 TRABALHOS RELACIONADOS
 
-Esta seção descreve os onze estudos de domínio que sustentam a pesquisa (Apêndice I),
+Esta seção descreve os onze estudos de domínio que sustentam a pesquisa,
 com o objeto, a abordagem e a contribuição de cada um para o problema
 aqui tratado. As principais obras de método (Breiman, 2001; Chen; Guestrin, 2016; Hanley; McNeil, 1982; Lundberg; Lee, 2017; Ribeiro; Singh; Guestrin, 2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
 elas fundamentam é introduzido.
@@ -445,7 +445,7 @@ já salvas.
 **b) Oracle's Elixir (cenário profissional).** Foram incorporados
 **99.259 jogos profissionais** de 2014 a 2026, de 122 ligas, da elite às de
 desenvolvimento, a partir dos arquivos CSV anuais que o site publica
-(Oracle's Elixir, [s.d.]; arquivos de 4 jul. 2026; Apêndice J), para comparar o *solo queue* de
+(Oracle's Elixir, [s.d.]; arquivos de 4 jul. 2026; Apêndice H), para comparar o *solo queue* de
 elo alto com o cenário profissional.
 
 Os dados são secundários e públicos, sem participação de sujeitos humanos
@@ -501,7 +501,7 @@ consome uma API própria em FastAPI, com seis páginas de visualização: Iníci
 Dashboard (indicadores agregados), Campeões, Partidas (análise minuto a
 minuto, mapa de calor, leitura de *draft* e modo "e se"), Competitivo
 (*solo queue* × profissional) e Simulador (composição, estado de jogo e
-SHAP). A Seção 5 mostra, recortada, a parte de cada tela que discute. As seis telas completas estão no Apêndice F (Figuras 6 a 11).
+SHAP). A Seção 5 mostra, recortada, a parte de cada tela que discute. As seis telas completas estão no Apêndice E (Figuras 6 a 11).
 
 A interface em linguagem natural é um fluxo *text-to-SQL*: um modelo
 de linguagem (Claude) traduz a pergunta em SQL, a consulta é validada
@@ -538,7 +538,7 @@ O desenvolvimento e a execução foram feitos localmente, em Windows.
 ## 5 RESULTADOS E ANÁLISE
 
 Esta seção apresenta os resultados obtidos, organizados de acordo com
-os objetivos específicos definidos na Seção 1.4.2 (Apêndice K).
+os objetivos específicos definidos na Seção 1.4.2 (Apêndice I).
 
 ### 5.1 Mapeamento de dados e recursos da Riot Games API (objetivo a)
 
@@ -578,7 +578,7 @@ viés de lado.
 **Viés de lado no *solo queue* de elo alto.** No agregado das cinco
 regiões, o time vermelho venceu mais que o azul, com intensidade variável
 por região. O Quadro 2 traz a medição direta em SQL, de 4 de outubro de 2026, sobre
-as 41.063 partidas. O histórico das medições está no Apêndice E.
+as 41.063 partidas. O histórico das medições está no Apêndice D.
 
 Quadro — Vitória do time vermelho por região
 
@@ -645,7 +645,7 @@ nas mãos de um time coordenado. A diferença na faixa com amostra
 suficiente, de 7,8 pontos percentuais, é pequena em termos absolutos, mas
 significativa (z = 8,3, p < 0,001). A faixa de +4.000 a +6.000 do
 profissional, com 72 jogos, é apenas indicativa. A origem das taxas está no
-Apêndice E. A Figura 1 mostra as duas comparações na tela Competitivo,
+Apêndice D. A Figura 1 mostra as duas comparações na tela Competitivo,
 com o cenário profissional restrito a 2026. Por isso o azul aparece com
 53,1%, diferente dos 53,2% do acervo completo.
 
@@ -672,9 +672,7 @@ Os três modelos ficaram próximos. Com a mesma busca em grade, a *Random
 Forest* e o MLP chegam a 0,7617 e 0,7619 de acurácia (AUC-ROC de 0,8468 e
 0,8477), e o XGBoost mantém a maior acurácia entre os três. Uma regressão
 logística, usada como *baseline* simples, chega a 0,7631 de acurácia e 0,8483
-de AUC-ROC, no mesmo patamar (Apêndice C): o limite está na informação das variáveis, não na complexidade do modelo. O XGBoost foi adotado pela
-estabilidade na faixa intermediária, já que não vence em todos os cortes:
-aos 10 minutos o MLP o supera em acurácia (0,7020 contra 0,7004) e aos 25 o MLP chega a 0,002 do AUC do XGBoost (0,9072 contra 0,9090). Com um modelo treinado para cada
+de AUC-ROC (Apêndice C) e fica à frente do XGBoost por milésimos (0,0010 de AUC-ROC aos 15 minutos; o intervalo exclui zero aos 10, 15 e 20): o limite está na informação das variáveis, não na complexidade do modelo. O XGBoost foi mantido por ser a escolha anterior ao baseline e já sustentar a interface; trocá-lo não mudaria o resultado prático. Com um modelo treinado para cada
 corte, com os mesmos hiperparâmetros e sobre a base de 39.426 partidas, o
 desempenho cresce conforme a partida avança: AUC-ROC de 0,774 aos 10
 minutos a 0,909 aos 25 (Quadro 4). As métricas dos três modelos nos
@@ -692,7 +690,7 @@ Quadro — Desempenho do XGBoost por corte temporal
 Na importância das variáveis (SHAP, média do valor absoluto), as
 diferenças de ouro e de experiência dominam em todos os cortes. A
 diferença de torres é quase irrelevante até os 20 minutos (0,0044 aos 10,
-0,0060 aos 15 e 0,0031 aos 20) e salta para 0,0928 aos 25, cerca de 15 vezes o valor dos 15 minutos (Figura 2 e Apêndice L). É coerente com a mecânica do
+0,0060 aos 15 e 0,0031 aos 20) e salta para 0,0928 aos 25, cerca de 15 vezes o valor dos 15 minutos (Figura 2 e Apêndice J). É coerente com a mecânica do
 jogo: as placas de defesa das torres caem por volta dos 14 minutos, e
 antes disso destruir uma torre é raro e pouco informativo. É a
 justificativa concreta para treinar um modelo *por fase* em vez de um
@@ -701,30 +699,28 @@ justificativa concreta para treinar um modelo *por fase* em vez de um
 
 Figura — Importância média de cada variável (|SHAP|) nos quatro cortes temporais | reports/figuras_texto/fig_shap_fases.png
 
-**Experimentos negativos.** Onze tentativas de enriquecer o conjunto de
-variáveis não produziram ganho distinguível de ruído (Quadro 5). As maiores quedas numéricas foram a cooperação do jogador (−0,0031, sobre 2.987 partidas) e o tipo do dragão (AUC-ROC de 0,8319 para 0,8295). As notas sobre três delas estão no Apêndice D. Já
-o aumento do *volume* de partidas produziu ganho real: o AUC-ROC do
+**Experimentos de enriquecimento.** Onze tentativas de enriquecer o conjunto de
+variáveis não produziram ganho relevante (Quadro 5): refeitas na base congelada, dez deram no máximo +0,0007 de AUC-ROC; a 11, que não dá para refazer, deu −0,0031. Oito conjuntos novos (12 a 19) somaram no máximo +0,0080, com regressão logística, mantido treinando no passado e testando no futuro (Apêndice K). Já o volume de partidas deu ganho real: o AUC-ROC do
 XGBoost subiu de 0,8214 (10.295 partidas) para 0,8393 (23.133) e para
-0,8473 (39.188). Com as variáveis de estado agregado que a API oferece, isso
-é consistente com um desempenho limitado mais pelo volume de dados do que
+0,8473 (39.188). Isso é consistente com um desempenho limitado mais pelo volume de dados do que
 pela engenharia de novas variáveis, embora três pontos não bastem para
 afirmá-lo.
 
 Quadro — Experimentos negativos de enriquecimento de *features*
 
-| # | Experimento | Resultado |
+| # | Experimento | Δ AUC-ROC aos 15 e aos 25 min |
 |---|---|---|
-| 1 | Diferença de abates de Barão/Arauto | Δ AUC ≈ ruído (±0,001-0,003) |
-| 2 | Dispersão espacial do time | Δ AUC ≈ ruído |
-| 3 | Tuning específico por fase | Δ AUC ≈ ruído |
-| 4 | Calibração adicional (além da já obtida) | sem ganho (modelos já calibrados) |
-| 5 | Ouro convertido em itens | Δ AUC ≈ ruído |
-| 6 | Separação de features defensivas/ofensivas | Δ AUC ≈ ruído |
-| 7 | Ouro em itens (`item_gold_diff`), em amostra maior | Δ AUC ≈ ruído |
-| 8 | Visão (ward_diff / ward_kill_diff) | Δ AUC ≈ ruído |
-| 9 | Dragões por tipo (`monsterSubType`) | **AUC piorou** (0,8319 → 0,8295), sobre a base de 23.133 partidas |
-| 10 | Placas de torre (`plate_diff`, `TURRET_PLATE_DESTROYED`) | Δ AUC -0,0002 (cortes 10 e 15 min, base de 39.188-39.309) |
-| 11 | Percentis comportamentais (`teamwork_pct_diff`/`expertise_pct_diff`, `lol-challenges-v1`) | Δ AUC -0,0031/+0,0007 (corte 15 min, n=2.987, piloto de n=199 sugeriu sinal que não se sustentou) |
+| 1 | Diferença de abates de Barão/Arauto | +0,0000 e −0,0000 |
+| 2 | Dispersão espacial do time | −0,0000 e +0,0003 |
+| 3 | Tuning específico por fase | +0,0001 e +0,0002 |
+| 4 | Calibração adicional (sigmoide) | +0,0001 e +0,0001 |
+| 5 | Ouro convertido em itens | +0,0001 e −0,0000 |
+| 6 | Variáveis defensivas/ofensivas (ofensivas) | +0,0007 e +0,0000 |
+| 7 | Ouro em itens (`item_gold_diff`) | +0,0001 e −0,0000 |
+| 8 | Visão (ward_diff / ward_kill_diff) | −0,0000 e +0,0000 |
+| 9 | Dragões por tipo (`monsterSubType`) | −0,0000 e +0,0000 |
+| 10 | Placas de torre (`plate_diff`, `TURRET_PLATE_DESTROYED`) | +0,0000 e +0,0000 |
+| 11 | Percentis comportamentais (`teamwork_pct_diff`/`expertise_pct_diff`, `lol-challenges-v1`) | −0,0031 e +0,0007 aos 15 min (n = 2.987); não refeito |
 
 ### 5.5 Dashboards (objetivo f)
 
@@ -740,7 +736,7 @@ partida e os objetivos de cada time até aquele minuto. A Figura 4 mostra
 o simulador no estado de jogo: o usuário define as diferenças aos 15
 minutos, o modelo de produção devolve a probabilidade de vitória do time
 azul e o SHAP decompõe essa probabilidade por variável, na mesma tela. As
-seis telas completas estão no Apêndice F.
+seis telas completas estão no Apêndice E.
 
 Figura — Análise de partida: mapa de calor, diferença de ouro e objetivos até o minuto 14 | reports/figuras_texto/fig_partida.png
 
@@ -865,14 +861,14 @@ de vantagem material em vitória entre os dois contextos.
 
 Registrar o que o trabalho não sustenta é parte da conclusão. Nenhuma das
 limitações a seguir invalida os achados. Elas delimitam até onde eles
-valem. O detalhe e os experimentos de cada uma estão no Apêndice G.
+valem. O detalhe e os experimentos de cada uma estão no Apêndice F.
 
 **Validade de construto.** A linha do tempo do *match-v5* não registra o estado das ondas
 de *minions* nem a ordem de escolha de campeões (*draft*), e nenhuma API
 pública da Riot expõe micro-posicionamento. Onze experimentos de
-enriquecimento não superaram as cinco variáveis originais (Quadro 5),
+enriquecimento superaram as cinco variáveis originais em até +0,0007 de AUC (Quadro 5),
 inclusive a posição dos jogadores, que existe na *timeline* e foi testada.
-Variáveis mais ricas somam até +0,008 de AUC-ROC (Apêndice M); um ganho maior provavelmente depende do que a fonte não tem. Que parte do erro
+Variáveis mais ricas somam até +0,008 de AUC-ROC (Apêndice K); um ganho maior provavelmente depende do que a fonte não tem. Que parte do erro
 do modelo venha dessa informação ausente é hipótese, não resultado medido.
 Por isso nenhuma orientação da plataforma que dependa de itemização ou de
 ondas vem do modelo, e a interface a marca como inferência geral.
@@ -904,7 +900,7 @@ restrição formal de monotonicidade.
 
 ### 6.2 TRABALHOS FUTUROS
 
-Ficam registrados cinco caminhos. O primeiro é a extensão da predição para partidas ao vivo, não implementada, mas prevista na arquitetura: a camada de predição aceita estado de jogo arbitrário por fase, e a barreira é de dados em tempo real, não de modelo. O segundo é a inclusão de seleção de campeão competitiva no simulador de time. O terceiro é a investigação de restrições de monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O quinto é pedir à Riot uma chave de produção, sujeita a aprovação, para ampliar o limite de requisições; a documentação não lista dados novos nas APIs padrão (Apêndice J), então o estado das ondas segue fora do alcance.
+Ficam registrados cinco caminhos. O primeiro é a extensão da predição para partidas ao vivo, não implementada, mas prevista na arquitetura: a camada de predição aceita estado de jogo arbitrário por fase, e a barreira é de dados em tempo real, não de modelo. O segundo é a inclusão de seleção de campeão competitiva no simulador de time. O terceiro é a investigação de restrições de monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O quinto é pedir à Riot uma chave de produção, sujeita a aprovação, para ampliar o limite de requisições; a documentação não lista dados novos nas APIs padrão (Apêndice H), então o estado das ondas segue fora do alcance.
 
 ---
 
@@ -1258,41 +1254,7 @@ efeito do tempo do efeito da região. O comando é
 
 ---
 
-## APÊNDICE D – Detalhe dos experimentos negativos
-
-O Quadro 5 da Seção 5.4 lista os onze experimentos de enriquecimento de
-variáveis. Os quadros a seguir detalham três deles, indicam como
-reproduzi-los e registram o efeito do volume de partidas, o acréscimo de maior ganho. Os experimentos 12 a 19, com ganho pequeno e real, estão no Apêndice M.
-
-Quadro — Detalhe de três experimentos negativos
-
-| Experimento | Hipótese | Resultado | Leitura |
-|---|---|---|---|
-| 4. Calibração adicional | Calibrar as probabilidades aproximaria o estado de empate total da taxa observada nos dados | Sem ganho de AUC; o desvio no estado de empate sobe de 1,7 para 2,3 pontos percentuais | O estado de empate total fica fora da distribuição observada, e o calibrador o extrapola para perto de 50%. A troca para *Random Forest* de profundidade 6 fecha o desvio (0,6 pp) ao custo de 0,0005 de AUC (Apêndice G) |
-| 10. Placas de torre | As placas destruídas cobrem a janela em que a diferença de torres é pouco informativa: torres raramente caem antes dos 15 minutos, mas as placas são destruídas o tempo todo | Δ AUC de −0,0002 nos cortes de 10 e 15 minutos | O sinal de pressão de rota que a placa capta já está em ouro e experiência. O evento foi encontrado inspecionando a linha do tempo bruta, porque a documentação oficial exige login para detalhar o esquema |
-| 11. Percentis de comportamento | O comportamento do jogador (cooperação e experiência) prevê o resultado | Piloto de 199 partidas: +0,0090 de AUC. Amostra de 2.987 partidas: −0,0031 (cooperação) e +0,0007 (experiência) | Regressão à média: com 199 partidas, o modelo de referência já oscilava 1,8 pp de AUC em relação ao de produção. O endpoint devolve o estado atual do jogador; para evitar dado do futuro, o teste usou as partidas mais recentes da KR, com 0 a 16 dias entre a coleta e a consulta (média de 7,8) |
-
-Quadro — Como reproduzir os três experimentos
-
-| Experimento | Comando | Artefato (em `reports/`) |
-|---|---|---|
-| 4 | `python docs/experimento_calibracao.py` | `experimento_calibracao_veredito.json` |
-| 10 | `python -m src.models.experiment_turret_plates` | `experimento_placas_torre.json` |
-| 11 | `python -m src.models.experiment_challenges_pilot --n-matches 3000` | `experimento_challenges_piloto.json` |
-
-Quadro — Efeito do volume de partidas sobre o AUC-ROC do XGBoost
-
-| Partidas | AUC-ROC aos 15 minutos | Ganho acumulado |
-|---:|---:|---:|
-| 10.295 | 0,8214 | — |
-| 23.133 | 0,8393 | +0,0179 |
-| 39.188 | 0,8473 | +0,0259 |
-
-O ganho acumulado de 0,0259 equivale a cerca de nove vezes o maior ganho entre os onze experimentos (0,003), a cerca de 130 vezes o menor (0,0002) e a cerca de três vezes o maior ganho do Apêndice M (+0,0080, medido em outra base).
-
----
-
-## APÊNDICE E – Proveniência das medições da Seção 5.3
+## APÊNDICE D – Proveniência das medições da Seção 5.3
 
 Quadro — Partidas por região na primeira e na última medição do viés de lado
 
@@ -1349,7 +1311,7 @@ mudança no padrão.
 
 ---
 
-## APÊNDICE F – Telas completas da plataforma
+## APÊNDICE E – Telas completas da plataforma
 
 As seis telas da plataforma, inteiras, das quais a Seção 5 mostra recortes.
 Foram capturadas com a API e a interface rodando localmente sobre as 41.063
@@ -1368,7 +1330,7 @@ ajustada à página. Os comandos que geram as capturas estão em
 
 ---
 
-## APÊNDICE G – Limitações em detalhe
+## APÊNDICE F – Limitações em detalhe
 
 O quadro a seguir reúne a evidência medida para cada limitação resumida na
 Seção 6.1; os dois seguintes detalham a discrepância de taxa-base do
@@ -1380,7 +1342,7 @@ Quadro — Limitações do trabalho e a evidência de cada uma
 |---|---|---|
 | Taxa-base do modelo no estado de empate | O modelo prevê 49,0% a 51,4% para o azul, e os dados dão 46,4% a 47,9% | Discrepância de 1,7 a 4,7 pontos percentuais; não é subajuste (quadros seguintes). Mantido o XGBoost |
 | Última rodada de coleta fora do treino | Treino com 39.426 das 41.063 partidas do banco. Das 1.754 partidas do banco sem variáveis, 1.647 são da KR e 107 de BR1, EUW1 e NA1; 117 da base congelada também não geraram linha | Não retreinado: o desempenho do modelo atual está medido e validado (Apêndice C e bateria comportamental), e retreinar invalidaria as duas. Quem quiser o modelo sobre a base completa reexecuta `train_baseline` e `export_model` |
-| Teto de desempenho das variáveis atuais | Onze experimentos sem ganho, dez sobre a linha do tempo e um sobre o endpoint de progressão do jogador. A posição dos jogadores existe na linha do tempo e foi testada (experimento 2). Os experimentos 12 a 19, com 59 variáveis novas, somam até +0,0080 de AUC-ROC aos 15 minutos (Apêndice M) | O ganho maior provavelmente depende de dado que a API pública não fornece: a ordem de escolha de campeões (*draft*) e o estado das ondas de *minions*. O histórico do jogador não acrescenta ao estado de jogo |
+| Teto de desempenho das variáveis atuais | Onze experimentos sem ganho, dez sobre a linha do tempo e um sobre o endpoint de progressão do jogador. A posição dos jogadores existe na linha do tempo e foi testada (experimento 2). Os experimentos 12 a 19, com 59 variáveis novas, somam até +0,0080 de AUC-ROC aos 15 minutos (Apêndice K) | O ganho maior provavelmente depende de dado que a API pública não fornece: a ordem de escolha de campeões (*draft*) e o estado das ondas de *minions*. O histórico do jogador não acrescenta ao estado de jogo |
 | Ausência de micro-posicionamento | Nenhuma API pública da Riot expõe movimentação de *minions* nem controle de onda | Replays (`.rofl`) e visão computacional sobre o minimapa foram considerados, mas não implementados |
 | Desequilíbrio de amostra por região | BR1 11.936, EUW1 11.744, KR 10.204 e NA1 7.159 partidas (a NA1 tinha 1.446 antes da rodada final). Em três das quatro regiões o intervalo de 95% exclui 50%; a KR tem 50,4%, com intervalo que inclui 50% | O achado de viés de elo alto, além do Brasil, se apoia nas três regiões com evidência firme |
 | Cobertura desigual por versão do jogo | O *patch* 16.13 concentra 40,4% das partidas (16.572 de 41.063), em dez *patches* de 16.10 a 16.19 | Treinar nos *patches* 16.10 a 16.13 e testar nos 16.14 a 16.19 não reduz a AUC-ROC (Apêndice C). A generalização para versões com balanceamento muito diferente segue sem medida |
@@ -1415,7 +1377,7 @@ neste recorte; não é um déficit de ajuste. Comando e artefato:
 
 ---
 
-## APÊNDICE H – Fundamentos dos métodos usados
+## APÊNDICE G – Fundamentos dos métodos usados
 
 O quadro resume, para cada método, o papel que ele tem neste trabalho, a propriedade que justifica o uso e o limite que o próprio autor da obra ou a medição deste trabalho aponta. As referências completas estão na lista de Referências.
 
@@ -1440,40 +1402,7 @@ Quadro — Fundamentos dos métodos usados e o limite de cada um
 
 ---
 
-## APÊNDICE I – Estudos de domínio e comparação com a literatura
-
-O primeiro quadro reúne os onze estudos de domínio da Seção 3; o segundo, a acurácia que cada um relata contra a deste trabalho. A comparação é apenas indicativa: mudam o jogo, o nível dos jogadores, o momento da previsão e a informação usada.
-
-Quadro — Estudos de domínio: objeto, resultado e relação com este trabalho
-
-| Estudo | Objeto | Resultado relatado | Relação com este trabalho |
-|---|---|---|---|
-| Hodge et al. (2021) | *Dota 2* profissional, previsão em tempo real | Até 85% de acurácia após 5 minutos, em previsões ao vivo de 28 partidas de um torneio | Sustenta prever a partir do estado da partida; outro jogo |
-| Birant e Birant (2023) | Esports, aprendizado multi-objetivo e multi-instância | Destaca a modelagem centrada no time | Orientação adotada: variáveis como diferenças entre os times |
-| Bahrololloomi et al. (2022) | *League of Legends*, métricas individuais | Prediz a vitória pelas métricas dos jogadores; o peso de cada função é desprezível | Esse nível só aparece nos perfis de jogador |
-| Jadowski e Cunningham (2022) | *League of Legends*, ligas profissionais de 2020 | 67% de acerto em 306 jogos da etapa seguinte; 54,08% de vitórias do azul em 882 jogos | Comparação indicativa; coerente com a vitória do azul no profissional |
-| Do et al. (2021) | *League of Legends*, ranqueadas, antes da partida | 75,1% com rede neural profunda, pela experiência do jogador com o campeão | Momento da previsão diferente |
-| Maymin (2021) | *League of Legends*, milhões de partidas ranqueadas | Probabilidade de vitória calibrada; avalia abates e mortes pelo efeito nela | Eventos individuais; fora da comparação numérica; origem do mapa de calor de posição |
-| Guan e Tung (2026) | *League of Legends* profissional, antes da partida (*preprint*) | Avalia o erro de probabilidade (Brier); lado do mapa e prioridade de escolha como covariáveis | Fora da comparação numérica |
-| García-Méndez e Arriba-Pérez (2025) | *Counter-Strike* profissional, fluxo contínuo | Classificação com interpretação; aponta a falta de interpretabilidade nos trabalhos anteriores | Orienta a camada de explicabilidade |
-| Jiang et al. (2025) | SiriusBI, *Business Intelligence* com modelos de linguagem | Exploração de dados estruturados com diálogo em várias rodadas | Motiva o *text-to-SQL* |
-| Guo et al. (2024) | Talk2Data, análise visual por decomposição de perguntas | Exploração de dados mais intuitiva | Motiva o *text-to-SQL* |
-| Wallner, Wang e Dormann (2023) | *League of Legends*, visualização de linhas narrativas (*storyline*) | Integrar tempo e localização numa só vista é viável para a interpretação pós-jogo | Referência do mapa de calor de posicionamento |
-
-Quadro — Acurácia relatada nos estudos e neste trabalho
-
-| Estudo | Momento da previsão | Acurácia relatada | Comparável? |
-|---|---|---|---|
-| Hodge et al. (2021) | 5 minutos, *Dota 2* | Até 85% | Não: outro jogo |
-| Jadowski e Cunningham (2022) | Jogos da etapa seguinte, profissional | 67% | Indicativa |
-| Do et al. (2021) | Antes da partida, ranqueadas | 75,1% | Indicativa |
-| Maymin (2021) | Eventos individuais | Sem acurácia comparável | Não |
-| Guan e Tung (2026) | Antes da partida, profissional | Erro de probabilidade (Brier) | Não |
-| Este trabalho | 10 a 25 minutos, ranqueadas de elo alto | 70,0% a 82,4% | Na mesma ordem de grandeza |
-
----
-
-## APÊNDICE J – Procedência dos dados e chaves da Riot Games API
+## APÊNDICE H – Procedência dos dados e chaves da Riot Games API
 
 O primeiro quadro reúne medições sobre a composição das duas bases, feitas em 3 de novembro de 2026, sobre as 41.063 partidas e os 99.259 jogos descritos na Seção 4.3. As consultas estão registradas em `docs/conferencia_referencias.md`. O segundo quadro resume os tipos de chave da Riot Games API, conforme o portal de desenvolvedores consultado na mesma data.
 
@@ -1500,7 +1429,7 @@ Quadro — Tipos de chave da Riot Games API
 
 ---
 
-## APÊNDICE K – Objetivos, evidências e onde estão
+## APÊNDICE I – Objetivos, evidências e onde estão
 
 Quadro — Objetivos específicos, onde são tratados e a evidência de cada um
 
@@ -1509,14 +1438,14 @@ Quadro — Objetivos específicos, onde são tratados e a evidência de cada um
 | a | 5.1 e Anexo A | Endpoints *league-v4*, *account-v1* e *match-v5*; coletor resumível e dentro dos limites de taxa |
 | b | 5.2 e Apêndice A | Quadro 1: onze tabelas relacionais para partidas, jogadores, estatísticas, itens e jogos profissionais |
 | c | 4.3 e 5.2 | 41.063 partidas de *solo queue* e 99.259 jogos profissionais; coleta e carga re-executáveis |
-| d | 5.3 e Apêndice E | Quadro 2 e viés de lado com quatro testes de robustez; inversão no profissional; conversão de vantagem |
+| d | 5.3 e Apêndice D | Quadro 2 e viés de lado com quatro testes de robustez; inversão no profissional; conversão de vantagem |
 | e | 5.4 e Apêndice C | Quadros 3 e 4: três modelos comparados em quatro cortes; XGBoost em produção |
-| f | 5.5 e Apêndice F | Seis páginas de visualização; Figuras 3 e 4 no texto |
+| f | 5.5 e Apêndice E | Seis páginas de visualização; Figuras 3 e 4 no texto |
 | g | 5.6 e Apêndice B | 23 de 26 perguntas corretas (88%), Quadro 6 |
 
 ---
 
-## APÊNDICE L – Importância das variáveis por corte
+## APÊNDICE J – Importância das variáveis por corte
 
 Valor médio absoluto do SHAP de cada variável, no modelo XGBoost de cada corte. Artefato: `reports/shap_importance_phases.json`.
 
@@ -1532,9 +1461,30 @@ Quadro — Importância média das variáveis (valor absoluto do SHAP) por corte
 
 ---
 
-## APÊNDICE M – Experimentos de precisão
+## APÊNDICE K – Experimentos de precisão
 
-Experimentos 12 a 19, feitos depois dos onze do Quadro 5, sobre a mesma base congelada de 39.426 partidas, com o mesmo protocolo (validação cruzada estratificada de 5 dobras, semente 42). Todas as variáveis vêm de `frames[: corte + 1]` da linha do tempo; as de campeão e de jogador usam só informação anterior à partida (teste `tests/test_features_v2_sem_vazamento.py`, 703 pares de partida e corte sem vazamento). O ganho é a diferença de AUC-ROC contra o XGBoost de produção com as cinco variáveis originais (0,8476 aos 15 minutos e 0,9089 aos 25 nesta base), com intervalo de 95% por *bootstrap* pareado.
+Experimentos 1 a 19, todos sobre a mesma base congelada de 39.426 partidas, com o mesmo protocolo (validação cruzada estratificada de 5 dobras, semente 42). Os experimentos 1 a 10, do Quadro 5, foram refeitos em 4 de novembro de 2026: tinham sido medidos antes, com bases de tamanhos diferentes e sem intervalo de confiança. O 11 não pôde ser refeito (adiante). Todas as variáveis vêm de `frames[: corte + 1]` da linha do tempo; as de campeão e de jogador usam só informação anterior à partida (teste `tests/test_features_v2_sem_vazamento.py`, 703 pares de partida e corte sem vazamento). O ganho é a diferença de AUC-ROC contra o XGBoost de produção com as cinco variáveis originais (0,8476 aos 15 minutos e 0,9089 aos 25 nesta base), com intervalo de 95% por *bootstrap* pareado.
+
+Quadro — Experimentos 1 a 10: ganho de AUC-ROC contra as cinco variáveis originais
+
+| Exp. | Variáveis acrescentadas | 15 minutos | 25 minutos |
+|---|---|---|---|
+| 1 | Diferença de abates de Barão e Arauto (2 variáveis, as mesmas do conjunto 14) | +0,0000 (+0,0000 a +0,0000) | −0,0000 (−0,0000 a +0,0000) |
+| 2 | Dispersão espacial: distância média dos jogadores ao centro do time (1) | −0,0000 (−0,0000 a +0,0000) | +0,0003 (+0,0001 a +0,0004) |
+| 3 | Tuning por fase: grade de 18 combinações escolhida só no treino (nenhuma variável nova) | +0,0001 (−0,0001 a +0,0003) | +0,0002 (−0,0000 a +0,0004) |
+| 4 | Calibração sigmoide sobre o XGBoost de produção | +0,0001 (−0,0000 a +0,0002) | +0,0001 (−0,0000 a +0,0003) |
+| 4 | Calibração isotônica sobre o XGBoost de produção | −0,0002 (−0,0003 a +0,0000) | −0,0001 (−0,0003 a +0,0001) |
+| 5 e 7 | Valor em ouro dos itens finalizados que cada time possui (1) | +0,0001 (+0,0000 a +0,0002) | −0,0000 (−0,0001 a +0,0000) |
+| 6 | Atributos ofensivos: dano de ataque, poder de habilidade, velocidade de ataque (3) | +0,0007 (+0,0004 a +0,0009) | +0,0000 (−0,0000 a +0,0001) |
+| 6 | Atributos defensivos: armadura, resistência mágica, vida (3) | +0,0001 (−0,0001 a +0,0003) | +0,0001 (−0,0000 a +0,0003) |
+| 8 | Visão: sentinelas colocadas e destruídas (2) | −0,0000 (−0,0001 a −0,0000) | +0,0000 (−0,0000 a +0,0000) |
+| 9 | Dragões por tipo (7) | −0,0000 (−0,0001 a +0,0000) | +0,0000 (−0,0000 a +0,0001) |
+| 10 | Placas de torre destruídas (1) | +0,0000 (−0,0000 a +0,0000) | +0,0000 (+0,0000 a +0,0001) |
+| 11 | Percentis de comportamento: cooperação e experiência (2) | −0,0031 e +0,0007, n = 2.987; não refeito | — |
+
+Só o experimento 6, nos atributos ofensivos, tem intervalo que exclui zero aos 15 minutos (XGBoost), e o ganho é pequeno; com cerca de 20 comparações, um intervalo isolado pode ser acaso. Os experimentos 1 e 10 usam colunas que já existem no conjunto 14, medidas isoladamente. No experimento 4, o desvio no estado de empate total (probabilidade prevista menos a taxa observada entre partidas com diferença de ouro menor que 500) foi de +1,1 pp na produção, +1,9 na sigmoide e +1,9 na isotônica aos 15 minutos, e de +2,1, +3,2 e +0,9 aos 25: a calibração adicional não fecha o desvio (Apêndice F). Comandos: `python -m src.features.build_features_antigos` e `python -m src.models.experiment_antigos --cutoffs 15 25`; artefato: `reports/experimentos_antigos.json`; teste de vazamento: `tests/test_features_antigos_sem_vazamento.py`.
+
+O experimento 11 (percentis do `lol-challenges-v1`) não foi refeito: o endpoint devolve o estado atual do jogador, então o teste usou as partidas mais recentes da KR, com 0 a 16 dias entre a coleta e a consulta (média de 7,8), para não usar dado do futuro. Um piloto de 199 partidas deu +0,0090 de AUC-ROC, mas era regressão à média: com 199 partidas, o modelo de referência já oscilava 1,8 pp de AUC em relação ao de produção. Com 2.987 partidas, o resultado foi −0,0031 (cooperação) e +0,0007 (experiência). Comando: `python -m src.models.experiment_challenges_pilot --n-matches 3000`; artefato: `reports/experimento_challenges_piloto.json`.
 
 Quadro — Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais
 
