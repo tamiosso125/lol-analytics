@@ -264,3 +264,23 @@ Editora, ano. p. x-y. DOI.`
 **Aplicado (2026-11-05): 10.1 a 10.9.** 10.10 mantido.
 
 Ao reescrever a entrada de Ribeiro (10.2), o segundo autor passou de "SINGH, Scott" para "SINGH, Sameer": o coautor do LIME é Sameer Singh, e "Scott" era um erro da entrada antiga.
+
+## B11 — Apêndices A a K e Anexo A (linhas 1016–1526)
+
+Passada leve, sem propor cortes (a quantidade de apêndices é a pergunta 2 ao orientador).
+Conferido e ok: os 11 apêndices e o Anexo A são citados no corpo pelo menos uma vez; os 25 quadros
+têm título acima e fonte abaixo, gerados pelo build; as 6 telas do Apêndice E entram como
+Figuras 6 a 11; nenhum resíduo dos conjuntos de 50, nem 1ª pessoa; o Apêndice I (objetivo g) e o
+Quadro de limitações do Apêndice F já citam o gabarito de 203; cada medição aponta comando e
+artefato.
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 11.1 | 1033 | R3 #6 | consistência | O título do Apêndice B ("Benchmark da interface em linguagem natural e auditoria do coach") não cobre a medida principal, o gabarito automático, que está nele | "APÊNDICE B – Avaliação da interface em linguagem natural e auditoria do coach" | 0 |
+| 11.2 | 1196 | R3 #7 | consistência | "O baseline é uma regressão logística…" sem itálico; o corpo usa *baseline* | "O *baseline* é…" | 0 |
+| 11.3 | 1488 | R3 #2 | número | "o modelo de referência já oscilava 1,8 pp de AUC": AUC-ROC não é percentual, e "pp" é para proporção | "…já oscilava 0,018 de AUC-ROC em relação ao de produção" | 0 |
+| 11.4 | quadros do Apêndice F e texto do K | R3 #6 | consistência | "pp" abreviado nos quadros e no Apêndice K, enquanto o corpo escreve "ponto percentual" | **Manter** nos quadros (espaço) e no K; a abreviação é usual. Só registro | 0 |
+
+O corpo do texto não muda de tamanho neste bloco.
+
+**Aplicado (2026-11-05): 11.1 a 11.3.** 11.4 mantido.

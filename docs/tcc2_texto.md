@@ -1030,7 +1030,7 @@ consultas geradas pela interface em linguagem natural.
 
 ---
 
-## APÊNDICE B – Benchmark da interface em linguagem natural e auditoria do coach
+## APÊNDICE B – Avaliação da interface em linguagem natural e auditoria do coach
 
 Medição de 5 de novembro de 2026 sobre a base de produção de **41.063
 partidas**: **26/26 = 100% de acurácia de execução**, pelo comando
@@ -1193,7 +1193,7 @@ Quadro — Regressão logística como baseline e diferença do XGBoost para os d
 | 20 min | Regressão logística | 0,7933 | 0,8771 | −0,0009 (−0,0012 a −0,0006) |
 | 25 min | Regressão logística | 0,8248 | 0,9091 | −0,0002 (−0,0006 a +0,0003) |
 
-O baseline é uma regressão logística com as variáveis padronizadas. Os
+O *baseline* é uma regressão logística com as variáveis padronizadas. Os
 intervalos vêm de *bootstrap* pareado (1.000 reamostragens das mesmas
 partidas para os dois modelos), sobre as previsões fora da amostra da
 validação cruzada de 5 dobras. Na acurácia, a diferença do XGBoost para a
@@ -1485,7 +1485,7 @@ Quadro — Experimentos 1 a 10: ganho de AUC-ROC contra as cinco variáveis orig
 
 Só o experimento 6, nos atributos ofensivos, tem intervalo que exclui zero aos 15 minutos (XGBoost), e o ganho é pequeno; com cerca de 20 comparações, um intervalo isolado pode ser acaso. Os experimentos 1 e 10 usam colunas que já existem no conjunto 14, medidas isoladamente. No experimento 4, o desvio no estado de empate total (probabilidade prevista menos a taxa observada entre partidas com diferença de ouro menor que 500) foi de +1,1 pp na produção, +1,9 na sigmoide e +1,9 na isotônica aos 15 minutos, e de +2,1, +3,2 e +0,9 aos 25: a calibração adicional não fecha o desvio (Apêndice F). Comandos: `python -m src.features.build_features_antigos` e `python -m src.models.experiment_antigos --cutoffs 15 25`; artefato: `reports/experimentos_antigos.json`; teste de vazamento: `tests/test_features_antigos_sem_vazamento.py`.
 
-O experimento 11 (percentis do `lol-challenges-v1`) não foi refeito: o endpoint devolve o estado atual do jogador, então o teste usou as partidas mais recentes da KR, com 0 a 16 dias entre a coleta e a consulta (média de 7,8), para não usar dado do futuro. Um piloto de 199 partidas deu +0,0090 de AUC-ROC, mas era regressão à média: com 199 partidas, o modelo de referência já oscilava 1,8 pp de AUC em relação ao de produção. Com 2.987 partidas, o resultado foi −0,0031 (cooperação) e +0,0007 (experiência). Comando: `python -m src.models.experiment_challenges_pilot --n-matches 3000`; artefato: `reports/experimento_challenges_piloto.json`.
+O experimento 11 (percentis do `lol-challenges-v1`) não foi refeito: o endpoint devolve o estado atual do jogador, então o teste usou as partidas mais recentes da KR, com 0 a 16 dias entre a coleta e a consulta (média de 7,8), para não usar dado do futuro. Um piloto de 199 partidas deu +0,0090 de AUC-ROC, mas era regressão à média: com 199 partidas, o modelo de referência já oscilava 0,018 de AUC-ROC em relação ao de produção. Com 2.987 partidas, o resultado foi −0,0031 (cooperação) e +0,0007 (experiência). Comando: `python -m src.models.experiment_challenges_pilot --n-matches 3000`; artefato: `reports/experimento_challenges_piloto.json`.
 
 Quadro — Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais
 
