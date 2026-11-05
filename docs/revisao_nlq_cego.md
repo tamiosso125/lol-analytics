@@ -15,8 +15,9 @@ Não corrigimos o sistema depois desta folha: o número vai ao TCC como saiu.
 
 ## Placar (conferido contra o banco)
 
-- Certas (C): 24; recusas certas (RC): 7; parciais (P): 10; erradas (E): 8; recusas erradas (RE): 1.
-- **Acerto estrito (C + RC): 31/50.** Com parciais valendo metade: 36/50. Erro ou recusa errada: 9/50.
+- Certas (C): 24; recusas certas (RC): 6; parciais (P): 11; erradas (E): 8; recusas erradas (RE): 1.
+- **Acerto estrito (C + RC): 30/50.** Com parciais valendo metade: 35.5/50. Erro ou recusa errada: 9/50.
+- Revisão de 5/11: a 89 passou de RC para P (ver o veredito).
 - Os vereditos estão em `reports/nlq_cego_vereditos.json`.
 
 ---
@@ -1012,7 +1013,7 @@ Linhas: 1. Colunas: aviso
 
 - não é possível responder: pro_games só tem a DIFERENÇA de ouro aos 15 minutos (gold_diff_at15), não o ouro total das equipes ao final da partida
 
-**Veredito: RC** — pro_games só tem gold_diff_at15, não o ouro final.
+**Veredito: P** — O roteador mandou a pergunta só ao competitivo, que de fato não tem ouro final, e o sistema recusou. Mas o solo responde: a maior diferença de ouro entre os dois times ao final de uma partida é 21.923 (EUW1_7976698876). Revisado em 5/11 ao comparar com a versão anterior, que respondeu pelo solo.
 
 ---
 
