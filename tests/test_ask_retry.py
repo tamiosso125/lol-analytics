@@ -1,4 +1,4 @@
-"""Testa a nova tentativa de `nl_to_sql.ask` com falhas SIMULADAS.
+"""Testa a nova tentativa de `nl_to_sql.ask_base` com falhas SIMULADAS.
 
 Não usa banco nem a API da Anthropic: troca `generate_sql` e `run_query` por
 funções falsas. O que se confere é o contrato descrito no docstring de `ask`:
@@ -34,7 +34,7 @@ def cenario(sqls, execucoes):
     chamadas = {"gerar": [], "rodar": []}
     it_sql, it_exec = iter(sqls), iter(execucoes)
 
-    def gerar(question, history=None, model=None, erro_anterior=None):
+    def gerar(question, history=None, model=None, erro_anterior=None, base=None):
         chamadas["gerar"].append(erro_anterior)
         return next(it_sql)
 
@@ -59,12 +59,12 @@ def main() -> int:
 
     try:
         c = cenario([BOA], [(["n"], [(1,)])])
-        r = nl_to_sql.ask("q")
+        r = nl_to_sql.ask_base("q")
         confere(r["tentativas"] == 1 and len(c["gerar"]) == 1, "de primeira: devia ser 1 tentativa")
 
         erro = psycopg2.errors.UndefinedColumn("coluna x nao existe")
         c = cenario([RUIM, BOA], [erro, (["n"], [(1,)])])
-        r = nl_to_sql.ask("q")
+        r = nl_to_sql.ask_base("q")
         confere(r["tentativas"] == 2 and r["sql"] == BOA, "correcao: devia devolver a SQL corrigida em 2 tentativas")
         confere(c["gerar"][0] is None and c["gerar"][1] is not None, "a 2a chamada devia levar erro_anterior")
         confere(c["gerar"][1][0] == RUIM and "coluna x nao existe" in c["gerar"][1][1],
@@ -73,7 +73,7 @@ def main() -> int:
         e2 = psycopg2.errors.UndefinedColumn("outra falha")
         c = cenario([RUIM, RUIM], [erro, e2])
         try:
-            nl_to_sql.ask("q")
+            nl_to_sql.ask_base("q")
             confere(False, "as duas falham: devia levantar SqlExecutionError")
         except nl_to_sql.SqlExecutionError as exc:
             confere(exc.sql == RUIM and exc.cause is e2, "SqlExecutionError devia ter a SQL e a causa da ultima tentativa")
@@ -81,7 +81,7 @@ def main() -> int:
 
         c = cenario([RUIM, "DELETE FROM matches"], [erro])
         try:
-            nl_to_sql.ask("q")
+            nl_to_sql.ask_base("q")
             confere(False, "correcao barrada: devia levantar SqlExecutionError")
         except nl_to_sql.SqlExecutionError as exc:
             confere(exc.sql == RUIM and exc.cause is erro, "correcao barrada: devia valer o erro da primeira SQL")
@@ -89,7 +89,7 @@ def main() -> int:
 
         c = cenario([RUIM, "SELECT * FROM pg_user"], [erro])
         try:
-            nl_to_sql.ask("q")
+            nl_to_sql.ask_base("q")
             confere(False, "correcao com tabela fora da lista: devia levantar")
         except nl_to_sql.SqlExecutionError:
             pass
@@ -98,7 +98,7 @@ def main() -> int:
         lenta = psycopg2.errors.QueryCanceled("statement timeout")
         c = cenario([RUIM], [lenta])
         try:
-            nl_to_sql.ask("q")
+            nl_to_sql.ask_base("q")
             confere(False, "timeout: devia levantar")
         except nl_to_sql.SqlExecutionError:
             pass

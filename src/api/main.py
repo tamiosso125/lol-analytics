@@ -160,6 +160,9 @@ def _external_call_error(exc: Exception) -> HTTPException:
 class HistoryTurn(BaseModel):
     question: str
     sql: str
+    # base do turno ("solo" ou "competitivo"); None = tela antiga. Um turno AMBOS chega
+    # como duas entradas com a mesma pergunta, uma por base (nl_to_sql._base_anterior)
+    base: str | None = None
 
 
 class Question(BaseModel):
@@ -1738,10 +1741,18 @@ def ask_nl(q: Question):
     except Exception as exc:
         raise _external_call_error(exc)
     return {
+        # roteamento (src/nlq/route.py): "solo", "competitivo" ou "ambos"; em AMBOS há
+        # um resultado por base, cada um com `erro` se aquela base falhou
+        "roteamento": result["roteamento"],
+        "base": result["base"],
+        "resultados": [
+            {**r, "rows": [list(x) for x in r["rows"][:100]]} for r in result["resultados"]
+        ],
+        # campos da versão sem roteamento = primeiro resultado que deu certo
         "sql": result["sql"],
         "columns": result["columns"],
         "rows": [list(r) for r in result["rows"][:100]],
-        # 2 = a primeira SQL falhou no banco e foi corrigida uma vez (nl_to_sql.ask)
+        # 2 = a primeira SQL falhou no banco e foi corrigida uma vez (nl_to_sql.ask_base)
         "tentativas": result.get("tentativas", 1),
     }
 

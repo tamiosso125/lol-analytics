@@ -26,7 +26,23 @@ from src.nlq.schema_context import SCHEMA_DESCRIPTION
 
 # a validação (camadas 1 a 3) vive em sql_guard.py, testável sem banco nem chave:
 # tests/test_validate_sql.py. Reexportada aqui porque evaluate_nlq e a API importam daqui.
-from src.nlq.sql_guard import ALLOWED_TABLES, FORBIDDEN, validate_sql  # noqa: E402,F401
+from src.nlq.route import AMBOS, PRO, SOLO, rotear  # noqa: E402
+from src.nlq.sql_guard import (  # noqa: E402,F401
+    ALLOWED_TABLES, FORBIDDEN, BaseMixError, validate_base, validate_sql,
+)
+
+# dica de base na MENSAGEM do usuário (o esquema no prompt de sistema não muda, então
+# o benchmark `evaluate_nlq`, que não passa base, é exatamente o mesmo de antes)
+DICA_BASE = {
+    "solo": (
+        "[Base escolhida: SOLO QUEUE. Use somente as tabelas matches, teams, participants, "
+        "players, bans, item_events e items. Não use pro_games nem pro_players.]"
+    ),
+    "competitivo": (
+        "[Base escolhida: COMPETITIVO (profissional). Use somente pro_games e pro_players. "
+        "Não use matches, teams, participants, players, bans, item_events nem items.]"
+    ),
+}
 
 
 class SqlExecutionError(Exception):
@@ -46,6 +62,7 @@ def generate_sql(
     history: list[dict] | None = None,
     model: str = "claude-haiku-4-5-20251001",
     erro_anterior: tuple[str, str] | None = None,
+    base: str | None = None,
 ) -> str:
     """history: turnos anteriores da mesma conversa, cada um
     {"question": ..., "sql": ...} — dá contexto para perguntas de
@@ -53,12 +70,16 @@ def generate_sql(
 
     erro_anterior: (sql, mensagem do banco) da tentativa que falhou ao executar.
     Só `ask` usa, uma vez; o benchmark (`evaluate_nlq`) não, de propósito: ele
-    mede a primeira tentativa."""
+    mede a primeira tentativa.
+
+    base: "solo" ou "competitivo" quando o roteador (src/nlq/route.py) já decidiu a
+    base; a dica vai junto da pergunta. None = sem dica (comportamento de sempre)."""
     messages = []
     for turn in history or []:
         messages.append({"role": "user", "content": turn["question"]})
         messages.append({"role": "assistant", "content": turn["sql"]})
-    messages.append({"role": "user", "content": question})
+    pergunta = f"{DICA_BASE[base]}\n\n{question}" if base in DICA_BASE else question
+    messages.append({"role": "user", "content": pergunta})
     if erro_anterior:
         sql_ruim, erro = erro_anterior
         messages.append({"role": "assistant", "content": sql_ruim})
@@ -101,38 +122,109 @@ def run_query(sql: str) -> tuple[list[str], list[tuple]]:
         return cols, cur.fetchall()
 
 
-def ask(question: str, history: list[dict] | None = None) -> dict:
-    """Gera, valida e executa. Se o banco rejeitar a SQL (coluna inexistente,
-    agregação aninhada, tipo errado...), faz UMA nova tentativa passando a
-    mensagem de erro do PostgreSQL ao modelo (2026-11-04: 4 de 50 perguntas
-    livres falharam assim). A nova SQL passa por `validate_sql` como qualquer
-    outra, a temperatura continua 0 e o resultado devolve a SQL que de fato
-    rodou, com `tentativas` = 2. Se a segunda também falhar, levanta
-    SqlExecutionError com a SQL e a causa da ÚLTIMA tentativa, encadeada à
-    primeira (`__cause__`): o erro não é engolido. Estouro de tempo
-    (`statement_timeout`) não é refeito: repetiria os 10 s e a consulta lenta
-    tende a continuar lenta."""
-    sql = generate_sql(question, history)
+def ask_base(question: str, history: list[dict] | None = None, base: str | None = None) -> dict:
+    """Gera, valida e executa numa base ("solo", "competitivo" ou None = sem base).
+
+    Se o banco rejeitar a SQL (coluna inexistente, agregação aninhada, tipo
+    errado...) OU a SQL misturar as duas bases, faz UMA nova tentativa passando o
+    erro ao modelo (2026-11-04: 4 de 50 perguntas livres falharam por erro de SQL).
+    A nova SQL passa por `validate_sql` e pela guarda de base como qualquer outra,
+    a temperatura continua 0 e o resultado devolve a SQL que de fato rodou, com
+    `tentativas` = 2. Se a segunda também falhar, levanta SqlExecutionError (ou
+    BaseMixError) com a SQL e a causa da ÚLTIMA tentativa, encadeada à primeira
+    (`__cause__`): o erro não é engolido. Estouro de tempo (`statement_timeout`)
+    não é refeito: repetiria os 10 s e a consulta lenta tende a continuar lenta."""
+    sql = generate_sql(question, history, base=base)
     validate_sql(sql)
     try:
-        cols, rows = run_query(sql)
-        return {"question": question, "sql": sql, "columns": cols, "rows": rows, "tentativas": 1}
-    except psycopg2.errors.QueryCanceled as exc:
-        raise SqlExecutionError(sql, exc) from exc
-    except psycopg2.Error as exc:
-        primeiro = exc
-    erro = str(primeiro).strip()
-    sql2 = generate_sql(question, history, erro_anterior=(sql, erro))
+        validate_base(sql, base)
+        try:
+            cols, rows = run_query(sql)
+            return {"question": question, "base": base, "sql": sql, "columns": cols,
+                    "rows": rows, "tentativas": 1}
+        except psycopg2.errors.QueryCanceled as exc:
+            raise SqlExecutionError(sql, exc) from exc
+        except psycopg2.Error as exc:
+            primeiro, erro = exc, str(exc).strip()
+    except BaseMixError as exc:
+        primeiro, erro = exc, str(exc)
+    sql2 = generate_sql(question, history, erro_anterior=(sql, erro), base=base)
     try:
         validate_sql(sql2)
     except ValueError:
-        # a correção foi barrada pela validação: vale o erro real da primeira SQL
+        # a correção foi barrada pela validação de segurança: vale o erro real da primeira SQL
+        if isinstance(primeiro, BaseMixError):
+            raise primeiro from None
         raise SqlExecutionError(sql, primeiro) from primeiro
+    validate_base(sql2, base)  # se a correção ainda mistura as bases, levanta BaseMixError
     try:
         cols, rows = run_query(sql2)
     except psycopg2.Error as exc2:
         raise SqlExecutionError(sql2, exc2) from primeiro
-    return {"question": question, "sql": sql2, "columns": cols, "rows": rows, "tentativas": 2}
+    return {"question": question, "base": base, "sql": sql2, "columns": cols, "rows": rows,
+            "tentativas": 2}
+
+
+def _historico_da_base(history: list[dict] | None, base: str) -> list[dict]:
+    """Só os turnos dessa base (ou sem base, de versões antigas da tela)."""
+    return [t for t in (history or []) if t.get("base") in (None, base)]
+
+
+def _base_anterior(history: list[dict] | None) -> str | None:
+    """Base do último turno, se foi UMA só; None se foi AMBOS ou não se sabe.
+    Um turno AMBOS chega como duas entradas com a mesma pergunta, uma por base."""
+    if not history:
+        return None
+    pergunta = history[-1].get("question")
+    bases = {t.get("base") for t in history if t.get("question") == pergunta} - {None}
+    return next(iter(bases)) if len(bases) == 1 else None
+
+
+def _erro_de_base(exc: Exception) -> dict:
+    """Falha de UMA base, para a resposta mostrar onde falhou sem derrubar a outra."""
+    if isinstance(exc, SqlExecutionError):
+        tipo = "execucao"
+    elif isinstance(exc, BaseMixError):
+        tipo = "mistura_de_bases"
+    else:
+        tipo = "validacao"
+    return {"tipo": tipo, "message": str(exc).strip() if tipo != "execucao"
+            else "A consulta gerada falhou ao executar no banco.",
+            "sql": getattr(exc, "sql", None), "cause": str(getattr(exc, "cause", exc)).strip()}
+
+
+def ask(question: str, history: list[dict] | None = None, modelo_roteador=None) -> dict:
+    """Entrada da API: roteia a pergunta e responde em UMA base ou nas DUAS.
+
+    1. `rotear` decide "solo", "competitivo" ou "ambos" (src/nlq/route.py): sem pista,
+       ou com pista dos dois lados, a resposta é AMBOS, nunca um palpite em silêncio.
+    2. Cada base roda por `ask_base`, com a dica de base, a guarda de mistura e a nova
+       tentativa. Em AMBOS, uma base que falha ou recusa não derruba a outra: o
+       resultado dela traz `erro` e a outra aparece normalmente.
+    3. Se TODAS as bases falham, levanta a exceção da última (SqlExecutionError,
+       BaseMixError ou ValueError), como antes: o erro não é engolido.
+
+    Devolve {"roteamento", "base", "resultados": [...]} e, por compatibilidade com a
+    tela antiga, `sql`/`columns`/`rows`/`tentativas` do primeiro resultado que deu certo."""
+    roteamento = rotear(question, _base_anterior(history), modelo=modelo_roteador)
+    bases = [SOLO, PRO] if roteamento["classe"] == AMBOS else [roteamento["classe"]]
+    resultados, ultimo_erro = [], None
+    for base in bases:
+        try:
+            r = ask_base(question, _historico_da_base(history, base), base)
+            resultados.append({"base": base, "sql": r["sql"], "columns": r["columns"],
+                               "rows": r["rows"], "tentativas": r["tentativas"], "erro": None})
+        except (SqlExecutionError, ValueError) as exc:  # BaseMixError é ValueError
+            ultimo_erro = exc
+            resultados.append({"base": base, "sql": getattr(exc, "sql", None), "columns": [],
+                               "rows": [], "tentativas": None, "erro": _erro_de_base(exc)})
+    if all(r["erro"] for r in resultados):
+        raise ultimo_erro
+    primeiro = next(r for r in resultados if not r["erro"])
+    return {"question": question, "roteamento": {"classe": roteamento["classe"], "origem": roteamento["origem"]},
+            "base": roteamento["classe"], "resultados": resultados,
+            "sql": primeiro["sql"], "columns": primeiro["columns"], "rows": primeiro["rows"],
+            "tentativas": primeiro["tentativas"]}
 
 
 def explain_result(question: str, sql: str, columns: list[str], rows: list[tuple]) -> str:

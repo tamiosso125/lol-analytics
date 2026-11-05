@@ -1,0 +1,50 @@
+1. Quantas partidas o time vermelho venceu?
+2. Quantas partidas o time azul venceu?
+3. Qual lado do mapa apresentou a maior taxa de vitória?
+4. Qual equipe venceu mais partidas em 2026?
+5. Quais foram as 10 equipes com mais vitórias em 2026?
+6. Qual foi a duração média das partidas profissionais em 2026?
+7. Qual foi a partida mais longa registrada em 2026?
+8. Qual foi a partida mais curta registrada em 2026?
+9. Quantas partidas terminaram antes dos 25 minutos?
+10. Qual equipe apresentou a maior taxa de vitória em partidas com duração superior a 35 minutos?
+11. Quais foram os 5 campeões mais jogados na posição MIDDLE?
+12. Quais foram os 10 campeões mais escolhidos na posição TOP?
+13. Qual campeão apresentou a maior taxa de vitória na posição JUNGLE?
+14. Quais campeões foram mais banidos em 2026?
+15. Qual campeão teve a maior quantidade de eliminações em uma única partida?
+16. Qual foi o campeão mais utilizado na posição ADC?
+17. Quais foram os 5 campeões com maior taxa de vitória na posição SUPPORT, considerando pelo menos 20 partidas?
+18. Qual campeão apresentou o maior KDA médio em 2026?
+19. Quais campeões foram utilizados em todas as cinco posições?
+20. Qual foi o campeão com a maior quantidade de partidas disputadas e nenhuma vitória?
+21. Qual foi o jogador com mais eliminações em 2026?
+22. Quais foram os 10 jogadores com maior KDA médio?
+23. Qual foi o CS médio dos jogadores na posição TOP?
+24. Qual jogador apresentou o maior CS por minuto na posição MIDDLE?
+25. Quais foram os 5 jogadores com mais assistências em 2026?
+26. Qual jogador apresentou a menor média de mortes por partida?
+27. Qual foi o jogador com maior participação nas eliminações da equipe?
+28. Quais jogadores conseguiram pelo menos um pentakill em 2026?
+29. Qual jogador apresentou o maior dano médio causado a campeões inimigos?
+30. Qual jogador teve o maior número de partidas disputadas em 2026?
+31. Qual equipe conquistou mais dragões em 2026?
+32. Quais foram as 5 equipes que mais conquistaram Barões Nashor?
+33. Qual equipe apresentou a maior média de ouro obtido por partida?
+34. Qual equipe destruiu mais torres durante a temporada?
+35. Qual equipe apresentou a maior diferença média de ouro aos 15 minutos?
+36. Qual foi a taxa de vitória das equipes que conquistaram o primeiro dragão?
+37. Quantas partidas foram vencidas pela equipe que conquistou o primeiro Barão Nashor?
+38. Qual equipe apresentou a maior média de eliminações por partida?
+39. Qual foi a porcentagem de vitórias das equipes que destruíram a primeira torre?
+40. Quais equipes conseguiram vencer partidas mesmo estando com desvantagem de ouro aos 15 minutos?
+41. Qual liga teve mais jogos profissionais em 2026?
+42. Quais foram as 5 ligas com maior duração média de partida?
+43. Qual liga apresentou a maior média de eliminações por partida?
+44. Qual foi o campeão mais escolhido em cada liga durante 2026?
+45. Qual liga apresentou a maior taxa de vitória do lado azul?
+46. Quais foram os 5 jogadores com maior KDA em cada liga?
+47. Qual liga apresentou a maior média de dragões conquistados por partida?
+48. Como a duração média das partidas variou entre os diferentes patches de 2026?
+49. Quais campeões tiveram o maior aumento na taxa de escolha entre dois patches consecutivos?
+50. Qual foi a diferença na média de eliminações por partida entre as principais ligas profissionais em 2026?

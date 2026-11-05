@@ -1,0 +1,223 @@
+{
+ "conjunto": "cego",
+ "fonte": "reports/nlq_cego_resultado.json",
+ "criterio": "cada resposta recalculada no banco com consulta independente",
+ "legenda": {
+  "C": "certa",
+  "E": "errada",
+  "P": "parcial",
+  "RC": "recusa certa",
+  "RE": "recusa errada"
+ },
+ "contagem": {
+  "C": 24,
+  "P": 10,
+  "RC": 7,
+  "E": 8,
+  "RE": 1
+ },
+ "total": 50,
+ "acerto_estrito": 31,
+ "vereditos": {
+  "51": {
+   "veredito": "C",
+   "motivo": "Locke (id 805) tem taxa de banimento 42,6% em 2026; confere."
+  },
+  "52": {
+   "veredito": "P",
+   "motivo": "Há 14 campeões com 1 jogo na JUNGLE (e 47 com 0 jogos, que a consulta ignora); os 5 mostrados são um corte arbitrário do empate, sem avisar."
+  },
+  "53": {
+   "veredito": "C",
+   "motivo": "Solo: Karthus 7,78 (2.416 jogos). Competitivo: Briar 5,73 (26 jogos); mesmo topo com filtro de amostra. Declara as duas bases."
+  },
+  "54": {
+   "veredito": "C",
+   "motivo": "Os 10 campeões e as médias de dano conferem (amostra >= 20)."
+  },
+  "55": {
+   "veredito": "RC",
+   "motivo": "participants só tem cs_total (colunas conferidas); não há CS aos 15 minutos no solo."
+  },
+  "56": {
+   "veredito": "C",
+   "motivo": "Jayce, 4.125 escolhas no lado azul (team_id 100); confere."
+  },
+  "57": {
+   "veredito": "C",
+   "motivo": "Sylas, 3.626 escolhas no lado vermelho (team_id 200); confere."
+  },
+  "58": {
+   "veredito": "P",
+   "motivo": "Solo: 173 campeões passam de 100 partidas, mas o LIMIT 100 corta a lista em 100. Competitivo: 93, completo."
+  },
+  "59": {
+   "veredito": "C",
+   "motivo": "Solo: Draven 541,8 ouro/min (1.955 jogos). Competitivo: recusa correta (pro não tem ouro total)."
+  },
+  "60": {
+   "veredito": "C",
+   "motivo": "Ivern, 55,9% em partidas < 30 min (730 jogos); confere."
+  },
+  "61": {
+   "veredito": "C",
+   "motivo": "Solo: 13,40 de média (40 jogos); competitivo: F8 ice 9,21 (14 jogos). Identifica o jogador por puuid, sem nome."
+  },
+  "62": {
+   "veredito": "E",
+   "motivo": "'Maior quantidade de mortes em 2026' por jogador é a SOMA no ano (1º tem 1.934 mortes em 282 jogos). A consulta ordenou partidas individuais (máximo 25) e pode repetir o mesmo jogador."
+  },
+  "63": {
+   "veredito": "C",
+   "motivo": "Solo: 51 assistências; competitivo: Nyph, 45; ambos os máximos conferem."
+  },
+  "64": {
+   "veredito": "C",
+   "motivo": "ADC = BOTTOM; 10,207 CS/min com 33 jogos; confere."
+  },
+  "65": {
+   "veredito": "P",
+   "motivo": "Solo: 103 jogadores atendem o critério, mas o LIMIT 100 corta 3. Competitivo: 89, completo."
+  },
+  "66": {
+   "veredito": "C",
+   "motivo": "1.324,7 de dano/min (78 jogos); mesmo topo sem exigir nome cadastrado."
+  },
+  "67": {
+   "veredito": "C",
+   "motivo": "Solo: 47 partidas sem morte; competitivo: Rekkles, 306."
+  },
+  "68": {
+   "veredito": "C",
+   "motivo": "Os 5 jogadores e as médias de ouro conferem (>= 20 jogos)."
+  },
+  "69": {
+   "veredito": "C",
+   "motivo": "Zac 16/1/26, KDA 42,0; sem empate no topo."
+  },
+  "70": {
+   "veredito": "C",
+   "motivo": "Solo: 65 campeões distintos em 2026; competitivo: Envy, 43; conferem."
+  },
+  "71": {
+   "veredito": "P",
+   "motivo": "0% é de fato o mínimo, mas há várias equipes com 0 vitória; a mostrada (REDPack) tem só 4 jogos. Com >= 10 jogos o topo é GLORE (14 jogos, 0%). Escolha arbitrária de empate com amostra minúscula."
+  },
+  "72": {
+   "veredito": "E",
+   "motivo": "Calculou a média por LINHA DE JOGADOR (AVG(pp.deaths)), não por equipe e partida; sem filtro de amostra (Silver Wolves = 15 linhas, 3 jogos) e sem ano."
+  },
+  "73": {
+   "veredito": "P",
+   "motivo": "Guasones 9,0 vem de 7 jogos; com >= 10 jogos em 2026 o topo é Fuego (8,88). Literalmente é o máximo, mas sem filtro de amostra."
+  },
+  "74": {
+   "veredito": "E",
+   "motivo": "Filtrou win = true ANTES de agrupar, então as derrotas não quebram a sequência: o 82 do Bilibili é o total de vitórias. A maior sequência real em 2026 é 23 (FENNEL)."
+  },
+  "75": {
+   "veredito": "RE",
+   "motivo": "Recusou dizendo que pro_games não tem ordem cronológica, mas tem game_date. Resposta real em 2026: ROSSMANN Centaurs, 23 derrotas seguidas (todos os anos: DRX Academy, 58)."
+  },
+  "76": {
+   "veredito": "E",
+   "motivo": "'Durante a temporada' pede 2026: 92 equipes têm mais de 50 jogos. A consulta não filtrou o ano e devolveu 867 (todos os anos)."
+  },
+  "77": {
+   "veredito": "RC",
+   "motivo": "O competitivo não tem CS total, só cs_diff_at15."
+  },
+  "78": {
+   "veredito": "C",
+   "motivo": "Gen.G, 352 vitórias do lado vermelho (sem ano na pergunta, todos os anos)."
+  },
+  "79": {
+   "veredito": "C",
+   "motivo": "LDM Mexico, 92,9% (14 jogos no lado azul); confere."
+  },
+  "80": {
+   "veredito": "E",
+   "motivo": "Calculou AVG(kills - deaths) por linha de jogador (escala de 1/5), sem comparar com o adversário e sem amostra (24 7 Tower Dive = 5 linhas, 1 jogo). Diferença real por jogo (>= 50 jogos): Frites Esports Club, +11,45."
+  },
+  "81": {
+   "veredito": "P",
+   "motivo": "Responde por EQUIPE (solo 1,74; competitivo 2,21). Por partida, somando as duas equipes, seriam 3,47 e 4,42. A resposta não diz que é por equipe."
+  },
+  "82": {
+   "veredito": "E",
+   "motivo": "Contou jogos em que ALGUMA das duas equipes tem 0 barões: 86.699. Jogos sem barão de nenhuma equipe: 6.633."
+  },
+  "83": {
+   "veredito": "RC",
+   "motivo": "O competitivo não registra primeiro sangue."
+  },
+  "84": {
+   "veredito": "C",
+   "motivo": "9,2966 torres por equipe vencedora (99.217 linhas); confere."
+  },
+  "85": {
+   "veredito": "C",
+   "motivo": "Máximo de 74 eliminações (aNc Outplayed, 2019); confere."
+  },
+  "86": {
+   "veredito": "E",
+   "motivo": "Erro total: o validador barrou ('Múltiplos statements'). Valor real: 11.547 jogos."
+  },
+  "87": {
+   "veredito": "C",
+   "motivo": "1,1270 barões por equipe vencedora; confere."
+  },
+  "88": {
+   "veredito": "RC",
+   "motivo": "O competitivo só tem a contagem de arautos, não quem pegou o primeiro."
+  },
+  "89": {
+   "veredito": "RC",
+   "motivo": "pro_games só tem gold_diff_at15, não o ouro final."
+  },
+  "90": {
+   "veredito": "P",
+   "motivo": "O número certo (14.946) aparece apenas como QUANTIDADE DE LINHAS: a consulta agrupou por jogo e devolveu 14.946 linhas com o valor 1, em vez de uma contagem."
+  },
+  "91": {
+   "veredito": "RC",
+   "motivo": "O competitivo não tem banimentos (colunas conferidas); o solo tem bans mas não tem liga."
+  },
+  "92": {
+   "veredito": "C",
+   "motivo": "EM 135, EUM 113, WLDs 113, UPL 110, NACL 92 (todos os anos); confere."
+  },
+  "93": {
+   "veredito": "P",
+   "motivo": "LGL (1.577 s) vem de apenas 8 jogos; com >= 100 jogos a menor duração é PCL (1.667 s). Sem filtro de amostra."
+  },
+  "94": {
+   "veredito": "E",
+   "motivo": "Violação de honestidade: o competitivo não tem banimentos; a consulta contou ESCOLHAS (pro_players.champion) e as rotulou como 'bans'. Devia recusar. Também listou 122 ligas em vez das principais."
+  },
+  "95": {
+   "veredito": "RC",
+   "motivo": "pro_games só tem gold_diff_at15, não o ouro total."
+  },
+  "96": {
+   "veredito": "C",
+   "motivo": "Ruler 404, Peyz 387, Smash 378, Diable 326, Chovy 321; conferem."
+  },
+  "97": {
+   "veredito": "C",
+   "motivo": "Bilibili Gaming, 71,3% (94 jogos); confere."
+  },
+  "98": {
+   "veredito": "P",
+   "motivo": "Devolveu as duas médias (LCK 2.042,6 s; LEC 1.974,8 s, todos os anos) mas não calculou a diferença (67,8 s)."
+  },
+  "99": {
+   "veredito": "C",
+   "motivo": "LJL, 138 campeões distintos em 2026; confere."
+  },
+  "100": {
+   "veredito": "P",
+   "motivo": "Lista as 43 ligas de 2026 em vez das principais, e os empates no 1º lugar saem arbitrários; os campeões por liga estão corretos."
+  }
+ }
+}

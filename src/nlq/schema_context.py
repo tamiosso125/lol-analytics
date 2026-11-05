@@ -195,8 +195,33 @@ Regras:
 - Ranking por TAXA DE VITÓRIA (de campeão, equipe, jogador, liga) sem limiar
   citado na pergunta: exija amostra mínima com HAVING COUNT(*) >= 20 no solo
   queue e HAVING COUNT(*) >= 10 no competitivo (um campeão com 1 jogo e 100%
-  de vitória não é resposta). Se a pergunta citar um limiar, use o dela. Não
-  acrescente a contagem como coluna.
+  de vitória não é resposta). Se a pergunta citar um limiar ("com pelo menos
+  N partidas"), use o dela. Em AMBOS os casos o limiar vai SÓ no HAVING: a
+  contagem NÃO vira coluna do resultado (nem COUNT(*) AS partidas, nem jogos),
+  porque a pergunta não a pediu.
+- ORDENAÇÃO E NULOS: no PostgreSQL, ORDER BY ... DESC põe os valores NULOS
+  PRIMEIRO, então um ranking pode ser liderado por um grupo sem dado. Em todo
+  ranking use ORDER BY métrica DESC NULLS LAST e, quando a métrica pode ser
+  nula (ex.: gold_diff_at15, xp_diff_at15 e cs_diff_at15 de pro_games, que são
+  nulos em parte dos jogos; divisão com NULLIF), filtre métrica IS NOT NULL.
+- "O X DE CADA Y" (o campeão mais escolhido em cada liga, o melhor jogador de
+  cada equipe, os N melhores de cada grupo): uma linha por grupo, NÃO LIMIT.
+  Use ROW_NUMBER() OVER (PARTITION BY grupo ORDER BY métrica DESC NULLS LAST)
+  numa subconsulta e filtre rn = 1 (ou rn <= N).
+- O QUE ESTE SCHEMA NÃO TEM — responda com o aviso de "não é possível
+  responder", sem aproximar nem trocar por uma métrica parecida:
+    * solo queue: pentakill ou qualquer sequência de abates (kills >= 5 não é
+      pentakill), quem fez algo primeiro (primeiro sangue, dragão, barão, torre
+      ou arauto), estado da partida em um minuto específico, nome de jogador
+      (players.game_name é quase sempre NULL);
+    * competitivo: ouro total, CS total, dano, visão e banimentos. pro_games só
+      tem gold_diff_at15, xp_diff_at15 e cs_diff_at15 (DIFERENÇAS aos 15
+      minutos), e pro_players só tem kills, deaths e assists; também não há
+      quem fez algo primeiro.
+  Diferença de ouro aos 15 minutos não é ouro total, e kills >= 5 não é
+  pentakill. Exemplo — "qual equipe tem a maior média de ouro obtido por
+  partida?" no competitivo:
+  SELECT 'não é possível responder: pro_games só tem a DIFERENÇA de ouro aos 15 minutos (gold_diff_at15), não o ouro total da equipe' AS aviso;
 - Se a pergunta pedir uma única resposta ("qual X tem mais/menos Y"), use
   ORDER BY na direção certa e LIMIT 1 — não retorne todas as linhas do
   agrupamento. Isso vale mesmo quando a resposta usa AVG/GROUP BY (ex.:

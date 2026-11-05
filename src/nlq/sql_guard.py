@@ -185,3 +185,40 @@ def validate_sql(sql: str) -> None:
     unknown = set(_referenced_tables(tokens)) - ALLOWED_TABLES - cte_names
     if unknown:
         raise ValueError(f"Tabelas não permitidas: {unknown}")
+
+
+# --- guarda de base (2026-11-04) ----------------------------------------------------
+# O sistema tem duas bases paralelas (docs/plano_roteamento_nlq.md). Uma consulta
+# não pode misturá-las: as convenções são diferentes (team_id 100/200 contra
+# 'Blue'/'Red'), e a junção teams x pro_games da pergunta 40 devolveu zero linhas.
+SOLO_TABLES = {"matches", "teams", "participants", "players", "bans", "item_events", "items"}
+PRO_TABLES = {"pro_games", "pro_players"}
+BASES = {"solo": SOLO_TABLES, "competitivo": PRO_TABLES}
+
+
+class BaseMixError(ValueError):
+    """A SQL usa tabelas da base que NÃO foi escolhida para a pergunta."""
+
+
+def tables_used(sql: str) -> set[str]:
+    """Tabelas do schema que a SQL referencia (sem as CTEs). Chame DEPOIS de
+    `validate_sql`: ela já garantiu que só há tabelas permitidas."""
+    structural = _without_string_literals(sql)
+    cte_names = {
+        m.lower() for m in re.findall(r"\b([a-z_][a-z0-9_]*)\s+AS\s*\(", structural, re.IGNORECASE)
+    }
+    tokens = [t.lower() for t in TOKEN.findall(structural)]
+    return set(_referenced_tables(tokens)) - cte_names
+
+
+def validate_base(sql: str, base: str | None) -> None:
+    """Falha com BaseMixError se a SQL usa tabela fora da base escolhida.
+    `base` None não confere nada. Consulta sem tabela (o aviso de "não é possível
+    responder") passa em qualquer base."""
+    if base not in BASES:
+        return
+    fora = tables_used(sql) - BASES[base]
+    if fora:
+        raise BaseMixError(
+            f"A consulta é da base '{base}', mas usa tabelas da outra base: {sorted(fora)}"
+        )
