@@ -1311,7 +1311,24 @@ def check_cego_nlq(t: str) -> None:
         if linha not in t:
             falha(f"NLQ cego: a linha do quadro de versões '{rotulo}' diverge do artefato: {linha}")
             return
-    print(f"  [OK] conjunto cego: {estrito}/50 e as contagens do quadro de versões batem com os artefatos")
+    # segundo conjunto cego (101-150): contagens do texto x artefato
+    c2p = RAIZ / "reports" / "nlq_cego_v2_vereditos.json"
+    if not c2p.exists():
+        falha("NLQ cego v2: falta reports/nlq_cego_v2_vereditos.json")
+        return
+    v2 = json.loads(c2p.read_text(encoding="utf-8"))
+    k = v2["contagem"]
+    est2 = k["C"] + k["RC"]
+    if sum(k.values()) != 50 or len(v2["vereditos"]) != 50 or v2["acerto_estrito"] != est2:
+        falha("NLQ cego v2: o artefato não fecha em 50 vereditos")
+        return
+    plano = " ".join(t.split())
+    for e in (f"{est2} de 50 certas ({round(est2 / 50 * 100)}%)",
+              f"{k['C']} certas, {k['RC']} recusas corretas, {k['P']} parciais, {k['E']} erradas e {k['RE']} recusa indevida"):
+        if e not in plano:
+            falha(f"NLQ cego v2: o texto não traz '{e}' (confira o artefato de vereditos)")
+            return
+    print(f"  [OK] conjunto cego: {estrito}/50 e as contagens do quadro de versões batem com os artefatos; v2 {est2}/50 confere")
 
 
 def check_holdout_temporal(t: str) -> None:

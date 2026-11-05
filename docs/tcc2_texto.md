@@ -48,7 +48,7 @@ cortes temporais, de 10 a 25 minutos; os três ficaram próximos, e o
 XGBoost, adotado em produção, alcançou acurácia de 0,7621 e AUC-ROC de
 0,8473 no corte de 15 minutos. Uma regressão logística simples chegou ao mesmo patamar, variáveis mais ricas somaram no máximo 0,008 de AUC-ROC e treinar no passado e testar no futuro não reduziu a AUC-ROC. A análise exploratória identificou viés de lado favorável ao time vermelho no *solo queue* de elo alto (56,3% de vitórias na região com maior amostra; o intervalo exclui 50% em três das quatro regiões), estável ao longo da partida e
 invertido no cenário profissional, em que o azul vence 53,2% dos jogos,
-achado sustentado por testes de robustez. Uma interface *text-to-SQL* com validação estrutural e roteamento entre as duas bases acertou 30 de 50 perguntas (60%) de um conjunto cego, conferido contra o banco, e 26 de 26 em um *benchmark* de referência ajustado pelo autor. A plataforma reúne seis páginas de visualização com
+achado sustentado por testes de robustez. Uma interface *text-to-SQL* com validação estrutural e roteamento entre as duas bases acertou 30 de 50 (60%) e 27 de 50 (54%) em dois conjuntos cegos, e 26 de 26 em um *benchmark* de referência ajustado pelo autor. A plataforma reúne seis páginas de visualização com
 predição explicável (SHAP). Os resultados mostram a viabilidade de
 integrar essas etapas em uma única solução aplicada a esports.
 
@@ -71,7 +71,7 @@ XGBoost, adopted in production, reached an accuracy of 0.7621 and an
 AUC-ROC of 0.8473 at the 15-minute cutoff. A simple logistic regression reached the same level, richer variables added at most 0.008 of AUC-ROC, and training on the past and testing on the future did not reduce the AUC-ROC. The exploratory analysis identified a side bias favoring the red side in high-elo solo queue (56.3% win rate in the region with the largest sample; the interval excludes 50% in three of the four regions), stable
 throughout the match and reversed in the professional scenario, where
 the blue side wins 53.2% of games, a finding supported by robustness
-tests. A text-to-SQL interface with structural validation and routing between the two databases answered 30 of 50 questions (60%) of a blind set correctly, checked against the database, and 26 of 26 on a reference benchmark tuned by the author. The platform comprises
+tests. A text-to-SQL interface with structural validation and routing between the two databases answered 30 of 50 (60%) and 27 of 50 (54%) questions of two blind sets correctly, and 26 of 26 on a reference benchmark tuned by the author. The platform comprises
 six visualization pages with explainable predictions (SHAP). The results
 show the feasibility of integrating these stages into a single solution
 applied to esports.
@@ -735,9 +735,9 @@ Figura — Simulador, aba Estado: probabilidade de vitória e contribuição de 
 
 A consulta em linguagem natural (*text-to-SQL* com validação e roteamento entre as bases) foi medida de duas formas (Apêndice B). No *benchmark* de 26 perguntas de referência, acertou 23 antes dos ajustes e 26 depois; como as regras do esquema foram escritas conhecendo as três falhas, o resultado não é independente.
 
-Por isso foi montado um conjunto cego de 50 perguntas, elaboradas pelo autor fora do ciclo de ajuste, rodadas uma vez com o sistema congelado e conferidas contra o banco, uma a uma. Saíram **30 de 50 certas (60%)**, com intervalo de 95% de 46% a 72%: 24 respostas certas e 6 recusas corretas (o banco não tem o dado), 11 parciais, 8 erradas e 1 recusa indevida. Três repetições não mudaram nenhum veredito. Duas versões anteriores acertaram 22 e 24 de 50 (Apêndice B): o ganho é real, mas modesto.
+Por isso foi montado um conjunto cego de 50 perguntas, elaboradas pelo autor fora do ciclo de ajuste, rodadas uma vez com o sistema congelado e conferidas contra o banco, uma a uma. Saíram **30 de 50 certas (60%)**, com intervalo de 95% de 46% a 72%: 24 respostas certas e 6 recusas corretas (o banco não tem o dado), 11 parciais, 8 erradas e 1 recusa indevida. Versões anteriores acertaram 22 e 24 de 50. Um segundo conjunto de 50 perguntas inéditas deu **27 de 50 certas (54%)**, intervalo de 95% de 40% a 67%: as correções não elevaram o acerto em perguntas novas (Apêndice B).
 
-O tipo de falha pesa mais que o acerto: 7 respostas estavam erradas e pareciam corretas (por exemplo, escolhas de campeão rotuladas como banimentos em um competitivo que não os registra) e só 2 falharam de forma visível. O validador garante a segurança da consulta, não o seu sentido (Seção 6.1).
+O tipo de falha pesa mais que o acerto: 7 respostas estavam erradas e pareciam corretas (escolhas de campeão rotuladas como banimentos, por exemplo) e só 2 falharam de forma visível. No segundo, de cerca de 19 perguntas sem dado no banco (primeira torre, série), 9 ou 10 receberam número em vez de recusa. O validador garante a segurança da consulta, não o seu sentido (Seção 6.1).
 
 A Figura 5 mostra uma consulta na plataforma: a pergunta 9 do benchmark,
 a SQL gerada pelo modelo, já validada, e o resultado lido do banco.
@@ -809,7 +809,7 @@ f) *dashboards* foram entregues em seis páginas de visualização,
 cobrindo desde estatísticas agregadas até análise minuto a minuto de
 partida individual;
 
-g) uma interface em linguagem natural foi implementada e avaliada: acertou 30 de 50 perguntas (60%) de um conjunto cego e 26 de 26 do *benchmark* de referência, ajustado pelo autor.
+g) uma interface em linguagem natural foi implementada e avaliada: acertou 30 de 50 (60%) e 27 de 50 (54%) perguntas de dois conjuntos cegos e 26 de 26 do *benchmark* de referência, ajustado pelo autor.
 
 O achado que merece destaque, por não ter sido o objeto anunciado do
 trabalho, é o viés de lado: uma assimetria estrutural entre os dois lados
@@ -853,13 +853,13 @@ jogador em um campeão ou um confronto de rota, seguem frágeis mesmo com
 41.063 partidas, apesar do encolhimento estatístico (*shrinkage*) em
 direção à média.
 
-**Limitações do modelo.** A taxa-base do XGBoost no estado de empate total (49,0% a 51,4% conforme o corte) subestima o viés de lado medido nos dados (46,4% a 47,9%). A discrepância não é subajuste: a busca em grade completa ficou 0,0001 de AUC acima da produção, e apenas a troca para *Random Forest* a fecha (0,6 pp), ao custo de 0,0005 de AUC. O modelo foi treinado sobre 39.426 das 41.063 partidas do banco e não foi retreinado, para não invalidar as validações já feitas. E o XGBoost não garante monotonicidade isolada por variável, por não usar restrição formal.
+**Limitações do modelo.** A taxa-base do XGBoost no estado de empate total (49,0% a 51,4% conforme o corte) subestima o viés de lado medido nos dados (46,4% a 47,9%). A discrepância não é subajuste: a busca em grade completa ficou 0,0001 de AUC acima da produção, e apenas a troca para *Random Forest* a fecha (0,6 pp), ao custo de 0,0005 de AUC. O modelo usa 39.426 das 41.063 partidas e não foi retreinado, para não invalidar as validações. E o XGBoost não garante monotonicidade isolada por variável, por não usar restrição formal.
 
-**Validade da consulta em linguagem natural.** O conjunto cego tem 50 perguntas (intervalo de 95% de 46% a 72%) e foi julgado por um só avaliador; o *benchmark* de 26 não é independente. O maior risco é a resposta errada que parece certa (7 de 50), e nas perguntas ambíguas o resultado depende do roteador.
+**Validade da consulta em linguagem natural.** Os dois conjuntos cegos têm 50 perguntas cada (intervalos de 95% de 46% a 72% e de 40% a 67%) e foram julgados por um só avaliador; o *benchmark* de 26 não é independente. O maior risco é a resposta errada que parece certa, inclusive o substituto sem rótulo quando o dado não existe.
 
 ### 6.2 TRABALHOS FUTUROS
 
-Ficam registrados seis caminhos. O primeiro é a extensão da predição para partidas ao vivo, prevista na arquitetura mas não implementada: a barreira é de dados em tempo real, não de modelo. O segundo é a inclusão de seleção de campeão competitiva no simulador de time. O terceiro é a investigação de restrições de monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O quinto é pedir à Riot uma chave de produção, sujeita a aprovação, para ampliar o limite de requisições; a documentação não lista dados novos nas APIs padrão (Apêndice H), então o estado das ondas segue fora do alcance. O sexto é a melhoria da consulta em linguagem natural: filtro de amostra mínima, verificação do resultado depois da execução e um conjunto cego maior, com dois avaliadores (Zhong; Yu; Klein, 2020).
+Ficam registrados seis caminhos. O primeiro é a extensão da predição para partidas ao vivo, prevista na arquitetura mas não implementada: a barreira é de dados em tempo real, não de modelo. O segundo é a inclusão de seleção de campeão competitiva no simulador de time. O terceiro é a investigação de restrições de monotonicidade formal no modelo, caso seja avaliada como necessária. O quarto é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O quinto é pedir à Riot uma chave de produção, sujeita a aprovação, para ampliar o limite de requisições; a documentação não lista dados novos nas APIs padrão (Apêndice H), então o estado das ondas segue fora do alcance. O sexto é a melhoria da consulta em linguagem natural: recusa obrigatória quando o dado não existe, verificação do resultado depois da execução e um conjunto cego maior, com dois avaliadores (Zhong; Yu; Klein, 2020).
 
 ---
 
@@ -1053,7 +1053,7 @@ consultas geradas pela interface em linguagem natural.
 Medição de 5 de novembro de 2026 sobre a base de produção de **41.063
 partidas**: **26/26 = 100% de acurácia de execução**, pelo comando
 `python -m src.nlq.evaluate_nlq`, que grava `reports/nlq_benchmark.json` com
-a acurácia, a base, o modelo e o desfecho de cada pergunta. Esse resultado **não é independente**: as regras do esquema que corrigiram as três falhas foram escritas depois de conhecê-las. Até 3 de novembro, antes dos ajustes, o resultado era 23 de 26 (88%) em todas as execuções. A medida independente é o conjunto cego, descrito mais adiante.
+a acurácia, a base, o modelo e o desfecho de cada pergunta. Esse resultado **não é independente**: as regras do esquema que corrigiram as três falhas foram escritas depois de conhecê-las. Até 3 de novembro, antes dos ajustes, o resultado era 23 de 26 (88%) em todas as execuções. As medidas independentes são os dois conjuntos cegos, descritos mais adiante.
 
 Quadro — Execuções do benchmark de linguagem natural
 
@@ -1183,6 +1183,63 @@ Quadro — Veredito de cada pergunta do conjunto cego
 | 98 | Qual foi a diferença na duração média das partidas entre a LCK e a LEC? | competitivo | P | Devolveu as duas médias (LCK 2.042,6 s; LEC 1.974,8 s, todos os anos) mas não calculou a diferença (67,8 s). |
 | 99 | Qual liga apresentou a maior diversidade de campeões escolhidos durante a temporada? | competitivo | C | LJL, 138 campeões distintos em 2026; confere. |
 | 100 | Qual foi a equipe com mais vitórias em cada uma das principais ligas profissionais de 2026? | competitivo | P | Lista as 43 ligas de 2026 em vez das principais, e os empates no 1º lugar saem arbitrários; os campeões por liga estão corretos. |
+
+**Segundo conjunto cego (50 perguntas, 5 de novembro de 2026).** Perguntas numeradas de 101 a 150, escritas pelo autor depois do primeiro conjunto, sem repetir nenhuma pergunta dele nem do conjunto de desenvolvimento (conferido por código). O sistema era o do commit 1fe0014, que já trazia as correções feitas a partir do primeiro conjunto; as perguntas foram rodadas uma única vez e cada resposta foi conferida contra o banco com consulta independente, pelo mesmo critério. Resultado: **27 de 50 certas (54%)**, intervalo de Wilson de 95% de 40.4% a 67.0%: 18 certas, 9 recusas corretas, 9 parciais, 13 erradas e 1 recusa indevida. O primeiro conjunto deu 30 de 50 (46% a 72%); os intervalos se sobrepõem, e o segundo tem mais perguntas sem dado no esquema, o que o torna mais difícil. A falha dominante é o substituto sem rótulo: para primeira torre, primeiro sangue, primeiro Barão, primeiro dragão, série e dano a torres, o sistema calculou outra grandeza e a apresentou como resposta, o que viola a separação entre dado medido e inferência (Seção 6.1). As correções do primeiro conjunto se mantiveram: nenhuma das certas depende de pergunta dele. Uma rodada anterior com o arquivo errado (perguntas repetidas) foi descartada. Qualquer ajuste a partir daqui seria desenvolvimento; o número fica congelado. Artefatos: `reports/nlq_cego_v2_resultado.json`, `reports/nlq_cego_v2_vereditos.json` e `docs/revisao_nlq_cego_v2.md`.
+
+Quadro — Veredito de cada pergunta do segundo conjunto cego
+
+| # | Pergunta | Base | Veredito | Motivo |
+|---|---|---|---|---|
+| 101 | Qual foi a porcentagem de partidas em que a equipe vencedora também conseguiu a primeira eliminação de torre? | competitivo | E | O schema não tem "primeira torre"; calculou % de linhas com vitória e torres>0 (49,97%) como se fosse a resposta. |
+| 102 | Quantas partidas tiveram exatamente a mesma quantidade de eliminações para as duas equipes? | competitivo | C | 1.383 jogos com kills iguais nas duas equipes; confere. |
+| 103 | Qual foi a média de diferença de ouro aos 10 minutos entre equipes vencedoras e perdedoras? | competitivo | RC | Só há gold_diff_at15. |
+| 104 | Em quantas partidas a equipe com menos eliminações conseguiu vencer? | competitivo | E | Comparou com o mínimo global de kills; o correto é 3.759 jogos em que o vencedor teve menos kills, o sistema deu 0. |
+| 105 | Qual foi a porcentagem de vitórias das equipes que estavam atrás em ouro aos 20 minutos? | competitivo | RC | Só há gold_diff_at15. |
+| 106 | Quais foram os 5 campeões com maior presença em picks ou bans em 2026? | solo | C | Locke 22.907 partidas (picks+bans, 2026); confere. |
+| 107 | Qual foi a taxa de vitória do campeão mais escolhido no lado vermelho? | solo | C | Sylas, 3.626 jogos no vermelho, 52,9% de vitória; confere. |
+| 108 | Qual foi a diferença na taxa de vitória de um mesmo campeão entre os lados azul e vermelho? | solo | P | A consulta devolve as taxas por lado (346 linhas), não a diferença pedida; os dados estão certos. |
+| 109 | Qual dupla de campeões de ADC e SUPPORT mais apareceu na mesma equipe? | competitivo | C | Xayah+Rakan, 6.022; confere (base competitiva). |
+| 110 | Qual dupla de campeões de ADC e SUPPORT teve a maior taxa de vitória, considerando pelo menos 20 partidas? | solo | C | Xerath+Poppy, 80% em 20 partidas; confere. |
+| 111 | Quais foram as 5 combinações de campeões de MIDDLE e JUNGLE mais utilizadas? | solo | C | Syndra+LeeSin 447 etc.; confere. |
+| 112 | Qual campeão apresentou a maior diferença de KDA médio entre vitórias e derrotas? | solo | C | Yuumi, diferença 7,74 (1.039 partidas); confere. |
+| 113 | Qual campeão foi escolhido mais vezes como primeira escolha de draft? | ambas | E | Não há ordem de draft; devolveu o campeão mais escolhido (Jayce/Nautilus) como "primeira escolha". |
+| 114 | Qual campeão foi mais frequentemente banido na primeira fase de bans? | solo | P | No solo só existem pick_turn 1-5 (uma fase); a resposta não avisa que "primeira fase" não existe nessa base. |
+| 115 | Qual posição apresentou a maior diversidade de campeões escolhidos em 2026? | ambas | C | TOP 169 (solo) e 91 (competitivo); confere. |
+| 116 | Qual posição teve a maior participação média no dano total causado pela equipe? | ambas | P | Solo certo (BOTTOM 23,8%). Competitivo usa kills+deaths+assists como se fosse dano: substituto não rotulado. |
+| 117 | Qual posição apresentou a maior participação média nas eliminações aos 15 minutos? | ambas | RC | Sem estado aos 15 min por posição. |
+| 118 | Qual foi a diferença média de CS aos 10 minutos entre jogadores vencedores e perdedores da posição TOP? | solo | RC | Sem CS aos 10 min. |
+| 119 | Qual jogador acumulou mais partidas com pelo menos 10 eliminações? | competitivo | E | Usou kills+assists>=10; com kills>=10 o jogador é Knight com 98 partidas (sistema: 776). |
+| 120 | Quais jogadores conseguiram mais partidas com participação em 80% ou mais das eliminações da equipe? | - | E | Erro de execução: timeout de 10 s na subconsulta correlacionada; o usuário vê a falha. |
+| 121 | Qual jogador teve a maior média de vantagem de experiência aos 15 minutos contra seu adversário de rota? | competitivo | E | xp_diff_at15 é da equipe, não do adversário de rota; atribuiu o valor da equipe a cada jogador. |
+| 122 | Qual jogador registrou mais partidas com CS por minuto superior a 10? | solo | C | ZORN, 54 partidas; confere. |
+| 123 | Qual jogador teve a maior média de dano a torres por partida? | solo | E | Não há dano a torres; usou o número de torres da equipe como se fosse. |
+| 124 | Qual jogador apresentou o maior percentual médio do ouro total de sua equipe? | competitivo | P | Recusou no competitivo, mas o solo tem gold_earned e responderia; o roteador não ofereceu o solo. |
+| 125 | Quais jogadores venceram partidas utilizando pelo menos 10 campeões diferentes? | solo | RE | Recusou alegando game_name NULL; dá para agrupar por puuid/player_name. |
+| 126 | Qual equipe conseguiu mais vitórias após perder o primeiro sangue? | competitivo | E | Não há primeiro sangue; usou "vencedor com menos kills" como substituto não rotulado. |
+| 127 | Qual equipe teve a maior taxa de vitória após perder a primeira torre? | competitivo | E | Não há primeira torre; usou "venceu com 0 torres" (taxa 0%). |
+| 128 | Qual equipe teve a maior taxa de vitória depois de perder o primeiro Barão Nashor? | competitivo | E | Não há primeiro Barão; usou "adversário com Barão e a equipe com 0". |
+| 129 | Qual equipe acumulou mais partidas com uma vantagem de pelo menos 3 mil de ouro aos 15 minutos? | competitivo | C | Dplus Kia, 191; confere. |
+| 130 | Qual equipe apresentou a menor média de duração em suas vitórias? | competitivo | C | Fox B, 1523,7 s (15 vitórias); confere. |
+| 131 | Qual equipe apresentou a maior média de duração em suas derrotas? | competitivo | C | n!faculty, 2606,2 s (10 derrotas); confere. |
+| 132 | Qual equipe venceu mais partidas sem conceder nenhuma torre ao adversário? | competitivo | C | Dplus Kia, 119; confere. |
+| 133 | Qual equipe teve o maior percentual de partidas com pelo menos 3 dragões conquistados? | competitivo | P | Acrescentou year=2026 sem a pergunta pedir; o valor de 2026 confere, sem o filtro o campeão seria Team Axelent69. |
+| 134 | Qual equipe conseguiu mais vitórias sem conquistar nenhum Barão Nashor? | competitivo | C | Dplus Kia, 106; confere. |
+| 135 | Qual equipe registrou mais partidas com zero mortes de um de seus jogadores? | competitivo | C | Dplus Kia, 514; confere. |
+| 136 | Em quantas partidas as duas equipes conquistaram pelo menos um Barão Nashor? | competitivo | P | Valor correto (12.462 jogos), mas devolvido como 12.462 linhas "1"; o usuário não vê o número. |
+| 137 | Qual foi a média de tempo até a conquista do primeiro Barão Nashor? | ambas | RC | Sem tempo do primeiro Barão. |
+| 138 | Qual foi a média de tempo até a primeira eliminação de campeão? | ambas | RC | Sem tempo da primeira eliminação. |
+| 139 | Qual foi a média de ouro acumulado pelas equipes vencedoras aos 15 minutos? | competitivo | RC | Só há diferença de ouro, não o ouro. |
+| 140 | Quantas partidas tiveram uma virada de liderança de ouro após os 20 minutos? | solo | RC | Sem ouro aos 20 min. |
+| 141 | Qual patch apresentou o maior número de campeões distintos escolhidos? | competitivo | C | Patch 16.1, 161 campeões; confere. |
+| 142 | Em qual patch a duração média das partidas foi mais alta? | competitivo | P | Restringiu a 2026 sem a pergunta pedir; 15.18 confere para 2026. |
+| 143 | Qual liga apresentou a maior porcentagem de partidas decididas após 40 minutos? | competitivo | P | Liga certa (OGN), percentual errado: 79,2% no sistema, 39,6% real (contou as duas linhas da partida no numerador). |
+| 144 | Qual liga teve a maior frequência de partidas com mais de 30 eliminações totais? | competitivo | E | Dividiu a contagem por ela mesma (1,0); a liga AC com 21 jogos não é a resposta. |
+| 145 | Qual liga apresentou a maior taxa de vitórias de equipes que perderam o primeiro dragão? | competitivo | E | Não há primeiro dragão; usou "equipe com 0 dragões". |
+| 146 | Qual liga apresentou a maior diferença entre as taxas de vitória dos lados azul e vermelho? | competitivo | P | LGL tem só 16 jogos; sem amostra mínima o maior desvio é ruído. |
+| 147 | Qual foi o mês de 2026 com mais partidas profissionais registradas? | competitivo | C | Maio, 1.511 jogos; confere. |
+| 148 | Qual foi o mês de 2026 com menor duração média das partidas? | solo | C | Agosto, 1.542,8 s (solo, 1.217 partidas); confere, só a base solo foi consultada. |
+| 149 | Qual equipe disputou mais séries que chegaram ao último jogo possível em formato melhor de cinco? | competitivo | E | Não há série; inventou series_id com DENSE_RANK por data e devolveu vazio. |
+| 150 | Qual foi a taxa de vitória das equipes que venceram o primeiro jogo de uma série melhor de três? | competitivo | RC | Sem identificador de série. |
 
 Estabilidade: três repetições com o mesmo sistema (mesmos *hashes*) mudaram o resultado de duas perguntas (66 e 94), sem alterar nenhum veredito. A 66 deixou de juntar a tabela de jogadores e devolveu o mesmo jogador e valor; na 94, a SQL é idêntica e variou só o desempate entre campeões com 17 jogos na liga AC. As versões anteriores foram rodadas sobre as mesmas 50 perguntas e julgadas por um critério mais brando (quadro acima).
 
@@ -1405,7 +1462,7 @@ Quadro — Limitações do trabalho e a evidência de cada uma
 | Desequilíbrio de amostra por região | BR1 11.936, EUW1 11.744, KR 10.204 e NA1 7.159 partidas (a NA1 tinha 1.446 antes da rodada final). Em três das quatro regiões o intervalo de 95% exclui 50%; a KR tem 50,4%, com intervalo que inclui 50% | O achado de viés de elo alto, além do Brasil, se apoia nas três regiões com evidência firme |
 | Cobertura desigual por versão do jogo | O *patch* 16.13 concentra 40,4% das partidas (16.572 de 41.063), em dez *patches* de 16.10 a 16.19 | Treinar nos *patches* 16.10 a 16.13 e testar nos 16.14 a 16.19 não reduz a AUC-ROC (Apêndice C). A generalização para versões com balanceamento muito diferente segue sem medida |
 | Monotonicidade isolada por variável | O XGBoost não garante que aumentar apenas a diferença de abates ou de torres nunca reduza a probabilidade prevista, por interações e redundâncias entre variáveis | Comportamento documentado e compreendido, sem restrição formal de monotonicidade (`monotone_constraints`) nesta versão |
-| Consulta em linguagem natural | 30 de 50 perguntas cegas corretas (60%, intervalo de 95% de 46% a 72%); 7 respostas erradas com aparência de certas; *benchmark* de 26 perguntas ajustado pelo autor, sem independência; um só avaliador | Falhas declaradas e sem ajuste depois da medida; consulta em transação somente leitura. Verificação do resultado depois da execução fica como trabalho futuro |
+| Consulta em linguagem natural | 30 de 50 (60%, intervalo de 95% de 46% a 72%) e 27 de 50 (54%, 40% a 67%) perguntas cegas corretas; 7 respostas erradas com aparência de certas no primeiro conjunto e substituto sem rótulo no segundo; *benchmark* de 26 perguntas ajustado pelo autor, sem independência; um só avaliador | Falhas declaradas e sem ajuste depois da medida; consulta em transação somente leitura. Verificação do resultado depois da execução fica como trabalho futuro |
 
 Quadro — Taxa de vitória do azul no estado de empate, modelo e dados
 
@@ -1500,7 +1557,7 @@ Quadro — Objetivos específicos, onde são tratados e a evidência de cada um
 | d | 5.3 e Apêndice D | Quadro 2 e viés de lado com quatro testes de robustez; inversão no profissional; conversão de vantagem |
 | e | 5.4 e Apêndice C | Quadros 3 e 4: três modelos comparados em quatro cortes; XGBoost em produção |
 | f | 5.5 e Apêndice E | Seis páginas de visualização; Figuras 3 e 4 no texto |
-| g | 5.6 e Apêndice B | 30 de 50 perguntas cegas corretas (60%); 26 de 26 no *benchmark* de referência, que não é independente |
+| g | 5.6 e Apêndice B | 30 de 50 (60%) e 27 de 50 (54%) perguntas cegas corretas; 26 de 26 no *benchmark* de referência, que não é independente |
 
 ---
 

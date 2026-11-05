@@ -161,7 +161,7 @@ NLQ (2026-11-05): três medidas, que não se somam. **Referência** (26 pergunta
 23/26 antes dos ajustes, **26/26 hoje, não independente** (regras escritas
 conhecendo as 3 falhas). **Desenvolvimento** (50): sem nota. **Cego** (50,
 rodado uma vez com o sistema congelado, conferido contra o banco):
-**30/50 (60%)**, IC 95% 46%–72%; 7 respostas erradas com aparência de certas.
+**30/50 (60%)**, IC 95% 46%–72%; 7 respostas erradas com aparência de certas. **Segundo cego (101–150, `docs/nlq_perguntas_v2_novas.txt`, rodado uma vez no commit 1fe0014): 27/50 (54%)**, IC 95% 40%–67%; falha dominante = substituto sem rótulo quando o dado não existe (`reports/nlq_cego_v2_vereditos.json`, `docs/revisao_nlq_cego_v2.md`).
 Versões anteriores no mesmo cego: 22/50 e 24/50. Três repetições: 0 vereditos
 mudaram. Roteador solo/competitivo/ambos em `src/nlq/route.py`; consulta em
 transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.

@@ -335,8 +335,8 @@ trava: sem ela o script grava a tela de erro e reporta sucesso.
 > QUALQUER mudança em `src/nlq/schema_context.py` — já regrediu
 > silenciosamente 2×. O benchmark de 26 perguntas **não é independente** (as
 > regras do esquema foram escritas conhecendo as 3 falhas antigas): hoje dá 26/26.
-> A medida independente é o conjunto cego, 30/50 (60%), em
-> `reports/nlq_cego_vereditos.json`. A consulta roda em transação somente leitura
+> As medidas independentes são os dois conjuntos cegos: 30/50 (60%) em
+> `reports/nlq_cego_vereditos.json` e 27/50 (54%) em `reports/nlq_cego_v2_vereditos.json`. A consulta roda em transação somente leitura
 > (`tests/test_run_query_readonly.py`).
 >
 > O comando exige `ANTHROPIC_API_KEY`. Sem ela o Apêndice B fica sem

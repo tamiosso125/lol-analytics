@@ -236,7 +236,7 @@ manter, cortar ou mover, com minha inclinação atual.
     (o Apêndice F já traz as limitações em detalhe). Pergunta se ele considera
     limitações e trabalhos futuros parte esperada da Conclusão ou excesso.
 
-45. **Posso reportar no Resumo e na Conclusão o conjunto cego (30 de 50, 60%) ao lado do benchmark de 26 (26 de 26)?**
+45. **Posso reportar no Resumo e na Conclusão os dois conjuntos cegos (30 de 50, 60%, e 27 de 50, 54%) ao lado do benchmark de 26 (26 de 26)?**
     (A) *Evidência para levar:* o benchmark de 26 perguntas foi o número do TCC 1 e
     do rascunho (23 de 26, 88%), mas as regras do esquema que o levaram a 26 de 26
     foram escritas conhecendo as três falhas: não é independente. Montei um conjunto

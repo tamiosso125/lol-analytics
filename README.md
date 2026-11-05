@@ -54,7 +54,7 @@ python -m src.models.tune_models              # 7. tuning + curva de calibraçã
 python -m src.nlq.nl_to_sql "qual campeão tem maior win rate?"
                                               # 8. consulta em linguagem natural
 python -m src.nlq.evaluate_nlq                # 9. valida a interface NL (benchmark de 26; não independente)
-python -m src.nlq.avaliar_conjunto --perguntas docs/nlq_perguntas_cegas.txt --saida reports/nlq_cego_resultado.json --rotulo cego   # conjunto cego (rodar uma vez)
+python -m src.nlq.avaliar_conjunto --perguntas docs/nlq_perguntas_cegas.txt --saida reports/nlq_cego_resultado.json --rotulo cego   # conjunto cego (rodar uma vez); o 2º conjunto usa docs/nlq_perguntas_v2_novas.txt e --rotulo cego_v2
 uvicorn src.api.main:app --reload             # 10. API para os dashboards
 streamlit run src/dashboard/app.py            # 11. dashboards interativos
 python -m src.models.explain_shap             # 12. explicabilidade (SHAP)
