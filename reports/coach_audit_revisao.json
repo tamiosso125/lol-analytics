@@ -1,0 +1,30 @@
+{
+  "revisado_em": "2026-11-04",
+  "como": "cada número sinalizado em coach_audit.json conferido à mão contra os dados do prompt gravado; as 36 frases finais lidas; um caso lido por inteiro contra os dados",
+  "classes": {
+    "derivado": "número que não aparece literalmente nos dados, mas sai deles por soma, complemento ou arredondamento",
+    "formato": "formato de partida, não estatística",
+    "conhecimento_geral": "limiar ou hipótese de conhecimento geral de League of Legends, não dado do histórico apresentado como medido"
+  },
+  "sinalizados": [
+    {"caso": 3, "token": "2400", "classe": "derivado", "justificativa": "arredondamento: 'quase 2400 de ouro' para a diferença de +2396"},
+    {"caso": 10, "token": "11", "classe": "derivado", "justificativa": "soma: 3 wards de controle + 8 normais do azul"},
+    {"caso": 16, "token": "13", "classe": "derivado", "justificativa": "soma: 4 de controle + 9 normais do azul"},
+    {"caso": 16, "token": "21", "classe": "derivado", "justificativa": "soma: 7 de controle + 14 normais do vermelho"},
+    {"caso": 20, "token": "26.4", "classe": "derivado", "justificativa": "complemento: 100 menos 73,6% de vitória do azul"},
+    {"caso": 24, "token": "4", "classe": "conhecimento_geral", "justificativa": "'4+ dragões': limiar da alma do dragão, não dado do histórico"},
+    {"caso": 27, "token": "4", "classe": "conhecimento_geral", "justificativa": "'4-5k de ouro de diferença' em cenário hipotético aos 35 minutos; o mais limítrofe dos três"},
+    {"caso": 27, "token": "5", "classe": "conhecimento_geral", "justificativa": "mesmo trecho: '4-5k de ouro de diferença'"},
+    {"caso": 28, "token": "18", "classe": "derivado", "justificativa": "soma: 3 de controle + 15 normais do azul"},
+    {"caso": 31, "token": "19", "classe": "derivado", "justificativa": "soma: 3 de controle + 16 normais do azul"},
+    {"caso": 31, "token": "5", "classe": "formato", "justificativa": "'5 contra 5'"},
+    {"caso": 31, "token": "5", "classe": "formato", "justificativa": "'5 contra 5'"},
+    {"caso": 34, "token": "13.6", "classe": "derivado", "justificativa": "arredondamento: '13,6k de ouro' para a diferença de +13679"}
+  ],
+  "ressalva_final_lida": {
+    "casos": 36,
+    "com_ressalva": 36,
+    "observacao": "o detector por palavras-chave pegou 35; o caso 9 diz que a análise não considera composição, itens nem posicionamento, que é a mesma ressalva com outras palavras"
+  },
+  "limite_conhecido": "A auditoria mede número, não afirmação qualitativa nem a correção do conhecimento geral. No caso 5 a resposta diz que Nilah e Janna estão 'muito atrasadas em ouro e experiência', mas nesse modo os dados trazem só a diferença do time, não a de cada campeão."
+}
