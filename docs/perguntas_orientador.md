@@ -103,6 +103,9 @@ são confirmações; as de C só se sobrar tempo.
     `EXTRACT(... FROM to_timestamp(...))`) e cerca de 12 vieram enganosas; o teto é
     ~28 de 50 (56%), contra 88%. **Decisão do autor: melhorar a precisão da
     consulta antes da entrega.** Levar como informação, não como dúvida.
+    *Atualização (2026-11-05):* a medida principal virou um gabarito automático de 203
+    perguntas (SQL de referência escrita antes da execução, comparação por código): 181
+    certas, 89,2%. Os 50 livres viraram dois conjuntos de 50 julgados à mão (60% e 54%).
 20. ~~**O recorte "Desafiante a Mestre" está claro?**~~ **Resolvida (2026-11-04):**
     o nome descreve a base (93% dos jogadores cadastrados são Mestre). O primeiro
     texto dizia "Desafiante e Grão-Mestre"; já corrigido. Não precisa levar.
@@ -246,11 +249,11 @@ manter, cortar ou mover, com minha inclinação atual.
     22 e 24 de 50. *Risco:* o 60% aparece ao lado do 88% que ele já viu.
     *Recomendação:* citar os dois, com o cego explicado, e apresentar as falhas como
     limitação (6.1). *Pergunta:* ele prefere os dois números no Resumo, ou só o cego?
-46. **Quem deve julgar as respostas do conjunto cego?** (A) Os 50 vereditos foram
-    dados por um só avaliador (eu, com uma consulta independente por pergunta, a
-    pedido do autor), sem segunda leitura humana. *Pergunta:* a banca aceita isso
-    como limitação declarada, ou ele pede que o orientador ou um colega confira uma
-    amostra antes da entrega?
+46. **Quem confere o gabarito?** (A) O gabarito automático tira o julgamento da execução (um
+    programa compara), mas as SQLs de referência foram escritas por mim, e os dois conjuntos de 50
+    anteriores tiveram um só avaliador. *Pergunta:* a banca aceita isso como limitação declarada,
+    ou ele pede que o orientador ou um colega confira uma amostra das SQLs de referência antes
+    da entrega?
 
 ## O que levar
 
