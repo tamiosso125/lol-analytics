@@ -1,0 +1,227 @@
+{
+ "conjunto": "v2 (101-150), perguntas novas escritas pelo autor, rodadas uma vez com o sistema do commit 1fe0014",
+ "fonte": "reports/nlq_cego_v2_resultado.json",
+ "criterio": "cada resposta recalculada no banco com consulta independente",
+ "legenda": {
+  "C": "certa",
+  "E": "errada",
+  "P": "parcial",
+  "RC": "recusa certa",
+  "RE": "recusa errada"
+ },
+ "contagem": {
+  "C": 18,
+  "P": 9,
+  "RC": 9,
+  "E": 13,
+  "RE": 1
+ },
+ "total": 50,
+ "acerto_estrito": 27,
+ "wilson95": [
+  40.4,
+  67.0
+ ],
+ "vereditos": {
+  "102": {
+   "veredito": "C",
+   "motivo": "1.383 jogos com kills iguais nas duas equipes; confere."
+  },
+  "106": {
+   "veredito": "C",
+   "motivo": "Locke 22.907 partidas (picks+bans, 2026); confere."
+  },
+  "107": {
+   "veredito": "C",
+   "motivo": "Sylas, 3.626 jogos no vermelho, 52,9% de vitória; confere."
+  },
+  "109": {
+   "veredito": "C",
+   "motivo": "Xayah+Rakan, 6.022; confere (base competitiva)."
+  },
+  "110": {
+   "veredito": "C",
+   "motivo": "Xerath+Poppy, 80% em 20 partidas; confere."
+  },
+  "111": {
+   "veredito": "C",
+   "motivo": "Syndra+LeeSin 447 etc.; confere."
+  },
+  "112": {
+   "veredito": "C",
+   "motivo": "Yuumi, diferença 7,74 (1.039 partidas); confere."
+  },
+  "115": {
+   "veredito": "C",
+   "motivo": "TOP 169 (solo) e 91 (competitivo); confere."
+  },
+  "122": {
+   "veredito": "C",
+   "motivo": "ZORN, 54 partidas; confere."
+  },
+  "129": {
+   "veredito": "C",
+   "motivo": "Dplus Kia, 191; confere."
+  },
+  "130": {
+   "veredito": "C",
+   "motivo": "Fox B, 1523,7 s (15 vitórias); confere."
+  },
+  "131": {
+   "veredito": "C",
+   "motivo": "n!faculty, 2606,2 s (10 derrotas); confere."
+  },
+  "132": {
+   "veredito": "C",
+   "motivo": "Dplus Kia, 119; confere."
+  },
+  "134": {
+   "veredito": "C",
+   "motivo": "Dplus Kia, 106; confere."
+  },
+  "135": {
+   "veredito": "C",
+   "motivo": "Dplus Kia, 514; confere."
+  },
+  "141": {
+   "veredito": "C",
+   "motivo": "Patch 16.1, 161 campeões; confere."
+  },
+  "147": {
+   "veredito": "C",
+   "motivo": "Maio, 1.511 jogos; confere."
+  },
+  "148": {
+   "veredito": "C",
+   "motivo": "Agosto, 1.542,8 s (solo, 1.217 partidas); confere, só a base solo foi consultada."
+  },
+  "108": {
+   "veredito": "P",
+   "motivo": "A consulta devolve as taxas por lado (346 linhas), não a diferença pedida; os dados estão certos."
+  },
+  "114": {
+   "veredito": "P",
+   "motivo": "No solo só existem pick_turn 1-5 (uma fase); a resposta não avisa que \"primeira fase\" não existe nessa base."
+  },
+  "116": {
+   "veredito": "P",
+   "motivo": "Solo certo (BOTTOM 23,8%). Competitivo usa kills+deaths+assists como se fosse dano: substituto não rotulado."
+  },
+  "124": {
+   "veredito": "P",
+   "motivo": "Recusou no competitivo, mas o solo tem gold_earned e responderia; o roteador não ofereceu o solo."
+  },
+  "133": {
+   "veredito": "P",
+   "motivo": "Acrescentou year=2026 sem a pergunta pedir; o valor de 2026 confere, sem o filtro o campeão seria Team Axelent69."
+  },
+  "136": {
+   "veredito": "P",
+   "motivo": "Valor correto (12.462 jogos), mas devolvido como 12.462 linhas \"1\"; o usuário não vê o número."
+  },
+  "142": {
+   "veredito": "P",
+   "motivo": "Restringiu a 2026 sem a pergunta pedir; 15.18 confere para 2026."
+  },
+  "143": {
+   "veredito": "P",
+   "motivo": "Liga certa (OGN), percentual errado: 79,2% no sistema, 39,6% real (contou as duas linhas da partida no numerador)."
+  },
+  "146": {
+   "veredito": "P",
+   "motivo": "LGL tem só 16 jogos; sem amostra mínima o maior desvio é ruído."
+  },
+  "103": {
+   "veredito": "RC",
+   "motivo": "Só há gold_diff_at15."
+  },
+  "105": {
+   "veredito": "RC",
+   "motivo": "Só há gold_diff_at15."
+  },
+  "117": {
+   "veredito": "RC",
+   "motivo": "Sem estado aos 15 min por posição."
+  },
+  "118": {
+   "veredito": "RC",
+   "motivo": "Sem CS aos 10 min."
+  },
+  "137": {
+   "veredito": "RC",
+   "motivo": "Sem tempo do primeiro Barão."
+  },
+  "138": {
+   "veredito": "RC",
+   "motivo": "Sem tempo da primeira eliminação."
+  },
+  "139": {
+   "veredito": "RC",
+   "motivo": "Só há diferença de ouro, não o ouro."
+  },
+  "140": {
+   "veredito": "RC",
+   "motivo": "Sem ouro aos 20 min."
+  },
+  "150": {
+   "veredito": "RC",
+   "motivo": "Sem identificador de série."
+  },
+  "101": {
+   "veredito": "E",
+   "motivo": "O schema não tem \"primeira torre\"; calculou % de linhas com vitória e torres>0 (49,97%) como se fosse a resposta."
+  },
+  "104": {
+   "veredito": "E",
+   "motivo": "Comparou com o mínimo global de kills; o correto é 3.759 jogos em que o vencedor teve menos kills, o sistema deu 0."
+  },
+  "113": {
+   "veredito": "E",
+   "motivo": "Não há ordem de draft; devolveu o campeão mais escolhido (Jayce/Nautilus) como \"primeira escolha\"."
+  },
+  "119": {
+   "veredito": "E",
+   "motivo": "Usou kills+assists>=10; com kills>=10 o jogador é Knight com 98 partidas (sistema: 776)."
+  },
+  "120": {
+   "veredito": "E",
+   "motivo": "Erro de execução: timeout de 10 s na subconsulta correlacionada; o usuário vê a falha."
+  },
+  "121": {
+   "veredito": "E",
+   "motivo": "xp_diff_at15 é da equipe, não do adversário de rota; atribuiu o valor da equipe a cada jogador."
+  },
+  "123": {
+   "veredito": "E",
+   "motivo": "Não há dano a torres; usou o número de torres da equipe como se fosse."
+  },
+  "126": {
+   "veredito": "E",
+   "motivo": "Não há primeiro sangue; usou \"vencedor com menos kills\" como substituto não rotulado."
+  },
+  "127": {
+   "veredito": "E",
+   "motivo": "Não há primeira torre; usou \"venceu com 0 torres\" (taxa 0%)."
+  },
+  "128": {
+   "veredito": "E",
+   "motivo": "Não há primeiro Barão; usou \"adversário com Barão e a equipe com 0\"."
+  },
+  "144": {
+   "veredito": "E",
+   "motivo": "Dividiu a contagem por ela mesma (1,0); a liga AC com 21 jogos não é a resposta."
+  },
+  "145": {
+   "veredito": "E",
+   "motivo": "Não há primeiro dragão; usou \"equipe com 0 dragões\"."
+  },
+  "149": {
+   "veredito": "E",
+   "motivo": "Não há série; inventou series_id com DENSE_RANK por data e devolveu vazio."
+  },
+  "125": {
+   "veredito": "RE",
+   "motivo": "Recusou alegando game_name NULL; dá para agrupar por puuid/player_name."
+  }
+ }
+}

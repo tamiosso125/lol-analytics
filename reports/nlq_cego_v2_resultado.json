@@ -1,0 +1,1727 @@
+{
+ "rotulo": "cego_v2",
+ "gerado_em": "2026-11-05T17:34:04",
+ "completo": true,
+ "interrompido_por": "",
+ "arquivo_de_perguntas": "docs/nlq_perguntas_v2_novas.txt",
+ "hash_das_perguntas": "b832010685412a2a",
+ "sistema": {
+  "hashes": {
+   "src/nlq/route.py": "53d5710f0234240d",
+   "src/nlq/sql_guard.py": "0e4017057c4baf2d",
+   "src/nlq/nl_to_sql.py": "ae234926cb251995",
+   "src/nlq/schema_context.py": "5ebb325cbe1875e7"
+  },
+  "git": {
+   "commit": "1fe0014",
+   "arquivos_modificados": []
+  },
+  "modelo_geracao": "claude-haiku-4-5-20251001",
+  "temperatura": 0
+ },
+ "resumo": {
+  "perguntas": 50,
+  "responderam": 49,
+  "erro_total": 1,
+  "roteadas_para_uma_base": 43,
+  "roteadas_para_ambas": 6,
+  "resultados_total": 55,
+  "resultados_com_erro": 0,
+  "resultados_recusa": 14,
+  "resultados_com_nova_tentativa": 2
+ },
+ "registros": [
+  {
+   "n": 101,
+   "pergunta": "Qual foi a porcentagem de partidas em que a equipe vencedora também conseguiu a primeira eliminação de torre?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT 100.0 * COUNT(CASE WHEN pg.win AND pg.towers > 0 THEN 1 END) / COUNT(*) AS porcentagem\nFROM pro_games pg;",
+     "columns": [
+      "porcentagem"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "49.9717909710958200"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 102,
+   "pergunta": "Quantas partidas tiveram exatamente a mesma quantidade de eliminações para as duas equipes?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS partidas\nFROM (\n  SELECT game_id,\n         MAX(CASE WHEN side = 'Blue' THEN total_kills END) AS blue_kills,\n         MAX(CASE WHEN side = 'Red' THEN total_kills END) AS red_kills\n  FROM (\n    SELECT game_id, side, SUM(kills) AS total_kills\n    FROM pro_players\n    GROUP BY game_id, side\n  ) t\n  GROUP BY game_id\n  HAVING MAX(CASE WHEN side = 'Blue' THEN total_kills END) = \n         MAX(CASE WHEN side = 'Red' THEN total_kills END)\n) s;",
+     "columns": [
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       1383
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 103,
+   "pergunta": "Qual foi a média de diferença de ouro aos 10 minutos entre equipes vencedoras e perdedoras?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_games só tem a DIFERENÇA de ouro aos 15 minutos (gold_diff_at15), não aos 10 minutos' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_games só tem a DIFERENÇA de ouro aos 15 minutos (gold_diff_at15), não aos 10 minutos"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 104,
+   "pergunta": "Em quantas partidas a equipe com menos eliminações conseguiu vencer?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT pg.game_id) AS partidas\nFROM pro_games pg\nWHERE pg.win\n  AND pg.kills = (\n    SELECT MIN(kills)\n    FROM pro_games\n    WHERE year = 2026\n  )\n  AND pg.year = 2026;",
+     "columns": [
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       0
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 105,
+   "pergunta": "Qual foi a porcentagem de vitórias das equipes que estavam atrás em ouro aos 20 minutos?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_games só tem a DIFERENÇA de ouro aos 15 minutos (gold_diff_at15), não aos 20 minutos' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_games só tem a DIFERENÇA de ouro aos 15 minutos (gold_diff_at15), não aos 20 minutos"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 106,
+   "pergunta": "Quais foram os 5 campeões com maior presença em picks ou bans em 2026?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT champion_name, COUNT(*) AS presenca\nFROM (\n  SELECT DISTINCT match_id, champion_name\n  FROM participants\n  WHERE champion_name IS NOT NULL\n  UNION ALL\n  SELECT DISTINCT b.match_id, p.champion_name\n  FROM bans b\n  JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) p\n    ON p.champion_id = b.champion_id\n)\nWHERE match_id IN (\n  SELECT match_id FROM matches WHERE EXTRACT(YEAR FROM game_creation) = 2026\n)\nGROUP BY champion_name\nORDER BY presenca DESC\nLIMIT 5;",
+     "columns": [
+      "champion_name",
+      "presenca"
+     ],
+     "n_linhas": 5,
+     "rows": [
+      [
+       "Locke",
+       22907
+      ],
+      [
+       "Pyke",
+       18827
+      ],
+      [
+       "LeeSin",
+       17210
+      ],
+      [
+       "Qiyana",
+       17198
+      ],
+      [
+       "Jayce",
+       16808
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 107,
+   "pergunta": "Qual foi a taxa de vitória do campeão mais escolhido no lado vermelho?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(p.win::int) AS win_rate\nFROM participants p\nWHERE p.team_id = 200\n  AND p.champion_name = (\n    SELECT p2.champion_name\n    FROM participants p2\n    WHERE p2.team_id = 200\n    GROUP BY p2.champion_name\n    ORDER BY COUNT(*) DESC\n    LIMIT 1\n  );",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.52895752895752895753"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 108,
+   "pergunta": "Qual foi a diferença na taxa de vitória de um mesmo campeão entre os lados azul e vermelho?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT \n  p.champion_name,\n  t.team_id,\n  AVG(p.win::int) AS win_rate,\n  COUNT(*) AS partidas\nFROM participants p\nJOIN teams t ON t.match_id = p.match_id AND t.team_id = p.team_id\nGROUP BY p.champion_name, t.team_id\nHAVING COUNT(*) >= 20\nORDER BY p.champion_name, t.team_id;",
+     "columns": [
+      "champion_name",
+      "team_id",
+      "win_rate",
+      "partidas"
+     ],
+     "n_linhas": 346,
+     "rows": [
+      [
+       "Aatrox",
+       100,
+       "0.46133333333333333333",
+       1500
+      ],
+      [
+       "Aatrox",
+       200,
+       "0.49933774834437086093",
+       1510
+      ],
+      [
+       "Ahri",
+       100,
+       "0.45402627070245573958",
+       1751
+      ],
+      [
+       "Ahri",
+       200,
+       "0.58315677966101694915",
+       1888
+      ],
+      [
+       "Akali",
+       100,
+       "0.45295055821371610845",
+       1881
+      ],
+      [
+       "Akali",
+       200,
+       "0.54639175257731958763",
+       2037
+      ],
+      [
+       "Akshan",
+       100,
+       "0.47850208044382801664",
+       721
+      ],
+      [
+       "Akshan",
+       200,
+       "0.50000000000000000000",
+       752
+      ],
+      [
+       "Alistar",
+       100,
+       "0.52406134320465362242",
+       1891
+      ],
+      [
+       "Alistar",
+       200,
+       "0.57846153846153846154",
+       1950
+      ],
+      [
+       "Ambessa",
+       100,
+       "0.45222178529296106960",
+       2543
+      ],
+      [
+       "Ambessa",
+       200,
+       "0.48814707305273343009",
+       2067
+      ],
+      [
+       "Amumu",
+       100,
+       "0.44295302013422818792",
+       149
+      ],
+      [
+       "Amumu",
+       200,
+       "0.56097560975609756098",
+       164
+      ],
+      [
+       "Anivia",
+       100,
+       "0.45950413223140495868",
+       1210
+      ],
+      [
+       "Anivia",
+       200,
+       "0.54417513682564503518",
+       1279
+      ],
+      [
+       "Annie",
+       100,
+       "0.50594227504244482173",
+       589
+      ],
+      [
+       "Annie",
+       200,
+       "0.53178294573643410853",
+       645
+      ],
+      [
+       "Aphelios",
+       100,
+       "0.47545008183306055646",
+       1222
+      ],
+      [
+       "Aphelios",
+       200,
+       "0.53391859537110933759",
+       1253
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 109,
+   "pergunta": "Qual dupla de campeões de ADC e SUPPORT mais apareceu na mesma equipe?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT pp1.champion AS adc, pp2.champion AS support, COUNT(DISTINCT pp1.game_id) AS aparicoes\nFROM pro_players pp1\nJOIN pro_players pp2 ON pp1.game_id = pp2.game_id AND pp1.side = pp2.side\nWHERE pp1.position = 'bot' AND pp2.position = 'sup'\nGROUP BY pp1.champion, pp2.champion\nORDER BY aparicoes DESC\nLIMIT 1;",
+     "columns": [
+      "adc",
+      "support",
+      "aparicoes"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Xayah",
+       "Rakan",
+       6022
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 110,
+   "pergunta": "Qual dupla de campeões de ADC e SUPPORT teve a maior taxa de vitória, considerando pelo menos 20 partidas?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "WITH dupla_adc_sup AS (\n  SELECT \n    p_adc.champion_name AS adc,\n    p_sup.champion_name AS support,\n    p_adc.match_id,\n    p_adc.win\n  FROM participants p_adc\n  JOIN participants p_sup \n    ON p_adc.match_id = p_sup.match_id \n    AND p_adc.team_id = p_sup.team_id\n  WHERE p_adc.team_position = 'BOTTOM'\n    AND p_sup.team_position = 'UTILITY'\n)\nSELECT \n  adc,\n  support,\n  AVG(win::int) AS win_rate\nFROM dupla_adc_sup\nGROUP BY adc, support\nHAVING COUNT(*) >= 20\nORDER BY win_rate DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "adc",
+      "support",
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Xerath",
+       "Poppy",
+       "0.80000000000000000000"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 111,
+   "pergunta": "Quais foram as 5 combinações de campeões de MIDDLE e JUNGLE mais utilizadas?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT p1.champion_name AS middle, p2.champion_name AS jungle, COUNT(DISTINCT p1.match_id) AS jogos\nFROM participants p1\nJOIN participants p2 ON p1.match_id = p2.match_id AND p1.team_id = p2.team_id\nWHERE p1.team_position = 'MIDDLE' AND p2.team_position = 'JUNGLE'\nGROUP BY p1.champion_name, p2.champion_name\nORDER BY jogos DESC\nLIMIT 5;",
+     "columns": [
+      "middle",
+      "jungle",
+      "jogos"
+     ],
+     "n_linhas": 5,
+     "rows": [
+      [
+       "Syndra",
+       "LeeSin",
+       447
+      ],
+      [
+       "Sylas",
+       "LeeSin",
+       339
+      ],
+      [
+       "Locke",
+       "LeeSin",
+       317
+      ],
+      [
+       "Ryze",
+       "LeeSin",
+       309
+      ],
+      [
+       "Yone",
+       "Nidalee",
+       288
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 112,
+   "pergunta": "Qual campeão apresentou a maior diferença de KDA médio entre vitórias e derrotas?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT \n  p.champion_name,\n  AVG(CASE WHEN p.win THEN (p.kills + p.assists)::float / NULLIF(p.deaths, 0) ELSE NULL END) AS kda_vitoria,\n  AVG(CASE WHEN NOT p.win THEN (p.kills + p.assists)::float / NULLIF(p.deaths, 0) ELSE NULL END) AS kda_derrota,\n  AVG(CASE WHEN p.win THEN (p.kills + p.assists)::float / NULLIF(p.deaths, 0) ELSE NULL END) \n  - AVG(CASE WHEN NOT p.win THEN (p.kills + p.assists)::float / NULLIF(p.deaths, 0) ELSE NULL END) AS diferenca_kda\nFROM participants p\nGROUP BY p.champion_name\nHAVING COUNT(*) >= 20\nORDER BY diferenca_kda DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "champion_name",
+      "kda_vitoria",
+      "kda_derrota",
+      "diferenca_kda"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Yuumi",
+       10.392058298013795,
+       2.651732060371459,
+       7.7403262376423365
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 113,
+   "pergunta": "Qual campeão foi escolhido mais vezes como primeira escolha de draft?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT p.champion_name, COUNT(*) AS escolhas\nFROM participants p\nWHERE p.team_position IS NOT NULL\nGROUP BY p.champion_name\nORDER BY escolhas DESC\nLIMIT 1;",
+     "columns": [
+      "champion_name",
+      "escolhas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Jayce",
+       7336
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT pp.champion, COUNT(*) AS escolhas\nFROM pro_players pp\nWHERE pp.position IS NOT NULL\nGROUP BY pp.champion\nORDER BY escolhas DESC\nLIMIT 1;",
+     "columns": [
+      "champion",
+      "escolhas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Nautilus",
+       24394
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 114,
+   "pergunta": "Qual campeão foi mais frequentemente banido na primeira fase de bans?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT c.champion_name, COUNT(DISTINCT b.match_id) AS bans\nFROM bans b\nJOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c\n  ON c.champion_id = b.champion_id\nWHERE b.pick_turn <= 5\nGROUP BY c.champion_name\nORDER BY bans DESC\nLIMIT 1;",
+     "columns": [
+      "champion_name",
+      "bans"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Locke",
+       10220
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 115,
+   "pergunta": "Qual posição apresentou a maior diversidade de campeões escolhidos em 2026?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT p.team_position, COUNT(DISTINCT p.champion_name) AS campeoes_unicos\nFROM participants p\nJOIN matches m ON m.match_id = p.match_id\nWHERE EXTRACT(YEAR FROM m.game_creation) = 2026\nGROUP BY p.team_position\nORDER BY campeoes_unicos DESC\nLIMIT 1;",
+     "columns": [
+      "team_position",
+      "campeoes_unicos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "TOP",
+       169
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT position, COUNT(DISTINCT champion) AS campeoes_unicos\nFROM pro_players pp\nJOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side\nWHERE pg.year = 2026\nGROUP BY position\nORDER BY campeoes_unicos DESC\nLIMIT 1;",
+     "columns": [
+      "position",
+      "campeoes_unicos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "top",
+       91
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 116,
+   "pergunta": "Qual posição teve a maior participação média no dano total causado pela equipe?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT p.team_position, AVG(p.dmg_to_champions::float / t.total_dmg) AS avg_participation\nFROM participants p\nJOIN (\n  SELECT match_id, team_id, SUM(dmg_to_champions) AS total_dmg\n  FROM participants\n  GROUP BY match_id, team_id\n) t ON t.match_id = p.match_id AND t.team_id = p.team_id\nWHERE t.total_dmg > 0\nGROUP BY p.team_position\nORDER BY avg_participation DESC;",
+     "columns": [
+      "team_position",
+      "avg_participation"
+     ],
+     "n_linhas": 6,
+     "rows": [
+      [
+       "BOTTOM",
+       0.23805903286050217
+      ],
+      [
+       "MIDDLE",
+       0.2357591335149745
+      ],
+      [
+       "TOP",
+       0.21919050180986854
+      ],
+      [
+       "JUNGLE",
+       0.1971239570734914
+      ],
+      [
+       "UTILITY",
+       0.10987542946627522
+      ],
+      [
+       "",
+       0.03534543577262082
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT pp.position, AVG(pp.kills + pp.deaths + pp.assists) / \n       (SELECT AVG(total_contrib) FROM (\n         SELECT SUM(kills + deaths + assists) AS total_contrib\n         FROM pro_players GROUP BY game_id, side) s) AS avg_participation\nFROM pro_players pp\nGROUP BY pp.position\nORDER BY avg_participation DESC\nLIMIT 1;",
+     "columns": [
+      "position",
+      "avg_participation"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "sup",
+       "0.21631908193129888569"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 117,
+   "pergunta": "Qual posição apresentou a maior participação média nas eliminações aos 15 minutos?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT 'não é possível responder: o schema não contém estado da partida em um minuto específico (15 minutos). A tabela participants só armazena totais finais da partida (kills, deaths, assists), não valores em instantes intermediários.' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: o schema não contém estado da partida em um minuto específico (15 minutos). A tabela participants só armazena totais finais da partida (kills, deaths, assists), não valores em instantes intermediários."
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_games e pro_players não contêm dados de estado da partida aos 15 minutos (kills, deaths, assists ou qualquer métrica em um instante específico). pro_players só tem kills, deaths e assists TOTAIS do jogo (fim de partida), não aos 15 minutos.' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_games e pro_players não contêm dados de estado da partida aos 15 minutos (kills, deaths, assists ou qualquer métrica em um instante específico). pro_players só tem kills, deaths e assists TOTAIS do jogo (fim de partida), não aos 15 minutos."
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 118,
+   "pergunta": "Qual foi a diferença média de CS aos 10 minutos entre jogadores vencedores e perdedores da posição TOP?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT 'não é possível responder: o schema não contém estado da partida em um minuto específico (CS aos 10 minutos). A tabela participants só armazena CS total ao final da partida, não em instantes intermediários.' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: o schema não contém estado da partida em um minuto específico (CS aos 10 minutos). A tabela participants só armazena CS total ao final da partida, não em instantes intermediários."
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 119,
+   "pergunta": "Qual jogador acumulou mais partidas com pelo menos 10 eliminações?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT player_name, COUNT(*) AS partidas\nFROM pro_players\nWHERE kills + assists >= 10\nGROUP BY player_name\nORDER BY partidas DESC\nLIMIT 1;",
+     "columns": [
+      "player_name",
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Knight",
+       776
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 120,
+   "pergunta": "Quais jogadores conseguiram mais partidas com participação em 80% ou mais das eliminações da equipe?",
+   "status": "erro",
+   "erro": {
+    "tipo": "execucao",
+    "sql": "SELECT pp.player_name, pp.team_name, COUNT(DISTINCT pp.game_id) AS partidas\nFROM pro_players pp\nGROUP BY pp.player_name, pp.team_name\nHAVING AVG(CASE WHEN pp.kills + pp.assists >= 0.8 * (\n  SELECT SUM(kills + assists) FROM pro_players pp2 \n  WHERE pp2.game_id = pp.game_id AND pp2.side = pp.side\n) THEN 1.0 ELSE 0 END) = 1.0\nORDER BY partidas DESC\nLIMIT 100;",
+    "cause": "ERRO:  cancelando comando por causa do tempo de espera (timeout) do comando"
+   }
+  },
+  {
+   "n": 121,
+   "pergunta": "Qual jogador teve a maior média de vantagem de experiência aos 15 minutos contra seu adversário de rota?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT pp.player_name, AVG(pg.xp_diff_at15) AS media_vantagem_xp\nFROM pro_players pp\nJOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side\nWHERE pg.year = 2026 AND pg.xp_diff_at15 IS NOT NULL\nGROUP BY pp.player_name\nHAVING COUNT(*) >= 10\nORDER BY media_vantagem_xp DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "player_name",
+      "media_vantagem_xp"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "EL",
+       "3273.4000000000000000"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 122,
+   "pergunta": "Qual jogador registrou mais partidas com CS por minuto superior a 10?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT p.puuid, pl.game_name, pl.tag_line, COUNT(*) AS partidas\nFROM participants p\nJOIN players pl ON pl.puuid = p.puuid\nJOIN matches m ON m.match_id = p.match_id\nWHERE p.cs_total / (m.game_duration_s / 60.0) > 10\nGROUP BY p.puuid, pl.game_name, pl.tag_line\nORDER BY partidas DESC\nLIMIT 1;",
+     "columns": [
+      "puuid",
+      "game_name",
+      "tag_line",
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "oTG2WJlXq5-uLku7ar1UNkenKsdQ5FNz2V6orFMGoJ84LqkLTloS1cdSpsSwm62RR_5e0pLL0fdung",
+       "ZORN",
+       "E500",
+       54
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 123,
+   "pergunta": "Qual jogador teve a maior média de dano a torres por partida?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT p.puuid, AVG(t.towers) AS media_torres\nFROM participants p\nJOIN teams t ON t.match_id = p.match_id AND t.team_id = p.team_id\nGROUP BY p.puuid\nHAVING COUNT(*) >= 20\nORDER BY media_torres DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "puuid",
+      "media_torres"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "1QnnKPxvvcUbV0hixGzu6yKIPd6S1GgxZnnUVWKIKYynr9eePSj4o8H2CWEnxjk7WhaYsQqn3OdyTw",
+       "8.3750000000000000"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 124,
+   "pergunta": "Qual jogador apresentou o maior percentual médio do ouro total de sua equipe?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_players não contém dados de ouro individual dos jogadores, apenas kills, deaths, assists e resultado' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_players não contém dados de ouro individual dos jogadores, apenas kills, deaths, assists e resultado"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 125,
+   "pergunta": "Quais jogadores venceram partidas utilizando pelo menos 10 campeões diferentes?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT 'não é possível responder: players.game_name é NULL para quase todos os jogadores do solo queue; não é possível montar ranking de jogadores por nome' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: players.game_name é NULL para quase todos os jogadores do solo queue; não é possível montar ranking de jogadores por nome"
+      ]
+     ],
+     "tentativas": 2,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 126,
+   "pergunta": "Qual equipe conseguiu mais vitórias após perder o primeiro sangue?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT a.team_name, COUNT(*) AS vitórias\nFROM pro_games a\nJOIN pro_games b ON b.game_id = a.game_id AND b.side <> a.side\nWHERE a.win AND b.kills > a.kills\nGROUP BY a.team_name\nORDER BY vitórias DESC\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "vitórias"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Dplus Kia",
+       25
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 127,
+   "pergunta": "Qual equipe teve a maior taxa de vitória após perder a primeira torre?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT a.team_name, AVG(a.win::int) AS win_rate\nFROM pro_games a\nJOIN pro_games b ON b.game_id = a.game_id AND b.side <> a.side\nWHERE a.year = 2026\n  AND b.towers > 0\n  AND a.towers = 0\nGROUP BY a.team_name\nHAVING COUNT(*) >= 10\nORDER BY win_rate DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "ALMO Players",
+       "0E-20"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 128,
+   "pergunta": "Qual equipe teve a maior taxa de vitória depois de perder o primeiro Barão Nashor?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT a.team_name, AVG(a.win::int) AS win_rate\nFROM pro_games a\nJOIN pro_games b ON b.game_id = a.game_id AND b.side <> a.side\nWHERE a.year = 2026\n  AND b.barons > 0\n  AND a.barons = 0\nGROUP BY a.team_name\nHAVING COUNT(*) >= 10\nORDER BY win_rate DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "LYON",
+       "0.28571428571428571429"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 129,
+   "pergunta": "Qual equipe acumulou mais partidas com uma vantagem de pelo menos 3 mil de ouro aos 15 minutos?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT team_name, COUNT(*) AS partidas\nFROM pro_games\nWHERE gold_diff_at15 >= 3000\nGROUP BY team_name\nORDER BY partidas DESC\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Dplus Kia",
+       191
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 130,
+   "pergunta": "Qual equipe apresentou a menor média de duração em suas vitórias?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT team_name, AVG(game_length_s) AS media_duracao\nFROM pro_games\nWHERE win\nGROUP BY team_name\nHAVING COUNT(*) >= 10\nORDER BY media_duracao ASC\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "media_duracao"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Fox B",
+       "1523.7333333333333333"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 131,
+   "pergunta": "Qual equipe apresentou a maior média de duração em suas derrotas?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT team_name, AVG(game_length_s) AS media_duracao\nFROM pro_games\nWHERE NOT win\nGROUP BY team_name\nHAVING COUNT(*) >= 10\nORDER BY media_duracao DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "media_duracao"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "n!faculty",
+       "2606.2000000000000000"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 132,
+   "pergunta": "Qual equipe venceu mais partidas sem conceder nenhuma torre ao adversário?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT a.team_name, COUNT(*) AS partidas\nFROM pro_games a\nJOIN pro_games b ON b.game_id = a.game_id AND b.side <> a.side\nWHERE a.win AND b.towers = 0\nGROUP BY a.team_name\nORDER BY partidas DESC\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Dplus Kia",
+       119
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 133,
+   "pergunta": "Qual equipe teve o maior percentual de partidas com pelo menos 3 dragões conquistados?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT team_name, AVG(CASE WHEN dragons >= 3 THEN 1.0 ELSE 0 END) AS percentual\nFROM pro_games\nWHERE year = 2026\nGROUP BY team_name\nHAVING COUNT(*) >= 10\nORDER BY percentual DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "percentual"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Karmine Corp Blue Stars",
+       "0.73076923076923076923"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 134,
+   "pergunta": "Qual equipe conseguiu mais vitórias sem conquistar nenhum Barão Nashor?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT team_name, COUNT(*) AS vitórias\nFROM pro_games\nWHERE win AND barons = 0\nGROUP BY team_name\nORDER BY vitórias DESC\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "vitórias"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Dplus Kia",
+       106
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 135,
+   "pergunta": "Qual equipe registrou mais partidas com zero mortes de um de seus jogadores?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT team_name, COUNT(DISTINCT game_id) AS partidas\nFROM pro_players\nWHERE deaths = 0\nGROUP BY team_name\nORDER BY partidas DESC\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Dplus Kia",
+       514
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 136,
+   "pergunta": "Em quantas partidas as duas equipes conquistaram pelo menos um Barão Nashor?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS partidas\nFROM pro_games\nGROUP BY game_id\nHAVING MIN(barons) >= 1 AND MAX(barons) >= 1;",
+     "columns": [
+      "partidas"
+     ],
+     "n_linhas": 12462,
+     "rows": [
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ],
+      [
+       1
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 137,
+   "pergunta": "Qual foi a média de tempo até a conquista do primeiro Barão Nashor?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT 'não é possível responder: o schema não armazena o instante em que o primeiro Barão foi conquistado — teams só tem a contagem total de barons, não timestamps ou ordem de eventos' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: o schema não armazena o instante em que o primeiro Barão foi conquistado — teams só tem a contagem total de barons, não timestamps ou ordem de eventos"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_games não registra o instante em que o primeiro Barão foi conquistado, apenas a contagem total de Barões ao final da partida' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_games não registra o instante em que o primeiro Barão foi conquistado, apenas a contagem total de Barões ao final da partida"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 138,
+   "pergunta": "Qual foi a média de tempo até a primeira eliminação de campeão?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT 'não é possível responder: o schema não contém timestamps de abates individuais ou estado da partida em instantes específicos; participants só armazena totais finais de kills, não quando cada abate ocorreu' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: o schema não contém timestamps de abates individuais ou estado da partida em instantes específicos; participants só armazena totais finais de kills, não quando cada abate ocorreu"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_games e pro_players não contêm informações sobre o tempo (minuto ou segundo) em que ocorreu a primeira eliminação; apenas kills, deaths e assists totais da partida são armazenados' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_games e pro_players não contêm informações sobre o tempo (minuto ou segundo) em que ocorreu a primeira eliminação; apenas kills, deaths e assists totais da partida são armazenados"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 139,
+   "pergunta": "Qual foi a média de ouro acumulado pelas equipes vencedoras aos 15 minutos?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_games só tem a DIFERENÇA de ouro aos 15 minutos (gold_diff_at15), não o ouro acumulado total da equipe' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_games só tem a DIFERENÇA de ouro aos 15 minutos (gold_diff_at15), não o ouro acumulado total da equipe"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 140,
+   "pergunta": "Quantas partidas tiveram uma virada de liderança de ouro após os 20 minutos?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT 'não é possível responder: o schema não contém estado da partida em minutos específicos (ouro aos 20 minutos). Apenas gold_earned final está disponível em participants, que é o total ao fim da partida, não um snapshot em um momento específico.' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: o schema não contém estado da partida em minutos específicos (ouro aos 20 minutos). Apenas gold_earned final está disponível em participants, que é o total ao fim da partida, não um snapshot em um momento específico."
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 141,
+   "pergunta": "Qual patch apresentou o maior número de campeões distintos escolhidos?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT pg.patch, COUNT(DISTINCT pp.champion) AS campeoes_distintos\nFROM pro_players pp\nJOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side\nGROUP BY pg.patch\nORDER BY campeoes_distintos DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "patch",
+      "campeoes_distintos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "16.1",
+       161
+      ]
+     ],
+     "tentativas": 2,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 142,
+   "pergunta": "Em qual patch a duração média das partidas foi mais alta?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT patch, AVG(game_length_s) AS duracao_media\nFROM pro_games\nWHERE year = 2026\nGROUP BY patch\nORDER BY duracao_media DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "patch",
+      "duracao_media"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "15.18",
+       "2088.5434782608695652"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 143,
+   "pergunta": "Qual liga apresentou a maior porcentagem de partidas decididas após 40 minutos?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT pg.league, \n       SUM(CASE WHEN pg.game_length_s > 2400 THEN 1 ELSE 0 END)::float / COUNT(DISTINCT pg.game_id) AS pct_after_40min\nFROM pro_games pg\nGROUP BY pg.league\nORDER BY pct_after_40min DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "league",
+      "pct_after_40min"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "OGN",
+       0.7918781725888325
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 144,
+   "pergunta": "Qual liga teve a maior frequência de partidas com mais de 30 eliminações totais?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT pg.league, COUNT(DISTINCT pg.game_id) AS jogos_com_30plus_kills,\n       COUNT(DISTINCT pg.game_id)::float / COUNT(DISTINCT pg.game_id) FILTER (WHERE TRUE) AS frequencia\nFROM pro_games pg\nWHERE (SELECT SUM(pp.kills) FROM pro_players pp WHERE pp.game_id = pg.game_id) > 30\nGROUP BY pg.league\nORDER BY frequencia DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "league",
+      "jogos_com_30plus_kills",
+      "frequencia"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "AC",
+       21,
+       1.0
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 145,
+   "pergunta": "Qual liga apresentou a maior taxa de vitórias de equipes que perderam o primeiro dragão?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT pg.league, AVG(pg.win::int) AS win_rate\nFROM pro_games pg\nWHERE pg.dragons = 0\nGROUP BY pg.league\nHAVING COUNT(*) >= 10\nORDER BY win_rate DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "league",
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "IWCI",
+       "0.50000000000000000000"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 146,
+   "pergunta": "Qual liga apresentou a maior diferença entre as taxas de vitória dos lados azul e vermelho?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT pg.league, \n       AVG(CASE WHEN pg.side = 'Blue' THEN pg.win::int ELSE NULL END) AS wr_blue,\n       AVG(CASE WHEN pg.side = 'Red' THEN pg.win::int ELSE NULL END) AS wr_red,\n       ABS(AVG(CASE WHEN pg.side = 'Blue' THEN pg.win::int ELSE NULL END) - \n           AVG(CASE WHEN pg.side = 'Red' THEN pg.win::int ELSE NULL END)) AS diferenca\nFROM pro_games pg\nGROUP BY pg.league\nORDER BY diferenca DESC NULLS LAST\nLIMIT 1;",
+     "columns": [
+      "league",
+      "wr_blue",
+      "wr_red",
+      "diferenca"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "LGL",
+       "0.75000000000000000000",
+       "0.25000000000000000000",
+       "0.50000000000000000000"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 147,
+   "pergunta": "Qual foi o mês de 2026 com mais partidas profissionais registradas?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT EXTRACT(MONTH FROM pg.game_date) AS mes, COUNT(DISTINCT pg.game_id) AS partidas\nFROM pro_games pg\nWHERE EXTRACT(YEAR FROM pg.game_date) = 2026\nGROUP BY mes\nORDER BY partidas DESC\nLIMIT 1;",
+     "columns": [
+      "mes",
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "5",
+       1511
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 148,
+   "pergunta": "Qual foi o mês de 2026 com menor duração média das partidas?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT EXTRACT(MONTH FROM m.game_creation) AS mes, AVG(m.game_duration_s) AS duracao_media\nFROM matches m\nWHERE EXTRACT(YEAR FROM m.game_creation) = 2026\nGROUP BY EXTRACT(MONTH FROM m.game_creation)\nORDER BY duracao_media ASC\nLIMIT 1;",
+     "columns": [
+      "mes",
+      "duracao_media"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "8",
+       "1542.7543138866064092"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 149,
+   "pergunta": "Qual equipe disputou mais séries que chegaram ao último jogo possível em formato melhor de cinco?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT team_name, COUNT(DISTINCT series_id) AS series_ate_jogo5\nFROM (\n  SELECT game_id, team_name, \n         ROW_NUMBER() OVER (PARTITION BY series_id ORDER BY game_date, game_id) AS game_num,\n         series_id\n  FROM (\n    SELECT pg.game_id, pg.team_name, pg.game_date,\n           DENSE_RANK() OVER (ORDER BY pg.game_date, pg.game_id) AS series_id\n    FROM pro_games pg\n    WHERE pg.year = 2026\n  ) t\n) s\nWHERE game_num = 5\nGROUP BY team_name\nORDER BY series_ate_jogo5 DESC\nLIMIT 1;",
+     "columns": [
+      "team_name",
+      "series_ate_jogo5"
+     ],
+     "n_linhas": 0,
+     "rows": [],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 150,
+   "pergunta": "Qual foi a taxa de vitória das equipes que venceram o primeiro jogo de uma série melhor de três?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_games não contém identificador de série (series_id ou equivalente) nem ordem dentro de uma série; não é possível determinar quais jogos formam uma série melhor de três nem qual foi o primeiro jogo de cada série' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_games não contém identificador de série (series_id ou equivalente) nem ordem dentro de uma série; não é possível determinar quais jogos formam uma série melhor de três nem qual foi o primeiro jogo de cada série"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  }
+ ]
+}
