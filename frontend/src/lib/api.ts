@@ -359,15 +359,48 @@ export interface RegionStat {
   avg_duration_min: number;
 }
 
-export interface AskResult {
+/** Base de dados da consulta: partidas ranqueadas ou jogos profissionais. */
+export type Base = "solo" | "competitivo";
+
+/** SQL e tabela devolvidas: o que `explain` e os helpers de formato precisam. */
+export interface AskTabela {
   sql: string;
   columns: string[];
   rows: (string | number | boolean | null)[][];
 }
 
+/** Falha de UMA base. Em "ambos", a outra base aparece normalmente. */
+export interface AskErroBase {
+  tipo: "execucao" | "validacao" | "mistura_de_bases";
+  message: string;
+  sql: string | null;
+  cause: string;
+}
+
+/** Resposta de uma base (src/nlq/nl_to_sql.py::ask). `erro` != null = esta base falhou. */
+export interface AskResultado {
+  base: Base;
+  sql: string | null;
+  columns: string[];
+  rows: (string | number | boolean | null)[][];
+  tentativas: number | null;
+  erro: AskErroBase | null;
+}
+
+/** Resposta do /ask. Os campos de AskTabela repetem o primeiro resultado que deu certo
+ * (compatibilidade); `resultados` tem um item por base consultada. */
+export interface AskResult extends AskTabela {
+  tentativas?: number;
+  base?: Base | "ambos";
+  roteamento?: { classe: Base | "ambos"; origem: "regras" | "heranca" | "modelo" | "padrao" };
+  resultados?: AskResultado[];
+}
+
 export interface HistoryTurn {
   question: string;
   sql: string;
+  /** Base do turno; um turno em "ambos" vai como duas entradas, uma por base. */
+  base?: Base;
 }
 
 export interface ExplainResult {
@@ -638,7 +671,7 @@ export const api = {
     ),
   ask: (question: string, history: HistoryTurn[] = []) =>
     request<AskResult>("/ask", { method: "POST", body: JSON.stringify({ question, history }) }),
-  explain: (question: string, result: AskResult) =>
+  explain: (question: string, result: AskTabela) =>
     request<ExplainResult>("/ask/explain", {
       method: "POST",
       body: JSON.stringify({ question, ...result }),

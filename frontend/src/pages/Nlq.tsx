@@ -5,7 +5,15 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Card, CardContent, ErrorNote, Input, PageHeader, Skeleton } from "@/components/ui";
 import { formatCell, humanizeColumn, isAdvisory, isEmptyResult } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { api, ApiError, type AskResult, type HistoryTurn } from "@/lib/api";
+import {
+  api,
+  ApiError,
+  type AskResult,
+  type AskResultado,
+  type AskTabela,
+  type Base,
+  type HistoryTurn,
+} from "@/lib/api";
 
 type Turn =
   | { type: "success"; question: string; result: AskResult }
@@ -23,6 +31,8 @@ interface Thread {
   turns: Turn[];
 }
 
+const ROTULO_BASE: Record<Base, string> = { solo: "Solo queue", competitivo: "Competitivo" };
+
 function turnFromError(question: string, error: ApiError): Turn {
   return {
     type: "error",
@@ -34,6 +44,36 @@ function turnFromError(question: string, error: ApiError): Turn {
   };
 }
 
+/** Os resultados da resposta: um por base. Resposta sem `resultados` (versão antiga da
+ * API) vira um resultado só, sem base conhecida. */
+function resultadosDe(result: AskResult): { itens: AskResultado[]; comBase: boolean } {
+  if (result.resultados?.length) return { itens: result.resultados, comBase: true };
+  return {
+    itens: [
+      {
+        base: "solo",
+        sql: result.sql,
+        columns: result.columns,
+        rows: result.rows,
+        tentativas: result.tentativas ?? 1,
+        erro: null,
+      },
+    ],
+    comBase: false,
+  };
+}
+
+function BaseBadge({ base }: { base: Base }) {
+  return (
+    <span
+      data-base={base}
+      className="rounded-full border border-border bg-foreground/5 px-2 py-0.5 text-xs font-medium text-secondary-ink"
+    >
+      {ROTULO_BASE[base]}
+    </span>
+  );
+}
+
 function EmptyResultNote() {
   return (
     <div className="rounded-lg border border-border bg-foreground/5 px-4 py-3 text-sm text-secondary-ink">
@@ -42,16 +82,16 @@ function EmptyResultNote() {
   );
 }
 
-function AdvisoryNote({ result }: { result: AskResult }) {
+function AdvisoryNote({ resultado }: { resultado: Pick<AskTabela, "rows"> }) {
   return (
     <div className="flex items-start gap-2.5 rounded-lg border border-border bg-foreground/5 px-4 py-3 text-sm">
       <Info size={16} className="mt-0.5 shrink-0 text-muted-ink" />
-      <p className="text-secondary-ink">{String(result.rows[0]?.[0] ?? "")}</p>
+      <p className="text-secondary-ink">{String(resultado.rows[0]?.[0] ?? "")}</p>
     </div>
   );
 }
 
-function ResultTable({ result }: { result: AskResult }) {
+function ResultTable({ result }: { result: Pick<AskTabela, "columns" | "rows"> }) {
   if (isEmptyResult(result)) return <EmptyResultNote />;
   return (
     <div className="overflow-x-auto">
@@ -112,12 +152,29 @@ function ViewToggle({
   );
 }
 
-function SuccessTurn({ question, result }: { question: string; result: AskResult }) {
-  // padrão é a explicação (mais amigável que SQL cru) — busca já ao montar
-  const [view, setView] = useState<"sql" | "explicacao">("explicacao");
+/** Resposta de UMA base: selo, SQL ou explicação, e a tabela. */
+function ResultadoPanel({
+  question,
+  resultado,
+  comBase,
+  autoExplain,
+}: {
+  question: string;
+  resultado: AskResultado;
+  comBase: boolean;
+  autoExplain: boolean;
+}) {
+  // com uma base só, a explicação (mais amigável que SQL cru) já vem aberta e é buscada
+  // ao montar; com duas, fica sob demanda para não dobrar as chamadas
+  const [view, setView] = useState<"sql" | "explicacao">(autoExplain ? "explicacao" : "sql");
 
+  const tabela: AskTabela = {
+    sql: resultado.sql ?? "",
+    columns: resultado.columns,
+    rows: resultado.rows,
+  };
   const explain = useMutation<{ explanation: string }, ApiError>({
-    mutationFn: () => api.explain(question, result),
+    mutationFn: () => api.explain(question, tabela),
   });
 
   const showExplanation = () => {
@@ -127,28 +184,50 @@ function SuccessTurn({ question, result }: { question: string; result: AskResult
 
   // o LLM sinalizou que não pode responder com o schema disponível
   // (SELECT '...' AS aviso) — mostra só o aviso, sem toggle SQL/Explicação
-  const advisory = isAdvisory(result);
+  const advisory = !resultado.erro && isAdvisory(resultado);
 
   useEffect(() => {
     // não usa showExplanation() aqui: view já nasce "explicacao" (o
     // setView ali dentro seria redundante) — só dispara a busca
-    if (!advisory && !explain.data && !explain.isPending) explain.mutate();
+    if (autoExplain && !resultado.erro && !advisory && !explain.data && !explain.isPending) {
+      explain.mutate();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const cabecalho = comBase ? (
+    <div className="mb-2 flex items-center gap-2">
+      <BaseBadge base={resultado.base} />
+    </div>
+  ) : null;
+
+  if (resultado.erro) {
+    return (
+      <div className="min-w-0">
+        {cabecalho}
+        <ErrorNote
+          message={resultado.erro.message}
+          kind="server"
+          sql={resultado.erro.sql ?? undefined}
+          cause={resultado.erro.cause}
+        />
+      </div>
+    );
+  }
+
   if (advisory) {
     return (
-      <div>
-        <p className="mb-2 text-sm font-medium text-foreground">{question}</p>
-        <AdvisoryNote result={result} />
+      <div className="min-w-0">
+        {cabecalho}
+        <AdvisoryNote resultado={resultado} />
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="min-w-0">
       <div className="mb-2 flex items-center justify-between gap-4">
-        <p className="text-sm font-medium text-foreground">{question}</p>
+        {cabecalho ?? <span />}
         <ViewToggle
           view={view}
           onChange={(v) => (v === "explicacao" ? showExplanation() : setView(v))}
@@ -156,9 +235,9 @@ function SuccessTurn({ question, result }: { question: string; result: AskResult
       </div>
       {view === "sql" ? (
         <pre className="overflow-x-auto rounded-lg bg-foreground/5 px-4 py-3 font-mono text-xs text-secondary-ink">
-          {result.sql}
+          {resultado.sql}
         </pre>
-      ) : explain.isPending ? (
+      ) : explain.isPending || (!explain.data && !explain.isError) ? (
         <Skeleton className="h-16" />
       ) : explain.isError ? (
         <ErrorNote message={explain.error.message} kind={explain.error.kind} />
@@ -168,18 +247,56 @@ function SuccessTurn({ question, result }: { question: string; result: AskResult
         </p>
       )}
       <div className="mt-3">
-        <ResultTable result={result} />
+        <ResultTable result={resultado} />
       </div>
     </div>
   );
 }
 
-/** Histórico (pergunta + SQL) dos turnos bem-sucedidos de uma thread —
- * dá contexto ao LLM para perguntas de acompanhamento. */
+function SuccessTurn({ question, result }: { question: string; result: AskResult }) {
+  const { itens, comBase } = resultadosDe(result);
+  const duas = itens.length > 1;
+  return (
+    <div>
+      <p className="mb-2 text-sm font-medium text-foreground">{question}</p>
+      {duas && (
+        <p className="mb-3 text-xs text-muted-ink">
+          A pergunta não diz de qual base falar, então aqui estão as duas. Diga “no solo queue” ou
+          “no competitivo” para escolher uma.
+        </p>
+      )}
+      {!duas && result.roteamento?.origem === "heranca" && (
+        <p className="mb-3 text-xs text-muted-ink">Mesma base da pergunta anterior.</p>
+      )}
+      <div className={cn(duas && "grid gap-4 md:grid-cols-2")}>
+        {itens.map((r) => (
+          <ResultadoPanel
+            key={r.base}
+            question={question}
+            resultado={r}
+            comBase={comBase}
+            autoExplain={!duas}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Histórico (pergunta + SQL + base) dos turnos bem-sucedidos de uma thread —
+ * dá contexto ao LLM para perguntas de acompanhamento. Um turno em "ambos" vira uma
+ * entrada por base; assim a API sabe que a base do turno foi ambígua e cada base só
+ * recebe a SQL dela. */
 function successHistory(turns: Turn[]): HistoryTurn[] {
   return turns
     .filter((t): t is Extract<Turn, { type: "success" }> => t.type === "success")
-    .map((t) => ({ question: t.question, sql: t.result.sql }));
+    .flatMap((t) => {
+      const validos = (t.result.resultados ?? []).filter((r) => !r.erro && r.sql);
+      if (validos.length) {
+        return validos.map((r) => ({ question: t.question, sql: r.sql as string, base: r.base }));
+      }
+      return [{ question: t.question, sql: t.result.sql }];
+    });
 }
 
 function ThreadCard({ thread, onAppend }: { thread: Thread; onAppend: (turn: Turn) => void }) {
@@ -268,22 +385,29 @@ export function Nlq() {
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="IA generativa" title="Pergunte aos dados">
-        A pergunta é convertida em SQL (somente leitura, validada) e executada no banco. Cada
-        card mantém o contexto — use o campo no rodapé para continuar a mesma consulta.
+        A pergunta é convertida em SQL (somente leitura, validada) e executada no banco. Há duas
+        bases, partidas ranqueadas (solo queue) e jogos profissionais (competitivo): quando a
+        pergunta não diz qual, a resposta traz as duas. Cada card mantém o contexto — use o campo
+        no rodapé para continuar a mesma consulta.
       </PageHeader>
 
-      <div className="flex gap-2">
-        <Input
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-          placeholder="Ex.: qual posição tem o maior KDA médio?"
-          disabled={ask.isPending}
-        />
-        <Button onClick={submit} disabled={ask.isPending || !question.trim()}>
-          <Send size={14} />
-          {ask.isPending ? "Consultando…" : "Perguntar"}
-        </Button>
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <Input
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submit()}
+            placeholder="Ex.: qual posição tem o maior KDA médio?"
+            disabled={ask.isPending}
+          />
+          <Button onClick={submit} disabled={ask.isPending || !question.trim()}>
+            <Send size={14} />
+            {ask.isPending ? "Consultando…" : "Perguntar"}
+          </Button>
+        </div>
+        <p className="text-xs text-muted-ink">
+          Dica: diga “no solo queue” ou “no competitivo” para escolher a base.
+        </p>
       </div>
 
       {threads.map((thread) => (

@@ -1,19 +1,22 @@
 /** Formatação de valores/colunas de resultado de SQL gerado dinamicamente
  * (nomes de coluna não são conhecidos com antecedência — a formatação
  * precisa ser inferida a partir do nome e do valor). */
-import type { AskResult } from "@/lib/api";
+import type { AskTabela } from "@/lib/api";
+
+/** O que os dois helpers leem: as colunas e as linhas (de AskResult ou de AskResultado). */
+type Tabular = Pick<AskTabela, "columns" | "rows"> & { sql?: string | null };
 
 /** true quando o resultado não tem linhas, ou tem só uma linha com todos
  * os valores nulos (ex.: AVG(...) sem GROUP BY sobre zero linhas — a
  * query roda sem erro mas não representa nenhum dado real). */
-export function isEmptyResult(result: AskResult): boolean {
+export function isEmptyResult(result: Tabular): boolean {
   if (result.rows.length === 0) return true;
   return result.rows.every((row) => row.every((cell) => cell === null));
 }
 
 /** true quando o LLM sinalizou que não pode responder com o schema
  * disponível — convenção definida em schema_context.py: SELECT '...' AS aviso. */
-export function isAdvisory(result: AskResult): boolean {
+export function isAdvisory(result: Tabular): boolean {
   return result.columns.length === 1 && result.columns[0].toLowerCase() === "aviso";
 }
 
