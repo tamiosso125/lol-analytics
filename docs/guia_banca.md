@@ -51,7 +51,7 @@ junta coleta, predição, explicação, visualização e consulta em português;
 profissionais, com três modelos comparados por validação cruzada
 estratificada; (4) empate técnico entre os três, XGBoost adotado com 76% e
 AUC de 0,85 aos 15 minutos, viés do vermelho que se inverte no
-profissional, 88% na consulta em português; (5) dá para integrar tudo numa
+profissional, 60% de acerto no conjunto cego da consulta em português (26 de 26 no *benchmark* ajustado); (5) dá para integrar tudo numa
 solução só.
 
 **Em uma frase:** foi construída uma plataforma (chamada **Bellestraiko**)
@@ -79,7 +79,7 @@ visualização (*dashboards*) → consulta em linguagem natural.
 | AUC-ROC aos 15 minutos | **0,8473** |
 | Viés de lado no solo queue | vermelho vence mais (56,3% na BR1) |
 | Viés de lado no profissional | **inverte**: azul vence 53,2% |
-| Interface em linguagem natural | **88%** de acerto (23 de 26 perguntas) |
+| Interface em linguagem natural | **60%** no conjunto cego (30 de 50); 26 de 26 no *benchmark* de referência, que não é independente |
 | Páginas de visualização | 6 |
 
 **O achado mais interessante** (e que não era o objetivo inicial): no
@@ -153,7 +153,7 @@ cumprido? onde?".
 | **d** | Avaliar análise de dados para achar padrões | Seção 5.3 | Viés de lado, conversão de vantagem |
 | **e** | Comparar XGBoost, Random Forest e redes neurais | Seção 5.4 | Empate técnico; XGBoost adotado: 0,7621 / 0,8473 |
 | **f** | Propor *dashboards* | Seção 5.5 | 6 páginas de visualização |
-| **g** | Propor interface em linguagem natural | Seção 5.6 | 88% de acerto (23/26) |
+| **g** | Propor interface em linguagem natural | Seção 5.6 | 30 de 50 no conjunto cego (60%); 26/26 no *benchmark* ajustado |
 
 **De onde vieram esses objetivos:** foram definidos no **TCC I**. O TCC II
 executou o que o TCC I prometeu, e foi além (adicionou os dados
@@ -462,8 +462,9 @@ decisões de projeto** (decore os nomes):
    comparam com ele. Você mede o mesmo indicador nos dois contextos e
    mostra a inversão do viés de lado.
 3. **Consulta mensurável:** a interface em linguagem natural foi avaliada
-   no próprio domínio, com 26 perguntas fixas conferidas contra o banco, o
-   que torna o erro mensurável, e não ilustrativo.
+   no próprio domínio, com 26 perguntas de referência e um conjunto cego de
+   50, ambos conferidos contra o banco, o que torna o erro mensurável, e não
+   ilustrativo.
 
 **Atenção:** versões antigas falavam em "quatro eixos", com "fonte de
 dados" (eles usam bases de terceiros) e "nenhum mede contra *benchmark*".
@@ -1533,12 +1534,17 @@ usa essa formulação; use a frase acima.
 
 O usuário escreve uma pergunta em português, por exemplo: **"Quais os 5
 campeões mais jogados?"**. O sistema:
-1. Manda a pergunta + a descrição do banco para um **modelo de
+1. **Roteia:** decide se a pergunta é sobre o *solo queue*, o competitivo
+   ou as duas bases (regras sobre o esquema; um modelo pequeno só no que
+   sobra). Se for ambígua, responde nas duas e mostra lado a lado.
+2. Manda a pergunta + a descrição do banco para um **modelo de
    linguagem** (LLM: Claude Haiku, da Anthropic).
-2. O LLM devolve uma consulta **SQL** (a linguagem dos bancos de dados).
-3. O sistema **valida** essa SQL (4 camadas de segurança).
-4. Executa no banco **real**.
-5. Mostra o resultado e uma explicação em português.
+3. O LLM devolve uma consulta **SQL** (a linguagem dos bancos de dados).
+4. O sistema **valida** essa SQL (4 camadas de segurança) e confere que
+   ela **não mistura** as duas bases.
+5. Executa no banco **real**, em transação **somente leitura**. Se o banco
+   recusar a SQL, refaz **uma** vez passando o erro ao modelo.
+6. Mostra o resultado e uma explicação em português.
 
 **Exemplo real do *benchmark* (pergunta 2):**
 - Pergunta: "Quais os 5 campeões mais jogados?"
@@ -1559,6 +1565,10 @@ dados. Por isso, **4 "seguranças na porta"**:
 4. **Tempo máximo:** o banco cancela qualquer consulta que passe de **10
    segundos** (`statement_timeout`).
 
+Desde 2026-11-05 há uma **5ª proteção, no próprio banco**: a consulta roda
+em transação **somente leitura**. Se o validador falhasse, o banco ainda
+recusaria escrever (`tests/test_run_query_readonly.py`).
+
 **Por que isso também protege contra *SQL injection*:** a entrada do
 usuário nunca é colada direto na SQL; o que roda é só o que passou pelas
 4 camadas.
@@ -1574,22 +1584,34 @@ usuário nunca é colada direto na SQL; o que roda é só o que passou pelas
 - **Erro com a SQL junto:** se a consulta falha no banco, o erro mostra a
   SQL e a causa, para dar para entender o que aconteceu.
 
-### 14.4 O *benchmark*: 88% (Apêndice B)
+### 14.4 Duas medidas, e por que não se somam (Apêndice B)
 
-- **26 perguntas fixas** (22 sobre *solo queue*, 4 sobre profissional),
-  cada uma com uma SQL de referência.
-- "Acurácia de execução" = o resultado da SQL gerada bate com o da SQL
-  de referência.
-- **23 de 26 = 88%**. Estável em várias medições (2026-07-13, 2026-09-28,
-  2026-10-04).
-- **As 3 falhas** (perguntas 5, 12 e 22) são da **mesma família**: todas
-  têm um limiar do tipo "com pelo menos N partidas", e o erro é de
-  formatação/coluna extra na resposta, não de entender a pergunta errado.
-- **Curiosidade boa de contar:** uma execução deu 22/26 (85%) porque
-  rodou **ao mesmo tempo** que a coleta escrevia no banco (a contagem
-  mudou entre uma consulta e outra). Repetindo sem coleta, voltou a 88%.
-- **Por que não "consertar" as 3 falhas para dar 100%?** Seria
-  "superajustar" o sistema às 26 perguntas, mascarando o desempenho real.
+**1. *Benchmark* de referência (26 perguntas, 22 *solo queue* e 4 profissional).**
+- "Acurácia de execução" = o resultado da SQL gerada bate com o da SQL de
+  referência.
+- **23 de 26 (88%)** em todas as execuções até 3/11. As 3 falhas (5, 12 e
+  22) eram da mesma família: "com pelo menos N partidas", coluna a mais.
+- **Hoje dá 26 de 26, mas isso NÃO é uma medida independente**: as regras
+  novas do esquema (amostra mínima) foram escritas **conhecendo** essas 3
+  falhas. É a medida de regressão, não a nota.
+- Curiosidade: uma execução deu 22/26 porque rodou ao mesmo tempo que a
+  coleta escrevia no banco.
+
+**2. Conjunto cego (50 perguntas, 51 a 100) = a nota que vale.**
+- Elaboradas pelo autor **fora do ciclo de ajuste**, rodadas **uma única vez**
+  com o sistema congelado (o *hash* dos arquivos ficou gravado) e conferidas
+  uma a uma contra o banco, com uma consulta independente por pergunta.
+- **30 de 50 (60%)**, intervalo de 95% de 46% a 72%: 24 certas, 6 recusas
+  certas (o banco não tem o dado), 11 parciais, 8 erradas, 1 recusa indevida.
+- Três repetições com o sistema parado: **nenhum veredito mudou**.
+- Versões anteriores nas mesmas 50 perguntas: 22 e 24 de 50. Ganho real, mas
+  modesto; o que mais mudou foi o tipo de erro (erros sem resposta: 8 → 1).
+- **O ponto central:** 7 das 50 respostas estavam **erradas e pareciam certas**
+  (ex.: "sequência de vitórias" que era o total de vitórias; 86.699 partidas
+  "sem barão" quando eram 6.633). Só 2 falharam de forma visível. O
+  validador garante a **segurança**, não o **sentido** da consulta.
+- Limites declarados (6.1): 50 perguntas, **um só avaliador**, sem segunda
+  leitura; o autor viu o texto das perguntas antes de congelar o sistema.
 
 ### 14.5 Honestidade da IA: dado medido x conhecimento geral
 
@@ -1779,14 +1801,45 @@ itens são buscados num catálogo oficial no banco, nunca da memória da
 IA."
 
 **15. "A interface de linguagem natural é segura?"**
-"Tem quatro camadas: só leitura, palavras de escrita bloqueadas, lista
-fechada de tabelas e tempo máximo de 10 segundos. A entrada do usuário
-nunca é colada direto na SQL."
+"Tem quatro camadas de validação (só um SELECT, palavras de escrita
+bloqueadas, lista fechada de tabelas, tempo máximo de 10 segundos) e,
+desde 5 de novembro, o banco roda a consulta em transação somente
+leitura. A entrada do usuário nunca é colada direto na SQL. Segurança é
+diferente de acerto: a consulta pode ser segura e responder outra coisa."
 
-**16. "Por que 88% e não 100%?"**
-"As três falhas são da mesma família benigna, formatação em perguntas com
-limiar mínimo de jogos. Ajustar o sistema só para essas 26 perguntas
-seria superajuste e esconderia o desempenho real."
+**16. "Por que 60% e não 88%?"**
+"São duas medidas diferentes. O benchmark de 26 perguntas deu 88% e hoje
+dá 26 de 26, mas as regras do esquema foram escritas conhecendo as
+falhas dele, então não é independente. Montei um conjunto cego de 50
+perguntas, rodado uma vez, com o sistema congelado, e conferi cada
+resposta contra o banco: 30 de 50, 60%, com intervalo de 46% a 72%.
+Reporto os dois e digo qual é qual."
+
+**16b. "O conjunto cego é mesmo cego?"**
+"Foi elaborado por mim, fora do ciclo de ajuste, e o sistema foi
+congelado antes de rodar, com o hash dos arquivos gravado. Mas eu vi o
+texto das perguntas antes de congelar, e uma regra de recusa que
+acrescentei toca em um tema que o conjunto também sonda. Está declarado
+no Apêndice B. Por isso o chamo de conjunto cego com ressalvas."
+
+**16c. "O que o sistema erra, e é grave?"**
+"Em 7 de 50 respostas devolveu um número ou lista plausível e errado,
+como uma sequência de vitórias que era o total de vitórias. É o risco
+principal: o erro não aparece. Só duas falharam de forma visível. Está nas
+limitações (6.1) e é o primeiro dos trabalhos futuros de linguagem
+natural: verificar o resultado depois da execução."
+
+**16d. "Quem julgou as respostas?"**
+"Um só avaliador, com uma consulta independente por pergunta, e o motivo
+de cada veredito está no Apêndice B. Não houve segunda leitura; está
+declarado como limitação. Um veredito foi revisto: a pergunta 89 passou
+de recusa certa para parcial, porque o solo queue respondia."
+
+**16e. "O roteamento ajudou?"**
+"Sim, mas pouco: 22 de 50 na versão mais antiga, 24 sem o roteamento e 30
+na atual. O que mais mudou foi o tipo de erro: respostas sem resultado
+caíram de 8 para 1, e perguntas de equipe deixaram de ser respondidas na
+base errada."
 
 **17. "Qual a contribuição científica?"**
 "Três: a integração completa numa plataforma, que nenhum trabalho

@@ -148,7 +148,7 @@ são confirmações; as de C só se sobrar tempo.
 
 ## 9. O que entra e o que sai do TCC (A e B)
 
-Estrutura hoje: corpo de 29 páginas (Resumo a Referências), seções 1 a 6, 11
+Estrutura hoje: corpo de 30 páginas (no teto) (Resumo a Referências), seções 1 a 6, 11
 apêndices (A a K), anexo A, 30 quadros e 11 figuras. Abaixo, o que eu hesito em
 manter, cortar ou mover, com minha inclinação atual.
 
@@ -226,7 +226,7 @@ manter, cortar ou mover, com minha inclinação atual.
     foi no Google Acadêmico e com quais palavras-chave; o modelo dele não exige. O
     meu texto atual não diz como os 11 estudos de domínio foram escolhidos, e não
     achei registro disso na documentação do projeto. *Custo:* uma ou duas frases;
-    o corpo está em 29 de 30 páginas, então precisaria de corte equivalente.
+    o corpo está em 30 de 30 páginas, então precisaria de corte equivalente.
 44. **Vale manter limitações (6.1) e trabalhos futuros (6.2) dentro da Conclusão?**
     (A) *Evidência para levar:* minha Conclusão tem cerca de 1.050 palavras de
     prosa; as dos 10 aprovados têm de 131 a 507 (a maior é a de Pablo, com 507).
@@ -254,7 +254,7 @@ manter, cortar ou mover, com minha inclinação atual.
 
 ## O que levar
 
-- O `.docx` e o PDF (29 páginas de corpo, apêndices A a K, anexo A).
+- O `.docx` e o PDF (30 páginas de corpo, apêndices A a K, anexo A).
 - Os slides (`docs/bellestraiko_defesa_v4.pptx`, 18 slides) e os prints do site
   (`reports/prints_site/`) para mostrar a demonstração.
 - Uma folha com o que mudou desde a última versão: carregador dos jogos profissionais
