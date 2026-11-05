@@ -65,7 +65,7 @@ LOCAL_ANO = ("Porto Alegre", "2026")
 # orientador é o mesmo em TODOS os 10 aprovados (verificado, não suposto).
 NOTA_ALUNO = (
     "Graduando em Ciência da Computação na Universidade do Vale do Rio "
-    "dos Sinos (UNISINOS). E-mail: Gtamiosso@edu.unisinos.br."
+    "dos Sinos (UNISINOS). E-mail: gtamiosso@edu.unisinos.br."
 )
 NOTA_ORIENTADOR = (
     "Orientador, Professor Dr. da Escola Politécnica da UNISINOS. "
@@ -76,7 +76,7 @@ NOTA_ORIENTADOR = (
 # quebrando no meio, em "...ESPORTS: Uma / proposta").
 TITULO_PT = (
     "PLATAFORMA INTELIGENTE PARA ANÁLISE DE DADOS DE ESPORTS:\n"
-    "Uma proposta para League of Legends com uso de machine learning "
+    "Uma proposta para *League of Legends* com uso de *machine learning* "
     "e interface em linguagem natural"
 )
 # O modelo oficial pede "TÍTULO EM PORTUGUÊS" e "TÍTULO EM OUTRO IDIOMA" como
@@ -199,15 +199,22 @@ def _p(doc, texto="", *, bold=False, align=None, size=12, space_after=None):
     if space_after is not None:
         pf.space_after = Pt(space_after)
     for i, trecho in enumerate(texto.split("\n") if texto else []):
-        r = p.add_run()
-        if i:
-            r.add_break()
-        r.add_text(trecho)
-        r.font.name = "Arial"
-        r.font.size = Pt(size)
-        r.font.bold = bold
-        # east-asian font, senao o Word pode substituir a fonte
-        r._element.rPr.rFonts.set(qn("w:eastAsia"), "Arial")
+        # *termo* sai em itálico (revisão linha a linha B1.10, 2026-11-05: o
+        # corpo já italicizava estrangeirismo, o subtítulo da capa não)
+        for j, parte in enumerate(re.split(r"\*([^*]+)\*", trecho)):
+            if not parte and not (i and j == 0):
+                continue
+            r = p.add_run()
+            if i and j == 0:
+                r.add_break()
+            r.add_text(parte)
+            r.font.name = "Arial"
+            r.font.size = Pt(size)
+            r.font.bold = bold
+            if j % 2:
+                r.font.italic = True
+            # east-asian font, senao o Word pode substituir a fonte
+            r._element.rPr.rFonts.set(qn("w:eastAsia"), "Arial")
     return p
 
 
@@ -376,14 +383,11 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     novos.append(_p(doc, TITULO_PT, bold=True,
                     align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12))
     novos.append(_p(doc))
-    # achado da conferencia linha-a-linha (2026-10-13): faltava a clausula
-    # final ("pelo Curso de... UNISINOS") e "grau" deveria ser "titulo" —
-    # confirmado em 3/3 aprovados conferidos (Carolina, Rodrigo, Henrique),
-    # mesma frase nos tres a menos de "Trabalho de Conclusao de Curso" vs
-    # "Artigo" no inicio (mantido "Trabalho de Conclusao de Curso", que e o
-    # que a Carolina usa e o que corresponde ao formato real deste documento
-    # — nao e um artigo curto, tem Apendices/Anexos como monografia).
-    novos.append(_p(doc, "Trabalho de Conclusão de Curso apresentado como "
+    # "Artigo apresentado..." (revisão linha a linha B1.1, 2026-11-05): é o
+    # texto do modelo do Prof. Elvandi e do modelo da Biblioteca, e o dos
+    # aprovados em que a folha de rosto foi lida. Até aqui dizia "Trabalho de
+    # Conclusão de Curso apresentado..." (escolha de 2026-10-13).
+    novos.append(_p(doc, "Artigo apresentado como "
                          "requisito parcial para obtenção do título de "
                          "Bacharel em Ciência da Computação, pelo Curso de "
                          "Ciência da Computação da Universidade do Vale do "
@@ -446,32 +450,28 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     p.paragraph_format.line_spacing = 1.0
     r = p.add_run("Resumo: ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
-    r = p.add_run(resumo)
-    r.font.name, r.font.size = "Arial", Pt(12)
+    _runs_italico(p, resumo)
     novos.append(p)
 
     p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=12)
     p.paragraph_format.line_spacing = 1.0
     r = p.add_run("Palavras-chave: ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
-    r = p.add_run(palavras_chave)
-    r.font.name, r.font.size = "Arial", Pt(12)
+    _runs_italico(p, palavras_chave)
     novos.append(p)
 
     p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     p.paragraph_format.line_spacing = 1.0
     r = p.add_run("Abstract: ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
-    r = p.add_run(abstract)
-    r.font.name, r.font.size = "Arial", Pt(12)
+    _runs_italico(p, abstract)
     novos.append(p)
 
     p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=12)
     p.paragraph_format.line_spacing = 1.0
     r = p.add_run("Key-words: ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
-    r = p.add_run(key_words)
-    r.font.name, r.font.size = "Arial", Pt(12)
+    _runs_italico(p, key_words)
     novos.append(p)
 
     # SEM SUMÁRIO / LISTA DE ILUSTRAÇÕES / LISTA DE QUADROS — removido em
@@ -479,10 +479,12 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     # referência (pasta "TCC II - EXEMPLOS E MATERIAIS") NÃO têm nenhum dos
     # três — em todos, a Introdução começa na página 3 ou 4, logo após
     # capa+folha de rosto+resumo/abstract, sem sumário nem listas no meio.
-    # Confirmado nos 10, não só na maioria. O pré-textual deste artigo
-    # termina no Abstract/Key-words; só falta a quebra de página pro corpo.
-    ult = novos[-1].add_run()
-    ult.add_break(WD_BREAK.PAGE)
+    # Confirmado nos 10, não só na maioria.
+    # SEM quebra de página antes da Introdução (revisão linha a linha B1.7,
+    # 2026-11-05): no modelo do Prof. Elvandi o "1 INTRODUÇÃO" vem logo depois
+    # das Key-words, e em 7 dos 10 aprovados a Introdução começa na mesma
+    # página, abaixo das palavras-chave. A quebra deixava três quartos de
+    # página em branco.
 
     # tudo o que foi montado vai para o topo do corpo, nessa ordem
     for el in novos:
@@ -496,6 +498,17 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
         anchor = el._p
 
 
+def _runs_italico(p, texto: str) -> None:
+    """Acrescenta `texto` ao parágrafo, com *trecho* em itálico (Arial 12)."""
+    for j, parte in enumerate(re.split(r"\*([^*]+)\*", texto)):
+        if not parte:
+            continue
+        r = p.add_run(parte)
+        r.font.name, r.font.size = "Arial", Pt(12)
+        if j % 2:
+            r.font.italic = True
+
+
 def extrair_pre_textual(md: str) -> tuple[str, str, str, str]:
     """Puxa Resumo / Palavras-chave / Abstract / Key-words do markdown.
 
@@ -506,9 +519,10 @@ def extrair_pre_textual(md: str) -> tuple[str, str, str, str]:
         m = re.search(inicio + r"(.*?)" + fim, md, re.S | re.M)
         if not m:
             return ""
-        # Tira os marcadores de enfase: no pre-textual vai como texto simples,
-        # igual ao TCC 1 ("Palavras-chave: esports; League of Legends; ...").
-        return re.sub(r"\s+", " ", m.group(1).replace("*", "")).strip()
+        # Mantém *itálico* (revisão linha a linha B1.5, 2026-11-05): o manual
+        # diz que o itálico de estrangeirismo, se usado, vale para o texto
+        # todo; o corpo usa, e o Resumo saía sem. Só o negrito (**) sai.
+        return re.sub(r"\s+", " ", m.group(1).replace("**", "")).strip()
 
     resumo = bloco(r"^## RESUMO\s*$", r"^\*\*Palavras-chave:\*\*")
     palavras = bloco(r"^\*\*Palavras-chave:\*\*\s*", r"^\*\*Abstract:\*\*")

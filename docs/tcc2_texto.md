@@ -44,13 +44,12 @@ ranqueadas de elo alto em cinco regiões, coletadas via Riot Games API, e
 99.259 jogos profissionais de 2014 a 2026 (Oracle's Elixir). Três
 modelos (XGBoost, *Random Forest* e uma rede neural MLP) foram comparados
 por validação cruzada estratificada para predizer o vencedor em quatro
-cortes temporais, de 10 a 25 minutos; os três ficaram próximos, e o
+cortes temporais, de 10 a 25 minutos. Os três ficaram próximos, e o
 XGBoost, adotado em produção, alcançou acurácia de 0,7621 e AUC-ROC de
-0,8473 no corte de 15 minutos. Uma regressão logística simples chegou ao mesmo patamar, variáveis mais ricas somaram no máximo 0,008 de AUC-ROC e treinar no passado e testar no futuro não reduziu a AUC-ROC. A análise exploratória identificou viés de lado favorável ao time vermelho no *solo queue* de elo alto (56,3% de vitórias na região com maior amostra; o intervalo exclui 50% em três das quatro regiões), estável ao longo da partida e
-invertido no cenário profissional, em que o azul vence 53,2% dos jogos,
+0,8473 no corte de 15 minutos. Uma regressão logística simples chegou ao mesmo patamar. A análise exploratória identificou viés de lado favorável ao time vermelho no *solo queue* de elo alto (56,3% de vitórias na região com maior amostra), estável ao longo da partida. No cenário profissional o viés se inverte, e o azul vence 53,2% dos jogos,
 achado sustentado por testes de robustez. Uma interface *text-to-SQL* com validação estrutural e roteamento entre as duas bases acertou 181 de 203 perguntas (89,2%) de um gabarito automático conferido por código. A plataforma reúne seis páginas de visualização com
 predição explicável (SHAP). Os resultados mostram a viabilidade de
-integrar essas etapas em uma única solução aplicada a esports.
+integrar essas etapas em uma única solução.
 
 **Palavras-chave:** esports; *League of Legends*; análise de dados;
 *machine learning*; interface em linguagem natural.
@@ -66,15 +65,14 @@ ranked matches from five regions, collected through the Riot Games API,
 and 99,259 professional games from 2014 to 2026 (Oracle's Elixir). Three
 models (XGBoost, Random Forest and an MLP neural network) were compared
 through stratified cross-validation to predict the winning team at four
-time cutoffs, from 10 to 25 minutes; the three performed similarly, and
+time cutoffs, from 10 to 25 minutes. The three performed similarly, and
 XGBoost, adopted in production, reached an accuracy of 0.7621 and an
-AUC-ROC of 0.8473 at the 15-minute cutoff. A simple logistic regression reached the same level, richer variables added at most 0.008 of AUC-ROC, and training on the past and testing on the future did not reduce the AUC-ROC. The exploratory analysis identified a side bias favoring the red side in high-elo solo queue (56.3% win rate in the region with the largest sample; the interval excludes 50% in three of the four regions), stable
-throughout the match and reversed in the professional scenario, where
+AUC-ROC of 0.8473 at the 15-minute cutoff. A simple logistic regression reached the same level. The exploratory analysis identified a side bias favoring the red side in high-elo solo queue (56.3% win rate in the region with the largest sample), stable
+throughout the match. In the professional scenario the bias reverses, and
 the blue side wins 53.2% of games, a finding supported by robustness
-tests. A text-to-SQL interface with structural validation and routing between the two databases answered 181 of 203 questions (89,2%) of an automatic gold standard checked by code. The platform comprises
+tests. A text-to-SQL interface with structural validation and routing between the two databases answered 181 of 203 questions (89.2%) of an automatic gold standard checked by code. The platform comprises
 six visualization pages with explainable predictions (SHAP). The results
-show the feasibility of integrating these stages into a single solution
-applied to esports.
+show the feasibility of integrating these stages into a single solution.
 
 **Key-words:** esports; *League of Legends*; data analysis; *machine learning*; natural language interface.
 
