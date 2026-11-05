@@ -1058,9 +1058,7 @@ def check_bases_declaradas(t: str) -> None:
     if i < 0:
         falha("bases: a nota que declara as duas bases nao existe na Secao 5.3")
     else:
-        j = t.find("
-
-", i)
+        j = t.find("\n\n", i)
         nota = t[i:j if j > 0 else i + 1400]
         if DESCRITIVA not in nota or not any(b in nota for b in MODELAGEM):
             falta = [b for b in (DESCRITIVA, *MODELAGEM) if b not in nota]
