@@ -1052,11 +1052,15 @@ def check_bases_declaradas(t: str) -> None:
             print(f"  base de modelagem declarada como {numero}")
 
     # (b) a nota que explica as duas bases
-    i = t.find("Nota sobre as bases")
+    # 2026-11-05 (revisão linha a linha B6.3): a nota deixou de ser um parágrafo
+    # entre parênteses e ganhou título em negrito; o fim é o fim do parágrafo
+    i = t.find("Bases usadas nesta seção e na modelagem")
     if i < 0:
         falha("bases: a nota que declara as duas bases nao existe na Secao 5.3")
     else:
-        j = t.find("*)", i)
+        j = t.find("
+
+", i)
         nota = t[i:j if j > 0 else i + 1400]
         if DESCRITIVA not in nota or not any(b in nota for b in MODELAGEM):
             falta = [b for b in (DESCRITIVA, *MODELAGEM) if b not in nota]
