@@ -78,3 +78,26 @@ final; Abstract fiel ao Resumo; números do Resumo conferidos pelo `verifica_tcc
 **Soma do bloco:** −2 linhas no Resumo e, se 1.7 for aceito, cerca de três quartos de página livres.
 
 **Aplicado (2026-11-05), os 10 itens.** Resumo com 246 palavras e Abstract com 244; a Introdução começa na página 2 do artigo, logo abaixo das Key-words; itálico no Resumo, no Abstract, nas palavras-chave e no subtítulo. `verifica_tcc.py` consistente, `confere_docx.py` conforme, corpo em 29 páginas; a última página das Referências agora termina na metade (cerca de meia página de folga).
+
+## B2 — 1 Introdução (linhas 81–203; páginas 2 a 4 do artigo)
+
+Conferido e ok: abre com contexto e o parágrafo "Neste contexto, o presente trabalho…" do modelo
+(R1 #8); referências da Introdução dentro dos 5 anos (Birant 2023, García-Méndez 2025, Jiang 2025);
+pergunta de pesquisa explícita (1.3); objetivos específicos a–g no infinitivo e iguais aos itens
+a–g da Conclusão; "cinco seções, além desta introdução" confere com as Seções 2 a 6. Tamanho:
+859 palavras, logo acima do maior dos colegas (839).
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 2.1 | 111–115 | R1 #8 (ME p. 3: a estrutura em seções é o último parágrafo da Introdução) | formato | O parágrafo "Este trabalho está organizado em cinco seções…" vem antes das subseções 1.1 a 1.5; o leitor lê o roteiro do trabalho e depois volta ao tema, à delimitação e ao problema | Mover o parágrafo para o fim da Seção 1, depois da 1.5 Justificativa | 0 |
+| 2.2 | 129–131 | R3 #2 | argumento | A Delimitação não diz qual população foi estudada (elo, fila, regiões); isso só aparece na 4.3. Delimitar é justamente isso | Trocar "com dados da Riot Games API complementados por dados profissionais do Oracle's Elixir, sobre partidas, jogadores e estatísticas de desempenho" por "com partidas ranqueadas solo/duo de jogadores de elo alto (Desafiante a Mestre), coletadas pela Riot Games API, e jogos profissionais do Oracle's Elixir" | 0 |
+| 2.3 | 96 | R3 #10 | português | Frase começa com "E" ("E Jiang et al. (2025) mostram…"), registro informal | "Jiang et al. (2025), por sua vez, mostram…" | 0 |
+| 2.4 | 121–125 | R3 #10 | português | "A plataforma, batizada Bellestraiko, é o sistema desenvolvido e implementado ao longo do trabalho, que se insere na área…": o "que" pode se referir ao trabalho ou ao sistema | "A plataforma, batizada **Bellestraiko**, foi desenvolvida e implementada ao longo do trabalho, que se insere na área da Ciência da Computação e envolve ciência de dados, inteligência artificial, aprendizado de máquina e sistemas de informação." | 0 |
+| 2.5 | 165–167 | R3 #2 | argumento | Os objetivos dizem "todos alcançados conforme apresentado na Seção 5": é afirmação de resultado dentro da Introdução, antes de qualquer evidência | "…foram definidos os seguintes objetivos específicos, retomados um a um na Seção 5:" | 0 |
+| 2.6 | 101–109 × 156–161 | R3 #8 | repetição | O objetivo geral aparece duas vezes quase com as mesmas palavras (parágrafo "Neste contexto" e 1.4.1) | **Manter**: o modelo pede os objetivos no parágrafo "Neste contexto" e o TCC I tem a 1.4.1. Só registro | 0 |
+| 2.7 | 186–190 | R3 | consistência | Os objetivos f e g dizem "propor", e a Seção 5 mostra que foram implementados | **Manter**: são os objetivos aprovados no TCC I; a Conclusão já diz que foram implementados | 0 |
+
+**Aplicado (2026-11-05): 2.1 a 2.5.** 2.6 e 2.7 mantidos.
+
+Fica para B12 (passada global): "esports" nunca em itálico (consistente, mas estrangeirismo) e a
+alternância entre "aprendizado de máquina" e *machine learning* depois da definição na linha 87.

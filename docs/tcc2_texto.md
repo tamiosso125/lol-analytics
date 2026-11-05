@@ -93,7 +93,7 @@ A exploração dessas informações, porém, ainda costuma depender de
 processos fragmentados e de ferramentas que exigem conhecimento técnico
 específico. García-Méndez e Arriba-Pérez (2025) indicam que não basta
 gerar previsões: é preciso apresentá-las de forma interpretável ao
-usuário final. E Jiang et al. (2025) mostram que modelos de linguagem
+usuário final. Jiang et al. (2025), por sua vez, mostram que modelos de linguagem
 podem apoiar a exploração de dados estruturados em soluções de *Business
 Intelligence*, reduzindo a barreira técnica entre o usuário e a base de
 dados.
@@ -108,27 +108,21 @@ profissionais (Oracle's Elixir, 99.259 jogos de 2014 a 2026), o que
 permitiu comparar os padrões do *solo queue* com os do cenário
 competitivo profissional.
 
-Este trabalho está organizado em cinco seções, além desta introdução. A
-Seção 2 apresenta a fundamentação teórica; a Seção 3, os trabalhos
-relacionados; a Seção 4, a metodologia; a Seção 5, os resultados e sua
-análise à luz da literatura; e a Seção 6, as conclusões, as limitações e
-os trabalhos futuros.
-
 ### 1.1 TEMA
 
 O tema deste trabalho é a análise de dados aplicada a esports, com foco
 no desenvolvimento de uma plataforma inteligente para exploração de
 informações competitivas em *League of Legends*. A plataforma, batizada
-**Bellestraiko**, é o sistema desenvolvido e implementado ao longo do
+**Bellestraiko**, foi desenvolvida e implementada ao longo do
 trabalho, que se insere na área da Ciência da Computação e envolve
 ciência de dados, inteligência artificial, aprendizado de máquina e sistemas
 de informação.
 
 ### 1.2 DELIMITAÇÃO DO TEMA
 
-O trabalho delimitou-se a *League of Legends*, com dados da Riot Games
-API complementados por dados profissionais do Oracle's Elixir, sobre
-partidas, jogadores e estatísticas de desempenho. No campo analítico, o
+O trabalho delimitou-se a *League of Legends*, com partidas ranqueadas
+solo/duo de jogadores de elo alto (Desafiante a Mestre), coletadas pela
+Riot Games API, e jogos profissionais do Oracle's Elixir. No campo analítico, o
 recorte é a comparação entre XGBoost, *Random Forest* e redes neurais em
 análises preditivas restritas ao estado do jogo até o momento da
 predição, sem informação posterior ao corte temporal. A proposta inclui
@@ -163,8 +157,7 @@ informações.
 #### 1.4.2 Objetivos específicos
 
 Para alcançar o objetivo geral proposto, foram definidos os seguintes
-objetivos específicos, todos alcançados conforme apresentado na
-Seção 5:
+objetivos específicos, retomados um a um na Seção 5:
 
 a) mapear os dados e os recursos disponibilizados pela Riot Games API
 relevantes para a análise competitiva em *League of Legends*;
@@ -200,6 +193,12 @@ natural em uma mesma plataforma reduz a dependência de processos
 fragmentados e de ferramentas que exigem conhecimento técnico elevado, e
 oferece uma contribuição aplicável à interpretação de desempenho, ao
 acompanhamento de tendências competitivas e à análise de partidas.
+
+Este trabalho está organizado em cinco seções, além desta introdução. A
+Seção 2 apresenta a fundamentação teórica; a Seção 3, os trabalhos
+relacionados; a Seção 4, a metodologia; a Seção 5, os resultados e sua
+análise à luz da literatura; e a Seção 6, as conclusões, as limitações e
+os trabalhos futuros.
 
 ---
 
