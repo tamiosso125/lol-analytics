@@ -787,7 +787,7 @@ b) as informações relevantes de partidas, jogadores e estatísticas
 foram identificadas e organizadas em um esquema relacional específico;
 
 c) foi estruturado e executado um processo de coleta, tratamento e
-organização capaz de escalar de um piloto de ~100 partidas para uma
+organização capaz de escalar de um piloto de cerca de 100 partidas para uma
 base de 41.063 partidas de *solo queue* somadas a 99.259 jogos profissionais;
 
 d) técnicas de análise de dados identificaram padrões relevantes,
@@ -809,7 +809,7 @@ g) uma interface em linguagem natural foi implementada e avaliada: acertou 181 d
 
 O achado que merece destaque, por não ter sido o objeto anunciado do
 trabalho, é o viés de lado: uma assimetria estrutural entre os dois lados
-do mapa, estatisticamente firme em três das quatro regiões coletadas
+do mapa, estatisticamente firme em três das quatro regiões com amostra suficiente
 (BR1, EUW1, NA1; a KR tem intervalo de confiança que inclui 50%) e com
 sinal invertido no jogo profissional. Ele é um fator de confusão que
 qualquer modelo preditivo sobre *solo queue* precisa controlar, e a
@@ -828,9 +828,9 @@ valem. O detalhe e os experimentos de cada uma estão no Apêndice F.
 **Validade de construto.** A linha do tempo do *match-v5* não registra o estado das ondas
 de *minions* nem a ordem de escolha de campeões (*draft*), e nenhuma API
 pública da Riot expõe micro-posicionamento. Onze experimentos de
-enriquecimento superaram as cinco variáveis originais em até +0,0007 de AUC (Quadro 5),
+enriquecimento superaram as cinco variáveis originais em até +0,0007 de AUC-ROC (Quadro 5),
 inclusive a posição dos jogadores, que existe na *timeline* e foi testada.
-Variáveis mais ricas somam até +0,008 de AUC-ROC (Apêndice K); um ganho maior provavelmente depende do que a fonte não tem. Que parte do erro
+Variáveis mais ricas somam até +0,0080 de AUC-ROC (Apêndice K); um ganho maior provavelmente depende do que a fonte não tem. Que parte do erro
 do modelo venha dessa informação ausente é hipótese, não resultado medido.
 Por isso nenhuma orientação da plataforma que dependa de itemização ou de
 ondas vem do modelo, e a interface a marca como inferência geral.
@@ -849,9 +849,9 @@ jogador em um campeão ou um confronto de rota, seguem frágeis mesmo com
 41.063 partidas, apesar do encolhimento estatístico (*shrinkage*) em
 direção à média.
 
-**Limitações do modelo.** A taxa-base do XGBoost no estado de empate total (49,0% a 51,4% conforme o corte) subestima o viés de lado medido nos dados (46,4% a 47,9%). A discrepância não é subajuste: a busca em grade completa ficou 0,0001 de AUC acima da produção, e apenas a troca para *Random Forest* a fecha (0,6 pp), ao custo de 0,0005 de AUC. O modelo usa 39.426 das 41.063 partidas e não foi retreinado, para não invalidar as validações. E o XGBoost não garante monotonicidade isolada por variável, por não usar restrição formal.
+**Limitações do modelo.** A taxa-base do XGBoost no estado de empate total (49,0% a 51,4% conforme o corte) subestima o viés de lado medido nos dados (46,4% a 47,9%). A discrepância não é subajuste: a busca em grade completa ficou 0,0001 de AUC-ROC acima da produção, e apenas a troca para *Random Forest* a fecha (0,6 ponto percentual), ao custo de 0,0005 de AUC-ROC. O modelo usa 39.426 das 41.063 partidas e não foi retreinado, para não invalidar as validações. O XGBoost também não garante monotonicidade isolada por variável, por não usar restrição formal.
 
-**Validade da consulta em linguagem natural.** A medida principal (203 perguntas de template, escritas por mim a partir de famílias de erro que já conhecia) pode superestimar o resultado em perguntas livres: em versões anteriores do sistema, perguntas escritas à mão acertaram entre 54% e 60%. As correções posteriores não foram medidas, e o *benchmark* de 26 não é independente.
+**Validade da consulta em linguagem natural.** A medida principal (203 perguntas de template, escritas pelo autor a partir de famílias de erro já conhecidas) pode superestimar o resultado em perguntas livres: em versões anteriores do sistema, perguntas escritas à mão acertaram entre 54% e 60%. As correções posteriores não foram medidas, e o *benchmark* de 26 não é independente.
 
 ### 6.2 TRABALHOS FUTUROS
 

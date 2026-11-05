@@ -216,3 +216,21 @@ um a um, com a ressalva de que a comparação de acurácia é só indicativa; as
 **Soma do bloco:** +1 linha.
 
 **Aplicado (2026-11-05): 8.1 a 8.3.**
+
+## B9 — 6 Conclusão, 6.1 e 6.2 (linhas 773–858; páginas 16 e 17 do artigo)
+
+Conferido e ok (R1 #14, ME p. 8): retoma o objetivo geral, responde a cada objetivo específico
+(a–g, iguais aos da 1.4.2), destaca o achado principal e apresenta trabalhos futuros; as
+limitações seguem as três validades e dizem, cada uma, até onde o resultado vale. A decisão de
+estrutura (6.1 e 6.2 dentro da Conclusão; 1.002 palavras contra 135–515 dos colegas) fica para a
+pergunta 4 ao orientador. Aqui só texto.
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 9.1 | 854 | R1 #5 (3ª pessoa), R3 #10 | português | "escritas **por mim** a partir de famílias de erro que já conhecia": única passagem em 1ª pessoa do corpo | "…escritas pelo autor a partir de famílias de erro já conhecidas…" | 0 |
+| 9.2 | 790 | R3 #10 | formato | "um piloto de ~100 partidas": til como "cerca de" é informal | "um piloto de cerca de 100 partidas" | 0 |
+| 9.3 | 812 | R3 #6 | consistência | "três das quatro regiões coletadas": foram coletadas cinco | "três das quatro regiões com amostra suficiente" | 0 |
+| 9.4 | 831, 833 e 852 | R3 #6 | consistência | "de AUC" em três lugares, quando o texto todo usa "AUC-ROC"; "+0,008" aqui e "+0,0080" na 5.4 | "AUC-ROC" nos três; "+0,0080" | 0 |
+| 9.5 | 852 | R3 #6 e #10 | consistência | "(0,6 pp)" abreviado, quando a 5.3 escreve "pontos percentuais"; e a frase final começa com "E o XGBoost…" | "(0,6 ponto percentual)"; "O XGBoost também não garante monotonicidade…" | 0 |
+
+**Aplicado (2026-11-05): 9.1 a 9.5.** Estrutura (6.1 e 6.2) aguarda a pergunta 4 ao orientador.
