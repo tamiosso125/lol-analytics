@@ -121,3 +121,20 @@ Tamanho: 928 palavras, perto do menor dos colegas (893).
 | 3.6 | 270–272 | R3 | argumento | Um resultado da amostra ("o azul vence 46,6%") aparece na Fundamentação | **Manter**: é o exemplo que justifica a AUC-ROC; o número é conferido pelo `verifica_tcc.py` | 0 |
 
 **Aplicado (2026-11-05): 3.1 a 3.4.** 3.5 e 3.6 mantidos.
+
+## B4 — 3 Trabalhos relacionados (linhas 304–393; páginas 6 e 7 do artigo)
+
+Conferido e ok: onze estudos de domínio (o modelo pede no mínimo cinco, R1 #11), contados um a um;
+cada subseção termina dizendo o que o estudo sustenta ou não neste trabalho (R1 #11, "efetuar a
+relação"); as frases sobre cada estudo batem com `docs/conferencia_referencias.md`, incluindo a
+correção de Bahrololloomi (o peso de cada função é desprezível); o *preprint* de Guan e Tung está
+declarado como tal; a 3.6 posiciona o trabalho em lacuna de integração e três decisões de projeto.
+Tamanho: 828 palavras, dentro da faixa dos colegas (409–1.703).
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 4.1 | 328 | R3 #10 | português | "Aqui, esse nível só aparece nos perfis de jogador": "esse nível" fica vago | "Neste trabalho, as métricas individuais aparecem só nos perfis de jogador da plataforma, não no modelo." | 0 |
+| 4.2 | depois da 3.5 | R2 (Rodrigo, com distinção; Letícia; Pablo) | argumento | Não há uma visão comparativa dos onze estudos; a comparação está espalhada no texto. 3 dos 10 colegas fecham a seção com um "Quadro – Comparação dos trabalhos relacionados" | **Opcional.** Quadro compacto na 3.6, com uma linha por estudo e este trabalho na última: jogo; cenário (profissional ou ranqueado); momento da predição; explicabilidade; linguagem natural; visualização. Custo: cerca de um terço de página, que é quase toda a folga atual (cerca de meia página) | +~13 linhas |
+| 4.3 | 306 | pergunta 3 ao orientador | formato | O texto não diz onde nem como os estudos foram buscados | **Aguardar o orientador** (pergunta 3). Se ele pedir, uma frase no parágrafo de abertura | 0 agora |
+
+**Aplicado (2026-11-05): 4.1.** 4.2 decidido em B12, conforme a folga; 4.3 aguarda o orientador.

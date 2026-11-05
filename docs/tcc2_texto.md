@@ -325,7 +325,7 @@ Birant e Birant (2023) apresentam uma abordagem de aprendizado
 multi-objetivo e multi-instância (*Multi-Objective Multi-Instance
 Learning*) aplicada a esports e destacam a modelagem centrada no time, em vez do jogador isolado. É a orientação adotada aqui, com as variáveis
 preditoras construídas como diferenças agregadas entre os dois times.
-Bahrololloomi et al. (2022) percorrem o caminho oposto: predizem a vitória a partir das métricas individuais dos jogadores e concluem que o peso de cada função é desprezível. Aqui, esse nível só aparece nos perfis de jogador.
+Bahrololloomi et al. (2022) percorrem o caminho oposto: predizem a vitória a partir das métricas individuais dos jogadores e concluem que o peso de cada função é desprezível. Neste trabalho, as métricas individuais aparecem só nos perfis de jogador da plataforma, não no modelo.
 
 Outros estudos preveem partidas de *League of Legends* com insumos
 diferentes. Jadowski e Cunningham (2022) ajustam classificadores
