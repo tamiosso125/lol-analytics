@@ -68,13 +68,13 @@ são confirmações; as de C só se sobrar tempo.
 
 ## 4. Resultados e o que ainda dá para mudar (A)
 
-15. **Posso apresentar o modelo de produção atual (XGBoost, 0,7621 de acurácia e
-    0,8473 de AUC aos 15 minutos), ou prefere que eu adote o modelo com variáveis
-    mais ricas?** Testei 59 variáveis novas: o ganho máximo é +0,008 de AUC-ROC
-    (regressão logística, 64 variáveis), estável no teste de treino no passado. Não
-    adotei porque exigiria retreinar, reexportar e atualizar quase todos os números
-    de modelagem. Está no Apêndice K. *Por quê:* a decisão é dele, e o prazo
-    apertado favorece não trocar.
+15. ~~**Posso apresentar o modelo de produção atual (XGBoost) ou adoto o modelo com
+    variáveis mais ricas?**~~ **Resolvida (2026-11-04): manter o XGBoost de 5 variáveis.**
+    O modelo rico (regressão logística, 64 variáveis) dá +0,0080 de AUC-ROC e +0,69 pp de
+    acurácia aos 15 minutos, estável no treino no passado, mas o Simulador, o modo "e se",
+    a composição e o coach só recebem as 5 diferenças que o usuário digita; adotá-lo
+    quebraria o Simulador, e usá-lo só na análise de partida deixaria dois modelos.
+    Resposta pronta no guia ("Por que não adotaram o modelo novo?"). Não precisa levar.
 16. ~~**A regressão logística empata com o XGBoost. Isso enfraquece a escolha do
     XGBoost?**~~ **Resolvida (2026-11-04): manter o XGBoost e dizer a verdade.** Ela não
     empata: fica à frente por milésimos (0,0010 de AUC-ROC aos 15 minutos; o intervalo
