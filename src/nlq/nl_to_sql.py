@@ -115,11 +115,16 @@ def generate_sql(
 
 
 def run_query(sql: str) -> tuple[list[str], list[tuple]]:
-    with get_conn() as conn, conn.cursor() as cur:
-        cur.execute("SET statement_timeout = '10s'")
-        cur.execute(sql)
-        cols = [d.name for d in cur.description]
-        return cols, cur.fetchall()
+    with get_conn() as conn:
+        # 2026-11-05: defesa em profundidade. Se o validador falhar, o próprio banco
+        # recusa escrita (a conexão só tinha statement_timeout). Precisa vir antes de
+        # qualquer comando da transação.
+        conn.set_session(readonly=True)
+        with conn.cursor() as cur:
+            cur.execute("SET statement_timeout = '10s'")
+            cur.execute(sql)
+            cols = [d.name for d in cur.description]
+            return cols, cur.fetchall()
 
 
 def ask_base(question: str, history: list[dict] | None = None, base: str | None = None) -> dict:
