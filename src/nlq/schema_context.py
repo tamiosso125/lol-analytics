@@ -7,6 +7,9 @@ Tabelas:
 
 matches(match_id, platform_id, queue_id, game_version, game_creation, game_duration_s)
   -- uma linha por partida; queue_id 420 = ranked solo; duração em segundos
+  -- game_creation é TIMESTAMPTZ (data e hora da partida), NÃO epoch em
+  -- milissegundos: para o ano use EXTRACT(YEAR FROM game_creation) = 2026;
+  -- nunca to_timestamp(game_creation / 1000) (dá erro de tipo).
 
 teams(match_id, team_id, win, barons, dragons, heralds, towers, inhibitors)
   -- duas linhas por partida; team_id 100 = time azul, 200 = time vermelho
@@ -60,6 +63,8 @@ bans(match_id, team_id, pick_turn, champion_id)
   -- champion_name. NUNCA junte "bans" direto com "participants" por
   -- champion_id (participants tem ~10 linhas por partida — o join cria
   -- uma explosão cartesiana e a query estoura o timeout do banco).
+  -- bans não tem data: para filtrar por ano junte com matches por match_id e
+  -- use EXTRACT(YEAR FROM matches.game_creation).
   -- Para obter o nome, junte com uma subquery DEDUPLICADA por
   -- champion_id (join 1-para-1, não 1-para-muitos). Exemplo — os 5
   -- campeões mais banidos e a taxa de banimento de cada um:
@@ -176,6 +181,22 @@ Regras:
   sinergia (média dos win rates solo, subquery `(SELECT AVG(win::int)
   FROM participants WHERE champion_name = 'X')` para cada) e um valor
   ajustado por shrinkage `(jogos*bruto + 20*expectativa) / (jogos+20)`.
+- SOLO QUEUE × COMPETITIVO quando a pergunta não disser qual: "equipe",
+  "jogador" (pelo nome), "liga", "temporada" e "patch" indicam o COMPETITIVO
+  (pro_games/pro_players, com team_name e player_name); "time azul/vermelho",
+  "campeão" e "posição" sem essas pistas indicam o solo queue (teams/
+  participants). No solo queue NÃO existe nome de equipe (só team_id 100/200),
+  e players.game_name é NULL para quase todos os jogadores: não monte ranking
+  de jogadores do solo queue por nome.
+- NÃO EXISTE no schema quem fez algo PRIMEIRO (primeiro dragão, primeiro barão,
+  primeira torre, primeiro abate): teams e pro_games só têm a contagem total.
+  Nunca use "dragons > 0" ou "towers > 0" como aproximação; responda com o
+  aviso de "não é possível responder".
+- Ranking por TAXA DE VITÓRIA (de campeão, equipe, jogador, liga) sem limiar
+  citado na pergunta: exija amostra mínima com HAVING COUNT(*) >= 20 no solo
+  queue e HAVING COUNT(*) >= 10 no competitivo (um campeão com 1 jogo e 100%
+  de vitória não é resposta). Se a pergunta citar um limiar, use o dela. Não
+  acrescente a contagem como coluna.
 - Se a pergunta pedir uma única resposta ("qual X tem mais/menos Y"), use
   ORDER BY na direção certa e LIMIT 1 — não retorne todas as linhas do
   agrupamento. Isso vale mesmo quando a resposta usa AVG/GROUP BY (ex.:

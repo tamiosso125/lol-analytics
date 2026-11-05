@@ -1741,6 +1741,8 @@ def ask_nl(q: Question):
         "sql": result["sql"],
         "columns": result["columns"],
         "rows": [list(r) for r in result["rows"][:100]],
+        # 2 = a primeira SQL falhou no banco e foi corrigida uma vez (nl_to_sql.ask)
+        "tentativas": result.get("tentativas", 1),
     }
 
 

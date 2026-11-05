@@ -3,10 +3,12 @@
 Abordagem: text-to-SQL — o LLM recebe o schema e a pergunta do usuário
 e gera uma query SELECT, que é validada antes da execução.
 
-Camadas de segurança:
-  1. apenas um statement, começando com SELECT (sem ; encadeado);
-  2. palavras-chave de escrita bloqueadas;
-  3. somente tabelas do schema são permitidas;
+Camadas de segurança (as três primeiras em sql_guard.py, reescritas em
+2026-11-04 com falha fechada; ver o docstring de lá):
+  1. apenas um statement, começando com SELECT ou WITH (sem ; encadeado);
+  2. palavras-chave de escrita e funções perigosas bloqueadas;
+  3. somente tabelas do schema são permitidas (inclusive em junção por vírgula,
+     subconsulta e parênteses; sem nome entre aspas);
   4. statement_timeout no PostgreSQL.
 
 Requer ANTHROPIC_API_KEY no ambiente (.env).
@@ -14,7 +16,6 @@ Requer ANTHROPIC_API_KEY no ambiente (.env).
 Uso:  python -m src.nlq.nl_to_sql "qual campeão tem maior win rate?"
 """
 import os
-import re
 import sys
 
 import anthropic
@@ -23,14 +24,9 @@ import psycopg2
 from src.db import get_conn
 from src.nlq.schema_context import SCHEMA_DESCRIPTION
 
-ALLOWED_TABLES = {
-    "matches", "teams", "participants", "players", "bans",
-    "pro_games", "pro_players", "item_events", "items",
-}
-FORBIDDEN = re.compile(
-    r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|copy)\b",
-    re.IGNORECASE,
-)
+# a validação (camadas 1 a 3) vive em sql_guard.py, testável sem banco nem chave:
+# tests/test_validate_sql.py. Reexportada aqui porque evaluate_nlq e a API importam daqui.
+from src.nlq.sql_guard import ALLOWED_TABLES, FORBIDDEN, validate_sql  # noqa: E402,F401
 
 
 class SqlExecutionError(Exception):
@@ -49,15 +45,33 @@ def generate_sql(
     question: str,
     history: list[dict] | None = None,
     model: str = "claude-haiku-4-5-20251001",
+    erro_anterior: tuple[str, str] | None = None,
 ) -> str:
     """history: turnos anteriores da mesma conversa, cada um
     {"question": ..., "sql": ...} — dá contexto para perguntas de
-    acompanhamento ("agora filtre só os challenger")."""
+    acompanhamento ("agora filtre só os challenger").
+
+    erro_anterior: (sql, mensagem do banco) da tentativa que falhou ao executar.
+    Só `ask` usa, uma vez; o benchmark (`evaluate_nlq`) não, de propósito: ele
+    mede a primeira tentativa."""
     messages = []
     for turn in history or []:
         messages.append({"role": "user", "content": turn["question"]})
         messages.append({"role": "assistant", "content": turn["sql"]})
     messages.append({"role": "user", "content": question})
+    if erro_anterior:
+        sql_ruim, erro = erro_anterior
+        messages.append({"role": "assistant", "content": sql_ruim})
+        messages.append({
+            "role": "user",
+            "content": (
+                "Essa consulta falhou ao executar no PostgreSQL com este erro:\n"
+                f"{erro}\n"
+                "Corrija a consulta, mantendo o que a pergunta pede, e responda apenas "
+                "com a SQL (um SELECT). Se o schema não tem o dado pedido, use o aviso "
+                "de 'não é possível responder'."
+            ),
+        })
 
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     msg = client.messages.create(
@@ -79,38 +93,6 @@ def generate_sql(
     return sql.removeprefix("```sql").removeprefix("```").removesuffix("```").strip()
 
 
-def _without_string_literals(sql: str) -> str:
-    """Remove o conteúdo de literais de string ('...') antes das checagens
-    estruturais abaixo — evita falso positivo de pontuação/palavras dentro
-    de texto livre (ex.: um aviso gerado pelo LLM com ';' na frase)."""
-    return re.sub(r"'(?:[^']|'')*'", "''", sql)
-
-
-def validate_sql(sql: str) -> None:
-    prefix = sql.lower().lstrip()
-    # WITH também é aceito — schema_context.py ensina um exemplo com CTE
-    # (item_events/items) e rejeitar isso aqui quebrava a query antes mesmo
-    # de checar a allowlist de tabelas.
-    if not (prefix.startswith("select") or prefix.startswith("with")):
-        raise ValueError("Apenas SELECT (ou WITH ... SELECT) é permitido.")
-    structural = _without_string_literals(sql)
-    if ";" in structural.rstrip().rstrip(";"):
-        raise ValueError("Múltiplos statements não são permitidos.")
-    if FORBIDDEN.search(structural):
-        raise ValueError("Query contém palavra-chave proibida.")
-    # nomes de CTE (WITH nome AS (...), nome2 AS (...)) não são tabelas do
-    # schema — sem isso, uma query com CTE (ex.: o exemplo de item_events/
-    # items) rejeita a si mesma, porque o FROM/JOIN que usa a CTE depois
-    # bate no mesmo regex que detecta tabelas reais.
-    cte_names = {
-        m.lower() for m in re.findall(r"\b([a-z_][a-z0-9_]*)\s+AS\s*\(", structural, re.IGNORECASE)
-    }
-    tables = set(re.findall(r"\b(?:from|join)\s+([a-z_][a-z0-9_]*)", structural, re.IGNORECASE))
-    unknown = {t.lower() for t in tables} - ALLOWED_TABLES - cte_names
-    if unknown:
-        raise ValueError(f"Tabelas não permitidas: {unknown}")
-
-
 def run_query(sql: str) -> tuple[list[str], list[tuple]]:
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("SET statement_timeout = '10s'")
@@ -120,13 +102,37 @@ def run_query(sql: str) -> tuple[list[str], list[tuple]]:
 
 
 def ask(question: str, history: list[dict] | None = None) -> dict:
+    """Gera, valida e executa. Se o banco rejeitar a SQL (coluna inexistente,
+    agregação aninhada, tipo errado...), faz UMA nova tentativa passando a
+    mensagem de erro do PostgreSQL ao modelo (2026-11-04: 4 de 50 perguntas
+    livres falharam assim). A nova SQL passa por `validate_sql` como qualquer
+    outra, a temperatura continua 0 e o resultado devolve a SQL que de fato
+    rodou, com `tentativas` = 2. Se a segunda também falhar, levanta
+    SqlExecutionError com a SQL e a causa da ÚLTIMA tentativa, encadeada à
+    primeira (`__cause__`): o erro não é engolido. Estouro de tempo
+    (`statement_timeout`) não é refeito: repetiria os 10 s e a consulta lenta
+    tende a continuar lenta."""
     sql = generate_sql(question, history)
     validate_sql(sql)
     try:
         cols, rows = run_query(sql)
-    except psycopg2.Error as exc:
+        return {"question": question, "sql": sql, "columns": cols, "rows": rows, "tentativas": 1}
+    except psycopg2.errors.QueryCanceled as exc:
         raise SqlExecutionError(sql, exc) from exc
-    return {"question": question, "sql": sql, "columns": cols, "rows": rows}
+    except psycopg2.Error as exc:
+        primeiro = exc
+    erro = str(primeiro).strip()
+    sql2 = generate_sql(question, history, erro_anterior=(sql, erro))
+    try:
+        validate_sql(sql2)
+    except ValueError:
+        # a correção foi barrada pela validação: vale o erro real da primeira SQL
+        raise SqlExecutionError(sql, primeiro) from primeiro
+    try:
+        cols, rows = run_query(sql2)
+    except psycopg2.Error as exc2:
+        raise SqlExecutionError(sql2, exc2) from primeiro
+    return {"question": question, "sql": sql2, "columns": cols, "rows": rows, "tentativas": 2}
 
 
 def explain_result(question: str, sql: str, columns: list[str], rows: list[tuple]) -> str:
