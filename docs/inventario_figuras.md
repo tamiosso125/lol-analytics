@@ -11,7 +11,7 @@ sobre o banco restaurado às 41.063 partidas.
 | 2 (corpo, 5.4) | `reports/figuras_texto/fig_shap_fases.png` | idem | SHAP por fase (Simulador) | modelo exportado |
 | 3 (corpo, 5.5) | `reports/figuras_texto/fig_partida.png` | idem | Análise de partida NA1_5653867149 | `raw_timelines` |
 | 4 (corpo, 5.5) | `reports/figuras_texto/fig_simulador_estado.png` | idem | Simulador, aba Estado, 71% | modelo exportado |
-| 5 (corpo, 5.6) | `reports/figuras_texto/fig_nlq.png` | idem | Consulta NL, pergunta 9 do benchmark | API Anthropic |
+| 5 (corpo, 5.6) | `reports/figuras_texto/fig_nlq.png` | idem | Consulta NL, pergunta 9 do benchmark, tela com roteamento por base (recapturada em 2026-11-05) | API Anthropic |
 | 6 a 11 (Apêndice F) | `reports/anexo_a/01_inicio.png` a `06_simulador.png` | `docs/recapturar_anexo_a.py` | Seis telas inteiras | banco, modelo |
 
 ## 1.2 Números da API contra o TCC
