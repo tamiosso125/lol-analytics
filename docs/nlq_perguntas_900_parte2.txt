@@ -1,0 +1,300 @@
+501. Qual é o campeão mais jogado na posição JUNGLE?
+502. Qual foi a duração média das partidas profissionais em 2020, em segundos?
+503. Quais são os 3 campeões com maior média de mortes na posição MIDDLE?
+504. Qual a posição mais comum de Varus?
+505. Quantos picks Ekko teve no competitivo?
+506. Qual a taxa de vitória de Maokai no solo queue?
+507. Qual campeão foi mais banido na VCS em 2026?
+508. Qual é a taxa de vitória do campeão Aatrox no competitivo em 2026?
+509. Qual o win rate de QT DIG∞ no profissional?
+510. Qual é a taxa de vitória da equipe HANJIN BRION Academy em 2026?
+511. Qual é a média de pontuação de visão do campeão Shen?
+512. Quantos torres destruídas V3 Esports faz em média por jogo?
+513. Quantos jogos profissionais foram registrados em 2016?
+514. Quantos jogos o jogador Svenskeren disputou?
+515. Qual a taxa de vitória de LeeSin no solo queue?
+516. Quais os 5 campeões com a maior média de eliminações jogando de TOP?
+517. Qual é o KDA médio do campeão DrMundo?
+518. Quantos Barões Nashor DetonatioN FocusMe faz em média por jogo?
+519. Qual campeão tem mais pentakills?
+520. Quantos jogos a equipe Cloud9 disputou?
+521. Qual a taxa de vitória de Nidalee no solo queue?
+522. Quantas vezes o campeão Tristana foi escolhido no competitivo?
+523. Quantos banimentos Ryze recebeu?
+524. Quantos jogos o jogador H4cker disputou?
+525. Quantos jogos tiveram mais de 8 Arautos do Vale somando as duas equipes?
+526. Qual é a taxa de vitória do campeão Zilean no competitivo em 2026?
+527. Qual é o KDA médio do campeão Olaf?
+528. Qual a posição mais comum de Shen?
+529. Quantas eliminações Artemis faz em média por jogo?
+530. Qual o win rate de Solary no profissional?
+531. Quantas partidas o campeão Twitch disputou?
+532. Quantas partidas foram disputadas na LPL em 2026?
+533. Qual foi a taxa de vitória do lado azul em 2024?
+534. Qual é a média de eliminações do campeão Leona?
+535. Qual é a taxa de vitória do time vermelho em partidas com mais de 25 minutos?
+536. Qual a média de assistências por partida de Teemo?
+537. Qual a média de dano causado a campeões por partida de FiddleSticks?
+538. Qual o win rate de SK Telecom T1 no profissional?
+539. Qual é a taxa de vitória do campeão Katarina?
+540. Quantos campeões têm taxa de vitória acima de 52% com pelo menos 100 partidas?
+541. Qual é a taxa de vitória da equipe GMBLERS Esports em 2026?
+542. Quais são os 10 jogadores com mais eliminações no total em 2026?
+543. Qual a média de dano causado a campeões por partida de Leblanc?
+544. Qual é a média de eliminações da posição sup no competitivo?
+545. Quantos eliminações G2 Esports faz em média por jogo?
+546. Quais são os 3 campeões com maior média de ouro obtido na posição TOP?
+547. Qual é a taxa de vitória da equipe Anubis Gaming em 2026?
+548. Quantas partidas o campeão Seraphine disputou?
+549. Qual jogador profissional tem a maior pontuação de visão?
+550. Qual é a taxa de vitória do campeão Riven no competitivo em 2026?
+551. Quantos Arautos do Vale o time azul faz em média por partida?
+552. Quantas vezes Taric foi jogado?
+553. Quantas vezes o item Eclipse foi comprado?
+554. Quais foram as 5 ligas com mais jogos em 2026?
+555. Quantas partidas Jin Air Green Wings jogou?
+556. Quantos jogos o jogador Clear disputou?
+557. Qual é a média de pontuação de visão do campeão Leblanc?
+558. Qual é a taxa de vitória da equipe Bomba Team em 2026?
+559. Qual a posição mais comum de Senna?
+560. Qual é o KDA médio do jogador Keria?
+561. Qual a taxa de vitória de Shyvana no solo queue?
+562. Quantos jogos a LPLOL teve em 2026?
+563. Qual é a média de Barões Nashor da equipe LGD Gaming Young Team por jogo?
+564. Qual campeão aparece mais vezes de UTILITY?
+565. Quantos picks Taliyah teve no competitivo?
+566. Qual posição costuma ser escolhida primeiro no draft?
+567. Quantas partidas o campeão Belveth disputou?
+568. Qual é a média de dragões do time azul por partida?
+569. Qual é a taxa de vitória do campeão Diana no competitivo em 2026?
+570. Quantas partidas o campeão MissFortune disputou?
+571. Quantas compras do item Tocha de Chamas Negras existem?
+572. Qual é o KDA médio do campeão Fiora?
+573. Quantos jogos o jogador Artemis disputou?
+574. Quantos jogos profissionais foram disputados no patch 16.11?
+575. Qual foi a duração média das partidas profissionais em 2019, em segundos?
+576. Qual é o KDA médio do jogador Hang?
+577. Qual é o KDA médio do campeão RekSai?
+578. Quantos jogos o jogador Karsa disputou?
+579. Qual foi a duração média das partidas profissionais em 2022, em segundos?
+580. Qual a posição mais comum de Malzahar?
+581. Quantos pentakills aconteceram no solo queue?
+582. Qual a posição mais comum de Shyvana?
+583. Qual é a taxa de vitória do campeão Taliyah no competitivo em 2026?
+584. Quais são os 5 campeões com maior média de eliminações na posição MIDDLE?
+585. Qual é a taxa de vitória do campeão Poppy no competitivo em 2026?
+586. Qual é a média de mortes da equipe KT Rolster Challengers por jogo?
+587. Qual a taxa de vitória de Vladimir no solo queue?
+588. Qual o aproveitamento de Movistar KOI em 2026?
+589. Qual é a média de mortes da equipe Top Esports Challenger por jogo?
+590. Quais os 5 campeões com a maior média de CS total jogando de UTILITY?
+591. Quantas vezes o campeão Quinn foi escolhido no competitivo?
+592. Qual é a duração média das partidas da HC em 2026, em segundos?
+593. Qual é a duração média das partidas no patch 16.03?
+594. Qual a taxa de vitória de Alistar no solo queue?
+595. Quantas vezes o campeão Taliyah foi banido?
+596. Quantos banimentos Sona recebeu?
+597. Quantos picks Vayne teve no competitivo?
+598. Qual foi a duração média das partidas profissionais em 2026, em segundos?
+599. Qual o aproveitamento de DN SOOPers em 2026?
+600. Quantos jogos profissionais foram disputados no mês 4 de 2026?
+601. Qual foi a taxa de vitória do lado azul em 2023?
+602. Quantos jogos a NACL teve em 2026?
+603. Qual era a vantagem de experiência aos 5 minutos, em média?
+604. Quantos jogos o jogador Knight disputou?
+605. Quais são os 3 campeões mais banidos?
+606. Qual é a média de eliminações do jogador Mission?
+607. Qual é a média de assistências do campeão Rell?
+608. Qual é a taxa de vitória do campeão Lillia?
+609. Quantas vezes Kennen foi jogado?
+610. Quantas eliminações Ghost faz em média por jogo?
+611. Qual é a média de CS total do campeão Nami?
+612. Qual equipe conquistou o primeiro sangue mais vezes em 2026?
+613. Quantos inibidores destruídos o time azul faz em média por partida?
+614. Em qual posição o campeão Lillia mais joga?
+615. Qual é a taxa de vitória do campeão Orianna no competitivo em 2026?
+616. Qual é a média de dragões da equipe Team Secret por jogo?
+617. Quantas partidas o campeão Mel disputou?
+618. Qual a posição mais comum de Cassiopeia?
+619. Qual é a média de eliminações do jogador Knight?
+620. Qual é a média de assistências do campeão Tryndamere?
+621. Qual é a taxa de vitória do campeão LeBlanc no competitivo em 2026?
+622. Qual a taxa de vitória de Poppy no solo queue?
+623. Qual é a média de assistências do campeão Gragas?
+624. Qual a taxa de vitória de Teemo no solo queue?
+625. Quantas vezes o campeão Tahm Kench foi escolhido no competitivo?
+626. Qual foi a duração da partida mais longa do solo queue?
+627. Qual é a média de torres destruídas da equipe Golden Guardians Academy por jogo?
+628. Quantos jogos profissionais foram disputados no patch 16.1?
+629. Qual é a média de eliminações do jogador Rest?
+630. Qual era a vantagem de experiência aos 20 minutos, em média?
+631. Qual é a taxa de vitória do campeão Syndra no competitivo em 2026?
+632. Quantas compras do item Juramento do Cavaleiro existem?
+633. Qual é a média de mortes do campeão Seraphine?
+634. Qual era a diferença de ouro aos 10 minutos, em média?
+635. Quantos mortes DetonatioN FocusMe faz em média por jogo?
+636. Quantos dragões MAX faz em média por jogo?
+637. Quantos banimentos Annie recebeu?
+638. Qual é a média de Barões Nashor do time vermelho por partida?
+639. Qual é o campeão mais jogado na posição BOTTOM?
+640. Quantos jogos profissionais foram disputados no mês 7 de 2026?
+641. Qual a taxa de vitória de Nilah no solo queue?
+642. Qual é a taxa de vitória da equipe Movistar R7?
+643. Qual o win rate de Young Miracles no profissional?
+644. Quantos dragões Dark Passage faz em média por jogo?
+645. Qual era a diferença de ouro aos 25 minutos, em média?
+646. Quantos jogadores do tier CHALLENGER estão cadastrados?
+647. Qual campeão foi mais banido na LIT em 2026?
+648. Quantos jogos profissionais foram disputados no patch 16.03?
+649. Quais os 5 campeões com a maior média de assistências jogando de UTILITY?
+650. Em qual posição o campeão KogMaw mais joga?
+651. Quantos jogos a equipe FunPlus Phoenix Blaze disputou?
+652. Qual é a média de torres destruídas da equipe Papara SuperMassive por jogo?
+653. Qual é o KDA médio do campeão Aurora?
+654. Quantas vezes o campeão Varus foi banido?
+655. Quantos jogos profissionais foram disputados no mês 6 de 2026?
+656. Qual a média de ouro obtido por partida de Evelynn?
+657. Qual a média de pontuação de visão por partida de KSante?
+658. Qual a taxa de vitória de Ryze no solo queue?
+659. Quantos dragões LNG Esports faz em média por jogo?
+660. Qual a média de ouro obtido por partida de Belveth?
+661. Quanto tempo as partidas levam até o primeiro Barão?
+662. Qual a média de eliminações por partida de Belveth?
+663. Qual é a taxa de vitória do campeão Taric no competitivo em 2026?
+664. Quantos Barões Nashor Bilibili Gaming Junior faz em média por jogo?
+665. Qual é o KDA médio do jogador Dardoch?
+666. Quantas vezes o campeão Poppy foi escolhido no competitivo?
+667. Qual é a média de CS total do campeão Morgana?
+668. Qual é a média de assistências do campeão TwistedFate?
+669. Qual a maior sequência de abates sem morrer?
+670. Quantos dragões Jin Air Green Wings faz em média por jogo?
+671. Qual era a diferença de ouro aos 5 minutos, em média?
+672. Qual a média de eliminações por partida de Swain?
+673. Quantas vezes o item Cutelo Negro foi comprado?
+674. Qual é a taxa de vitória do campeão Akali no competitivo em 2026?
+675. Qual é a taxa de vitória do campeão Milio no competitivo em 2026?
+676. Quais são os 5 campeões com maior média de CS total na posição MIDDLE?
+677. Quantas eliminações Jactroll faz em média por jogo?
+678. Quantas partidas Royal Club jogou?
+679. Qual equipe virou mais séries depois de perder o primeiro jogo?
+680. Qual a média de pontuação de visão por partida de Qiyana?
+681. Qual o aproveitamento de Dragons Esports em 2026?
+682. Qual é a média de pontuação de visão do campeão Nidalee?
+683. Qual era a média de CS aos 5 minutos, em média?
+684. Quantas séries a T1 disputou?
+685. Qual a taxa de vitória de Gangplank no solo queue?
+686. Qual é a taxa de vitória da equipe CTBC Flying Oyster em 2026?
+687. Qual o win rate de Chiefs Esports Club no profissional?
+688. Em quantas partidas o time azul conquistou o primeiro sangue?
+689. Qual a taxa de vitória de Aatrox no solo queue?
+690. Quantas séries melhor de três terminaram em 2 a 0?
+691. Quantos jogos a equipe Maryville University disputou?
+692. Quantos jogos o jogador Rest disputou?
+693. Quantas vezes o item Medalhão dos Solari de Ferro foi comprado?
+694. Qual é a média de Barões Nashor da equipe DN SOOPers Academy por jogo?
+695. Qual é a taxa de vitória da equipe Gen.G Global Academy?
+696. Qual é a taxa de vitória da equipe TSM?
+697. Quanto é o win rate de DrMundo?
+698. Quantos jogos profissionais foram disputados no mês 12 de 2026?
+699. Quantos jogos tiveram mais de 6 Arautos do Vale somando as duas equipes?
+700. Quantos jogos a equipe inf disputou?
+701. Qual o win rate de Dark Passage no profissional?
+702. Qual a média de assistências por partida de Lux?
+703. Qual é a média de CS total do campeão Taliyah?
+704. Quantos jogadores do tier MASTER estão cadastrados?
+705. Qual é a média de CS total do campeão Ziggs?
+706. Quanto é o win rate de Kennen?
+707. Qual campeão foi mais banido na TCL em 2026?
+708. Qual é o KDA médio do jogador Creme?
+709. Quais são os 3 campeões com maior média de mortes na posição BOTTOM?
+710. Quais os 5 campeões com a maior média de dano causado a campeões jogando de TOP?
+711. Quantos jogos o jogador Zanzarah disputou?
+712. Qual é a média de assistências do campeão Syndra?
+713. Qual a taxa de vitória de Viego no solo queue?
+714. Quais os 3 campeões com a maior média de dano causado a campeões jogando de MIDDLE?
+715. Qual a média de CS total por partida de Shaco?
+716. Quantas partidas o campeão Akshan disputou?
+717. Qual é a média de pontuação de visão do campeão Ezreal?
+718. Qual o aproveitamento de BNK FEARX em 2026?
+719. Qual é a média de Barões Nashor da equipe Oh My God por jogo?
+720. Qual é a pontuação de visão média na posição JUNGLE?
+721. Quantos picks Aatrox teve no competitivo?
+722. Qual é a média de torres destruídas da equipe DN SOOPers por jogo?
+723. Qual é a duração média das partidas na plataforma NA1?
+724. Quais são os 5 campeões com maior média de eliminações na posição JUNGLE?
+725. Qual é a taxa de vitória do campeão Zac no competitivo em 2026?
+726. Quantos jogos profissionais foram disputados no mês 10 de 2026?
+727. Qual o minuto médio da primeira morte?
+728. Qual é a média de eliminações da equipe LNG Esports por jogo?
+729. Qual é a taxa de vitória do campeão Karthus?
+730. Quantos jogos a equipe SK Gaming disputou?
+731. Qual é a taxa de vitória da equipe DN SOOPers Challengers em 2026?
+732. Quantos Barões Nashor Gen.G Global Academy faz em média por jogo?
+733. Quais os 5 campeões com a maior média de ouro obtido jogando de BOTTOM?
+734. Quantos banimentos Ekko recebeu?
+735. Quantas partidas SK Telecom T1 jogou?
+736. Qual era a diferença de ouro aos 20 minutos, em média?
+737. Qual é a taxa de vitória da equipe LOUD em 2026?
+738. Quais os 3 campeões com a maior média de dano causado a campeões jogando de TOP?
+739. Qual é a taxa de vitória do campeão Corki?
+740. Qual é a taxa de vitória do campeão Heimerdinger no competitivo em 2026?
+741. Quantas partidas o campeão Leblanc disputou?
+742. Qual a média de CS total por partida de Nilah?
+743. Qual é a taxa de vitória do campeão Galio no competitivo em 2026?
+744. Qual é a média de ouro obtido do campeão Nidalee?
+745. Qual é o KDA médio do campeão Malphite?
+746. Quantas partidas duraram mais de 35 minutos?
+747. Qual campeão causa mais dano a estruturas?
+748. Quantos jogos o jogador Jactroll disputou?
+749. Qual o win rate de LNG Academy no profissional?
+750. Quantas partidas LGD Gaming Young Team jogou?
+751. Quais são os 5 campeões com maior média de eliminações na posição BOTTOM?
+752. Qual é o KDA médio do campeão Viego?
+753. Qual campeão foi mais banido na LCKC em 2026?
+754. Quantos jogadores do tier GRANDMASTER estão cadastrados?
+755. Qual é o campeão mais jogado na posição UTILITY?
+756. Qual a média de mortes por partida de Yunara?
+757. Qual é a taxa de vitória do campeão Kennen no competitivo em 2026?
+758. Qual é a duração média das partidas no patch 16.1?
+759. Qual é o item mais comprado?
+760. Quantas vezes XinZhao foi jogado?
+761. Quantas partidas o campeão Gragas disputou?
+762. Qual é a taxa de vitória da equipe Cloud9 em 2026?
+763. Qual a posição mais comum de Gangplank?
+764. Quantos jogos a HC teve em 2026?
+765. Quantas compras do item Húbris existem?
+766. Qual a média de dano causado a campeões por partida de Sett?
+767. Quais foram os 5 campeões mais escolhidos no competitivo em 2026?
+768. Qual é a taxa de vitória do campeão Ekko no competitivo em 2026?
+769. Quantos jogos tiveram mais de 50 eliminações somando as duas equipes?
+770. Qual é a taxa de vitória do time vermelho em partidas com mais de 30 minutos?
+771. Quantos jogos profissionais foram disputados no mês 1 de 2026?
+772. Qual era o número de eliminações aos 25 minutos, em média?
+773. Qual é o KDA médio do jogador Shanks?
+774. Quantos jogos tiveram mais de 35 eliminações somando as duas equipes?
+775. Quantas partidas profissionais existem em 2024?
+776. Quais os 3 campeões com a maior média de ouro obtido jogando de BOTTOM?
+777. Quantas partidas o campeão Nunu disputou?
+778. Qual é a pontuação de visão média na posição MIDDLE?
+779. Em que minuto acontece o primeiro dragão, em média?
+780. Qual é a taxa de vitória do campeão Pyke?
+781. Qual é a média de ouro obtido do campeão Locke?
+782. Quantos picks Blitzcrank teve no competitivo?
+783. Qual é a média de CS total do campeão Zyra?
+784. Qual é a média de eliminações do jogador Koala?
+785. Qual a taxa de vitória de Yunara no solo queue?
+786. Quais são os 5 campeões com maior média de mortes na posição TOP?
+787. Em qual posição o campeão Zoe mais joga?
+788. Qual é a taxa de vitória da equipe MAX?
+789. Qual é a taxa de vitória das equipes que conquistaram o primeiro Arauto do Vale?
+790. Quanto é o win rate de KogMaw?
+791. Quantos jogos profissionais foram disputados no patch 16.05?
+792. Quantas partidas o campeão Zilean disputou?
+793. Quais os 5 campeões com a maior média de dano causado a campeões jogando de MIDDLE?
+794. Quanto é o win rate de RekSai?
+795. Quantas vezes o campeão Akali foi escolhido no competitivo?
+796. Qual o aproveitamento de Vivo Keyd Stars em 2026?
+797. Em quantas partidas o time azul conquistou o primeiro Barão Nashor?
+798. Quantas partidas MOUZ NXT jogou?
+799. Qual é a média de torres destruídas da equipe paiN Gaming por jogo?
+800. Qual é a taxa de vitória do campeão Quinn no competitivo em 2026?

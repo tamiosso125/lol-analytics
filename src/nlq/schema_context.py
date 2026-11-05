@@ -267,10 +267,41 @@ Regras:
 - BANIMENTOS no competitivo NÃO existem. Contar pro_players.champion conta ESCOLHAS
   (picks): nunca rotule isso como "bans" nem responda como se fosse banimento; use o
   aviso de "não é possível responder". Banimentos só existem no solo queue (tabela bans).
-- TEMPORADA e "este ano" valem 2026: pro_games.year = 2026 (solo queue:
+- "TEMPORADA", "este ano" e "atual" valem 2026: pro_games.year = 2026 (solo queue:
   EXTRACT(YEAR FROM game_creation) = 2026), mesmo que a pergunta não escreva o ano.
+  Sem essas palavras nem um ano escrito, NÃO filtre o ano: vale a base inteira.
 - "PRINCIPAIS LIGAS" no competitivo: filtre league IN ('LCK','LPL','LEC','LCP','LTA',
   'LCS','CBLOL'); sem esse filtro entram dezenas de ligas regionais e de acesso.
+- ELIMINAÇÕES, ABATES e KILLS são a coluna kills. Assistências só entram em
+  "participação nas eliminações" (kills + assists) ou quando a pergunta cita
+  assistências; "pelo menos 10 eliminações" é kills >= 10, não kills + assists.
+- VENCEDOR × PERDEDOR do mesmo jogo: auto-junção de pro_games por game_id com
+  a.win e NOT b.win (ou side diferente). "A equipe com menos eliminações venceu" é
+  a.win AND a.kills < b.kills, comparando com o ADVERSÁRIO daquele jogo, nunca com o
+  mínimo da tabela inteira. Exemplo — jogos em que o vencedor teve menos kills:
+  SELECT COUNT(*) AS jogos FROM pro_games a JOIN pro_games b
+    ON b.game_id = a.game_id AND b.side <> a.side
+  WHERE a.win AND a.kills < b.kills;
+- PORCENTAGEM ou FREQUÊNCIA de jogos (ou equipes) que cumprem uma condição, em tabela
+  de DUAS linhas por jogo: AVG(CASE WHEN condição THEN 1.0 ELSE 0 END) por grupo.
+  Nunca divida SUM(...) por COUNT(DISTINCT game_id), que dobra o numerador, nem
+  divida uma contagem por ela mesma. Condição sobre o TOTAL das duas equipes (ex.:
+  mais de 30 kills somando as duas) pede subconsulta por game_id com SUM(kills), e
+  só depois a média por liga.
+- "AS DUAS EQUIPES tiveram X" ("em quantas partidas as duas conquistaram um Barão"):
+  UMA linha, com a contagem FORA da subconsulta: SELECT COUNT(*) FROM (SELECT game_id
+  FROM pro_games GROUP BY game_id HAVING MIN(barons) >= 1) s. Nunca devolva uma
+  linha por jogo.
+- NÃO use subconsulta correlacionada por linha sobre pro_players ou participants
+  (estoura o tempo limite de 10 s): pré-agregue em CTE ou subconsulta com GROUP BY
+  e faça JOIN.
+- DIFERENÇA entre dois lados ou grupos (azul × vermelho, vitória × derrota) de uma
+  mesma entidade: UMA linha por entidade com a coluna da diferença, calculada com
+  AVG(...) FILTER (WHERE ...) ou duas CTEs com JOIN; não devolva as duas taxas em
+  linhas separadas. Se a pergunta pedir "qual" entidade tem a maior diferença, ordene
+  por ABS(diferença) e aplique o limiar de amostra mínima.
+- JOGADOR no solo queue: agrupe por puuid e devolva o puuid (não recuse só porque
+  game_name é NULL). A recusa por falta de nome só vale quando a pergunta exige o nome.
 - Se a pergunta pedir uma única resposta ("qual X tem mais/menos Y"), use
   ORDER BY na direção certa e LIMIT 1 — não retorne todas as linhas do
   agrupamento. Isso vale mesmo quando a resposta usa AVG/GROUP BY (ex.:

@@ -1,0 +1,2086 @@
+{
+ "rotulo": "gabarito900_p2",
+ "gerado_em": "2026-11-05T18:37:54",
+ "completo": false,
+ "interrompido_por": "BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purcha",
+ "arquivo_de_perguntas": "docs/nlq_perguntas_900_parte2.txt",
+ "hash_das_perguntas": "a9659f2a132d7efc",
+ "sistema": {
+  "hashes": {
+   "src/nlq/route.py": "53d5710f0234240d",
+   "src/nlq/sql_guard.py": "0e4017057c4baf2d",
+   "src/nlq/nl_to_sql.py": "f4c2ddbc799d6315",
+   "src/nlq/schema_context.py": "0000b63852c8db24"
+  },
+  "git": {
+   "commit": "371e229",
+   "arquivos_modificados": [
+    "src/nlq/nl_to_sql.py",
+    "src/nlq/schema_context.py"
+   ]
+  },
+  "modelo_geracao": "claude-haiku-4-5-20251001",
+  "temperatura": 0
+ },
+ "resumo": {
+  "perguntas": 65,
+  "responderam": 65,
+  "erro_total": 0,
+  "roteadas_para_uma_base": 51,
+  "roteadas_para_ambas": 14,
+  "resultados_total": 79,
+  "resultados_com_erro": 0,
+  "resultados_recusa": 4,
+  "resultados_com_nova_tentativa": 0
+ },
+ "registros": [
+  {
+   "n": 501,
+   "pergunta": "Qual é o campeão mais jogado na posição JUNGLE?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT champion_name, COUNT(*) AS jogos\nFROM participants\nWHERE team_position = 'JUNGLE'\nGROUP BY champion_name\nORDER BY jogos DESC\nLIMIT 1;",
+     "columns": [
+      "champion_name",
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "LeeSin",
+       6995
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 502,
+   "pergunta": "Qual foi a duração média das partidas profissionais em 2020, em segundos?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(game_length_s) AS duracao_media_segundos\nFROM pro_games\nWHERE year = 2020;",
+     "columns": [
+      "duracao_media_segundos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "1939.1672949566989302"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 503,
+   "pergunta": "Quais são os 3 campeões com maior média de mortes na posição MIDDLE?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT champion_name, AVG(deaths) AS media_mortes\nFROM participants\nWHERE team_position = 'MIDDLE'\nGROUP BY champion_name\nHAVING COUNT(*) >= 20\nORDER BY media_mortes DESC\nLIMIT 3;",
+     "columns": [
+      "champion_name",
+      "media_mortes"
+     ],
+     "n_linhas": 3,
+     "rows": [
+      [
+       "Briar",
+       "9.3181818181818182"
+      ],
+      [
+       "Karthus",
+       "8.7500000000000000"
+      ],
+      [
+       "MasterYi",
+       "7.8857142857142857"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 504,
+   "pergunta": "Qual a posição mais comum de Varus?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT team_position, COUNT(*) AS frequencia\nFROM participants\nWHERE champion_name = 'Varus'\nGROUP BY team_position\nORDER BY frequencia DESC\nLIMIT 1;",
+     "columns": [
+      "team_position",
+      "frequencia"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "BOTTOM",
+       1362
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT position, COUNT(*) AS jogos\nFROM pro_players\nWHERE champion = 'Varus'\nGROUP BY position\nORDER BY jogos DESC\nLIMIT 1;",
+     "columns": [
+      "position",
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "bot",
+       16635
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 505,
+   "pergunta": "Quantos picks Ekko teve no competitivo?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(*) AS picks\nFROM pro_players\nWHERE champion = 'Ekko';",
+     "columns": [
+      "picks"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       2738
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 506,
+   "pergunta": "Qual a taxa de vitória de Maokai no solo queue?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(p.win::int) AS win_rate\nFROM participants p\nWHERE p.champion_name = 'Maokai';",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.49880095923261390887"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 507,
+   "pergunta": "Qual campeão foi mais banido na VCS em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_games e pro_players não contêm dados de banimentos; banimentos só existem na tabela bans do solo queue' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_games e pro_players não contêm dados de banimentos; banimentos só existem na tabela bans do solo queue"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 508,
+   "pergunta": "Qual é a taxa de vitória do campeão Aatrox no competitivo em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(CASE WHEN pp.win THEN 1.0 ELSE 0 END) AS win_rate\nFROM pro_players pp\nJOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side\nWHERE pp.champion = 'Aatrox' AND pg.year = 2026;",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.50150150150150150150"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 509,
+   "pergunta": "Qual o win rate de QT DIG∞ no profissional?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(CASE WHEN win THEN 1.0 ELSE 0 END) AS win_rate\nFROM pro_games\nWHERE team_name = 'QT DIG∞';",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.56000000000000000000"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 510,
+   "pergunta": "Qual é a taxa de vitória da equipe HANJIN BRION Academy em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(win::int) AS win_rate\nFROM pro_games\nWHERE team_name = 'HANJIN BRION Academy' AND year = 2026;",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.16666666666666666667"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 511,
+   "pergunta": "Qual é a média de pontuação de visão do campeão Shen?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(vision_score) AS media_vision_score\nFROM participants\nWHERE champion_name = 'Shen';",
+     "columns": [
+      "media_vision_score"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "44.1894889103182257"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 512,
+   "pergunta": "Quantos torres destruídas V3 Esports faz em média por jogo?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(towers) AS media_torres\nFROM pro_games\nWHERE team_name = 'V3 Esports';",
+     "columns": [
+      "media_torres"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "4.7506053268765133"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 513,
+   "pergunta": "Quantos jogos profissionais foram registrados em 2016?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS jogos\nFROM pro_games\nWHERE year = 2016;",
+     "columns": [
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       4081
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 514,
+   "pergunta": "Quantos jogos o jogador Svenskeren disputou?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS jogos\nFROM pro_players\nWHERE player_name = 'Svenskeren';",
+     "columns": [
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       629
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 515,
+   "pergunta": "Qual a taxa de vitória de LeeSin no solo queue?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(p.win::int) AS win_rate\nFROM participants p\nWHERE p.champion_name = 'Lee Sin'",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       null
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 516,
+   "pergunta": "Quais os 5 campeões com a maior média de eliminações jogando de TOP?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT p.champion_name, AVG(p.kills + p.assists) AS media_eliminacoes\nFROM participants p\nWHERE p.team_position = 'TOP'\nGROUP BY p.champion_name\nHAVING COUNT(*) >= 20\nORDER BY media_eliminacoes DESC NULLS LAST\nLIMIT 5;",
+     "columns": [
+      "champion_name",
+      "media_eliminacoes"
+     ],
+     "n_linhas": 5,
+     "rows": [
+      [
+       "Janna",
+       "16.7727272727272727"
+      ],
+      [
+       "Karthus",
+       "14.9534883720930233"
+      ],
+      [
+       "Soraka",
+       "14.1428571428571429"
+      ],
+      [
+       "AurelionSol",
+       "13.6714285714285714"
+      ],
+      [
+       "Quinn",
+       "13.4688128772635815"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 517,
+   "pergunta": "Qual é o KDA médio do campeão DrMundo?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG((kills + assists)::float / NULLIF(deaths, 0)) AS kda_medio\nFROM participants\nWHERE champion_name = 'Dr. Mundo';",
+     "columns": [
+      "kda_medio"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       null
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG((pp.kills + pp.assists)::float / NULLIF(pp.deaths, 0)) AS kda_medio\nFROM pro_players pp\nWHERE pp.champion = 'Dr. Mundo';",
+     "columns": [
+      "kda_medio"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       3.7900746967346683
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 518,
+   "pergunta": "Quantos Barões Nashor DetonatioN FocusMe faz em média por jogo?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(barons) AS media_barons\nFROM pro_games\nWHERE team_name = 'DetonatioN FocusMe';",
+     "columns": [
+      "media_barons"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.73587786259541984733"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 519,
+   "pergunta": "Qual campeão tem mais pentakills?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT 'não é possível responder: o schema não registra pentakills (sequências de 5 abates), apenas o total final de kills por partida' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: o schema não registra pentakills (sequências de 5 abates), apenas o total final de kills por partida"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_players só tem kills, deaths e assists; não há registro de sequências de abates (pentakill exige 5 eliminações consecutivas sem morrer, informação não disponível neste schema)' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_players só tem kills, deaths e assists; não há registro de sequências de abates (pentakill exige 5 eliminações consecutivas sem morrer, informação não disponível neste schema)"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 520,
+   "pergunta": "Quantos jogos a equipe Cloud9 disputou?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS jogos\nFROM pro_games\nWHERE team_name = 'Cloud9';",
+     "columns": [
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       1027
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 521,
+   "pergunta": "Qual a taxa de vitória de Nidalee no solo queue?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(p.win::int) AS win_rate\nFROM participants p\nWHERE p.champion_name = 'Nidalee';",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.52215568862275449102"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 522,
+   "pergunta": "Quantas vezes o campeão Tristana foi escolhido no competitivo?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(*) AS vezes_escolhido\nFROM pro_players\nWHERE champion = 'Tristana';",
+     "columns": [
+      "vezes_escolhido"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       10222
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 523,
+   "pergunta": "Quantos banimentos Ryze recebeu?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT COUNT(*) AS banimentos\nFROM bans b\nJOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c\n  ON c.champion_id = b.champion_id\nWHERE c.champion_name = 'Ryze';",
+     "columns": [
+      "banimentos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       508
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 524,
+   "pergunta": "Quantos jogos o jogador H4cker disputou?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT COUNT(DISTINCT p.match_id) AS jogos\nFROM participants p\nJOIN players pl ON pl.puuid = p.puuid\nWHERE pl.game_name = 'H4cker';",
+     "columns": [
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       0
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 525,
+   "pergunta": "Quantos jogos tiveram mais de 8 Arautos do Vale somando as duas equipes?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(*) AS jogos\nFROM (\n  SELECT game_id\n  FROM pro_games\n  GROUP BY game_id\n  HAVING SUM(heralds) > 8\n) s;",
+     "columns": [
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       0
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 526,
+   "pergunta": "Qual é a taxa de vitória do campeão Zilean no competitivo em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(CASE WHEN pp.win THEN 1.0 ELSE 0 END) AS win_rate\nFROM pro_players pp\nJOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side\nWHERE pp.champion = 'Zilean' AND pg.year = 2026;",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.18181818181818181818"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 527,
+   "pergunta": "Qual é o KDA médio do campeão Olaf?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG((kills + assists)::float / NULLIF(deaths, 0)) AS kda_medio\nFROM participants\nWHERE champion_name = 'Olaf';",
+     "columns": [
+      "kda_medio"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       2.625354922424856
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG((pp.kills + pp.assists)::float / NULLIF(pp.deaths, 0)) AS kda_medio\nFROM pro_players pp\nWHERE pp.champion = 'Olaf';",
+     "columns": [
+      "kda_medio"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       4.04166256754471
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 528,
+   "pergunta": "Qual a posição mais comum de Shen?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT team_position, COUNT(*) AS jogos\nFROM participants\nWHERE champion_name = 'Shen'\nGROUP BY team_position\nORDER BY jogos DESC\nLIMIT 1;",
+     "columns": [
+      "team_position",
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "TOP",
+       1237
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT position, COUNT(*) AS picks\nFROM pro_players\nWHERE champion = 'Shen'\nGROUP BY position\nORDER BY picks DESC\nLIMIT 1;",
+     "columns": [
+      "position",
+      "picks"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "top",
+       3588
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 529,
+   "pergunta": "Quantas eliminações Artemis faz em média por jogo?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(p.kills) AS media_eliminacoes\nFROM participants p\nJOIN players pl ON pl.puuid = p.puuid\nWHERE UPPER(pl.game_name) = UPPER('Artemis');",
+     "columns": [
+      "media_eliminacoes"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       null
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 530,
+   "pergunta": "Qual o win rate de Solary no profissional?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(CASE WHEN win THEN 1.0 ELSE 0 END) AS win_rate\nFROM pro_games\nWHERE team_name = 'Solary';",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.50395778364116094987"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 531,
+   "pergunta": "Quantas partidas o campeão Twitch disputou?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT COUNT(DISTINCT match_id) AS partidas\nFROM participants\nWHERE champion_name = 'Twitch';",
+     "columns": [
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       1216
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS partidas\nFROM pro_players\nWHERE champion = 'Twitch';",
+     "columns": [
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       1316
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 532,
+   "pergunta": "Quantas partidas foram disputadas na LPL em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS partidas\nFROM pro_games\nWHERE league = 'LPL' AND year = 2026;",
+     "columns": [
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       453
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 533,
+   "pergunta": "Qual foi a taxa de vitória do lado azul em 2024?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(t.win::int) AS win_rate_azul\nFROM matches m\nJOIN teams t ON t.match_id = m.match_id\nWHERE t.team_id = 100\n  AND EXTRACT(YEAR FROM m.game_creation) = 2024;",
+     "columns": [
+      "win_rate_azul"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       null
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(CASE WHEN win THEN 1.0 ELSE 0 END) AS win_rate_blue\nFROM pro_games\nWHERE year = 2024 AND side = 'Blue';",
+     "columns": [
+      "win_rate_blue"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.53140333660451422964"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 534,
+   "pergunta": "Qual é a média de eliminações do campeão Leona?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(p.kills) AS media_eliminacoes\nFROM participants p\nWHERE p.champion_name = 'Leona';",
+     "columns": [
+      "media_eliminacoes"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "1.5414285714285714"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(pp.kills) AS media_eliminacoes\nFROM pro_players pp\nWHERE pp.champion = 'Leona';",
+     "columns": [
+      "media_eliminacoes"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.80852237468110046197"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 535,
+   "pergunta": "Qual é a taxa de vitória do time vermelho em partidas com mais de 25 minutos?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(t.win::int) AS win_rate\nFROM matches m\nJOIN teams t ON t.match_id = m.match_id\nWHERE t.team_id = 200\n  AND m.game_duration_s > 1500;",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.53185805422647527911"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 536,
+   "pergunta": "Qual a média de assistências por partida de Teemo?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(assists) AS media_assistencias\nFROM participants\nWHERE champion_name = 'Teemo';",
+     "columns": [
+      "media_assistencias"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "5.7198824681684623"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(assists) AS media_assistencias\nFROM pro_players\nWHERE champion = 'Teemo';",
+     "columns": [
+      "media_assistencias"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "4.4727272727272727"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 537,
+   "pergunta": "Qual a média de dano causado a campeões por partida de FiddleSticks?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(dmg_to_champions) AS media_dano\nFROM participants\nWHERE champion_name = 'Fiddlesticks';",
+     "columns": [
+      "media_dano"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       null
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 538,
+   "pergunta": "Qual o win rate de SK Telecom T1 no profissional?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(win::int) AS win_rate\nFROM pro_games\nWHERE team_name = 'SK Telecom T1';",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.66924265842349304482"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 539,
+   "pergunta": "Qual é a taxa de vitória do campeão Katarina?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(win::int) AS win_rate\nFROM participants\nWHERE champion_name = 'Katarina';",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.51522020725388601036"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(CASE WHEN pp.win THEN 1.0 ELSE 0 END) AS win_rate\nFROM pro_players pp\nWHERE pp.champion = 'Katarina';",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.40104166666666666667"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 540,
+   "pergunta": "Quantos campeões têm taxa de vitória acima de 52% com pelo menos 100 partidas?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT COUNT(*) AS campeoes\nFROM (\n  SELECT champion_name, AVG(win::int) AS win_rate, COUNT(*) AS partidas\n  FROM participants\n  GROUP BY champion_name\n  HAVING COUNT(*) >= 100 AND AVG(win::int) > 0.52\n) s;",
+     "columns": [
+      "campeoes"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       20
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 541,
+   "pergunta": "Qual é a taxa de vitória da equipe GMBLERS Esports em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(win::int) AS win_rate\nFROM pro_games\nWHERE team_name = 'GMBLERS Esports' AND year = 2026;",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.50877192982456140351"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 542,
+   "pergunta": "Quais são os 10 jogadores com mais eliminações no total em 2026?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT p.puuid, SUM(p.kills) AS total_eliminacoes\nFROM participants p\nJOIN matches m ON m.match_id = p.match_id\nWHERE EXTRACT(YEAR FROM m.game_creation) = 2026\nGROUP BY p.puuid\nORDER BY total_eliminacoes DESC\nLIMIT 10;",
+     "columns": [
+      "puuid",
+      "total_eliminacoes"
+     ],
+     "n_linhas": 10,
+     "rows": [
+      [
+       "OatnaPBvTVw9F4_aSs_I-n5H9wuIh5qViLJkrDZkKTAAzxhtkiiPtZB8Q72fIsArUyay15lHvA2OXQ",
+       2848
+      ],
+      [
+       "CmSvbaGrgTmelntwIPuuP7Q7j8xBUebVhHKLduBA5CH2J9Le2vDvo7dbSBKVlecvlaL7O2hVX0u-rg",
+       2478
+      ],
+      [
+       "ghMJSHJBEV5dFQh0DT3sfrzpaLLs7RdjaS8LPPqpqzHG07cOLpZmDMlw1iEJ52KsFb3m0XJjvI14kQ",
+       2221
+      ],
+      [
+       "ef9eAPZPp0q2O4FLodF9AZwlWTDYmrd9graJTVMFsKCvAGjO85jiA4B_lkg4Eb9F9TqPEq1QCTtkhA",
+       2119
+      ],
+      [
+       "5U6WQMrOK0QQQgnFqDa2Z1BAaNmMCMK9P-ag5gi9P7zJsGUont6amod7XOtAqGdRXsDo70FOp-9-xA",
+       1918
+      ],
+      [
+       "KCtbc82XwWK2fLZ6H8twWlf1BqN_y2XTwE8kaq5uuoKPEdmuj_4IRzAJqOPU99pZwjJvwKZhY_yM2A",
+       1854
+      ],
+      [
+       "Z7QU68UI1iRys73AoM28fjFH1WQwVWl4kH2SG_kCwe42nmYs9Y_rSDyGyne4EaZiCjLgY_cfR3tCsw",
+       1846
+      ],
+      [
+       "3YG9KFEWgO2vR3lRzch1DzQUjfd5NMpkdKZvAu4DBKF4yJF7u0nUZ1jDaZcXJJCJ-YTodMcJyHYBgg",
+       1799
+      ],
+      [
+       "QgSgeUI2HdeQ9f6v027awwz5kCgKz7wUF-IGrhK0HHByVygSl53CPe4ugkhFzlhJFaxU40OrC2wvwg",
+       1778
+      ],
+      [
+       "WytLX6gKNaHX7o0mhOzbESG4IsjZjPk86tlIABFC6qjAsvsoaqnqmbbFr0Xk7S9ReamWFbRq1QGdmQ",
+       1689
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT pp.player_name, SUM(pp.kills) AS total_eliminacoes\nFROM pro_players pp\nJOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side\nWHERE pg.year = 2026\nGROUP BY pp.player_name\nORDER BY total_eliminacoes DESC\nLIMIT 10;",
+     "columns": [
+      "player_name",
+      "total_eliminacoes"
+     ],
+     "n_linhas": 10,
+     "rows": [
+      [
+       "Knight",
+       698
+      ],
+      [
+       "Peyz",
+       684
+      ],
+      [
+       "Feng",
+       565
+      ],
+      [
+       "Smash",
+       560
+      ],
+      [
+       "FenRir",
+       560
+      ],
+      [
+       "HARPOON",
+       554
+      ],
+      [
+       "Viper",
+       553
+      ],
+      [
+       "Guti",
+       493
+      ],
+      [
+       "Zeka",
+       491
+      ],
+      [
+       "Slayder",
+       485
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 543,
+   "pergunta": "Qual a média de dano causado a campeões por partida de Leblanc?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(dmg_to_champions) AS media_dano\nFROM participants\nWHERE champion_name = 'Leblanc';",
+     "columns": [
+      "media_dano"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "23328.124143835616"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 544,
+   "pergunta": "Qual é a média de eliminações da posição sup no competitivo?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(pp.kills) AS media_eliminacoes_sup\nFROM pro_players pp\nWHERE pp.position = 'sup';",
+     "columns": [
+      "media_eliminacoes_sup"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.85289998891788150193"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 545,
+   "pergunta": "Quantos eliminações G2 Esports faz em média por jogo?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(kills) AS media_eliminacoes\nFROM pro_games\nWHERE team_name = 'G2 Esports';",
+     "columns": [
+      "media_eliminacoes"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "14.9656526005888126"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 546,
+   "pergunta": "Quais são os 3 campeões com maior média de ouro obtido na posição TOP?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT p.champion_name, AVG(p.gold_earned) AS media_ouro\nFROM participants p\nWHERE p.team_position = 'TOP'\nGROUP BY p.champion_name\nHAVING COUNT(*) >= 20\nORDER BY media_ouro DESC NULLS LAST\nLIMIT 3;",
+     "columns": [
+      "champion_name",
+      "media_ouro"
+     ],
+     "n_linhas": 3,
+     "rows": [
+      [
+       "Zeri",
+       "13408.206896551724"
+      ],
+      [
+       "Graves",
+       "12748.608108108108"
+      ],
+      [
+       "Gangplank",
+       "12678.511443250817"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 547,
+   "pergunta": "Qual é a taxa de vitória da equipe Anubis Gaming em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(win::int) AS win_rate\nFROM pro_games\nWHERE team_name = 'Anubis Gaming' AND year = 2026;",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.61290322580645161290"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 548,
+   "pergunta": "Quantas partidas o campeão Seraphine disputou?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT COUNT(DISTINCT match_id) AS partidas\nFROM participants\nWHERE champion_name = 'Seraphine';",
+     "columns": [
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       3957
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS partidas\nFROM pro_players\nWHERE champion = 'Seraphine';",
+     "columns": [
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       3566
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 549,
+   "pergunta": "Qual jogador profissional tem a maior pontuação de visão?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT 'não é possível responder: pro_players não tem coluna de visão (vision_score); apenas kills, deaths, assists, champion, position, player_name, team_name, side e win' AS aviso;",
+     "columns": [
+      "aviso"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "não é possível responder: pro_players não tem coluna de visão (vision_score); apenas kills, deaths, assists, champion, position, player_name, team_name, side e win"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 550,
+   "pergunta": "Qual é a taxa de vitória do campeão Riven no competitivo em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(CASE WHEN pp.win THEN 1.0 ELSE 0 END) AS win_rate\nFROM pro_players pp\nJOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side\nWHERE pp.champion = 'Riven' AND pg.year = 2026;",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.71428571428571428571"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 551,
+   "pergunta": "Quantos Arautos do Vale o time azul faz em média por partida?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(heralds) AS media_arautos_azul\nFROM teams\nWHERE team_id = 100;",
+     "columns": [
+      "media_arautos_azul"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.47108102184448286779"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 552,
+   "pergunta": "Quantas vezes Taric foi jogado?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT COUNT(*) AS vezes_jogado\nFROM participants\nWHERE champion_name = 'Taric';",
+     "columns": [
+      "vezes_jogado"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       833
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(*) AS vezes_jogado\nFROM pro_players\nWHERE champion = 'Taric';",
+     "columns": [
+      "vezes_jogado"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       2222
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 553,
+   "pergunta": "Quantas vezes o item Eclipse foi comprado?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT COUNT(*) AS vezes_comprado\nFROM item_events ie\nJOIN items i ON i.item_id = ie.item_id\nWHERE i.name = 'Eclipse' AND ie.action = 'BUY';",
+     "columns": [
+      "vezes_comprado"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       6976
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 554,
+   "pergunta": "Quais foram as 5 ligas com mais jogos em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT league, COUNT(DISTINCT game_id) AS jogos\nFROM pro_games\nWHERE year = 2026\nGROUP BY league\nORDER BY jogos DESC\nLIMIT 5;",
+     "columns": [
+      "league",
+      "jogos"
+     ],
+     "n_linhas": 5,
+     "rows": [
+      [
+       "LPL",
+       453
+      ],
+      [
+       "LCK",
+       349
+      ],
+      [
+       "LCKC",
+       338
+      ],
+      [
+       "LJL",
+       326
+      ],
+      [
+       "EM",
+       284
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 555,
+   "pergunta": "Quantas partidas Jin Air Green Wings jogou?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS partidas\nFROM pro_games\nWHERE team_name = 'Jin Air Green Wings';",
+     "columns": [
+      "partidas"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       561
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 556,
+   "pergunta": "Quantos jogos o jogador Clear disputou?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS jogos\nFROM pro_players\nWHERE player_name = 'Clear';",
+     "columns": [
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       571
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 557,
+   "pergunta": "Qual é a média de pontuação de visão do campeão Leblanc?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(vision_score) AS media_vision_score\nFROM participants\nWHERE champion_name = 'Leblanc';",
+     "columns": [
+      "media_vision_score"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "33.7418664383561644"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 558,
+   "pergunta": "Qual é a taxa de vitória da equipe Bomba Team em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(win::int) AS win_rate\nFROM pro_games\nWHERE team_name = 'Bomba Team' AND year = 2026;",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.63157894736842105263"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 559,
+   "pergunta": "Qual a posição mais comum de Senna?",
+   "roteamento": {
+    "classe": "ambos",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT team_position, COUNT(*) AS jogos\nFROM participants\nWHERE champion_name = 'Senna'\nGROUP BY team_position\nORDER BY jogos DESC\nLIMIT 1;",
+     "columns": [
+      "team_position",
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "BOTTOM",
+       2921
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    },
+    {
+     "base": "competitivo",
+     "sql": "SELECT position, COUNT(*) AS jogos\nFROM pro_players\nWHERE champion = 'Senna'\nGROUP BY position\nORDER BY jogos DESC\nLIMIT 1;",
+     "columns": [
+      "position",
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "bot",
+       5256
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 560,
+   "pergunta": "Qual é o KDA médio do jogador Keria?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG((pp.kills + pp.assists)::float / NULLIF(pp.deaths, 0)) AS kda_medio\nFROM pro_players pp\nWHERE pp.player_name = 'Keria';",
+     "columns": [
+      "kda_medio"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       5.480648148148148
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 561,
+   "pergunta": "Qual a taxa de vitória de Shyvana no solo queue?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT AVG(p.win::int) AS win_rate\nFROM participants p\nWHERE p.champion_name = 'Shyvana';",
+     "columns": [
+      "win_rate"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.47340980187695516163"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 562,
+   "pergunta": "Quantos jogos a LPLOL teve em 2026?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "modelo"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(DISTINCT game_id) AS jogos\nFROM pro_games\nWHERE league = 'LPL' AND year = 2026;",
+     "columns": [
+      "jogos"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       453
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 563,
+   "pergunta": "Qual é a média de Barões Nashor da equipe LGD Gaming Young Team por jogo?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT AVG(barons) AS media_barons\nFROM pro_games\nWHERE team_name = 'LGD Gaming Young Team';",
+     "columns": [
+      "media_barons"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "0.53299492385786802030"
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 564,
+   "pergunta": "Qual campeão aparece mais vezes de UTILITY?",
+   "roteamento": {
+    "classe": "solo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "solo",
+     "sql": "SELECT champion_name, COUNT(*) AS vezes\nFROM participants\nWHERE team_position = 'UTILITY'\nGROUP BY champion_name\nORDER BY vezes DESC\nLIMIT 1;",
+     "columns": [
+      "champion_name",
+      "vezes"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       "Nautilus",
+       6514
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  },
+  {
+   "n": 565,
+   "pergunta": "Quantos picks Taliyah teve no competitivo?",
+   "roteamento": {
+    "classe": "competitivo",
+    "origem": "regras"
+   },
+   "resultados": [
+    {
+     "base": "competitivo",
+     "sql": "SELECT COUNT(*) AS picks\nFROM pro_players\nWHERE champion = 'Taliyah';",
+     "columns": [
+      "picks"
+     ],
+     "n_linhas": 1,
+     "rows": [
+      [
+       10598
+      ]
+     ],
+     "tentativas": 1,
+     "erro": null
+    }
+   ],
+   "status": "respondeu"
+  }
+ ]
+}
