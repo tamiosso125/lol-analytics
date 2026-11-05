@@ -354,6 +354,23 @@ Auditoria de fundamentação do coach (2026-11-04): a IA inventa estatística? R
 **Requer:** `ANTHROPIC_API_KEY`, banco, modelos exportados.
 **Escreve:** `reports/coach_audit.json` (saída bruta, prompts e métricas).
 
+### `src/nlq/route.py`
+Classifica a pergunta em `solo`, `competitivo` ou `ambos`: regras sobre o esquema
+(pistas fortes e fracas), **herança** da base da pergunta anterior e, no resíduo,
+um modelo pequeno (Haiku, `max_tokens=16`, só a primeira linha da resposta). Saída
+inválida ou exceção → `ambos`. `ask` roda uma ou duas bases e devolve `resultados`
+por base; `sql_guard.validate_base` impede que uma SQL misture as duas bases.
+**Testes:** `tests/test_route.py`, `tests/test_ask_base.py`, `tests/test_ask_route.py`.
+
+### `src/nlq/avaliar_conjunto.py`
+Roda um conjunto de perguntas (`N. pergunta?` por linha) pelo caminho do produto e
+grava a saída bruta a cada pergunta, com o hash dos arquivos que definem o
+comportamento. Não julga acerto. Para limpo em `anthropic.APIError` e retoma com
+`--retomar`. Usado no conjunto de desenvolvimento (50, sem nota) e no CEGO (50, o
+número que vai ao TCC).
+**Uso:** `python -m src.nlq.avaliar_conjunto --perguntas ARQ --saida JSON --rotulo X [--retomar]`
+**Escreve:** o JSON de `--saida`. Vereditos do cego: `reports/nlq_cego_vereditos.json`.
+
 ### `src/nlq/evaluate_nlq.py`
 Validação metodológica da interface NL exigida pela banca: 26 perguntas
 de referência com SQL "gold" (22 de solo queue + 4 do competitivo,

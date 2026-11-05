@@ -236,6 +236,22 @@ manter, cortar ou mover, com minha inclinação atual.
     (o Apêndice F já traz as limitações em detalhe). Pergunta se ele considera
     limitações e trabalhos futuros parte esperada da Conclusão ou excesso.
 
+45. **Posso reportar no Resumo e na Conclusão o conjunto cego (30 de 50, 60%) ao lado do benchmark de 26 (26 de 26)?**
+    (A) *Evidência para levar:* o benchmark de 26 perguntas foi o número do TCC 1 e
+    do rascunho (23 de 26, 88%), mas as regras do esquema que o levaram a 26 de 26
+    foram escritas conhecendo as três falhas: não é independente. Montei um conjunto
+    cego de 50 perguntas, rodadas uma vez com o sistema congelado e conferidas contra
+    o banco: 24 certas, 6 recusas certas, 11 parciais, 8 erradas e 1 recusa indevida
+    (intervalo de 95% de 46% a 72%). Versões anteriores do sistema no mesmo conjunto:
+    22 e 24 de 50. *Risco:* o 60% aparece ao lado do 88% que ele já viu.
+    *Recomendação:* citar os dois, com o cego explicado, e apresentar as falhas como
+    limitação (6.1). *Pergunta:* ele prefere os dois números no Resumo, ou só o cego?
+46. **Quem deve julgar as respostas do conjunto cego?** (A) Os 50 vereditos foram
+    dados por um só avaliador (eu, com uma consulta independente por pergunta, a
+    pedido do autor), sem segunda leitura humana. *Pergunta:* a banca aceita isso
+    como limitação declarada, ou ele pede que o orientador ou um colega confira uma
+    amostra antes da entrega?
+
 ## O que levar
 
 - O `.docx` e o PDF (29 páginas de corpo, apêndices A a K, anexo A).

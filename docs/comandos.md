@@ -312,6 +312,15 @@ trava: sem ela o script grava a tela de erro e reporta sucesso.
 # grava reports/nlq_benchmark.json (accuracy, base e desfecho por pergunta)
 .venv\Scripts\python.exe -m src.nlq.evaluate_nlq
 
+# Conjunto de perguntas pelo caminho do PRODUTO (roteador, base, guarda, nova
+# tentativa). Grava a cada pergunta, com o hash dos 4 arquivos do sistema; para
+# limpo se a API falhar (créditos, rede) e retoma com --retomar. NÃO julga acerto:
+# quem julga é uma pessoa lendo a SQL e as linhas (docs/revisao_nlq_*.md).
+# O conjunto CEGO (docs/nlq_perguntas_cegas.txt) roda UMA vez, com o sistema
+# congelado: não ajuste o sistema depois de ver o resultado.
+.venv\Scripts\python.exe -m src.nlq.avaliar_conjunto --perguntas docs/nlq_perguntas_cegas.txt --saida reports/nlq_cego_resultado.json --rotulo cego
+.venv\Scripts\python.exe -m src.nlq.avaliar_conjunto --perguntas docs/nlq_perguntas_cegas.txt --saida reports/nlq_cego_resultado.json --rotulo cego --retomar
+
 # Auditoria do coach (Seção 4.7 e Apêndice B): 36 respostas pelo caminho do
 # produto, cada número conferido contra os dados do prompt. Grava
 # reports/coach_audit.json. A revisão manual dos sinalizados fica em
@@ -324,7 +333,11 @@ trava: sem ela o script grava a tela de erro e reporta sucesso.
 
 > **Regra da casa**: sempre rode `evaluate_nlq` de novo depois de
 > QUALQUER mudança em `src/nlq/schema_context.py` — já regrediu
-> silenciosamente 2×.
+> silenciosamente 2×. O benchmark de 26 perguntas **não é independente** (as
+> regras do esquema foram escritas conhecendo as 3 falhas antigas): hoje dá 26/26.
+> A medida independente é o conjunto cego, 30/50 (60%), em
+> `reports/nlq_cego_vereditos.json`. A consulta roda em transação somente leitura
+> (`tests/test_run_query_readonly.py`).
 >
 > O comando exige `ANTHROPIC_API_KEY`. Sem ela o Apêndice B fica sem
 > artefato: em 2026-10-04 o número publicado (23/26) vinha da saída de

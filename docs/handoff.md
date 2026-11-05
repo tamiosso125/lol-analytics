@@ -157,10 +157,14 @@ os **4 cortes × 3 modelos** do Apêndice C e grava
 é por ele que um número velho no TCC é detectado em vez de passar.
 `train_baseline.py` continua sendo só o corte de 15 min.
 
-NLQ: **88% execution accuracy** (23/26, medido repetidamente e estável
-nesta sessão de revisão — 2026-07-13; as 3 falhas são a mesma família
-benigna de sempre, formatação/coluna extra, não erro real). 26
-perguntas de referência (22 solo queue + 4 competitivo).
+NLQ (2026-11-05): três medidas, que não se somam. **Referência** (26 perguntas):
+23/26 antes dos ajustes, **26/26 hoje, não independente** (regras escritas
+conhecendo as 3 falhas). **Desenvolvimento** (50): sem nota. **Cego** (50,
+rodado uma vez com o sistema congelado, conferido contra o banco):
+**30/50 (60%)**, IC 95% 46%–72%; 7 respostas erradas com aparência de certas.
+Versões anteriores no mesmo cego: 22/50 e 24/50. Três repetições: 0 vereditos
+mudaram. Roteador solo/competitivo/ambos em `src/nlq/route.py`; consulta em
+transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
 
 **Achados de tese (os dois lados do viés de lado):**
 - Solo queue Challenger/GM de elo alto: **o vermelho vence mais que o azul
@@ -244,8 +248,8 @@ de novo se `data/items.json` mudar de versão (não depende de coleta).
 - Amostras pequenas em matchups/sinergias específicos — NLQ avisa e
   rotula "Leitura de jogo"; shrinkage de dupla (com IC) já shipped
   (2026-07-06), ver `team_synergies()`.
-- Benchmark NLQ tem 3 falhas benignas aceitas (formatação, não erro)
-  — deliberadamente não superajustado; 23/26 = 88%.
+- Benchmark NLQ (26): 23/26 antes, 26/26 hoje, **não independente**; a medida
+  independente é o cego (30/50). Falhas do cego declaradas no TCC (6.1), sem ajuste.
 - Cobertura por patch desigual no solo queue (16.13 domina) — exposto
   no Dashboard.
 - Wave/micro state não existe em nenhuma API da Riot — caminhos reais

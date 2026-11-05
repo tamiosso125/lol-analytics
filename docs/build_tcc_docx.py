@@ -1053,7 +1053,8 @@ LARGURAS_QUADROS = {
     "Comparação entre modelos (corte de 15 minutos)": [3.4, 2.5, 2.3, 2.1, 2.3, 3.4],
     "Desempenho do XGBoost por corte temporal": [3.0, 4.0, 4.5, 4.5],
     "Experimentos negativos de enriquecimento de features": [0.9, 6.1, 9.0],
-    "Acurácia de execução por tipo de pergunta do benchmark": [6.0, 6.5, 3.5],
+    "Acerto da consulta em linguagem natural nas 50 perguntas do conjunto cego, por versão do sistema":
+        [3.4, 1.6, 1.9, 1.9, 2.8, 2.0, 2.4],
     # apêndices
     "Esquema relacional do banco de dados": [3.0, 9.5, 3.5],
     "Benchmark de 26 perguntas de referência (NLQ)": [0.8, 4.4, 7.4, 3.4],
@@ -1061,6 +1062,8 @@ LARGURAS_QUADROS = {
         [1.4, 1.5, 1.45, 2.85, 1.95, 1.8, 1.6, 1.6, 1.75],
     # apêndices reescritos em quadros (2026-11-03)
     "Execuções do benchmark de linguagem natural": [4.0, 2.4, 2.2, 7.4],
+    "Tipos de falha do conjunto cego": [7.0, 3.0, 6.0],
+    "Veredito de cada pergunta do conjunto cego": [0.9, 5.0, 1.6, 1.5, 7.0],
     "Auditoria de fundamentação do coach (36 respostas)": [7.0, 9.0],
     "Configuração dos três modelos comparados": [2.6, 6.2, 7.2],
     "Validação cruzada com 5 e com 10 dobras": [1.8, 3.0, 2.8, 2.8, 2.8, 2.8],
@@ -1100,6 +1103,8 @@ QUADROS_ESQUERDA = {
     "Experimentos 1 a 10: ganho de AUC-ROC contra as cinco variáveis originais",
     "Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais",
     "Execuções do benchmark de linguagem natural",
+    "Tipos de falha do conjunto cego",
+    "Veredito de cada pergunta do conjunto cego",
     "Auditoria de fundamentação do coach (36 respostas)",
     "Configuração dos três modelos comparados",
     "Origem dos números da Seção 5.3",

@@ -4,7 +4,7 @@ nova tentativa) e grava a saída bruta, sem julgar acerto.
 Serve a dois conjuntos (docs/plano_roteamento_nlq.md, Fase 5):
   * desenvolvimento (50 perguntas livres que já foram analisadas e usadas para ajustar o
     sistema: NÃO valem como nota);
-  * CEGO (50 perguntas escritas por outra pessoa, rodadas UMA vez depois de congelar o
+  * CEGO (50 perguntas escritas pelo autor do TCC fora do ciclo de ajuste, rodadas UMA vez depois de congelar o
     sistema: é o número que vai ao TCC).
 
 Protocolo do conjunto cego: o hash dos arquivos que definem o comportamento

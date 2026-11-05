@@ -1268,6 +1268,50 @@ def check_benchmark_nlq(t: str) -> None:
               "mas reports/nlq_benchmark.json existe — remova a declaração")
         return
     print("  [OK] accuracy e base do Apêndice B batem com o artefato")
+    check_cego_nlq(t)
+
+
+def check_cego_nlq(t: str) -> None:
+    """O conjunto cego do NLQ: contagens do texto x `reports/nlq_cego_vereditos.json`.
+
+    A 5.6, o Quadro 6, o Resumo e a Conclusão citam o acerto do cego e as
+    contagens por veredito. Cada número tem de sair do artefato de vereditos, não
+    da memória de quem escreveu (o 31/50 inicial estava errado por um veredito).
+    """
+    import json
+
+    caminho = RAIZ / "reports" / "nlq_cego_vereditos.json"
+    comp = RAIZ / "reports" / "nlq_cego_comparacao.json"
+    if not caminho.exists() or not comp.exists():
+        falha("NLQ cego: faltam reports/nlq_cego_vereditos.json ou nlq_cego_comparacao.json")
+        return
+    v = json.loads(caminho.read_text(encoding="utf-8"))
+    c = v["contagem"]
+    estrito = c["C"] + c["RC"]
+    if sum(c.values()) != 50 or len(v["vereditos"]) != 50:
+        falha(f"NLQ cego: o artefato não tem 50 vereditos ({sum(c.values())})")
+        return
+    esperadas = [
+        f"{c['C']} saíram certas, {c['RC']} foram recusas corretas, {c['P']} parciais, "
+        f"{c['E']} erradas e {c['RE']} recusa indevida",
+        f"{estrito} de 50 (60%)" if round(estrito / 50 * 100) == 60 else f"{estrito} de 50 ({round(estrito / 50 * 100)}%)",
+        f"| **Atual** | **{c['C']}** | **{c['RC']}** | **{c['P']}** | **{c['E'] + c['RE']}** | **{estrito}** |",
+    ]
+    for e in esperadas:
+        # o markdown quebra linha: normaliza espaços antes de procurar
+        if e not in " ".join(t.split()).replace("| ** ", "| **"):
+            falha(f"NLQ cego: o texto não traz '{e}' (confira o artefato de vereditos)")
+            return
+    cmp = json.loads(comp.read_text(encoding="utf-8"))["versoes"]
+    for nome, rotulo in (("antes_de_tudo (3b7e353)", "Antes das melhorias"),
+                         ("antes_do_roteamento (66bfe7a)", "Sem o roteamento")):
+        r = cmp[nome]["resumo"]
+        linha = (f"| {rotulo} | {r['C']} | {r['RC']} | {r['P']} | {r['E'] + r['RE']} | "
+                 f"{r['acerto_estrito']} | {cmp[nome]['erros_totais']} |")
+        if linha not in t:
+            falha(f"NLQ cego: a linha do quadro de versões '{rotulo}' diverge do artefato: {linha}")
+            return
+    print(f"  [OK] conjunto cego: {estrito}/50 e as contagens do quadro de versões batem com os artefatos")
 
 
 def check_holdout_temporal(t: str) -> None:

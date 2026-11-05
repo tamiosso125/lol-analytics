@@ -53,7 +53,8 @@ python -m src.models.train_baseline           # 6. compara RF / XGBoost / MLP
 python -m src.models.tune_models              # 7. tuning + curva de calibração
 python -m src.nlq.nl_to_sql "qual campeão tem maior win rate?"
                                               # 8. consulta em linguagem natural
-python -m src.nlq.evaluate_nlq                # 9. valida a interface NL (banca)
+python -m src.nlq.evaluate_nlq                # 9. valida a interface NL (benchmark de 26; não independente)
+python -m src.nlq.avaliar_conjunto --perguntas docs/nlq_perguntas_cegas.txt --saida reports/nlq_cego_resultado.json --rotulo cego   # conjunto cego (rodar uma vez)
 uvicorn src.api.main:app --reload             # 10. API para os dashboards
 streamlit run src/dashboard/app.py            # 11. dashboards interativos
 python -m src.models.explain_shap             # 12. explicabilidade (SHAP)
