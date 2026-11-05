@@ -159,3 +159,22 @@ com referência; modelagem sem vazamento, com validação e métricas; *software
 **Soma do bloco:** +3 linhas.
 
 **Aplicado (2026-11-05): 5.1 a 5.5.** 5.6 mantido.
+
+## B6 — 5.1 a 5.3 (linhas 522–636; páginas 9 a 12 do artigo)
+
+Conferido e ok: cada subseção abre com o objetivo que atende (a, b e c, d); Quadro 1, Quadro 2 e
+Figura 1 chamados antes de aparecer e comentados depois (R3 #4); números conferidos pelo
+`verifica_tcc.py` (regiões, intervalos, empates por corte, Holm, profissional, conversão de
+vantagem); a hipótese do *counter-pick* está marcada como hipótese, e a limitação da KR aparece
+junto do resultado (R3 #9).
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 6.1 | 553–558 | R3 #6 | consistência | "…39.426 em 4 de outubro e 41.063 ao fim desse dia, com a região NA1 passando de 1.446 para 7.159 partidas na rodada final": a nota das linhas 583–588 diz que a rodada final (39.426 → 41.063) foi quase toda da KR. A NA1 cresceu antes, então "rodada final" contradiz a nota | "…39.426 em 4 de outubro e 41.063 ao fim desse dia. Na rodada de outubro, a região NA1 passou de 1.446 para 7.159 partidas: era a menor das quatro regiões com amostra relevante…" | 0 |
+| 6.2 | 562–563 | R3 #6 | consistência | "No agregado das cinco regiões": de novo cinco, quando a leitura usa quatro (EUN1 tem 20 partidas) | "No agregado, o time vermelho venceu mais que o azul…" | 0 |
+| 6.3 | 583–588 | R3 #10 | formato | Um parágrafo inteiro entre parênteses ("(Nota sobre as bases… Seção 6.1.)"); os outros blocos da seção usam um título em negrito | "**Bases usadas nesta seção e na modelagem.** A análise descritiva foi medida…", sem os parênteses | 0 |
+| 6.4 | 597–598 | R3 #10 | argumento | "um ponto percentual de diferença em subamostras de mil partidas não é diferença": frase de efeito, imprecisa | "…um ponto percentual em subamostras de mil partidas fica dentro do erro de amostragem (cerca de ±3 pontos com 95% de confiança)." | 0 |
+
+Fica para B12: "solo queue" sem itálico na legenda da Figura 1 (o corpo usa itálico).
+
+**Aplicado (2026-11-05): 6.1 a 6.4.**

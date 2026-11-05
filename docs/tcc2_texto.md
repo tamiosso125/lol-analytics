@@ -552,15 +552,14 @@ Quadro — Tabelas do banco de dados e o que cada uma guarda
 
 A coleta seguiu de forma incremental e o volume cresceu ao longo do
 trabalho: 10.295 partidas na primeira base ampla, 23.133 no retreino de
-julho de 2026, 39.426 em 4 de outubro e 41.063 ao fim desse dia, com a região NA1 passando de 1.446
-para 7.159 partidas na rodada final. Era a menor das quatro regiões com
+julho de 2026, 39.426 em 4 de outubro e 41.063 ao fim desse dia. Na rodada de outubro, a região NA1 passou de 1.446
+para 7.159 partidas: era a menor das quatro regiões com
 amostra relevante, e a que mais limitava a generalização do achado de
 viés de lado.
 
 ### 5.3 Análise exploratória: padrões identificados (objetivo d)
 
-**Viés de lado no *solo queue* de elo alto.** No agregado das cinco
-regiões, o time vermelho venceu mais que o azul, com intensidade variável
+**Viés de lado no *solo queue* de elo alto.** No agregado, o time vermelho venceu mais que o azul, com intensidade variável
 por região. O Quadro 2 traz a medição direta em SQL, de 4 de outubro de 2026, sobre
 as 41.063 partidas. O histórico das medições está no Apêndice D.
 
@@ -580,12 +579,12 @@ de 95% exclui 50%; na KR, com 50,4% e intervalo [49,5%, 51,4%], o
 intervalo inclui 50%, e o viés não é distinguível de zero. A BR1 sustenta
 a assimetria com folga ([55,4%, 57,2%]). O padrão não se limita ao Brasil, mas as quatro regiões não o demonstram com a mesma força.
 
-(Nota sobre as bases usadas nesta seção e na modelagem: a análise
+**Bases usadas nesta seção e na modelagem.** A análise
 descritiva foi medida sobre as **41.063 partidas** que o banco tem ao fim
 da coleta. As variáveis e os modelos foram construídos antes da última
 rodada da KR, sobre a base anterior de **39.426 partidas**, das quais
 39.309 geraram variáveis preditoras e 39.188 chegam ao corte de 15 minutos. Por isso a Seção 5.4 e o Apêndice C citam 39.426. As 1.637 partidas de diferença,
-quase todas da KR, são uma limitação declarada na Seção 6.1.)
+quase todas da KR, são uma limitação declarada na Seção 6.1.
 
 **O viés é estável ao longo da partida.** Com amostras menores, parecia haver um pico no meio do jogo. A base ampliada não confirma essa forma. Entre as partidas empatadas em cada corte (diferença
 de ouro menor que 500), o azul venceu 46,4% aos 10 minutos (n = 7.349),
@@ -595,7 +594,7 @@ para comparações múltiplas (o menor valor-p corrigido é 0,83), e o
 intervalo do corte de 10 minutos, o de maior amostra, [45,3%, 47,6%],
 exclui 50% com folga. O viés existe e tem magnitude praticamente constante. O que a amostra maior desfez foi a *evolução* atribuída a ele.
 A lição vale para o trabalho todo: em corpus de esports, um ponto
-percentual de diferença em subamostras de mil partidas não é diferença.
+percentual em subamostras de mil partidas fica dentro do erro de amostragem (cerca de ±3 pontos com 95% de confiança).
 
 Os quatro testes de robustez da Seção 4.5 se aplicam aqui. O teste (i),
 restrito à BR1, reproduz a assimetria e descarta mistura regional. O
