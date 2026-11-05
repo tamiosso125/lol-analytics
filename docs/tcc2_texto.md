@@ -866,7 +866,7 @@ Robin; DÖRNER, Ralf. A machine learning based analysis of e-sports player
 performances in League of Legends for winning prediction based on player roles and
 performances. In: INTERNATIONAL JOINT CONFERENCE ON COMPUTER
 VISION, IMAGING AND COMPUTER GRAPHICS THEORY AND APPLICATIONS,
-17., 2022, Roma. **Proceedings of the 17th International Joint Conference on
+17., 2022, on-line. **Proceedings of the 17th International Joint Conference on
 Computer Vision, Imaging and Computer Graphics Theory and Applications
 (VISIGRAPP 2022): Volume 2: HUCAPP**. [S. l.]: SciTePress, 2022. p. 68-76. DOI:
 10.5220/0010895900003124.
@@ -883,20 +883,17 @@ BROWN, Lawrence D.; CAI, T. Tony; DASGUPTA, Anirban. Interval estimation for a
 binomial proportion. **Statistical Science**, [S. l.], v. 16, n. 2, p. 101-133,
 2001. DOI: 10.1214/ss/1009213286.
 
-CHEN, Tianqi; GUESTRIN, Carlos. XGBoost: a scalable tree boosting system. In:
-Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge
-Discovery and Data Mining. New York: ACM, 2016. p. 785-794. DOI:
-10.1145/2939672.2939785.
+CHEN, Tianqi; GUESTRIN, Carlos. XGBoost: a scalable tree boosting system. In: ACM SIGKDD INTERNATIONAL CONFERENCE ON KNOWLEDGE DISCOVERY AND DATA MINING, 22., 2016, San Francisco. **Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining**. New York: ACM, 2016. p. 785-794. DOI: 10.1145/2939672.2939785.
 
-CRESWELL, John W.; CRESWELL, J. David. **Research design: qualitative,
-quantitative, and mixed methods approaches**. 6. ed. Thousand Oaks: SAGE
+CRESWELL, John W.; CRESWELL, J. David. **Research design**: qualitative,
+quantitative, and mixed methods approaches. 6. ed. Thousand Oaks: SAGE
 Publications, 2023.
 
 DO, Tiffany D.; WANG, Seong Ioi; YU, Dylan S.; MCMILLIAN, Matthew G.; MCMAHAN,
 Ryan P. Using machine learning to predict game outcomes based on
 player-champion experience in League of Legends. In: INTERNATIONAL CONFERENCE
-ON THE FOUNDATIONS OF DIGITAL GAMES, 16., 2021. **Proceedings of the 16th
-International Conference on the Foundations of Digital Games**. Montreal: ACM,
+ON THE FOUNDATIONS OF DIGITAL GAMES, 16., 2021, on-line. **Proceedings of the 16th
+International Conference on the Foundations of Digital Games**. New York: ACM,
 2021. DOI: 10.1145/3472538.3472579.
 
 GARCÍA-MÉNDEZ, Silvia; ARRIBA-PÉREZ, Francisco de. Explainable e-sports win
@@ -909,10 +906,7 @@ https://www.sciencedirect.com/science/article/pii/S1875952125001077. Acesso em:
 GIL, Antonio Carlos. **Como elaborar projetos de pesquisa**. 4. ed. São Paulo: Atlas,
 2002.
 
-GRINSZTAJN, Léo; OYALLON, Edouard; VAROQUAUX, Gaël. Why do tree-based models
-still outperform deep learning on typical tabular data? In: **Advances in
-Neural Information Processing Systems 35 (NeurIPS 2022)**. 2022. Disponível em:
-https://arxiv.org/abs/2207.08815. Acesso em: 20 out. 2026.
+GRINSZTAJN, Léo; OYALLON, Edouard; VAROQUAUX, Gaël. Why do tree-based models still outperform deep learning on typical tabular data? In: CONFERENCE ON NEURAL INFORMATION PROCESSING SYSTEMS, 36., 2022, New Orleans. **Advances in Neural Information Processing Systems 35**. Red Hook: Curran Associates, 2022. Disponível em: https://arxiv.org/abs/2207.08815. Acesso em: 20 out. 2026.
 
 GUAN, Min-Ren; TUNG, Shen-Ning. Pre-game paired-comparison modeling of
 professional League of Legends map outcomes. **arXiv**, 2609.08060, 2026.
@@ -959,13 +953,11 @@ Knowledge Discovery from Data**, [S. l.], v. 6, n. 4, art. 15, 2012. DOI:
 
 KOHAVI, Ron. A study of cross-validation and bootstrap for accuracy estimation
 and model selection. In: INTERNATIONAL JOINT CONFERENCE ON ARTIFICIAL
-INTELLIGENCE, 14., 1995. **Proceedings of the 14th International Joint
+INTELLIGENCE, 14., 1995, Montreal. **Proceedings of the 14th International Joint
 Conference on Artificial Intelligence (IJCAI-95)**. San Mateo: Morgan Kaufmann,
 1995. p. 1137-1143.
 
-LUNDBERG, Scott M.; LEE, Su-In. A unified approach to interpreting model
-predictions. In: Advances in Neural Information Processing Systems 30 (NIPS 2017). 2017. p. 4765-4774. Disponível em: https://arxiv.org/abs/1705.07874.
-Acesso em: 4 out. 2026.
+LUNDBERG, Scott M.; LEE, Su-In. A unified approach to interpreting model predictions. In: CONFERENCE ON NEURAL INFORMATION PROCESSING SYSTEMS, 31., 2017, Long Beach. **Advances in Neural Information Processing Systems 30**. Red Hook: Curran Associates, 2017. p. 4765-4774. Disponível em: https://arxiv.org/abs/1705.07874. Acesso em: 4 out. 2026.
 
 MAYMIN, Philip Z. Smart kills and worthless deaths: eSports analytics for
 League of Legends. **Journal of Quantitative Analysis in Sports**, [S. l.], v.
@@ -973,7 +965,7 @@ League of Legends. **Journal of Quantitative Analysis in Sports**, [S. l.], v.
 
 NICULESCU-MIZIL, Alexandru; CARUANA, Rich. Predicting good probabilities with
 supervised learning. In: INTERNATIONAL CONFERENCE ON MACHINE LEARNING, 22.,
-2005. **Proceedings of the 22nd International Conference on Machine Learning
+2005, Bonn. **Proceedings of the 22nd International Conference on Machine Learning
 (ICML 2005)**. New York: ACM, 2005. p. 625-632. DOI: 10.1145/1102351.1102430.
 
 ORACLE'S ELIXIR. **Downloads**: dados de partidas profissionais de League of
@@ -984,13 +976,10 @@ PEDREGOSA, Fabian et al. Scikit-learn: machine learning in Python. **Journal of
 Machine Learning Research**, [S. l.], v. 12, p. 2825-2830, 2011.
 
 PRODANOV, Cleber Cristiano; FREITAS, Ernani Cesar de. **Metodologia do
-trabalho científico: métodos e técnicas da pesquisa e do trabalho acadêmico**.
+trabalho científico**: métodos e técnicas da pesquisa e do trabalho acadêmico.
 2. ed. Novo Hamburgo: Feevale, 2013.
 
-RIBEIRO, Marco Tulio; SINGH, Scott; GUESTRIN, Carlos. "Why should I trust you?":
-explaining the predictions of any classifier. In: Proceedings of the 22nd ACM
-SIGKDD International Conference on Knowledge Discovery and Data Mining. New
-York: ACM, 2016. p. 1135-1144. DOI: 10.1145/2939672.2939778.
+RIBEIRO, Marco Tulio; SINGH, Sameer; GUESTRIN, Carlos. "Why should I trust you?": explaining the predictions of any classifier. In: ACM SIGKDD INTERNATIONAL CONFERENCE ON KNOWLEDGE DISCOVERY AND DATA MINING, 22., 2016, San Francisco. **Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining**. New York: ACM, 2016. p. 1135-1144. DOI: 10.1145/2939672.2939778.
 
 RIOT GAMES. **APIs**. [S. l.], [s. d.]. Disponível em:
 https://developer.riotgames.com/apis. Acesso em: 12 maio 2026.
@@ -1000,10 +989,7 @@ temporal evolution of gameplay using storyline visualization: a study with Leagu
 Legends. **Proceedings of the ACM on Human-Computer Interaction**, New York, v.
 7, n. CHI PLAY, art. 412, p. 1002-1024, 2023. DOI: 10.1145/3611058.
 
-WANG, Bailin; SHIN, Richard; LIU, Xiaodong; POLOZOV, Oleksandr; RICHARDSON, Matthew. RAT-SQL: relation-aware schema encoding and linking for text-to-SQL parsers. In:
-Proceedings of the 58th Annual Meeting of the Association for Computational
-Linguistics. Association for Computational Linguistics, 2020. p. 7567-7578.
-DOI: 10.18653/v1/2020.acl-main.677.
+WANG, Bailin; SHIN, Richard; LIU, Xiaodong; POLOZOV, Oleksandr; RICHARDSON, Matthew. RAT-SQL: relation-aware schema encoding and linking for text-to-SQL parsers. In: ANNUAL MEETING OF THE ASSOCIATION FOR COMPUTATIONAL LINGUISTICS, 58., 2020, on-line. **Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics**. [S. l.]: Association for Computational Linguistics, 2020. p. 7567-7578. DOI: 10.18653/v1/2020.acl-main.677.
 
 ZHONG, Ruiqi; YU, Tao; KLEIN, Dan. Semantic evaluation for text-to-SQL with
 distilled test suites. In: CONFERENCE ON EMPIRICAL METHODS IN NATURAL LANGUAGE

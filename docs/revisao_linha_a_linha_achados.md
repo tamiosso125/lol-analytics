@@ -234,3 +234,33 @@ pergunta 4 ao orientador. Aqui só texto.
 | 9.5 | 852 | R3 #6 e #10 | consistência | "(0,6 pp)" abreviado, quando a 5.3 escreve "pontos percentuais"; e a frase final começa com "E o XGBoost…" | "(0,6 ponto percentual)"; "O XGBoost também não garante monotonicidade…" | 0 |
 
 **Aplicado (2026-11-05): 9.1 a 9.5.** Estrutura (6.1 e 6.2) aguarda a pergunta 4 ao orientador.
+
+## B10 — Referências (linhas 862–1012; páginas 17 a 20 do artigo)
+
+Conferido e ok (R1 #19): 31 entradas em ordem alfabética, toda citada no texto e todo citado
+listado (`verifica_tcc.py`); artigos de periódico no padrão (autor, título, **periódico**, local,
+volume, número, páginas, ano, DOI); *preprint* identificado; sites com "Disponível em" e "Acesso
+em". O ponto fraco é a forma dos trabalhos de evento, que não segue um padrão único.
+
+Padrão ABNT NBR 6023 para trabalho de evento, já usado em Bahrololloomi, Do, Kohavi,
+Niculescu-Mizil e Zhong: `In: NOME DO EVENTO, número., ano, local. **Título dos anais**. Local:
+Editora, ano. p. x-y. DOI.`
+
+| # | Entrada | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 10.1 | CHEN; GUESTRIN (2016) | R1 #19 (ABNT) | ABNT | "In: Proceedings of the 22nd ACM SIGKDD…" sem o nome do evento em maiúsculas e sem negrito nos anais | "In: ACM SIGKDD INTERNATIONAL CONFERENCE ON KNOWLEDGE DISCOVERY AND DATA MINING, 22., 2016, San Francisco. **Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining**. New York: ACM, 2016. p. 785-794. DOI: …" | +1 linha |
+| 10.2 | RIBEIRO; SINGH; GUESTRIN (2016) | ABNT | ABNT | Mesmo problema, mesmo evento | Mesma forma da 10.1, p. 1135-1144 | +1 linha |
+| 10.3 | LUNDBERG; LEE (2017) | ABNT | ABNT | "In: Advances in Neural Information Processing Systems 30 (NIPS 2017). 2017." sem evento, sem negrito, sem editora | "In: CONFERENCE ON NEURAL INFORMATION PROCESSING SYSTEMS, 31., 2017, Long Beach. **Advances in Neural Information Processing Systems 30**. Red Hook: Curran Associates, 2017. p. 4765-4774. Disponível em: … Acesso em: …" | +1 linha |
+| 10.4 | GRINSZTAJN et al. (2022) | ABNT | ABNT | "In: **Advances … 35 (NeurIPS 2022)**. 2022." sem evento nem editora | "In: CONFERENCE ON NEURAL INFORMATION PROCESSING SYSTEMS, 36., 2022, New Orleans. **Advances in Neural Information Processing Systems 35**. Red Hook: Curran Associates, 2022. Disponível em: … Acesso em: …" (sem páginas, que não conferi) | +1 linha |
+| 10.5 | WANG et al. (2020) | ABNT | ABNT | "In: Proceedings of the 58th Annual Meeting… Association for Computational Linguistics, 2020." sem evento, sem negrito, sem local | "In: ANNUAL MEETING OF THE ASSOCIATION FOR COMPUTATIONAL LINGUISTICS, 58., 2020, on-line. **Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics**. [S. l.]: Association for Computational Linguistics, 2020. p. 7567-7578. DOI: …" | +1 linha |
+| 10.6 | BAHROLOLLOOMI et al. (2022) | ABNT, R3 #2 | ABNT | O evento está como "17., 2022, Roma", mas o VISIGRAPP 2022 foi **on-line** (6 a 8 de fevereiro de 2022; os anais registram "Online Streaming") | "17., 2022, on-line." | 0 |
+| 10.7 | DO et al. (2021) | ABNT | ABNT | "Montreal: ACM": o local da editora é o da ACM (New York); o evento de 2021 foi on-line | Evento "16., 2021, on-line." e editora "New York: ACM, 2021." | 0 |
+| 10.8 | KOHAVI (1995); NICULESCU-MIZIL; CARUANA (2005) | ABNT | ABNT | Falta o local do evento ("14., 1995." e "22., 2005.") | "14., 1995, Montreal." e "22., 2005, Bonn." | 0 |
+| 10.9 | CRESWELL; CRESWELL (2023); PRODANOV; FREITAS (2013) | ABNT (só o título em negrito, o subtítulo não) | ABNT | O subtítulo está em negrito junto com o título | "**Research design**: qualitative, quantitative, and mixed methods approaches." e "**Metodologia do trabalho científico**: métodos e técnicas da pesquisa e do trabalho acadêmico." | 0 |
+| 10.10 | PEDREGOSA et al. (2011) | ABNT | consistência | Única entrada com "et al."; as outras listam todos os autores (Jiang, com 15). A NBR 6023 permite "et al." | **Manter** (permitido); só registro | 0 |
+
+**Soma do bloco:** +5 linhas. Fonte da 10.6: [anais do HUCAPP 2022](https://www.proceedings.com/64207.html), [registro Unpaywall](https://unpaywall.org/10.5220%2F0000156800003124).
+
+**Aplicado (2026-11-05): 10.1 a 10.9.** 10.10 mantido.
+
+Ao reescrever a entrada de Ribeiro (10.2), o segundo autor passou de "SINGH, Scott" para "SINGH, Sameer": o coautor do LIME é Sameer Singh, e "Scott" era um erro da entrada antiga.
