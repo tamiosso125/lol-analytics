@@ -985,13 +985,15 @@ aprende sozinho dos dados. Hiperparâmetros são configurações que
 - **Mas atenção, a escolha não foi porque ele ganhou em tudo.** Aos 10
   minutos o MLP teve acurácia um pouco maior (0,7020 contra 0,7004) e aos
   25 minutos o MLP quase empatou na AUC (0,9072 contra 0,9090). O texto
-  diz que a escolha foi pela **estabilidade na faixa intermediária**,
-  onde a previsão é mais usada.
+  (Seção 5.4) não usa mais o argumento da "estabilidade na faixa
+  intermediária": diz que o XGBoost foi **mantido por ser a escolha
+  anterior ao baseline e já sustentar a interface**, e remete os números
+  dos quatro cortes ao Apêndice C (mudado em 2026-11-04).
 - **Resposta pronta se perguntarem "mas o MLP ganhou aos 10 minutos!":**
-  "Ganhou por 0,0016 de acurácia, uma diferença irrelevante. O critério
-  foi o comportamento consistente na faixa intermediária, e lá o XGBoost
-  foi o melhor. Além disso, o XGBoost se integra direto com o SHAP de
-  árvore (TreeExplainer), que dá explicações exatas e rápidas."
+  "Ganhou por 0,0016 de acurácia, uma diferença irrelevante. O XGBoost
+  vinha do TCC I e já sustentava a interface; ele se integra direto com o
+  SHAP de árvore (TreeExplainer), que dá explicações exatas e rápidas, e
+  os dois ficaram no mesmo patamar."
   (Essa última parte é verdade técnica: o `export_model.py` usa
   `shap.TreeExplainer`, que é específico para árvores.)
 
@@ -1082,8 +1084,8 @@ medida do mesmo jeito do Quadro 3:
 | *Random Forest* ajustada: 200 árvores, profundidade 6, folha 5 | 0,7617 | 0,8468 |
 
 Empate técnico. O XGBoost segue com a maior acurácia, o critério do
-Apêndice G, e a conclusão não muda. Se a banca comparar o Quadro 3
-(*Random Forest* com 0,8277) com o Apêndice G (*Random Forest* de
+Apêndice F, e a conclusão não muda. Se a banca comparar o Quadro 3
+(*Random Forest* com 0,8277) com o Apêndice F (*Random Forest* de
 profundidade 6 a 0,0005 do XGBoost), a resposta está na própria 5.4: o
 quadro traz a configuração de referência, e a frase seguinte, a ajustada.
 **Resposta pronta:** "Na base final, ajustei por busca em
@@ -1266,7 +1268,7 @@ de chuva" e choveu em 70 deles, ela é **bem calibrada**.
 mostrou que os modelos, especialmente o XGBoost, **já eram bem
 calibrados**, sem precisar de ajuste extra.
 
-### 10.7 Taxa-base e a limitação do empate (Seção 6.1 e Apêndice G)
+### 10.7 Taxa-base e a limitação do empate (Seção 6.1 e Apêndice F)
 
 **Pergunta crítica:** se as duas equipes estão **totalmente empatadas**,
 o que o modelo prevê?
@@ -1342,7 +1344,7 @@ jogos**, do **valor de Shapley**.
 
 ## 12. Os 11 experimentos que não funcionaram (e por que isso é bom)
 
-### 12.1 O que foi tentado (Quadro 5, Seção 5.4; detalhe no Apêndice D)
+### 12.1 O que foi tentado (Quadro 5, Seção 5.4; detalhe no Apêndice K)
 
 Para tentar melhorar o modelo, foram testadas 11 ideias. **Nenhuma**
 melhorou de forma distinguível de ruído (mudanças de ±0,001 a 0,003 na
@@ -1387,7 +1389,7 @@ A AUC do XGBoost subiu só por aumentar o número de partidas:
 Ganho total de **0,0259**: cerca de **9 vezes** o maior ganho de um
 experimento de variáveis (0,003) e cerca de 130 vezes o menor (0,0002).
 (Versões anteriores diziam "6 vezes"; 0,0259 ÷ 0,003 dá 8,6. Corrigido em
-2026-11-03 ao reescrever o Apêndice D.)
+2026-11-03 ao reescrever o Apêndice K.)
 
 ### 12.4 Por que resultados negativos são bons para a tese
 
@@ -1712,9 +1714,9 @@ números por partida. O XGBoost também se integra com o SHAP de árvore,
 que dá explicações exatas."
 
 **6. "O MLP ganhou aos 10 minutos. Por que não usaram ele?"**
-"A diferença foi de 0,0016 de acurácia, irrelevante. O critério foi a
-estabilidade na faixa intermediária, onde a previsão é mais usada, e lá o
-XGBoost foi melhor."
+"A diferença foi de 0,0016 de acurácia, irrelevante. O XGBoost vinha do
+TCC I e já sustentava a interface, com o SHAP de árvore; o MLP ficou no
+mesmo patamar e o quadro dos quatro cortes está no Apêndice C."
 
 **7. "Os hiperparâmetros estão bem ajustados?"**
 "Sim. Uma busca em grade com 27 combinações e validação cruzada achou a
@@ -1752,7 +1754,7 @@ antiga."
 "As *features* foram congeladas com 39.426. As 1.637 a mais, quase todas
 da Coreia, mudariam o treino em cerca de 4%, e o ganho medido por volume
 é pequeno nessa escala. Retreinar invalidaria as métricas e a bateria de
-validação já feitas. Está declarado como limitação na Seção 6.1 (detalhe no Apêndice G), com o
+validação já feitas. Está declarado como limitação na Seção 6.1 (detalhe no Apêndice F), com o
 comando para quem quiser retreinar."
 
 **13. "O que é SHAP e por que não LIME?"**
@@ -1878,7 +1880,7 @@ o modelo aprende a vantagem do lado pelo valor de base (a taxa média de
 vitória do azul, que ele recebe quando todas as diferenças são zero). O
 problema é que ele
 a subestima no empate (49-51% contra 46-48% nos dados); está na 6.1 e no
-Apêndice G."
+Apêndice F."
 
 **37. "Se fosse começar de novo, o que faria diferente?"**
 "Congelaria a coleta antes de treinar, para não ter duas bases (41.063 e
@@ -1951,7 +1953,7 @@ causa de conhecimento mais completo e consultas mais uniformes."
 
 **48. "Uma regressão logística não faz o mesmo? Por que XGBoost?"** (medido em
 2026-11-03, `src/models/baseline_e_diferencas.py`, Apêndice C)
-"Porque o limite está nas cinco variáveis, não no modelo: uma regressão logística, medida como baseline em 2026-11-03, chega a 0,7631 de acurácia e 0,8483 de AUC aos 15 minutos, no mesmo patamar. O XGBoost ficou 0,0010 abaixo em AUC, com intervalo que exclui zero, mas é uma diferença de milésimos. A comparação com árvores e rede neural era o objetivo e do TCC I, e o XGBoost foi escolhido antes desse baseline ser medido; o que ele oferece é capturar interações caso as variáveis cresçam, e o SHAP de árvore. Com só cinco variáveis, o ganho de complexidade é zero, e o trabalho diz isso."
+"Porque o limite está nas cinco variáveis, não no modelo: uma regressão logística, medida como baseline em 2026-11-03, chega a 0,7631 de acurácia e 0,8483 de AUC aos 15 minutos. O XGBoost ficou 0,0010 abaixo em AUC, com intervalo que exclui zero aos 10, 15 e 20 minutos, mas é uma diferença de milésimos, e o texto diz que a logística fica à frente. A comparação com árvores e rede neural era o objetivo e do TCC I, e o XGBoost foi escolhido antes desse baseline ser medido. Não digam que ele captura interações caso as variáveis cresçam: com as 59 variáveis novas a logística ganhou mais que ele (+0,0080 contra +0,0044, Apêndice K). O que o XGBoost oferece hoje é o SHAP exato de árvore e a integração já validada; trocar de modelo não mudaria o resultado prático."
 
 **46. "O que a literatura diz sobre os três modelos empatarem?"** "Do et al.
 (2021) testaram cinco algoritmos e ficaram entre 72,7% e 75,4%, com o
@@ -1994,14 +1996,14 @@ Oracle's Elixir (CSV) → tabelas do profissional
 TCC II, ferramentas e materiais são **descritos**, não referenciados com
 citação. Por isso a 4.8 não tem citações.
 
-### 16.3 As 6 páginas (recortes na Seção 5, telas inteiras no Apêndice F)
+### 16.3 As 6 páginas (recortes na Seção 5, telas inteiras no Apêndice E)
 
 **No corpo (Seção 5), cinco figuras recortadas:** Figura 1 Competitivo
 (viés de lado e conversão, 5.3); Figura 2 SHAP nos quatro cortes (5.4);
 Figura 3 análise de partida com mapa de calor (5.5); Figura 4 Simulador,
 aba Estado (5.5); Figura 5 consulta em linguagem natural (5.6).
 
-**No Apêndice F, as seis telas inteiras (Figuras 6 a 11):**
+**No Apêndice E, as seis telas inteiras (Figuras 6 a 11):**
 
 | Figura | Página | O que mostra |
 |---|---|---|
@@ -2057,7 +2059,7 @@ resultado e **reprova** se algo divergir.
 
 ## 18. Limitações e trabalhos futuros
 
-### 18.1 Limitações (Seção 6.1 e Apêndice G)
+### 18.1 Limitações (Seção 6.1 e Apêndice F)
 
 Saber as limitações **é ponto a favor**. A banca respeita quem conhece
 os limites do próprio trabalho.
@@ -2208,9 +2210,9 @@ para isso que este guia existe.
 
 **Documento**
 - 29 páginas do Resumo ao fim das Referências (limite 30, uma linha de folga)
-- 31 referências; 11 Figuras (5 no corpo, 6 telas inteiras no Apêndice F);
-  33 Quadros (6 no corpo, 27 nos apêndices); Apêndices A-M (H fundamentos dos métodos, I estudos e literatura, J procedência dos dados e chaves da Riot, K objetivos e evidências, L SHAP por corte, M experimentos de precisão); Anexo A (documentação da Riot)
-- limitações: Seção 6.1, com o detalhe no Apêndice G
+- 31 referências; 11 Figuras (5 no corpo, 6 telas inteiras no Apêndice E);
+  29 Quadros (6 no corpo, 23 nos apêndices); Apêndices A-K (G fundamentos dos métodos, H procedência dos dados e chaves da Riot, I objetivos e evidências, J SHAP por corte, K experimentos de precisão, 1 a 19); Anexo A (documentação da Riot)
+- limitações: Seção 6.1, com o detalhe no Apêndice F
 - `verifica_tcc.py`: 20/20
 
 ---
@@ -2291,7 +2293,7 @@ Detalhes e páginas em `docs/conferencia_referencias.md`.
 ## Perguntas novas depois dos experimentos de precisão (2026-11-03)
 
 **"Vocês tentaram variáveis mais ricas para subir a acurácia?"**
-Sim (Apêndice M). Além dos onze experimentos do Quadro 5, testamos mais oito conjuntos: trajetória, diferença por função, objetivos, campeões de cada time e histórico do jogador. O maior ganho, com 64 variáveis e regressão logística, foi +0,0080 de AUC-ROC aos 15 minutos (0,8483 para 0,8555) e +0,0074 aos 25, e se manteve treinando no passado e testando no futuro (+0,0069 a +0,0089). Está abaixo de +0,01. O que mais ajudou foi a diferença por função (+0,0027).
+Sim (Apêndice K). Além dos onze experimentos do Quadro 5, testamos mais oito conjuntos: trajetória, diferença por função, objetivos, campeões de cada time e histórico do jogador. O maior ganho, com 64 variáveis e regressão logística, foi +0,0080 de AUC-ROC aos 15 minutos (0,8483 para 0,8555) e +0,0074 aos 25, e se manteve treinando no passado e testando no futuro (+0,0069 a +0,0089). Está abaixo de +0,01. O que mais ajudou foi a diferença por função (+0,0027).
 
 **"Por que não adotaram o modelo novo, se melhorou?"**
 O ganho é real mas pequeno (cerca de 1 ponto de acurácia aos 15 minutos), e trocar o modelo exigiria retreinar, reexportar e revalidar tudo. Fica como trabalho futuro. O que o resultado mostra é que o limite está na informação disponível, não no algoritmo: a regressão logística aproveita as variáveis novas mais que o XGBoost.
@@ -2306,4 +2308,4 @@ Não pela documentação: a chave de produção aumenta o limite de requisiçõe
 A literatura que consultei reporta 73% a 82% em partida em andamento, e resultados muito acima disso sem discussão de vazamento são suspeitos. Aos 25 minutos já temos AUC-ROC de 0,909.
 
 **"E os 2.543 jogos profissionais que faltavam?"**
-Erro do carregador (apagava por ano do arquivo, não por jogo), corrigido. O total passou de 96.716 para 99.259; a taxa do azul no total continua 53,2% (Apêndice J).
+Erro do carregador (apagava por ano do arquivo, não por jogo), corrigido. O total passou de 96.716 para 99.259; a taxa do azul no total continua 53,2% (Apêndice H).

@@ -160,7 +160,7 @@ resultado está em `reports/`.**
 .venv\Scripts\python.exe -m src.models.multi_cutoff_metrics
 
 # GridSearchCV na base final + reports/tune_models_39k.log/.json (~50s só
-# com XGBoost). Sustenta a afirmação da 6.1 e do Apêndice G de que a
+# com XGBoost). Sustenta a afirmação da 6.1 e do Apêndice F de que a
 # limitação de taxa-base NÃO é subajuste. --completo acrescenta RF e MLP
 # (~6 min) e mede a melhor combinação como no Quadro 3: são os valores
 # ajustados que a 5.4 cita (acuracia_quadro3 / auc_quadro3 no JSON):
@@ -201,7 +201,7 @@ resultado está em `reports/`.**
 
 ```powershell
 # Teste D1: calibração e regularização alternativa contra a discrepância de
-# taxa-base da Seção 6.1 e do Apêndice G. LENTO (~40 min): cada variante roda validação
+# taxa-base da Seção 6.1 e do Apêndice F. LENTO (~40 min): cada variante roda validação
 # cruzada aninhada sobre 39.188 linhas. Grava
 # reports/experimento_calibracao.json, e o veredito sai de
 # reports/experimento_calibracao_veredito.json:
@@ -212,14 +212,14 @@ resultado está em `reports/`.**
 ```
 
 ```powershell
-# Experimento 10 (Apêndice D): placas de torre (TURRET_PLATE_DESTROYED)
+# Experimento 10 (Apêndice K): placas de torre (TURRET_PLATE_DESTROYED)
 # como feature plate_diff — ~10 min, varre 41 mil timelines. Grava
 # reports/experimento_placas_torre.json:
 .venv\Scripts\python.exe -m src.models.experiment_turret_plates
 ```
 
 ```powershell
-# Experimento 11 (Apêndice D): percentis comportamentais do jogador
+# Experimento 11 (Apêndice K): percentis comportamentais do jogador
 # (teamwork_pct_diff/expertise_pct_diff via lol-challenges-v1), sobre as
 # partidas KR mais recentes (minimiza o gap entre a coleta e a consulta —
 # lol-challenges-v1 devolve estado VITALÍCIO atual, não da época da
@@ -240,12 +240,12 @@ resultado está em `reports/`.**
 | artefato | quem consome |
 |---|---|
 | `reports/metricas_corte.json` | Quadros 3 e 4 e Apêndice C; checagem 5 |
-| `reports/tune_models_39k.json` | Seção 5.4 (três modelos ajustados), 6.1 e Apêndice G; checagem 12 |
-| `reports/taxa_base_por_corte.json` | Seção 5.3, 6.1 e Apêndice G |
+| `reports/tune_models_39k.json` | Seção 5.4 (três modelos ajustados), 6.1 e Apêndice F; checagem 12 |
+| `reports/taxa_base_por_corte.json` | Seção 5.3, 6.1 e Apêndice F |
 | `reports/faixa_duracao.json` | Seção 4.5 e 5.3 (teste ii) |
-| `reports/experimento_calibracao_veredito.json` | Apêndices D e G; checagem 14 |
-| `reports/experimento_placas_torre.json` | Seção 5.4 e Apêndice D (experimento 10) |
-| `reports/experimento_challenges_piloto.json` | Seção 5.4 e Apêndice D (experimento 11) |
+| `reports/experimento_calibracao_veredito.json` | Apêndices K e F; checagem 14 |
+| `reports/experimento_placas_torre.json` | Seção 5.4 e Apêndice K (experimento 10) |
+| `reports/experimento_challenges_piloto.json` | Seção 5.4 e Apêndice K (experimento 11) |
 
 > `reports/tune_models_39k.log` cai no `.gitignore` (`*.log`) e não é
 > versionado; o `.json` é, e é dele que a checagem 12 lê. O log é a versão
@@ -281,7 +281,7 @@ quando algo diverge, e ambas devem passar.
 .venv\Scripts\python.exe docs\confere_docx.py
 ```
 
-### 5d. Regerar as figuras (recortes da Seção 5 e telas do Apêndice F)
+### 5d. Regerar as figuras (recortes da Seção 5 e telas do Apêndice E)
 
 ```powershell
 # A API precisa estar em :8000 e o frontend na porta LIBERADA NO CORS
@@ -290,7 +290,7 @@ quando algo diverge, e ambas devem passar.
 Push-Location frontend; npx vite preview --port 5173; Pop-Location
 $env:FRONT_URL = "http://localhost:5173"
 .venv\Scripts\python.exe docs\capturar_figuras_texto.py   # 5 recortes do corpo (Figuras 1-5)
-.venv\Scripts\python.exe docs\recapturar_anexo_a.py       # 6 telas inteiras (Apêndice F)
+.venv\Scripts\python.exe docs\recapturar_anexo_a.py       # 6 telas inteiras (Apêndice E)
 ```
 
 Os recortes vão para `reports/figuras_texto/` (registro em `figuras.json`,
@@ -355,7 +355,7 @@ $env:TCC1_REFERENCE_DOCX = 'C:\Users\Home\Downloads\TCC\TCC_Final.docx'
 
 # 1. markdown -> .docx (pandoc gera o corpo; python-docx monta capa,
 #    folha de rosto, numeração de Quadros e Figuras, insere as 5 figuras
-#    do corpo e as 6 telas do Apêndice F)
+#    do corpo e as 6 telas do Apêndice E)
 .\.venv\Scripts\python.exe docs\build_tcc_docx.py
 
 # 2. o Word preenche a numeração dos campos SEQ e PAGE (não há sumário nem
@@ -427,7 +427,7 @@ texto existam de verdade. Ver **5b**, **5c** e **5d**.
 
 ```
 15. python -m src.models.multi_cutoff_metrics  # Apêndice C + metricas_corte.json
-16. python -m src.models.tune_models_full --completo  # lastro da 5.4, 6.1 e Apêndice G
+16. python -m src.models.tune_models_full --completo  # lastro da 5.4, 6.1 e Apêndice F
 17. python docs/verifica_tcc.py               # 22 checagens, exit 0
 18. python docs/build_tcc_docx.py             # gera o .docx
 19. powershell -File docs/finalize-fields.ps1  # Word preenche os campos
@@ -440,7 +440,7 @@ texto existam de verdade. Ver **5b**, **5c** e **5d**.
 # variáveis ricas (base congelada de 39.426 partidas); grava data/features_v2.csv.gz
 .venv\Scripts\python.exe -m src.features.build_features_v2
 .venv\Scripts\python.exe tests\test_features_v2_sem_vazamento.py        # 0 vazamentos em 703 pares
-# experimentos 12 a 18 -> reports/experimentos_precisao.json (Apêndice M)
+# experimentos 12 a 18 -> reports/experimentos_precisao.json (Apêndice K)
 .venv\Scripts\python.exe -m src.models.experiment_precisao --cutoffs 15 25
 # treino no passado, teste no futuro com as variáveis novas -> reports/holdout_precisao.json
 .venv\Scripts\python.exe -m src.models.holdout_precisao --cutoffs 15 25

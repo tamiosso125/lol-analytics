@@ -30,7 +30,7 @@ Legends com DOIS datasets complementares:
    retreinados — a diferença de 1.637 partidas é limitação declarada
    (das 1.754 partidas sem *features*, 1.647 são da KR e 107 são de
    BR1, EUW1 e NA1; as features cobrem 39.309 partidas distintas)
-   na Seção 6.1 do TCC (detalhe no Apêndice G). JSON bruto + timelines guardados para
+   na Seção 6.1 do TCC (detalhe no Apêndice F). JSON bruto + timelines guardados para
    reprocessamento.
 2. **Competitivo** (Oracle's Elixir): **99.259 jogos** profissionais de
    2014-2026 (LCK/LPL/LEC/LTA/CBLOL etc.), carregados de CSVs anuais.
@@ -139,7 +139,7 @@ Modelo em produção, solo queue **39.188 partidas** no corte de 15 min
 (retreino de 2026-10-04 — números do CV 5-fold com semente 42 e
 hiperparâmetros de produção 500/0,01/3; o `GridSearchCV` sobre as 39 mil
 linhas devolveu ajuste equivalente, 200 árvores a taxa 0,05, o que
-confirma que a limitação de taxa-base registrada na Seção 6.1 e no Apêndice G do TCC não
+confirma que a limitação de taxa-base registrada na Seção 6.1 e no Apêndice F do TCC não
 é subajuste):
 
 | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
@@ -218,7 +218,7 @@ perguntas de referência (22 solo queue + 4 competitivo).
   (`plate_diff`) e percentis comportamentais entraram na série por
   último; e não é 8 porque o experimento de dragões por tipo
   (`monsterSubType`, diário 2026-07-05) entrou antes deles e ficou de
-  fora do Apêndice D do TCC até 2026-10-03; o "7º"/"8º" nos títulos das
+  fora do Apêndice K do TCC até 2026-10-03; o "7º"/"8º" nos títulos das
   entradas de 2026-07-06 do diário é renumeração local que ignora esses
   três experimentos.
 - Validação externa: o próprio Oracle's Elixir publica uma calculadora
@@ -272,9 +272,9 @@ Resumo (página 1) ao fim das Referências, limite 30 (régua corrigida em
 2026-10-23; a antiga parava no início das Referências e dizia "30" quando
 eram 37). Reduzido em 2026-10-28 conforme `docs/plano_reducao_corpo.md`,
 com 6 quadros e 5 figuras recortadas no corpo a pedido do orientador
-(`docs/capturar_figuras_texto.py`). 31 referências, Apêndices A-M (H a M novos em 2026-11-03; F =
-telas inteiras, G = limitações em detalhe), Anexo A (documentação da Riot).
-O Apêndice E recebeu as notas de proveniência da Seção 5.3, movidas do
+(`docs/capturar_figuras_texto.py`). 31 referências, Apêndices A-K (G a K novos em 2026-11-03; em 2026-11-04 o antigo I saiu e o antigo D
+foi fundido no de precisão; E = telas inteiras, F = limitações em detalhe), Anexo A (documentação da Riot).
+O Apêndice D recebeu as notas de proveniência da Seção 5.3, movidas do
 corpo em 2026-10-20 para abrir espaço às citações novas). Suíte completa verde:
 `tests/smoke_test.py`, `tests/validate_predictions.py` (aprovado com
 ressalvas), `docs/verifica_tcc.py` (22 checagens, consistente),

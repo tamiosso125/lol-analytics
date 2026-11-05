@@ -750,7 +750,7 @@ como acerto infla o número (foi o que mascarou `tower_diff`/15min como
 
 Classificação dos não-OK, por **propriedade** e não por lista de casos:
 - `LIMITADO` (1): `kill_diff`/15min — direção em 60%, SHAP 0,070. A
-  Seção 6.1 do TCC (e o Apêndice G) nomeia "abates e torres" ao declarar
+  Seção 6.1 do TCC (e o Apêndice F) nomeia "abates e torres" ao declarar
   a não-garantia de monotonicidade isolada.
 - `NEUTRO` (3): `tower_diff`/10min (SHAP 0,004), `tower_diff`/15min
   (0,014) e `kill_diff`/25min (0,009) — abaixo do limiar de 0,05, ou
@@ -824,10 +824,10 @@ Gera `docs/tcc2_final.docx` em 4 passos:
    fonte (estilo `Fonte das ilustrações` do TCC 1) abaixo. Insere as 5
    figuras do corpo onde o markdown tem `Figura — Título | caminho.png`
    (recortes de `reports/figuras_texto/`) e as 6 telas de
-   `reports/anexo_a/` no Apêndice F. Sem listas de ilustrações e de quadros.
-   A tabela `Arquivo | Página` do Apêndice F é localizada pelo cabeçalho
+   `reports/anexo_a/` no Apêndice E. Sem listas de ilustrações e de quadros.
+   A tabela `Arquivo | Página` do Apêndice E é localizada pelo cabeçalho
    (`_tabela_de_arquivos`), não por ser a última do documento: desde
-   2026-11-03 há quadros no Apêndice G depois dela. Os quadros de apêndice com
+   2026-11-03 há quadros no Apêndice F depois dela. Os quadros de apêndice com
    comando, caminho ou texto corrido ficam alinhados à esquerda
    (`QUADROS_ESQUERDA`); todo quadro novo precisa de entrada em
    `LARGURAS_QUADROS`, com a soma das larguras em torno de 16 cm.
@@ -878,7 +878,7 @@ No `.docx`, cada figura entra por um marcador no Markdown:
 
 ### `docs/recapturar_anexo_a.py`
 
-Regrava as seis telas inteiras do **Apêndice F** (eram Anexo A até
+Regrava as seis telas inteiras do **Apêndice E** (eram Anexo A até
 2026-10-28) contra a API e o frontend de produção. No Simulador, abre a aba
 Estado com o mesmo estado da figura do corpo (a aba padrão é um formulário
 vazio).
@@ -910,7 +910,7 @@ telas de erro — o sintoma é um PNG de 24 KB, idêntico entre páginas.
 
 ### `src/models/tune_models_full.py`
 
-Reexecuta o `GridSearchCV` na base final e **arquiva o log**. É o que dá lastro à afirmação da Seção 6.1 e do Apêndice G de que a limitação de taxa-base **não é subajuste**, e, com `--completo`, aos valores dos três modelos ajustados que a Seção 5.4 cita.
+Reexecuta o `GridSearchCV` na base final e **arquiva o log**. É o que dá lastro à afirmação da Seção 6.1 e do Apêndice F de que a limitação de taxa-base **não é subajuste**, e, com `--completo`, aos valores dos três modelos ajustados que a Seção 5.4 cita.
 
 ```powershell
 .venv\Scripts\python.exe -m src.models.tune_models_full            # só o XGBoost, ~50s
@@ -929,7 +929,7 @@ Treino no passado, teste no futuro. Responde ao aviso de Kaufman et al. (2012) d
 
 Grava `reports/holdout_temporal.json` (Apêndice C do TCC; a checagem 20 de `verifica_tcc.py` compara o quadro com ele).
 
-`tune_models.py` — o script original — não servia: ele imprime o resultado e não guarda nada, e foi rodado sobre a base de 10 mil. A afirmação da antiga Seção 5.8 (hoje 6.1 e Apêndice G) ficou semanas sem artefato por causa disso.
+`tune_models.py` — o script original — não servia: ele imprime o resultado e não guarda nada, e foi rodado sobre a base de 10 mil. A afirmação da antiga Seção 5.8 (hoje 6.1 e Apêndice F) ficou semanas sem artefato por causa disso.
 
 Resultado medido em 2026-10-04, sobre as 39.188 linhas do corte de 15 min:
 
@@ -1030,7 +1030,7 @@ registradas no código:
 ### `docs/experimento_calibracao.py` e `docs/reavalia_calibracao.py`
 
 Teste **D1**: calibração e regularização alternativa contra a discrepância
-de taxa-base da Seção 6.1 e do Apêndice G. São as duas alavancas que a grade de
+de taxa-base da Seção 6.1 e do Apêndice F. São as duas alavancas que a grade de
 hiperparâmetros não cobre — ela variou só `n_estimators`,
 `learning_rate` e `max_depth`, e a discrepância é justamente de
 taxa-base.
@@ -1142,4 +1142,4 @@ conta cinco vezes.
 
 ### `src/features/build_features_v2.py`, `src/models/experiment_precisao.py`, `src/models/holdout_precisao.py`, `src/models/experiment_historico.py`
 
-Experimentos 12 a 19 (2026-11-03), exploratórios: não alteram o modelo de produção nem o `data/features.csv`. `build_features_v2` extrai 59 variáveis novas de `frames[: corte + 1]` para a base congelada de `features_phases.csv`; `tests/test_features_v2_sem_vazamento.py` confere que cortar a timeline no corte não muda nenhuma. `experiment_precisao` compara conjuntos de variáveis (trajetória, função, objetivos, campeões, jogadores) com 5 dobras e semente 42 e IC por *bootstrap* pareado. `holdout_precisao` repete com treino no passado e teste no futuro. `experiment_historico` mede o histórico do jogador por estrato de cobertura. Resultados no Apêndice M do TCC. Atenção: a codificação de campeões é ajustada só no treino e o histórico usa só partidas com `game_creation` anterior.
+Experimentos 12 a 19 (2026-11-03), exploratórios: não alteram o modelo de produção nem o `data/features.csv`. `build_features_v2` extrai 59 variáveis novas de `frames[: corte + 1]` para a base congelada de `features_phases.csv`; `tests/test_features_v2_sem_vazamento.py` confere que cortar a timeline no corte não muda nenhuma. `experiment_precisao` compara conjuntos de variáveis (trajetória, função, objetivos, campeões, jogadores) com 5 dobras e semente 42 e IC por *bootstrap* pareado. `holdout_precisao` repete com treino no passado e teste no futuro. `experiment_historico` mede o histórico do jogador por estrato de cobertura. Resultados no Apêndice K do TCC. Atenção: a codificação de campeões é ajustada só no treino e o histórico usa só partidas com `game_creation` anterior.
