@@ -31,7 +31,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(RAIZ))
 
-GABARITO = RAIZ / "docs" / "nlq_gabarito_900.json"
+GABARITO = RAIZ / "docs" / "nlq_gabarito_203.json"
 
 
 def e_recusa(res: dict) -> bool:

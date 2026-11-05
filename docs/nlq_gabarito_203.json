@@ -1,0 +1,2037 @@
+{
+ "semente": 20261105,
+ "total": 203,
+ "origem": "amostra ao acaso do que o gerador produz (docs/nlq_gabarito_900.json)",
+ "itens": [
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Qual é a taxa de vitória do lado azul na EWC em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE league = 'EWC' AND year = 2026 AND side = 'Blue'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 201
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Qual é a taxa de vitória do campeão Shen no competitivo em 2026?",
+   "sql_ref": "SELECT AVG(pp.win::int) AS taxa FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pp.champion = 'Shen' AND pg.year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 202
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Qual é a duração média das partidas da LPL em 2026, em segundos?",
+   "sql_ref": "SELECT AVG(game_length_s) AS media FROM pro_games WHERE league = 'LPL' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 203
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais são os 3 campeões com maior média de eliminações na posição MIDDLE?",
+   "sql_ref": "SELECT champion_name, AVG(kills) AS media FROM participants WHERE team_position = 'MIDDLE' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 3",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 3,
+   "id": 204
+  },
+  {
+   "base": "competitivo",
+   "familia": "C9-ano",
+   "pergunta": "Quantos jogos profissionais foram registrados em 2015?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE year = 2015",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 205
+  },
+  {
+   "base": "solo",
+   "familia": "S8-bans",
+   "pergunta": "Quantos banimentos Singed recebeu?",
+   "sql_ref": "SELECT COUNT(*) AS bans FROM bans b JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c ON c.champion_id = b.champion_id WHERE c.champion_name = 'Singed'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 206
+  },
+  {
+   "base": "solo",
+   "familia": "S10-plataforma",
+   "pergunta": "Qual é a duração média das partidas na plataforma KR?",
+   "sql_ref": "SELECT AVG(game_duration_s) AS media FROM matches WHERE platform_id = 'KR'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 207
+  },
+  {
+   "base": "solo",
+   "familia": "S14-kda",
+   "pergunta": "Qual é o KDA médio do campeão Evelynn?",
+   "sql_ref": "SELECT AVG((kills + assists)::float / NULLIF(deaths, 0)) AS kda FROM participants WHERE champion_name = 'Evelynn'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 208
+  },
+  {
+   "base": "solo",
+   "familia": "S12-itens",
+   "pergunta": "Quantas compras do item Cetro de Cristal de Rylai existem?",
+   "sql_ref": "SELECT COUNT(*) AS compras FROM item_events e JOIN items i ON i.item_id = e.item_id WHERE i.name = 'Cetro de Cristal de Rylai' AND e.action = 'BUY'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 209
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Quantos picks Aurelion Sol teve no competitivo?",
+   "sql_ref": "SELECT COUNT(*) AS picks FROM pro_players WHERE champion = 'Aurelion Sol'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 210
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Qual é a duração média das partidas da HLL em 2026, em segundos?",
+   "sql_ref": "SELECT AVG(game_length_s) AS media FROM pro_games WHERE league = 'HLL' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 211
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Qual é a média de eliminações do jogador Kasing?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_players WHERE player_name = 'Kasing'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 212
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Qual é a média de mortes da equipe DN SOOPers Challengers por jogo?",
+   "sql_ref": "SELECT AVG(deaths) AS media FROM pro_games WHERE team_name = 'DN SOOPers Challengers'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 213
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Qual a taxa de vitória de Cassiopeia no solo queue?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Cassiopeia'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 214
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Quanto é o win rate de Thresh?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Thresh'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 215
+  },
+  {
+   "base": "solo",
+   "familia": "S12-itens",
+   "pergunta": "Quantas vezes o item Tormento de Liandry foi comprado?",
+   "sql_ref": "SELECT COUNT(*) AS compras FROM item_events e JOIN items i ON i.item_id = e.item_id WHERE i.name = 'Tormento de Liandry' AND e.action = 'BUY'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 216
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Qual é a taxa de vitória do campeão Evelynn?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Evelynn'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 217
+  },
+  {
+   "base": "solo",
+   "familia": "S5-mais-jogado-posicao",
+   "pergunta": "Qual campeão aparece mais vezes de BOTTOM?",
+   "sql_ref": "SELECT champion_name, COUNT(*) AS jogos FROM participants WHERE team_position = 'BOTTOM' GROUP BY champion_name ORDER BY jogos DESC LIMIT 1",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 218
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe Top Esports?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'Top Esports'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 219
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Qual é a média de torres destruídas da equipe T1 por jogo?",
+   "sql_ref": "SELECT AVG(towers) AS media FROM pro_games WHERE team_name = 'T1'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 220
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe HANJIN BRION Challengers em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'HANJIN BRION Challengers' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 221
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de assistências por partida de Jayce?",
+   "sql_ref": "SELECT AVG(assists) AS media FROM participants WHERE champion_name = 'Jayce'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 222
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual o win rate de G2 Esports no profissional?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'G2 Esports'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 223
+  },
+  {
+   "base": "solo",
+   "familia": "S12-itens",
+   "pergunta": "Quantas vezes o item Malevolência foi comprado?",
+   "sql_ref": "SELECT COUNT(*) AS compras FROM item_events e JOIN items i ON i.item_id = e.item_id WHERE i.name = 'Malevolência' AND e.action = 'BUY'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 224
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas partidas o campeão Lucian disputou?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Lucian'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 225
+  },
+  {
+   "base": "solo",
+   "familia": "S9-campeoes-wr",
+   "pergunta": "Quantos campeões têm taxa de vitória acima de 56% com pelo menos 100 partidas?",
+   "sql_ref": "SELECT COUNT(*) AS campeoes FROM (SELECT champion_name FROM participants GROUP BY champion_name HAVING COUNT(*) >= 100 AND AVG(win::int) > 0.56) s",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 226
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual é a média de pontuação de visão do campeão MonkeyKing?",
+   "sql_ref": "SELECT AVG(vision_score) AS media FROM participants WHERE champion_name = 'MonkeyKing'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 227
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Qual é a taxa de vitória do campeão Vayne no competitivo em 2026?",
+   "sql_ref": "SELECT AVG(pp.win::int) AS taxa FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pp.champion = 'Vayne' AND pg.year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 228
+  },
+  {
+   "base": "competitivo",
+   "familia": "C8-ranking",
+   "pergunta": "Quais foram as 3 ligas com mais jogos em 2026?",
+   "sql_ref": "SELECT league, COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE year = 2026 GROUP BY league ORDER BY jogos DESC LIMIT 3",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 3,
+   "id": 229
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Quantos picks Talon teve no competitivo?",
+   "sql_ref": "SELECT COUNT(*) AS picks FROM pro_players WHERE champion = 'Talon'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 230
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas vezes Yuumi foi jogado?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Yuumi'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 231
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Quanto é o win rate de TwistedFate?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'TwistedFate'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 232
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas partidas o campeão Ivern disputou?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Ivern'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 233
+  },
+  {
+   "base": "competitivo",
+   "familia": "C9-ano",
+   "pergunta": "Quantos jogos profissionais foram registrados em 2017?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE year = 2017",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 234
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Quantas partidas foram disputadas na TCL em 2026?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE league = 'TCL' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 235
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas partidas o campeão Kassadin disputou?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Kassadin'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 236
+  },
+  {
+   "base": "competitivo",
+   "familia": "U2-serie",
+   "pergunta": "Qual o aproveitamento de uma equipe em séries melhor de cinco?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "série ausente",
+   "id": 237
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas vezes Garen foi jogado?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Garen'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 238
+  },
+  {
+   "base": "competitivo",
+   "familia": "C9-ano",
+   "pergunta": "Qual foi a duração média das partidas profissionais em 2016, em segundos?",
+   "sql_ref": "SELECT AVG(game_length_s) AS media FROM pro_games WHERE year = 2016",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 239
+  },
+  {
+   "base": "competitivo",
+   "familia": "U1-primeiro",
+   "pergunta": "Qual equipe conquistou a primeira torre mais vezes em 2026?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "primeiro evento ausente",
+   "id": 240
+  },
+  {
+   "base": "competitivo",
+   "familia": "U6-draft",
+   "pergunta": "Qual campeão é mais banido na primeira fase de bans do competitivo?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "ordem do draft ausente",
+   "id": 241
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Quantos torres destruídas FunPlus Phoenix faz em média por jogo?",
+   "sql_ref": "SELECT AVG(towers) AS media FROM pro_games WHERE team_name = 'FunPlus Phoenix'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 242
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas partidas o campeão Neeko disputou?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Neeko'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 243
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Quantos Barões Nashor V3 Esports faz em média por jogo?",
+   "sql_ref": "SELECT AVG(barons) AS media FROM pro_games WHERE team_name = 'V3 Esports'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 244
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Qual é o KDA médio do jogador Kasing?",
+   "sql_ref": "SELECT AVG((kills + assists)::float / NULLIF(deaths, 0)) AS kda FROM pro_players WHERE player_name = 'Kasing'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 245
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Quanto é o win rate de Jayce?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Jayce'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 246
+  },
+  {
+   "base": "competitivo",
+   "familia": "C2-jogos-equipe",
+   "pergunta": "Quantos jogos a equipe Gen.G Global Academy disputou?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE team_name = 'Gen.G Global Academy'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 247
+  },
+  {
+   "base": "solo",
+   "familia": "S12-itens",
+   "pergunta": "Quantas compras do item Céu Dividido existem?",
+   "sql_ref": "SELECT COUNT(*) AS compras FROM item_events e JOIN items i ON i.item_id = e.item_id WHERE i.name = 'Céu Dividido' AND e.action = 'BUY'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 248
+  },
+  {
+   "base": "competitivo",
+   "familia": "U4-dano-visao",
+   "pergunta": "Qual equipe tem a maior média de dano por minuto no competitivo?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "dano, visão, ouro total ou CS total ausentes no competitivo",
+   "id": 249
+  },
+  {
+   "base": "competitivo",
+   "familia": "C10-contagem",
+   "pergunta": "Quantos jogos tiveram mais de 30 eliminações somando as duas equipes?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM (SELECT game_id FROM pro_games GROUP BY game_id HAVING SUM(kills) > 30) s",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 250
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Qual é a taxa de vitória do campeão Malzahar?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Malzahar'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 251
+  },
+  {
+   "base": "competitivo",
+   "familia": "C2-jogos-equipe",
+   "pergunta": "Quantos jogos a equipe ThunderTalk Gaming disputou?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE team_name = 'ThunderTalk Gaming'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 252
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Quantos mortes SK Gaming Prime faz em média por jogo?",
+   "sql_ref": "SELECT AVG(deaths) AS media FROM pro_games WHERE team_name = 'SK Gaming Prime'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 253
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe Forsaken em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'Forsaken' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 254
+  },
+  {
+   "base": "solo",
+   "familia": "S16-visao",
+   "pergunta": "Qual é a pontuação de visão média na posição BOTTOM?",
+   "sql_ref": "SELECT AVG(vision_score) AS media FROM participants WHERE team_position = 'BOTTOM'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 255
+  },
+  {
+   "base": "solo",
+   "familia": "S8-bans",
+   "pergunta": "Quantas vezes o campeão Rell foi banido?",
+   "sql_ref": "SELECT COUNT(*) AS bans FROM bans b JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c ON c.champion_id = b.champion_id WHERE c.champion_name = 'Rell'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 256
+  },
+  {
+   "base": "competitivo",
+   "familia": "C9-ano",
+   "pergunta": "Qual foi a duração média das partidas profissionais em 2023, em segundos?",
+   "sql_ref": "SELECT AVG(game_length_s) AS media FROM pro_games WHERE year = 2023",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 257
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantos jogos o jogador FoFo disputou?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM pro_players WHERE player_name = 'FoFo'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 258
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Quantos jogos a LRN teve em 2026?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE league = 'LRN' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 259
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Quantos eliminações SK Gaming Prime faz em média por jogo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_games WHERE team_name = 'SK Gaming Prime'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 260
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Quanto é o win rate de Chogath?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Chogath'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 261
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Quantos picks Renata Glasc teve no competitivo?",
+   "sql_ref": "SELECT COUNT(*) AS picks FROM pro_players WHERE champion = 'Renata Glasc'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 262
+  },
+  {
+   "base": "competitivo",
+   "familia": "U1-primeiro",
+   "pergunta": "Qual equipe conquistou o primeiro dragão mais vezes em 2026?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "primeiro evento ausente",
+   "id": 263
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe INTZ?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'INTZ'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 264
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe Sentinels em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'Sentinels' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 265
+  },
+  {
+   "base": "competitivo",
+   "familia": "U7-itens-pro",
+   "pergunta": "Qual item mais comprado no competitivo em 2026?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "itens ausentes no competitivo",
+   "id": 266
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas partidas o campeão Cassiopeia disputou?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Cassiopeia'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 267
+  },
+  {
+   "base": "competitivo",
+   "familia": "U3-minuto",
+   "pergunta": "Qual era a vantagem de experiência aos 25 minutos, em média?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "estado em minuto ausente",
+   "id": 268
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais são os 3 campeões com maior média de CS total na posição MIDDLE?",
+   "sql_ref": "SELECT champion_name, AVG(cs_total) AS media FROM participants WHERE team_position = 'MIDDLE' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 3",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 3,
+   "id": 269
+  },
+  {
+   "base": "solo",
+   "familia": "S5-mais-jogado-posicao",
+   "pergunta": "Qual é o campeão mais jogado na posição JUNGLE?",
+   "sql_ref": "SELECT champion_name, COUNT(*) AS jogos FROM participants WHERE team_position = 'JUNGLE' GROUP BY champion_name ORDER BY jogos DESC LIMIT 1",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 501
+  },
+  {
+   "base": "competitivo",
+   "familia": "C9-ano",
+   "pergunta": "Qual foi a duração média das partidas profissionais em 2020, em segundos?",
+   "sql_ref": "SELECT AVG(game_length_s) AS media FROM pro_games WHERE year = 2020",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 502
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais são os 3 campeões com maior média de mortes na posição MIDDLE?",
+   "sql_ref": "SELECT champion_name, AVG(deaths) AS media FROM participants WHERE team_position = 'MIDDLE' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 3",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 3,
+   "id": 503
+  },
+  {
+   "base": "solo",
+   "familia": "S15-posicao-campeao",
+   "pergunta": "Qual a posição mais comum de Varus?",
+   "sql_ref": "SELECT team_position, COUNT(*) AS jogos FROM participants WHERE champion_name = 'Varus' GROUP BY team_position ORDER BY jogos DESC LIMIT 1",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 504
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Quantos picks Ekko teve no competitivo?",
+   "sql_ref": "SELECT COUNT(*) AS picks FROM pro_players WHERE champion = 'Ekko'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 505
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Qual a taxa de vitória de Maokai no solo queue?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Maokai'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 506
+  },
+  {
+   "base": "competitivo",
+   "familia": "U5-ban-pro",
+   "pergunta": "Qual campeão foi mais banido na VCS em 2026?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "banimentos ausentes no competitivo",
+   "id": 507
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Qual é a taxa de vitória do campeão Aatrox no competitivo em 2026?",
+   "sql_ref": "SELECT AVG(pp.win::int) AS taxa FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pp.champion = 'Aatrox' AND pg.year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 508
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual o win rate de QT DIG∞ no profissional?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'QT DIG∞'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 509
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe HANJIN BRION Academy em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'HANJIN BRION Academy' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 510
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual é a média de pontuação de visão do campeão Shen?",
+   "sql_ref": "SELECT AVG(vision_score) AS media FROM participants WHERE champion_name = 'Shen'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 511
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Quantos torres destruídas V3 Esports faz em média por jogo?",
+   "sql_ref": "SELECT AVG(towers) AS media FROM pro_games WHERE team_name = 'V3 Esports'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 512
+  },
+  {
+   "base": "competitivo",
+   "familia": "C9-ano",
+   "pergunta": "Quantos jogos profissionais foram registrados em 2016?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE year = 2016",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 513
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantos jogos o jogador Svenskeren disputou?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM pro_players WHERE player_name = 'Svenskeren'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 514
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Qual a taxa de vitória de LeeSin no solo queue?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'LeeSin'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 515
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais os 5 campeões com a maior média de eliminações jogando de TOP?",
+   "sql_ref": "SELECT champion_name, AVG(kills) AS media FROM participants WHERE team_position = 'TOP' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 5",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 5,
+   "id": 516
+  },
+  {
+   "base": "solo",
+   "familia": "S14-kda",
+   "pergunta": "Qual é o KDA médio do campeão DrMundo?",
+   "sql_ref": "SELECT AVG((kills + assists)::float / NULLIF(deaths, 0)) AS kda FROM participants WHERE champion_name = 'DrMundo'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 517
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Quantos Barões Nashor DetonatioN FocusMe faz em média por jogo?",
+   "sql_ref": "SELECT AVG(barons) AS media FROM pro_games WHERE team_name = 'DetonatioN FocusMe'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 518
+  },
+  {
+   "base": "solo",
+   "familia": "U8-multikill",
+   "pergunta": "Qual campeão tem mais pentakills?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "sequência de abates ausente",
+   "id": 519
+  },
+  {
+   "base": "competitivo",
+   "familia": "C2-jogos-equipe",
+   "pergunta": "Quantos jogos a equipe Cloud9 disputou?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE team_name = 'Cloud9'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 520
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Qual a taxa de vitória de Nidalee no solo queue?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Nidalee'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 521
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Quantas vezes o campeão Tristana foi escolhido no competitivo?",
+   "sql_ref": "SELECT COUNT(*) AS picks FROM pro_players WHERE champion = 'Tristana'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 522
+  },
+  {
+   "base": "solo",
+   "familia": "S8-bans",
+   "pergunta": "Quantos banimentos Ryze recebeu?",
+   "sql_ref": "SELECT COUNT(*) AS bans FROM bans b JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c ON c.champion_id = b.champion_id WHERE c.champion_name = 'Ryze'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 523
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantos jogos o jogador H4cker disputou?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM pro_players WHERE player_name = 'H4cker'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 524
+  },
+  {
+   "base": "competitivo",
+   "familia": "C10-contagem",
+   "pergunta": "Quantos jogos tiveram mais de 8 Arautos do Vale somando as duas equipes?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM (SELECT game_id FROM pro_games GROUP BY game_id HAVING SUM(heralds) > 8) s",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 525
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Qual é a taxa de vitória do campeão Zilean no competitivo em 2026?",
+   "sql_ref": "SELECT AVG(pp.win::int) AS taxa FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pp.champion = 'Zilean' AND pg.year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 526
+  },
+  {
+   "base": "solo",
+   "familia": "S14-kda",
+   "pergunta": "Qual é o KDA médio do campeão Olaf?",
+   "sql_ref": "SELECT AVG((kills + assists)::float / NULLIF(deaths, 0)) AS kda FROM participants WHERE champion_name = 'Olaf'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 527
+  },
+  {
+   "base": "solo",
+   "familia": "S15-posicao-campeao",
+   "pergunta": "Qual a posição mais comum de Shen?",
+   "sql_ref": "SELECT team_position, COUNT(*) AS jogos FROM participants WHERE champion_name = 'Shen' GROUP BY team_position ORDER BY jogos DESC LIMIT 1",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 528
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantas eliminações Artemis faz em média por jogo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_players WHERE player_name = 'Artemis'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 529
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual o win rate de Solary no profissional?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'Solary'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 530
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas partidas o campeão Twitch disputou?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Twitch'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 531
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Quantas partidas foram disputadas na LPL em 2026?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE league = 'LPL' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 532
+  },
+  {
+   "base": "competitivo",
+   "familia": "C11-lado",
+   "pergunta": "Qual foi a taxa de vitória do lado azul em 2024?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE year = 2024 AND side = 'Blue'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 533
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual é a média de eliminações do campeão Leona?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM participants WHERE champion_name = 'Leona'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 534
+  },
+  {
+   "base": "solo",
+   "familia": "S7-duracao",
+   "pergunta": "Qual é a taxa de vitória do time vermelho em partidas com mais de 25 minutos?",
+   "sql_ref": "SELECT AVG(t.win::int) AS taxa FROM teams t JOIN matches m ON m.match_id = t.match_id WHERE t.team_id = 200 AND m.game_duration_s > 1500",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 535
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de assistências por partida de Teemo?",
+   "sql_ref": "SELECT AVG(assists) AS media FROM participants WHERE champion_name = 'Teemo'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 536
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de dano causado a campeões por partida de FiddleSticks?",
+   "sql_ref": "SELECT AVG(dmg_to_champions) AS media FROM participants WHERE champion_name = 'FiddleSticks'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 537
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual o win rate de SK Telecom T1 no profissional?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'SK Telecom T1'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 538
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Qual é a taxa de vitória do campeão Katarina?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Katarina'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 539
+  },
+  {
+   "base": "solo",
+   "familia": "S9-campeoes-wr",
+   "pergunta": "Quantos campeões têm taxa de vitória acima de 52% com pelo menos 100 partidas?",
+   "sql_ref": "SELECT COUNT(*) AS campeoes FROM (SELECT champion_name FROM participants GROUP BY champion_name HAVING COUNT(*) >= 100 AND AVG(win::int) > 0.52) s",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 540
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe GMBLERS Esports em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'GMBLERS Esports' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 541
+  },
+  {
+   "base": "competitivo",
+   "familia": "C8-ranking",
+   "pergunta": "Quais são os 10 jogadores com mais eliminações no total em 2026?",
+   "sql_ref": "SELECT pp.player_name, SUM(pp.kills) AS total FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pg.year = 2026 GROUP BY pp.player_name ORDER BY total DESC LIMIT 10",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 10,
+   "id": 542
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de dano causado a campeões por partida de Leblanc?",
+   "sql_ref": "SELECT AVG(dmg_to_champions) AS media FROM participants WHERE champion_name = 'Leblanc'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 543
+  },
+  {
+   "base": "competitivo",
+   "familia": "C12-posicao",
+   "pergunta": "Qual é a média de eliminações da posição sup no competitivo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_players WHERE position = 'sup'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 544
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Quantos eliminações G2 Esports faz em média por jogo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_games WHERE team_name = 'G2 Esports'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 545
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais são os 3 campeões com maior média de ouro obtido na posição TOP?",
+   "sql_ref": "SELECT champion_name, AVG(gold_earned) AS media FROM participants WHERE team_position = 'TOP' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 3",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 3,
+   "id": 546
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe Anubis Gaming em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'Anubis Gaming' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 547
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas partidas o campeão Seraphine disputou?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Seraphine'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 548
+  },
+  {
+   "base": "competitivo",
+   "familia": "U4-dano-visao",
+   "pergunta": "Qual jogador profissional tem a maior pontuação de visão?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "dano, visão, ouro total ou CS total ausentes no competitivo",
+   "id": 549
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Qual é a taxa de vitória do campeão Riven no competitivo em 2026?",
+   "sql_ref": "SELECT AVG(pp.win::int) AS taxa FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pp.champion = 'Riven' AND pg.year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 550
+  },
+  {
+   "base": "solo",
+   "familia": "S6-lado",
+   "pergunta": "Quantos Arautos do Vale o time azul faz em média por partida?",
+   "sql_ref": "SELECT AVG(heralds) AS media FROM teams WHERE team_id = 100",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 551
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas vezes Taric foi jogado?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Taric'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 552
+  },
+  {
+   "base": "solo",
+   "familia": "S12-itens",
+   "pergunta": "Quantas vezes o item Eclipse foi comprado?",
+   "sql_ref": "SELECT COUNT(*) AS compras FROM item_events e JOIN items i ON i.item_id = e.item_id WHERE i.name = 'Eclipse' AND e.action = 'BUY'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 553
+  },
+  {
+   "base": "competitivo",
+   "familia": "C8-ranking",
+   "pergunta": "Quais foram as 5 ligas com mais jogos em 2026?",
+   "sql_ref": "SELECT league, COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE year = 2026 GROUP BY league ORDER BY jogos DESC LIMIT 5",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 5,
+   "id": 554
+  },
+  {
+   "base": "competitivo",
+   "familia": "C2-jogos-equipe",
+   "pergunta": "Quantas partidas Jin Air Green Wings jogou?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE team_name = 'Jin Air Green Wings'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 555
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantos jogos o jogador Clear disputou?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM pro_players WHERE player_name = 'Clear'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 556
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual é a média de pontuação de visão do campeão Leblanc?",
+   "sql_ref": "SELECT AVG(vision_score) AS media FROM participants WHERE champion_name = 'Leblanc'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 557
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe Bomba Team em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'Bomba Team' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 558
+  },
+  {
+   "base": "solo",
+   "familia": "S15-posicao-campeao",
+   "pergunta": "Qual a posição mais comum de Senna?",
+   "sql_ref": "SELECT team_position, COUNT(*) AS jogos FROM participants WHERE champion_name = 'Senna' GROUP BY team_position ORDER BY jogos DESC LIMIT 1",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 559
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Qual é o KDA médio do jogador Keria?",
+   "sql_ref": "SELECT AVG((kills + assists)::float / NULLIF(deaths, 0)) AS kda FROM pro_players WHERE player_name = 'Keria'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 560
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Qual a taxa de vitória de Shyvana no solo queue?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Shyvana'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 561
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Quantos jogos a LPLOL teve em 2026?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE league = 'LPLOL' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 562
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Qual é a média de Barões Nashor da equipe LGD Gaming Young Team por jogo?",
+   "sql_ref": "SELECT AVG(barons) AS media FROM pro_games WHERE team_name = 'LGD Gaming Young Team'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 563
+  },
+  {
+   "base": "solo",
+   "familia": "S5-mais-jogado-posicao",
+   "pergunta": "Qual campeão aparece mais vezes de UTILITY?",
+   "sql_ref": "SELECT champion_name, COUNT(*) AS jogos FROM participants WHERE team_position = 'UTILITY' GROUP BY champion_name ORDER BY jogos DESC LIMIT 1",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 564
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Quantos picks Taliyah teve no competitivo?",
+   "sql_ref": "SELECT COUNT(*) AS picks FROM pro_players WHERE champion = 'Taliyah'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 565
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantos jogos o jogador ppgod disputou?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM pro_players WHERE player_name = 'ppgod'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 801
+  },
+  {
+   "base": "competitivo",
+   "familia": "C9-ano",
+   "pergunta": "Quantas partidas profissionais existem em 2021?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE year = 2021",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 802
+  },
+  {
+   "base": "competitivo",
+   "familia": "U5-ban-pro",
+   "pergunta": "Qual campeão foi mais banido na EM em 2026?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "banimentos ausentes no competitivo",
+   "id": 803
+  },
+  {
+   "base": "solo",
+   "familia": "S8-bans",
+   "pergunta": "Quantos banimentos MasterYi recebeu?",
+   "sql_ref": "SELECT COUNT(*) AS bans FROM bans b JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c ON c.champion_id = b.champion_id WHERE c.champion_name = 'MasterYi'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 804
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais os 5 campeões com a maior média de ouro obtido jogando de UTILITY?",
+   "sql_ref": "SELECT champion_name, AVG(gold_earned) AS media FROM participants WHERE team_position = 'UTILITY' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 5",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 5,
+   "id": 805
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Quanto é o win rate de Veigar?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Veigar'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 806
+  },
+  {
+   "base": "solo",
+   "familia": "S8-bans",
+   "pergunta": "Quantas vezes o campeão Amumu foi banido?",
+   "sql_ref": "SELECT COUNT(*) AS bans FROM bans b JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c ON c.champion_id = b.champion_id WHERE c.champion_name = 'Amumu'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 807
+  },
+  {
+   "base": "solo",
+   "familia": "S8-bans",
+   "pergunta": "Quantas vezes o campeão Heimerdinger foi banido?",
+   "sql_ref": "SELECT COUNT(*) AS bans FROM bans b JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c ON c.champion_id = b.champion_id WHERE c.champion_name = 'Heimerdinger'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 808
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais os 3 campeões com a maior média de CS total jogando de JUNGLE?",
+   "sql_ref": "SELECT champion_name, AVG(cs_total) AS media FROM participants WHERE team_position = 'JUNGLE' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 3",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 3,
+   "id": 809
+  },
+  {
+   "base": "solo",
+   "familia": "S8-bans",
+   "pergunta": "Quantas vezes o campeão Sett foi banido?",
+   "sql_ref": "SELECT COUNT(*) AS bans FROM bans b JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c ON c.champion_id = b.champion_id WHERE c.champion_name = 'Sett'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 810
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Qual é a média de eliminações da equipe Vitality.Bee por jogo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_games WHERE team_name = 'Vitality.Bee'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 811
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de mortes por partida de Skarner?",
+   "sql_ref": "SELECT AVG(deaths) AS media FROM participants WHERE champion_name = 'Skarner'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 812
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Qual é a média de eliminações da equipe JD Gaming por jogo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_games WHERE team_name = 'JD Gaming'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 813
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual é a média de eliminações do campeão Locke?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM participants WHERE champion_name = 'Locke'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 814
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantas eliminações Svenskeren faz em média por jogo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_players WHERE player_name = 'Svenskeren'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 815
+  },
+  {
+   "base": "solo",
+   "familia": "S10-plataforma",
+   "pergunta": "Quantas partidas foram coletadas na plataforma BR1?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM matches WHERE platform_id = 'BR1'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 816
+  },
+  {
+   "base": "solo",
+   "familia": "S8-bans",
+   "pergunta": "Quantas vezes o campeão Kassadin foi banido?",
+   "sql_ref": "SELECT COUNT(*) AS bans FROM bans b JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c ON c.champion_id = b.champion_id WHERE c.champion_name = 'Kassadin'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 817
+  },
+  {
+   "base": "competitivo",
+   "familia": "U1-primeiro",
+   "pergunta": "Qual equipe conquistou o primeiro Arauto do Vale mais vezes em 2026?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "primeiro evento ausente",
+   "id": 818
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Quantos mortes Oh My God Academy faz em média por jogo?",
+   "sql_ref": "SELECT AVG(deaths) AS media FROM pro_games WHERE team_name = 'Oh My God Academy'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 819
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual é a média de mortes do campeão Kindred?",
+   "sql_ref": "SELECT AVG(deaths) AS media FROM participants WHERE champion_name = 'Kindred'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 820
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de dano causado a campeões por partida de Heimerdinger?",
+   "sql_ref": "SELECT AVG(dmg_to_champions) AS media FROM participants WHERE champion_name = 'Heimerdinger'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 821
+  },
+  {
+   "base": "competitivo",
+   "familia": "C12-posicao",
+   "pergunta": "Qual é a média de eliminações da posição mid no competitivo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_players WHERE position = 'mid'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 822
+  },
+  {
+   "base": "competitivo",
+   "familia": "U1-primeiro",
+   "pergunta": "Qual liga tem a maior taxa de partidas em que quem fez o primeiro sangue venceu?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "primeiro evento ausente",
+   "id": 823
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantas eliminações Clear faz em média por jogo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_players WHERE player_name = 'Clear'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 824
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas partidas o campeão Nocturne disputou?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Nocturne'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 825
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais são os 5 campeões com maior média de mortes na posição MIDDLE?",
+   "sql_ref": "SELECT champion_name, AVG(deaths) AS media FROM participants WHERE team_position = 'MIDDLE' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 5",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 5,
+   "id": 826
+  },
+  {
+   "base": "competitivo",
+   "familia": "C10-contagem",
+   "pergunta": "Quantos jogos tiveram mais de 45 eliminações somando as duas equipes?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM (SELECT game_id FROM pro_games GROUP BY game_id HAVING SUM(kills) > 45) s",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 827
+  },
+  {
+   "base": "solo",
+   "familia": "S12-itens",
+   "pergunta": "Quantas vezes o item Cajado do Arcanjo foi comprado?",
+   "sql_ref": "SELECT COUNT(*) AS compras FROM item_events e JOIN items i ON i.item_id = e.item_id WHERE i.name = 'Cajado do Arcanjo' AND e.action = 'BUY'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 828
+  },
+  {
+   "base": "solo",
+   "familia": "S15-posicao-campeao",
+   "pergunta": "Qual a posição mais comum de Yunara?",
+   "sql_ref": "SELECT team_position, COUNT(*) AS jogos FROM participants WHERE champion_name = 'Yunara' GROUP BY team_position ORDER BY jogos DESC LIMIT 1",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 829
+  },
+  {
+   "base": "competitivo",
+   "familia": "C7-patch",
+   "pergunta": "Qual é a duração média das partidas no patch 16.01?",
+   "sql_ref": "SELECT AVG(game_length_s) AS media FROM pro_games WHERE patch = '16.01'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 830
+  },
+  {
+   "base": "solo",
+   "familia": "S6-lado",
+   "pergunta": "Quantos Barões Nashor o time azul faz em média por partida?",
+   "sql_ref": "SELECT AVG(barons) AS media FROM teams WHERE team_id = 100",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 831
+  },
+  {
+   "base": "solo",
+   "familia": "S10-plataforma",
+   "pergunta": "Qual é a duração média das partidas na plataforma EUW1?",
+   "sql_ref": "SELECT AVG(game_duration_s) AS media FROM matches WHERE platform_id = 'EUW1'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 832
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe Hanwha Life Esports Academy em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'Hanwha Life Esports Academy' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 833
+  },
+  {
+   "base": "solo",
+   "familia": "S15-posicao-campeao",
+   "pergunta": "Em qual posição o campeão Kaisa mais joga?",
+   "sql_ref": "SELECT team_position, COUNT(*) AS jogos FROM participants WHERE champion_name = 'Kaisa' GROUP BY team_position ORDER BY jogos DESC LIMIT 1",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 834
+  },
+  {
+   "base": "competitivo",
+   "familia": "C10-contagem",
+   "pergunta": "Quantos jogos tiveram mais de 40 eliminações somando as duas equipes?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM (SELECT game_id FROM pro_games GROUP BY game_id HAVING SUM(kills) > 40) s",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 835
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Qual é a duração média das partidas da AL em 2026, em segundos?",
+   "sql_ref": "SELECT AVG(game_length_s) AS media FROM pro_games WHERE league = 'AL' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 836
+  },
+  {
+   "base": "competitivo",
+   "familia": "U2-serie",
+   "pergunta": "Qual equipe tem mais séries vencidas por 3 a 0?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "série ausente",
+   "id": 837
+  },
+  {
+   "base": "competitivo",
+   "familia": "C7-patch",
+   "pergunta": "Qual é a duração média das partidas no patch 16.04?",
+   "sql_ref": "SELECT AVG(game_length_s) AS media FROM pro_games WHERE patch = '16.04'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 838
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Qual é a média de eliminações do jogador Zanzarah?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_players WHERE player_name = 'Zanzarah'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 839
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de CS total por partida de Diana?",
+   "sql_ref": "SELECT AVG(cs_total) AS media FROM participants WHERE champion_name = 'Diana'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 840
+  },
+  {
+   "base": "competitivo",
+   "familia": "U1-primeiro",
+   "pergunta": "Qual é a taxa de vitória das equipes que conquistaram o primeiro Barão Nashor?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "primeiro evento ausente",
+   "id": 841
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais são os 5 campeões com maior média de ouro obtido na posição JUNGLE?",
+   "sql_ref": "SELECT champion_name, AVG(gold_earned) AS media FROM participants WHERE team_position = 'JUNGLE' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 5",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 5,
+   "id": 842
+  },
+  {
+   "base": "solo",
+   "familia": "S4-top-campeoes-posicao",
+   "pergunta": "Quais são os 3 campeões com maior média de CS total na posição TOP?",
+   "sql_ref": "SELECT champion_name, AVG(cs_total) AS media FROM participants WHERE team_position = 'TOP' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY media DESC NULLS LAST LIMIT 3",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 3,
+   "id": 843
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de dano causado a campeões por partida de LeeSin?",
+   "sql_ref": "SELECT AVG(dmg_to_champions) AS media FROM participants WHERE champion_name = 'LeeSin'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 844
+  },
+  {
+   "base": "solo",
+   "familia": "S2-partidas-campeao",
+   "pergunta": "Quantas vezes Galio foi jogado?",
+   "sql_ref": "SELECT COUNT(*) AS partidas FROM participants WHERE champion_name = 'Galio'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 845
+  },
+  {
+   "base": "competitivo",
+   "familia": "U1-primeiro",
+   "pergunta": "Qual liga tem a maior taxa de partidas em que quem fez o primeiro Barão Nashor venceu?",
+   "sql_ref": null,
+   "tipo": "recusa",
+   "recusa_esperada": true,
+   "motivo_ref": "primeiro evento ausente",
+   "id": 846
+  },
+  {
+   "base": "solo",
+   "familia": "S1-winrate-campeao",
+   "pergunta": "Qual a taxa de vitória de Heimerdinger no solo queue?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM participants WHERE champion_name = 'Heimerdinger'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 847
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Quantos picks Shen teve no competitivo?",
+   "sql_ref": "SELECT COUNT(*) AS picks FROM pro_players WHERE champion = 'Shen'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 848
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual o aproveitamento de Priority em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'Priority' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 849
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Qual é a média de eliminações do jogador Pyosik?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_players WHERE player_name = 'Pyosik'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 850
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de dano causado a campeões por partida de Kled?",
+   "sql_ref": "SELECT AVG(dmg_to_champions) AS media FROM participants WHERE champion_name = 'Kled'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 851
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Quantos jogos a HLL teve em 2026?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE league = 'HLL' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 852
+  },
+  {
+   "base": "competitivo",
+   "familia": "C9-ano",
+   "pergunta": "Qual foi a duração média das partidas profissionais em 2018, em segundos?",
+   "sql_ref": "SELECT AVG(game_length_s) AS media FROM pro_games WHERE year = 2018",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 853
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantas eliminações Crisp faz em média por jogo?",
+   "sql_ref": "SELECT AVG(kills) AS media FROM pro_players WHERE player_name = 'Crisp'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 854
+  },
+  {
+   "base": "competitivo",
+   "familia": "C2-jogos-equipe",
+   "pergunta": "Quantos jogos a equipe MAX disputou?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE team_name = 'MAX'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 855
+  },
+  {
+   "base": "competitivo",
+   "familia": "C1-winrate-equipe",
+   "pergunta": "Qual é a taxa de vitória da equipe RED Canids em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE team_name = 'RED Canids' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 856
+  },
+  {
+   "base": "competitivo",
+   "familia": "C6-campeao-pro",
+   "pergunta": "Qual é a taxa de vitória do campeão Fizz no competitivo em 2026?",
+   "sql_ref": "SELECT AVG(pp.win::int) AS taxa FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pp.champion = 'Fizz' AND pg.year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 857
+  },
+  {
+   "base": "solo",
+   "familia": "S16-visao",
+   "pergunta": "Qual é a pontuação de visão média na posição TOP?",
+   "sql_ref": "SELECT AVG(vision_score) AS media FROM participants WHERE team_position = 'TOP'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 858
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual é a média de mortes do campeão Viktor?",
+   "sql_ref": "SELECT AVG(deaths) AS media FROM participants WHERE champion_name = 'Viktor'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 859
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Qual é a taxa de vitória do lado azul na HC em 2026?",
+   "sql_ref": "SELECT AVG(win::int) AS taxa FROM pro_games WHERE league = 'HC' AND year = 2026 AND side = 'Blue'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 860
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de CS total por partida de Anivia?",
+   "sql_ref": "SELECT AVG(cs_total) AS media FROM participants WHERE champion_name = 'Anivia'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 861
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Quantas partidas foram disputadas na NL em 2026?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE league = 'NL' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 862
+  },
+  {
+   "base": "solo",
+   "familia": "S3-media-campeao",
+   "pergunta": "Qual a média de assistências por partida de KSante?",
+   "sql_ref": "SELECT AVG(assists) AS media FROM participants WHERE champion_name = 'KSante'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 863
+  },
+  {
+   "base": "solo",
+   "familia": "S8-bans",
+   "pergunta": "Quantos banimentos Tristana recebeu?",
+   "sql_ref": "SELECT COUNT(*) AS bans FROM bans b JOIN (SELECT DISTINCT champion_id, champion_name FROM participants) c ON c.champion_id = b.champion_id WHERE c.champion_name = 'Tristana'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 864
+  },
+  {
+   "base": "competitivo",
+   "familia": "C3-media-equipe",
+   "pergunta": "Qual é a média de dragões da equipe inf por jogo?",
+   "sql_ref": "SELECT AVG(dragons) AS media FROM pro_games WHERE team_name = 'inf'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 865
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantos jogos o jogador Ghost disputou?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM pro_players WHERE player_name = 'Ghost'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 866
+  },
+  {
+   "base": "solo",
+   "familia": "S15-posicao-campeao",
+   "pergunta": "Em qual posição o campeão Viktor mais joga?",
+   "sql_ref": "SELECT team_position, COUNT(*) AS jogos FROM participants WHERE champion_name = 'Viktor' GROUP BY team_position ORDER BY jogos DESC LIMIT 1",
+   "tipo": "ranking",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 867
+  },
+  {
+   "base": "competitivo",
+   "familia": "C4-liga",
+   "pergunta": "Quantos jogos a EWC teve em 2026?",
+   "sql_ref": "SELECT COUNT(DISTINCT game_id) AS jogos FROM pro_games WHERE league = 'EWC' AND year = 2026",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 868
+  },
+  {
+   "base": "competitivo",
+   "familia": "C5-jogador",
+   "pergunta": "Quantos jogos o jogador Hauntzer disputou?",
+   "sql_ref": "SELECT COUNT(*) AS jogos FROM pro_players WHERE player_name = 'Hauntzer'",
+   "tipo": "escalar",
+   "recusa_esperada": false,
+   "n_ref": 1,
+   "id": 869
+  }
+ ]
+}
