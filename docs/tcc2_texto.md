@@ -282,7 +282,7 @@ usuário e os dados. Jiang et al. (2025) observam que soluções de
 várias rodadas, favorecem a exploração de dados estruturados, e Guo et al.
 (2024), que a decomposição de perguntas e a análise visual tornam essa
 exploração mais intuitiva. O problema técnico central é a geração da consulta: o modelo
-produz texto, e o banco exige SQL válido e correto sobre um esquema
+produz texto, e o banco exige SQL (*Structured Query Language*) válido e correto sobre um esquema
 específico. Uma consulta gramaticalmente correta pode citar uma tabela
 inexistente ou responder à pergunta errada. Wang et al. (2020) tratam
 este segundo caso e mostram que representar o esquema com os
@@ -362,7 +362,7 @@ Legends*.
 ### 3.5 VISUALIZAÇÃO ESPAÇO-TEMPORAL DE PARTIDAS
 
 Wallner, Wang e Dormann (2023) estudam a evolução espaço-temporal do
-gameplay em *League of Legends* com a técnica de *storyline
+*gameplay* em *League of Legends* com a técnica de *storyline
 visualization* e mostram que integrar tempo e localização numa só vista é viável para a interpretação pós-jogo. O estudo é a
 referência do posicionamento minuto a minuto da análise de partida.
 
@@ -509,8 +509,8 @@ partida. O modelo preditivo não vê itens, posição nem o estado das ondas de 
 
 ### 4.8 MATERIAIS E MÉTODOS UTILIZADOS
 
-Foram utilizados Python (coleta, ETL e modelagem, com *pandas*, *NumPy*,
-*scikit-learn*, *XGBoost* e *SHAP*), PostgreSQL, FastAPI e React com
+Foram utilizados Python (coleta, ETL (extração, transformação e carga) e modelagem, com pandas, NumPy,
+scikit-learn, XGBoost e SHAP), PostgreSQL, FastAPI e React com
 TypeScript e Recharts. A interface em linguagem natural e o módulo de
 orientação estratégica (*coach*) usam a API da Anthropic (modelo Claude).
 Testes automatizados cobrem o *backend* (testes de fumaça e uma bateria de
@@ -632,7 +632,7 @@ Apêndice D. A Figura 1 mostra as duas comparações na tela Competitivo,
 com o cenário profissional restrito a 2026. Por isso o azul aparece com
 53,1%, diferente dos 53,2% do acervo completo.
 
-Figura — Tela Competitivo: viés de lado e conversão de vantagem de ouro, solo queue × profissional de 2026 | reports/figuras_texto/fig_competitivo.png
+Figura — Tela Competitivo: viés de lado e conversão de vantagem de ouro, *solo queue* × profissional de 2026 | reports/figuras_texto/fig_competitivo.png
 
 ### 5.4 Modelagem preditiva e comparação entre modelos (objetivo e)
 

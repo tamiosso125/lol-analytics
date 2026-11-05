@@ -587,8 +587,15 @@ def _legenda(doc, tipo: str, titulo: str) -> "docx.text.paragraph.Paragraph":
     r = p.add_run(f"{tipo} ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), False
     _campo_seq(p, tipo)
-    r = p.add_run(f" – {titulo}")
-    r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), False
+    # *trecho* do título sai em itálico (revisão linha a linha B12, 2026-11-05:
+    # "solo queue" na legenda da Figura 1 saía sem o itálico do corpo)
+    for j, parte in enumerate(re.split(r"\*([^*]+)\*", f" – {titulo}")):
+        if not parte:
+            continue
+        r = p.add_run(parte)
+        r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), False
+        if j % 2:
+            r.font.italic = True
     return p
 
 
@@ -685,6 +692,13 @@ def inserir_figuras_texto(doc) -> int:
         if not m:
             continue
         titulo, rel = m.groups()
+        # o pandoc já transformou *trecho* em run itálico; remonta os marcadores
+        # para `_legenda` levar o itálico ao título (revisão B12.1, 2026-11-05)
+        com_italico = "".join(f"*{r.text}*" if r.italic and r.text.strip() else r.text
+                              for r in p.runs).strip()
+        m2 = _RE_FIGURA_TEXTO.match(com_italico)
+        if m2:
+            titulo = m2.group(1)
         caminho = os.path.join(ROOT, rel)
         if not os.path.exists(caminho):
             sys.exit(f"figura do texto ausente: {rel} (rode docs/capturar_figuras_texto.py)")

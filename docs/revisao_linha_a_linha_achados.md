@@ -284,3 +284,25 @@ artefato.
 O corpo do texto não muda de tamanho neste bloco.
 
 **Aplicado (2026-11-05): 11.1 a 11.3.** 11.4 mantido.
+
+## B12 — Passada global (documento inteiro; PDF de 61 páginas, corpo nas páginas 1 a 29)
+
+Conferido e ok: Quadros 1 a 5 e Figuras 1 a 5 são todos chamados no texto antes de aparecer;
+nenhum título ficou sozinho no pé de página e nenhuma página do corpo ficou curta (varredura do PDF
+e folha de contato das 29 páginas); siglas técnicas centrais (MLP, AUC-ROC, LIME, SHAP) definidas
+na primeira vez; a única passagem em 1ª pessoa já saiu em B9. **Folga:** as Referências agora
+terminam a 90% da página 29 (cerca de 3 linhas livres; eram meia página depois de B1, e B5, B7,
+B8 e B10 consumiram o resto).
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 12.1 | 635 (legenda da Figura 1) | R1 #21, R3 #7 | consistência | "solo queue" sem itálico na legenda; o corpo usa itálico 15 vezes. O build não levava itálico às legendas | "*solo queue*" na legenda (o `build_tcc_docx.py` já foi ajustado para levar `*…*` às legendas; sem esta troca no texto, nada muda) | 0 |
+| 12.2 | 365 | R3 #7 | consistência | "gameplay" sem itálico (única ocorrência) | "*gameplay*" | 0 |
+| 12.3 | 512–513 (4.8) | R3 #7 | consistência | *pandas*, *NumPy*, *scikit-learn*, *XGBoost* e *SHAP* em itálico só na 4.8; no resto do texto XGBoost, SHAP e scikit-learn são escritos sem itálico (nome próprio de *software*) | Tirar o itálico dos cinco nomes na 4.8 | 0 |
+| 12.4 | 285 e 512 | R3 #6 | consistência | SQL e ETL aparecem sem a forma por extenso | "SQL (*Structured Query Language*)" na primeira ocorrência (2.4) e "ETL (extração, transformação e carga)" na 4.8 | +1 linha |
+| 12.5 | — | R3 #6 | consistência | "esports" nunca está em itálico (16 ocorrências, inclusive no título) | **Manter**: está consistente em todo o texto | 0 |
+| 12.6 | 3.6 (achado 4.2) | R2 | argumento | Quadro comparativo dos trabalhos relacionados (+~13 linhas) | **Não incluir**: com cerca de 3 linhas de folga, levaria o corpo a 30 páginas. Fica como sugestão se o orientador pedir | 0 |
+
+A leitura final do PDF de ponta a ponta continua marcada para 12/11, sobre o texto congelado.
+
+**Aplicado (2026-11-05): 12.1 a 12.4.** 12.5 mantido; 12.6 não incluído. **Revisão linha a linha concluída (B0 a B12).** Pendentes: perguntas 2, 3 e 4 ao orientador (apêndices, busca dos trabalhos relacionados, estrutura da Conclusão) e a leitura final do PDF em 12/11.
