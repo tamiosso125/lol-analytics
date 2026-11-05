@@ -347,6 +347,13 @@ por acaso); (b) quando relevante, acrescenta um trecho iniciado por
 explicitamente rotulado como conhecimento do jogo (não dos dados) e
 apontando se concorda ou discorda dos números.
 
+### `src/coach/audit_grounding.py`
+Auditoria de fundamentação do coach (2026-11-04): a IA inventa estatística? Roda 36 casos de partidas reais pelo caminho do produto (`/predict`, `/compose`, `/coach`, em processo, via `TestClient`), três modos (partida completa, composição, só estado) e os cortes 15, 20 e 25. Um espião no cliente da Anthropic guarda o prompt; os dados fornecidos são o prompt sem o bloco de instruções (que traz números como "4-8 frases"). Todo número da resposta tem que estar nos dados (tolerância 0,51 em porcentagem); tempo de jogo e formato ("5-10 minutos", "5v5") são contados à parte. Há ainda uma conferência rígida: porcentagem tem que bater com porcentagem dos dados (ou o complemento a 100) e contagem de jogos com contagem de jogos. O que sobra é sinalizado e REVISADO À MÃO (`reports/coach_audit_revisao.json`). Não mede afirmação qualitativa nem a correção do conhecimento geral.
+
+**Uso:** `python -m src.coach.audit_grounding --n 36` (ou `--reanalisar`)
+**Requer:** `ANTHROPIC_API_KEY`, banco, modelos exportados.
+**Escreve:** `reports/coach_audit.json` (saída bruta, prompts e métricas).
+
 ### `src/nlq/evaluate_nlq.py`
 Validação metodológica da interface NL exigida pela banca: 26 perguntas
 de referência com SQL "gold" (22 de solo queue + 4 do competitivo,

@@ -149,7 +149,7 @@ são confirmações; as de C só se sobrar tempo.
 ## 9. O que entra e o que sai do TCC (A e B)
 
 Estrutura hoje: corpo de 29 páginas (Resumo a Referências), seções 1 a 6, 11
-apêndices (A a K), anexo A, 29 quadros e 11 figuras. Abaixo, o que eu hesito em
+apêndices (A a K), anexo A, 30 quadros e 11 figuras. Abaixo, o que eu hesito em
 manter, cortar ou mover, com minha inclinação atual.
 
 30. **Quantos apêndices posso ter? Os Apêndices G a K (fundamentos dos métodos,
@@ -157,7 +157,7 @@ manter, cortar ou mover, com minha inclinação atual.
     experimentos de precisão) valem a pena, ou 11 apêndices distraem?** (A) *Evidência para levar:* os 10
     aprovados têm no máximo 3 apêndices (6 deles têm algum), de 3 a 9 páginas no
     total, com material de apoio (links, termos, questionários). O meu tem 11
-    apêndices e um anexo, 29 quadros e cerca de 27 páginas (estimativa: 59 do
+    apêndices e um anexo, 30 quadros e cerca de 27 páginas (estimativa: 59 do
     documento menos capa, folha de rosto e as 29 do corpo). *Inclinação:* manter K
     (é o achado novo) e J; avaliar fundir G na Seção 2 e I em uma tabela da
     Conclusão. *Por quê:* G repete conceitos da fundamentação e I repete a ligação
@@ -194,10 +194,15 @@ manter, cortar ou mover, com minha inclinação atual.
 35. **O histórico do jogador (+0,0004) e a codificação de campeões e jogadores
     ficam só no apêndice?** (B) São negativos ou quase nulos, mas respondem a "por
     que não usou o histórico do jogador?".
-36. **A orientação estratégica (coach) e a separação entre dado medido e
-    conhecimento geral da LLM estão suficientemente destacadas?** (A) Para mim é
-    um diferencial (Seção 5.6), mas não sei se ele considera parte do escopo ou um
-    desvio do objetivo g.
+36. ~~**O coach e a separação entre dado medido e conhecimento geral da LLM estão bem
+    posicionados?**~~ **Resolvida em parte (2026-11-04).** O coach só aparecia na 4.7, 4.8 e 5.7
+    (não no Resumo, nos objetivos, nos resultados nem na Conclusão, e não existia no TCC I),
+    e a afirmação de que cada resposta separa dado e conhecimento geral não tinha evidência.
+    Auditei 36 respostas (`src/coach/audit_grounding.py`): 0 estatísticas inventadas após
+    revisão, ressalva final em 36 de 36, 87 de 87 itens da lista real; a 4.7 ganhou uma
+    frase e o Apêndice B um quadro, com o limite declarado (número, não afirmação
+    qualitativa). **Resta levar, em uma linha:** o orientador considera o coach parte do
+    escopo, já que ele não estava no TCC I?
 37. **A parte do competitivo (99.259 jogos, 122 ligas, viés azul de 53,2%) ocupa
     espaço demais num trabalho centrado no *solo queue*?** (B) Em contrapartida, o
     contraste entre os dois cenários é o achado mais citável.

@@ -1602,7 +1602,16 @@ que vem do **conhecimento geral** da IA.
   (*matchups*, sinergias, itens) é rotulado como dado; o resto é rotulado
   como conhecimento geral.
 - **A IA nunca inventa estatística.** Se um número não foi calculado do
-  banco, ele não aparece como número.
+  banco, ele não aparece como número. **Medido em 2026-11-04** (Apêndice B,
+  `src/coach/audit_grounding.py`): em 36 respostas do coach, 453 números, 0
+  estatísticas inventadas depois de revisar à mão os 13 que o detector não
+  achou nos dados (8 somas, complementos ou arredondamentos dos dados, 2 de
+  formato, 3 limiares de conhecimento geral); 167 de 167 porcentagens e 52 de
+  52 contagens de jogos batem com os dados; 87 de 87 itens sugeridos vêm da
+  lista real; todas terminam com a ressalva de limites. **Limite que vocês
+  devem dizer:** isso mede número, não afirmação qualitativa. No caso 5 a IA
+  disse que dois campeões estavam "muito atrasados em ouro e experiência",
+  mas nesse modo só há a diferença do time.
 - O modelo de ML **não vê** itens, posição nem ondas de minion; qualquer
   orientação sobre isso é marcada como inferência.
 
@@ -2211,7 +2220,7 @@ para isso que este guia existe.
 **Documento**
 - 29 páginas do Resumo ao fim das Referências (limite 30, uma linha de folga)
 - 31 referências; 11 Figuras (5 no corpo, 6 telas inteiras no Apêndice E);
-  29 Quadros (6 no corpo, 23 nos apêndices); Apêndices A-K (G fundamentos dos métodos, H procedência dos dados e chaves da Riot, I objetivos e evidências, J SHAP por corte, K experimentos de precisão, 1 a 19); Anexo A (documentação da Riot)
+  30 Quadros (6 no corpo, 24 nos apêndices); Apêndices A-K (G fundamentos dos métodos, H procedência dos dados e chaves da Riot, I objetivos e evidências, J SHAP por corte, K experimentos de precisão, 1 a 19); Anexo A (documentação da Riot)
 - limitações: Seção 6.1, com o detalhe no Apêndice F
 - `verifica_tcc.py`: 20/20
 

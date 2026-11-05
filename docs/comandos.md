@@ -311,6 +311,15 @@ trava: sem ela o script grava a tela de erro e reporta sucesso.
 # Benchmark de execution accuracy (exigência da banca):
 # grava reports/nlq_benchmark.json (accuracy, base e desfecho por pergunta)
 .venv\Scripts\python.exe -m src.nlq.evaluate_nlq
+
+# Auditoria do coach (Seção 4.7 e Apêndice B): 36 respostas pelo caminho do
+# produto, cada número conferido contra os dados do prompt. Grava
+# reports/coach_audit.json. A revisão manual dos sinalizados fica em
+# reports/coach_audit_revisao.json (checagem 21 confere os dois).
+# A saída da IA varia (temperatura 0,4): rode UMA vez e guarde.
+.venv\Scripts\python.exe -m src.coach.audit_grounding --n 36
+# recalcula só as métricas da saída gravada, sem chamar o modelo:
+.venv\Scripts\python.exe -m src.coach.audit_grounding --reanalisar
 ```
 
 > **Regra da casa**: sempre rode `evaluate_nlq` de novo depois de
