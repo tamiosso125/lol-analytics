@@ -367,6 +367,8 @@ export interface AskTabela {
   sql: string;
   columns: string[];
   rows: (string | number | boolean | null)[][];
+  /** Total de linhas no banco; a API devolve no máximo 100 em `rows`. */
+  n_linhas?: number;
 }
 
 /** Falha de UMA base. Em "ambos", a outra base aparece normalmente. */
@@ -383,6 +385,7 @@ export interface AskResultado {
   sql: string | null;
   columns: string[];
   rows: (string | number | boolean | null)[][];
+  n_linhas?: number;
   tentativas: number | null;
   erro: AskErroBase | null;
 }

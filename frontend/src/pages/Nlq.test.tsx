@@ -144,6 +144,23 @@ describe("Nlq: roteamento solo queue × competitivo", () => {
     ]);
   });
 
+  it("avisa quando a lista foi cortada nas primeiras linhas", async () => {
+    const rows = Array.from({ length: 100 }, (_, i) => [`Campeao${i}`, i]);
+    ask.mockResolvedValueOnce(
+      resposta({
+        roteamento: { classe: "solo", origem: "regras" },
+        base: "solo",
+        resultados: [{ ...SOLO, columns: ["champion_name", "n"], rows, n_linhas: 250 }],
+        sql: SOLO.sql,
+        columns: ["champion_name", "n"],
+        rows,
+      }),
+    );
+    renderPage(<Nlq />);
+    await perguntar("quais campeões tiveram mais de 100 partidas?");
+    expect(await screen.findByText(/Mostrando as 100 primeiras de 250 linhas/)).toBeInTheDocument();
+  });
+
   it("a página mostra a dica de como escolher a base", () => {
     renderPage(<Nlq />);
     const dica = screen.getByText(/Dica:/);

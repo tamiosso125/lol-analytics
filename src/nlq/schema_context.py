@@ -38,6 +38,7 @@ pro_games(game_id, league, year, split, playoffs, game_date, patch, side,
   -- duas linhas por jogo (uma por time). ATENÇÃO: aqui "side" é texto
   -- 'Blue'/'Red' (NÃO team_id 100/200 — isso é só nas tabelas de solo
   -- queue). league é a sigla da liga ('LCK', 'LPL', 'LEC'...).
+  -- game_date dá a ORDEM CRONOLÓGICA dos jogos (use ORDER BY game_date, game_id).
   -- gold_diff_at15 é na perspectiva DAQUELA linha/time. Jogos =
   -- COUNT(DISTINCT game_id). SEMPRE filtre por year quando a pergunta
   -- indicar um ano (sem filtro, 13 anos de metas diferentes se misturam
@@ -117,8 +118,11 @@ items(item_id, name, total_gold, purchasable, map_11)
   -- ORDER BY jogos DESC LIMIT 5;
 
 Regras:
-- Responda APENAS com uma query SQL (SELECT), sem explicação e sem markdown.
-- Sempre inclua LIMIT (máximo 100) quando o resultado puder ter muitas linhas.
+- Responda APENAS com uma query SQL (SELECT), sem explicação e sem markdown. Escreva
+  UMA consulta final: nada de comentários, "Wait", correção ou segunda tentativa.
+- Sempre inclua LIMIT (máximo 100) quando o resultado puder ter muitas linhas. Se a
+  pergunta pede TODOS os que atendem a um critério ("quais campeões tiveram mais de N
+  partidas?", sem um número de itens), use LIMIT 500: cortar em 100 devolve lista incompleta.
 - Win rate = AVG(win::int) ou AVG(CASE WHEN win THEN 1.0 ELSE 0 END), sempre
   como fração entre 0 e 1 — nunca multiplique por 100 nem arredonde para
   formato de porcentagem.
@@ -192,10 +196,12 @@ Regras:
   primeira torre, primeiro abate): teams e pro_games só têm a contagem total.
   Nunca use "dragons > 0" ou "towers > 0" como aproximação; responda com o
   aviso de "não é possível responder".
-- Ranking por TAXA DE VITÓRIA (de campeão, equipe, jogador, liga) sem limiar
-  citado na pergunta: exija amostra mínima com HAVING COUNT(*) >= 20 no solo
-  queue e HAVING COUNT(*) >= 10 no competitivo (um campeão com 1 jogo e 100%
-  de vitória não é resposta). Se a pergunta citar um limiar ("com pelo menos
+- Ranking ou extremo ("maior", "menor", "melhor", "pior") de uma MÉDIA ou TAXA
+  (win rate, média de kills, mortes, torres, duração...) de campeão, equipe, jogador
+  ou liga, sem limiar citado na pergunta: exija amostra mínima com HAVING COUNT(*)
+  >= 20 no solo queue e HAVING COUNT(*) >= 10 no competitivo (uma liga: >= 30 jogos,
+  COUNT(DISTINCT game_id)); um grupo com 1 jogo e 100% de vitória, ou com 4 jogos e
+  média alta, não é resposta. Não vale para CONTAGENS ("mais jogados"). Se a pergunta citar um limiar ("com pelo menos
   N partidas"), use o dela. Em AMBOS os casos o limiar vai SÓ no HAVING: a
   contagem NÃO vira coluna do resultado (nem COUNT(*) AS partidas, nem jogos),
   porque a pergunta não a pediu.
@@ -222,6 +228,49 @@ Regras:
   pentakill. Exemplo — "qual equipe tem a maior média de ouro obtido por
   partida?" no competitivo:
   SELECT 'não é possível responder: pro_games só tem a DIFERENÇA de ouro aos 15 minutos (gold_diff_at15), não o ouro total da equipe' AS aviso;
+- COMPETITIVO, EQUIPE E JOGO: pro_games tem UMA linha por equipe em cada jogo, e
+  kills, deaths, dragons, barons, heralds, towers e inhibitors são da EQUIPE naquele
+  jogo. Para "equipe" use pro_games, NÃO pro_players (cada linha de pro_players é um
+  jogador: a média sai por jogador, cerca de 1/5 do valor da equipe). O total das
+  duas equipes de um jogo é SUM(coluna) ... GROUP BY game_id; a diferença entre a
+  equipe e o adversário vem de uma auto-junção por game_id com side diferente.
+  Exemplo — equipe com a maior diferença média de torres sobre o adversário em 2026:
+  SELECT a.team_name, AVG(a.towers - b.towers) AS dif
+  FROM pro_games a JOIN pro_games b ON b.game_id = a.game_id AND b.side <> a.side
+  WHERE a.year = 2026 GROUP BY a.team_name HAVING COUNT(*) >= 10
+  ORDER BY dif DESC NULLS LAST LIMIT 1;
+- CONTAR JOGOS ou PARTIDAS dá UMA linha: agrupe por jogo numa SUBconsulta e conte
+  fora dela; nunca deixe GROUP BY game_id (ou match_id) no nível externo, que devolve
+  uma linha por jogo. "Nenhuma equipe teve X" é HAVING MAX(X) = 0 (WHERE X = 0 pega
+  também jogos em que só UMA das equipes não teve). Exemplo — jogos com mais de 6
+  dragões somando as duas equipes:
+  SELECT COUNT(*) AS jogos FROM (
+    SELECT game_id FROM pro_games GROUP BY game_id HAVING SUM(dragons) > 6) s;
+  No solo queue é igual, com matches/teams e match_id.
+- TOTAL × UMA PARTIDA: "o jogador (ou campeão) com a maior quantidade de X em
+  [período]", sem "por partida", "média" nem "em uma única partida", é a SOMA de X
+  por jogador (GROUP BY, SUM(X)), não as linhas individuais. "Em uma única partida"
+  é o MAIOR valor de uma linha.
+- SEQUÊNCIAS CONSECUTIVAS (vitórias ou derrotas seguidas): numere os jogos de cada
+  equipe em ordem cronológica e subtraia a numeração dentro de cada resultado;
+  filtre win/NOT win SÓ DEPOIS de calcular o grupo, porque filtrar antes apaga as
+  derrotas que quebram a sequência. Exemplo — maior sequência de vitórias em 2026:
+  SELECT team_name, MAX(seq) AS maior_sequencia FROM (
+    SELECT team_name, COUNT(*) AS seq FROM (
+      SELECT team_name, win,
+             ROW_NUMBER() OVER (PARTITION BY team_name ORDER BY game_date, game_id)
+           - ROW_NUMBER() OVER (PARTITION BY team_name, win ORDER BY game_date, game_id) AS grp
+      FROM pro_games WHERE year = 2026) t
+    WHERE win GROUP BY team_name, grp) s
+  GROUP BY team_name ORDER BY maior_sequencia DESC LIMIT 1;
+  Para derrotas troque WHERE win por WHERE NOT win.
+- BANIMENTOS no competitivo NÃO existem. Contar pro_players.champion conta ESCOLHAS
+  (picks): nunca rotule isso como "bans" nem responda como se fosse banimento; use o
+  aviso de "não é possível responder". Banimentos só existem no solo queue (tabela bans).
+- TEMPORADA e "este ano" valem 2026: pro_games.year = 2026 (solo queue:
+  EXTRACT(YEAR FROM game_creation) = 2026), mesmo que a pergunta não escreva o ano.
+- "PRINCIPAIS LIGAS" no competitivo: filtre league IN ('LCK','LPL','LEC','LCP','LTA',
+  'LCS','CBLOL'); sem esse filtro entram dezenas de ligas regionais e de acesso.
 - Se a pergunta pedir uma única resposta ("qual X tem mais/menos Y"), use
   ORDER BY na direção certa e LIMIT 1 — não retorne todas as linhas do
   agrupamento. Isso vale mesmo quando a resposta usa AVG/GROUP BY (ex.:

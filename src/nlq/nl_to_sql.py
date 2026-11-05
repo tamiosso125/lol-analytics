@@ -110,8 +110,29 @@ def generate_sql(
             "A pergunta é complexa demais — a consulta gerada foi cortada antes de "
             "terminar. Tente dividir em perguntas menores."
         )
-    sql = msg.content[0].text.strip()
-    return sql.removeprefix("```sql").removeprefix("```").removesuffix("```").strip()
+    return extrair_sql(msg.content[0].text)
+
+
+def extrair_sql(texto: str) -> str:
+    """Tira a SQL da resposta do modelo.
+
+    2026-11-05: às vezes o modelo escreve uma SQL, comenta "Wait, let me reconsider" e
+    escreve outra; a segunda é a corrigida. Antes, o texto inteiro ia ao validador e
+    voltava "Múltiplos statements" (4 de 4 passadas do cego, pergunta 86). Quando há
+    blocos de código, vale o ÚLTIMO que começa com SELECT ou WITH; o validador
+    continua sendo aplicado a ele como a qualquer SQL."""
+    texto = texto.strip()
+    if "```" in texto:
+        candidatos = []
+        for parte in texto.split("```"):
+            p = parte.strip()
+            if p.lower().startswith("sql"):
+                p = p[3:].strip()
+            if p.lower().startswith(("select", "with")):
+                candidatos.append(p)
+        if candidatos:
+            return candidatos[-1]
+    return texto.removeprefix("```sql").removeprefix("```").removesuffix("```").strip()
 
 
 def run_query(sql: str) -> tuple[list[str], list[tuple]]:

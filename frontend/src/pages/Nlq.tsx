@@ -91,10 +91,16 @@ function AdvisoryNote({ resultado }: { resultado: Pick<AskTabela, "rows"> }) {
   );
 }
 
-function ResultTable({ result }: { result: Pick<AskTabela, "columns" | "rows"> }) {
+function ResultTable({ result }: { result: Pick<AskTabela, "columns" | "rows" | "n_linhas"> }) {
   if (isEmptyResult(result)) return <EmptyResultNote />;
+  const cortada = (result.n_linhas ?? result.rows.length) > result.rows.length;
   return (
     <div className="overflow-x-auto">
+      {cortada && (
+        <p role="note" className="px-3 pb-2 text-sm text-secondary-ink">
+          Mostrando as {result.rows.length} primeiras de {result.n_linhas} linhas.
+        </p>
+      )}
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border text-left text-secondary-ink">

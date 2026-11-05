@@ -1746,12 +1746,14 @@ def ask_nl(q: Question):
         "roteamento": result["roteamento"],
         "base": result["base"],
         "resultados": [
-            {**r, "rows": [list(x) for x in r["rows"][:100]]} for r in result["resultados"]
+            {**r, "n_linhas": len(r["rows"]), "rows": [list(x) for x in r["rows"][:100]]}
+            for r in result["resultados"]
         ],
         # campos da versão sem roteamento = primeiro resultado que deu certo
         "sql": result["sql"],
         "columns": result["columns"],
         "rows": [list(r) for r in result["rows"][:100]],
+        "n_linhas": len(result["rows"]),  # a tela avisa quando só mostra as 100 primeiras
         # 2 = a primeira SQL falhou no banco e foi corrigida uma vez (nl_to_sql.ask_base)
         "tentativas": result.get("tentativas", 1),
     }
