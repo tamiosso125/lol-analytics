@@ -73,12 +73,17 @@ são confirmações; as de C só se sobrar tempo.
     mais ricas?** Testei 59 variáveis novas: o ganho máximo é +0,008 de AUC-ROC
     (regressão logística, 64 variáveis), estável no teste de treino no passado. Não
     adotei porque exigiria retreinar, reexportar e atualizar quase todos os números
-    de modelagem. Está no Apêndice M. *Por quê:* a decisão é dele, e o prazo
+    de modelagem. Está no Apêndice K. *Por quê:* a decisão é dele, e o prazo
     apertado favorece não trocar.
-16. **A regressão logística empata com o XGBoost. Isso enfraquece a escolha do
-    XGBoost?** *Por quê:* a banca provavelmente vai perguntar. Minha resposta: o
-    limite está na informação, não no algoritmo, e o XGBoost foi adotado pela
-    estabilidade na faixa intermediária.
+16. ~~**A regressão logística empata com o XGBoost. Isso enfraquece a escolha do
+    XGBoost?**~~ **Resolvida (2026-11-04): manter o XGBoost e dizer a verdade.** Ela não
+    empata: fica à frente por milésimos (0,0010 de AUC-ROC aos 15 minutos; o intervalo
+    exclui zero aos 10, 15 e 20 minutos), e com as 59 variáveis novas ganha mais que o
+    XGBoost (+0,0080 contra +0,0044). A Seção 5.4 trocou "no mesmo patamar" e
+    "estabilidade na faixa intermediária" por: logística à frente por milésimos, XGBoost
+    mantido por ser a escolha anterior ao baseline e já sustentar a interface. Checagem 21
+    confere os números contra `baseline_e_diferencas.json`. Resposta pronta no guia (48).
+    Não precisa levar.
 17. ~~**O achado do viés de lado precisa de mais robustez?**~~ **Resolvida
     (2026-11-04):** a Seção 5.3 já diz que só BR1, EUW1 e NA1 excluem 50% (a KR, com
     50,4% e [49,5%, 51,4%], não é distinguível de zero), traz quatro testes de
@@ -143,20 +148,19 @@ são confirmações; as de C só se sobrar tempo.
 
 ## 9. O que entra e o que sai do TCC (A e B)
 
-Estrutura hoje: corpo de 29 páginas (Resumo a Referências), seções 1 a 6, 13
-apêndices (A a M), anexo A, 33 quadros e 11 figuras. Abaixo, o que eu hesito em
+Estrutura hoje: corpo de 29 páginas (Resumo a Referências), seções 1 a 6, 11
+apêndices (A a K), anexo A, 29 quadros e 11 figuras. Abaixo, o que eu hesito em
 manter, cortar ou mover, com minha inclinação atual.
 
-30. **Quantos apêndices posso ter? Os Apêndices H a M (fundamentos dos métodos,
-    estudos de domínio e comparação com a literatura, procedência dos dados,
-    objetivos e evidências, importância das variáveis, experimentos de precisão)
-    valem a pena, ou 13 apêndices distraem?** (A) *Evidência para levar:* os 10
+30. **Quantos apêndices posso ter? Os Apêndices G a K (fundamentos dos métodos,
+    procedência dos dados, objetivos e evidências, importância das variáveis,
+    experimentos de precisão) valem a pena, ou 11 apêndices distraem?** (A) *Evidência para levar:* os 10
     aprovados têm no máximo 3 apêndices (6 deles têm algum), de 3 a 9 páginas no
-    total, com material de apoio (links, termos, questionários). O meu tem 13
-    apêndices e um anexo, 33 quadros e cerca de 30 páginas (estimativa: 61 do
-    documento menos capa, folha de rosto e as 29 do corpo). *Inclinação:* manter M
-    (é o achado novo) e L; avaliar fundir H na Seção 2 e K em uma tabela da
-    Conclusão. *Por quê:* H repete conceitos da fundamentação e K repete a ligação
+    total, com material de apoio (links, termos, questionários). O meu tem 11
+    apêndices e um anexo, 29 quadros e cerca de 27 páginas (estimativa: 59 do
+    documento menos capa, folha de rosto e as 29 do corpo). *Inclinação:* manter K
+    (é o achado novo) e J; avaliar fundir G na Seção 2 e I em uma tabela da
+    Conclusão. *Por quê:* G repete conceitos da fundamentação e I repete a ligação
     objetivo-resultado que o texto já faz.
 31. ~~**As Seções 2 e 3 têm subseções com os mesmos temas. Isso repete?**~~
     **Resolvida (2026-11-04):** nenhum dos 10 aprovados repete título idêntico entre
@@ -166,17 +170,27 @@ manter, cortar ou mover, com minha inclinação atual.
     *League of Legends*; 3.3 Predição com interpretação em *Counter-Strike*; 3.4
     Sistemas de consulta em linguagem natural sobre dados; 3.5 Visualização
     espaço-temporal de partidas. Corpo segue em 29 páginas. Não precisa levar.
-32. **O Apêndice I (estudos de domínio e comparação com a literatura) repete a Seção
-    5.7 (Os resultados frente à literatura)?** (B) *Por quê:* se a 5.7 já basta, o
-    I pode sair ou virar uma tabela.
-33. **Os experimentos negativos (Apêndice D) e os de precisão 12 a 19 (Apêndice M)
-    ficam separados ou juntos?** (B) Ambos dizem "tentei e não melhorou"; juntos, a
-    leitura é mais direta.
-34. **Os experimentos 12 a 19 merecem um parágrafo no corpo (5.4), e não só no
-    apêndice?** (A) Hoje o corpo cita o ganho máximo de +0,008 e remete ao
-    apêndice. *Por quê:* é o resultado que responde "por que não chegou a 0,9"
-    antes de a banca perguntar. O corpo está em 29 de 30 páginas, então só cabe se
-    eu cortar outro trecho.
+32. ~~**O antigo Apêndice I (estudos de domínio e comparação com a literatura) repete
+    a Seção 5.7?**~~ **Resolvida (2026-11-04): removido.** O segundo quadro repetia
+    a 5.7 (mesmos números e mesma ressalva) e o primeiro repetia a Seção 3 e a
+    coluna de relação da 5.7. Os apêndices J a M viraram I a L. Corpo segue em 29
+    páginas; documento em 59. Não precisa levar.
+33. ~~**Os experimentos negativos (antigo Apêndice D) e os de precisão 12 a 19 ficam
+    separados ou juntos?**~~ **Resolvida (2026-11-04): juntos.** Para isso refiz os
+    experimentos 1 a 10 na base congelada, com o mesmo protocolo e intervalo de
+    confiança (`reports/experimentos_antigos.json`): nenhum passa de +0,0007 de
+    AUC-ROC aos 15 minutos (só os atributos ofensivos têm intervalo que exclui zero);
+    o 11 não pode ser refeito. O D foi apagado, o Quadro 5 do corpo ganhou os números
+    novos e o Apêndice K traz os 19 experimentos. Corpo segue em 29 páginas. Não
+    precisa levar.
+34. ~~**Os experimentos 12 a 19 merecem um parágrafo no corpo (5.4), e não só no
+    apêndice?**~~ **Resolvida (2026-11-04): sim.** A 5.4 só tratava dos 11 primeiros; o
+    +0,0080 aparecia no Resumo e na 6.1 sem a origem. O parágrafo "Experimentos de
+    enriquecimento" agora cita os dois ganhos máximos (+0,0007 nos experimentos 1 a 10,
+    +0,0080 nos 12 a 19, com regressão logística e mantido no treino no passado) e
+    funde a frase do volume de partidas, sem custo de página (692 contra 693
+    caracteres). A checagem 21 confere os dois números contra os artefatos. Não
+    precisa levar.
 35. **O histórico do jogador (+0,0004) e a codificação de campeões e jogadores
     ficam só no apêndice?** (B) São negativos ou quase nulos, mas respondem a "por
     que não usou o histórico do jogador?".
@@ -190,7 +204,7 @@ manter, cortar ou mover, com minha inclinação atual.
 38. **Os três casos que o benchmark de linguagem natural errou (5, 12 e 22)
     aparecem no corpo ou só no Apêndice B?** (B) Mostrar o erro dá credibilidade,
     mas ocupa espaço.
-39. **As 11 figuras e as 6 telas do Apêndice F são demais, ou faltam figuras de
+39. **As 11 figuras e as 6 telas do Apêndice E são demais, ou faltam figuras de
     arquitetura e de resultados (curva ROC, calibração)?** (B) Hoje o fluxo do
     sistema é descrito em texto, sem diagrama.
 40. **Onde entram a declaração de uso de IA (pergunta 8) e o aviso de que o produto
@@ -214,17 +228,17 @@ manter, cortar ou mover, com minha inclinação atual.
     Só 3 dos 10 usam a expressão "trabalhos futuros" no texto (Bruno, Eduardo e
     Letícia); os demais não a trazem explicitamente. *Alternativa:* uma Conclusão
     curta, com limitações e trabalhos futuros em seção própria ou em apêndice
-    (o Apêndice G já traz as limitações em detalhe). Pergunta se ele considera
+    (o Apêndice F já traz as limitações em detalhe). Pergunta se ele considera
     limitações e trabalhos futuros parte esperada da Conclusão ou excesso.
 
 ## O que levar
 
-- O `.docx` e o PDF (29 páginas de corpo, apêndices A a M, anexo A).
+- O `.docx` e o PDF (29 páginas de corpo, apêndices A a K, anexo A).
 - Os slides (`docs/bellestraiko_defesa_v4.pptx`, 18 slides) e os prints do site
   (`reports/prints_site/`) para mostrar a demonstração.
 - Uma folha com o que mudou desde a última versão: carregador dos jogos profissionais
-  corrigido (99.259 jogos em vez de 96.716), apêndices H a M, experimentos de
-  precisão 12 a 19, teste de treino no passado e teste no futuro, e a correção da
+  corrigido (99.259 jogos em vez de 96.716), apêndices G a K, experimentos de
+  precisão 1 a 19, teste de treino no passado e teste no futuro, e a correção da
   referência do RAT-SQL.
 - O guia de estudo da banca (`docs/guia_banca.md` ou o site) para ele ver as
   respostas preparadas.
