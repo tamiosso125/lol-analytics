@@ -198,3 +198,21 @@ conferidos pelo `verifica_tcc.py`.
 **Soma do bloco:** +2 linhas.
 
 **Aplicado (2026-11-05): 7.1 a 7.5.**
+
+## B8 — 5.6 e 5.7 (linhas 730–769; páginas 15 e 16 do artigo)
+
+Conferido e ok: o *benchmark* de 26 é declarado não independente; o gabarito tem método,
+intervalo e a divisão entre respondíveis e recusas; as falhas e a correção não medida estão
+ditas junto do resultado (R3 #9); a Figura 5 é chamada antes; a 5.7 retoma os estudos da Seção 3
+um a um, com a ressalva de que a comparação de acurácia é só indicativa; as acurácias citadas
+(70,0% a 82,4%) batem com o Quadro 4.
+
+| # | Linha | Régua | Tipo | Problema | Proposta | Efeito |
+|---|---|---|---|---|---|---|
+| 8.1 | 734 | R3 #6 | consistência | "Para sair do julgamento de uma só pessoa, a medida principal passou a ser…": o julgamento por uma pessoa não aparece mais no texto, então a frase se refere a algo que o leitor não viu | "A medida principal é um gabarito automático: cada pergunta nasce com a SQL de referência…" | 0 |
+| 8.2 | 736 | R3 #10 | argumento | "as duas correções feitas depois" não diz quais são, e "(15 de 16 recusas esperadas certas)" repete o número do parágrafo anterior | "…as duas correções feitas depois (o nome exato das entidades passou a ser resolvido no banco, e a consulta é refeita quando eliminações viram kills mais assistências) não foram medidas de ponta a ponta. Quando o banco não tem o dado, uma recusa determinística responde antes do modelo." | +1 linha |
+| 8.3 | 738 | R3 #7 | consistência | "a pergunta 9 do benchmark": sem itálico, o resto do texto usa *benchmark* | "*benchmark*" | 0 |
+
+**Soma do bloco:** +1 linha.
+
+**Aplicado (2026-11-05): 8.1 a 8.3.**

@@ -731,11 +731,11 @@ Figura — Simulador, aba Estado: probabilidade de vitória e contribuição de 
 
 A consulta em linguagem natural (*text-to-SQL* com validação e roteamento entre as bases) foi medida de duas formas (Apêndice B). No *benchmark* de 26 perguntas de referência, acertou 23 antes dos ajustes e 26 depois; como as regras do esquema foram escritas conhecendo as três falhas, o resultado não é independente.
 
-Para sair do julgamento de uma só pessoa, a medida principal passou a ser um gabarito automático: cada pergunta nasce com a SQL de referência, escrita antes de qualquer execução, e um programa compara o resultado. O gerador produz as perguntas por template, e a medida usa 203, amostradas ao acaso. O sistema acertou **181 de 203 (89,2%)**, com intervalo de 95% de 84,1% a 92,7%: 166 de 187 perguntas respondíveis e 15 de 16 recusas esperadas.
+A medida principal é um gabarito automático: cada pergunta nasce com a SQL de referência, escrita antes de qualquer execução, e um programa compara o resultado. O gerador produz as perguntas por template, e a medida usa 203, amostradas ao acaso. O sistema acertou **181 de 203 (89,2%)**, com intervalo de 95% de 84,1% a 92,7%: 166 de 187 perguntas respondíveis e 15 de 16 recusas esperadas.
 
-As 22 falhas vêm de nomes de entidade escritos de outro modo pelo modelo ("Monkey King" no lugar de MonkeyKing), de eliminações lidas como kills mais assistências e de roteamento para a base errada; as duas correções feitas depois não foram medidas de ponta a ponta. Quando o banco não tem o dado, uma recusa determinística responde antes do modelo (15 de 16 recusas esperadas certas). O validador garante a segurança da consulta, não o seu sentido (Seção 6.1).
+As 22 falhas vêm de nomes de entidade escritos de outro modo pelo modelo ("Monkey King" no lugar de MonkeyKing), de eliminações lidas como kills mais assistências e de roteamento para a base errada; as duas correções feitas depois (o nome exato das entidades passou a ser resolvido no banco, e a consulta é refeita quando eliminações viram kills mais assistências) não foram medidas de ponta a ponta. Quando o banco não tem o dado, uma recusa determinística responde antes do modelo. O validador garante a segurança da consulta, não o seu sentido (Seção 6.1).
 
-A Figura 5 mostra uma consulta na plataforma: a pergunta 9 do benchmark,
+A Figura 5 mostra uma consulta na plataforma: a pergunta 9 do *benchmark*,
 a SQL gerada pelo modelo, já validada, e o resultado lido do banco.
 
 Figura — Consulta em linguagem natural: pergunta, SQL gerada e resultado | reports/figuras_texto/fig_nlq.png
