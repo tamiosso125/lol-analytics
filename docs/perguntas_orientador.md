@@ -4,6 +4,46 @@ Entrega em 16/11 (antes 13/11). Em cada pergunta: por que perguntar e o que faze
 resposta. As de **prioridade A** mudam algo que ainda dá para ajustar; as de B
 são confirmações; as de C só se sobrar tempo.
 
+## LEVAR À REUNIÃO (decisão do autor, 2026-11-05): só estas quatro
+
+As demais perguntas deste arquivo ficam como referência e **não serão levadas**. Números
+atualizados em 2026-11-05 (corpo de 29 páginas; 11 apêndices e um anexo).
+
+**1. (antiga 14) Palavras-chave com ponto e vírgula está certo?**
+- *Evidência:* o modelo de artigo dele (p. 4) diz "iniciais em minúscula, exceto substantivos
+  próprios, nomes científicos ou siglas, separadas por ponto e vírgula e finalizadas por ponto".
+  Nos 10 TCC II aprovados: 5 usam `;`, 4 usam ponto e 1 usa vírgula.
+- *Meu texto:* `esports; *League of Legends*; análise de dados; *machine learning*; interface em
+  linguagem natural.` (e igual em inglês). Um comentário antigo dele no TCC I falava em ponto.
+- *Pergunta:* confirma o ponto e vírgula do modelo?
+
+**2. (antiga 30) Quantos apêndices posso ter?**
+- *Evidência:* os 10 aprovados têm no máximo 3 apêndices (6 deles têm algum), de 3 a 9 páginas no
+  total, com material de apoio (links, termos, questionários). O meu tem 11 apêndices e um anexo,
+  30 quadros e cerca de 30 páginas (estimativa: 61 do documento menos capa, folha de rosto e as
+  29 do corpo).
+- *Inclinação:* manter K (experimentos de precisão, o achado novo) e J; avaliar fundir G
+  (fundamentos dos métodos) na Seção 2 e I (objetivos e evidências) em uma tabela da Conclusão.
+- *Pergunta:* há limite ou preferência? Posso cortar ou fundir apêndices?
+
+**3. (antiga 43) Preciso dizer na Seção 3 onde e como busquei os trabalhos relacionados?**
+- *Evidência:* Pablo, Bruno e Eduardo (aprovados) abrem a Seção 3 dizendo que a busca foi no
+  Google Acadêmico e com quais palavras-chave; o modelo dele não exige. O meu texto atual não diz
+  como os estudos de domínio foram escolhidos, e não achei registro disso na documentação.
+- *Custo:* uma ou duas frases; o corpo está em 29 de 30 páginas.
+- *Pergunta:* a base, as palavras-chave e o critério de escolha precisam aparecer?
+
+**4. (antiga 44) Vale manter limitações (6.1) e trabalhos futuros (6.2) dentro da Conclusão?**
+- *Evidência:* a minha Conclusão, com 6.1 e 6.2, tem cerca de 1.000 palavras (dessas, cerca de 390
+  são a conclusão propriamente dita); as dos 10 aprovados têm de 131 a 507 (a maior é a de Pablo).
+  Só 3 dos 10 usam a expressão "trabalhos futuros" no texto (Bruno, Eduardo e Letícia).
+- *Estado:* 6.2 já foi cortada para três trabalhos futuros; o Apêndice F traz as limitações em
+  detalhe.
+- *Pergunta:* limitações e trabalhos futuros são parte esperada da Conclusão, ou ficam melhor em
+  seção própria ou em apêndice?
+
+---
+
 ## 1. Entrega e banca (A)
 
 1. **Qual é o formato e o canal da entrega no dia 13?** (arquivo Word, PDF, sistema
