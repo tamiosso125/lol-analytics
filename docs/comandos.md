@@ -202,7 +202,7 @@ resultado está em `reports/`.**
 ```powershell
 # Teste D1: calibração e regularização alternativa contra a discrepância de
 # taxa-base da Seção 6.1 e do Apêndice F. LENTO (~40 min): cada variante roda validação
-# cruzada aninhada sobre 39.188 linhas. Grava
+# cruzada aninhada sobre 40.816 linhas. Grava
 # reports/experimento_calibracao.json, e o veredito sai de
 # reports/experimento_calibracao_veredito.json:
 .venv\Scripts\python.exe docs\experimento_calibracao.py
@@ -458,7 +458,7 @@ texto existam de verdade. Ver **5b**, **5c** e **5d**.
 ## Experimentos de precisão (2026-11-03, exploratório, não altera o modelo de produção)
 
 ```powershell
-# variáveis ricas (base congelada de 39.426 partidas); grava data/features_v2.csv.gz
+# variáveis ricas (base única de 41.063 partidas); grava data/features_v2.csv.gz
 .venv\Scripts\python.exe -m src.features.build_features_v2
 .venv\Scripts\python.exe tests\test_features_v2_sem_vazamento.py        # 0 vazamentos em 703 pares
 # experimentos 12 a 18 -> reports/experimentos_precisao.json (Apêndice K)

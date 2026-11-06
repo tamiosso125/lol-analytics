@@ -955,12 +955,12 @@ Grava `reports/holdout_temporal.json` (Apêndice C do TCC; a checagem 20 de `ver
 
 `tune_models.py` — o script original — não servia: ele imprime o resultado e não guarda nada, e foi rodado sobre a base de 10 mil. A afirmação da antiga Seção 5.8 (hoje 6.1 e Apêndice F) ficou semanas sem artefato por causa disso.
 
-Resultado medido em 2026-10-04, sobre as 39.188 linhas do corte de 15 min:
+Resultado refeito em 2026-11-06, sobre as 40.816 linhas do corte de 15 min (base única; em 2026-10-04, sobre 39.188, a produção ficou em 2º, AUC 0,8473 contra 0,8475):
 
 | | |
 |---|---|
-| Produção (500 / 0,01 / 3) | AUC **0,8473** — 2º lugar de 27 |
-| Vencedora da grade (200 / 0,05 / 3) | AUC 0,8475 |
+| Produção (500 / 0,01 / 3) | AUC **0,8490** — 3º lugar de 27 |
+| Vencedora da grade (200 / 0,05 / 3) | AUC 0,8491 |
 | Profundidade | **a mesma: 3** |
 | Delta | **+0,0001** |
 
@@ -971,13 +971,13 @@ também é medida como no Quadro 3 (`cross_val_predict`, probabilidades
 agregadas), porque o `best_score_` da grade é a média por *fold* e não é
 diretamente comparável:
 
-| 15 min, 39.188 linhas | melhor combinação | acurácia | AUC-ROC |
+| 15 min, 40.816 linhas | melhor combinação | acurácia | AUC-ROC |
 |---|---|---:|---:|
-| XGBoost (produção) | 500 / 0,01 / 3 | 0,7621 | 0,8473 |
-| MLP | `(32,)`, `alpha=0.001` | 0,7619 | 0,8477 |
-| *Random Forest* | 200 árvores, `max_depth=6`, `min_samples_leaf=5` | 0,7617 | 0,8468 |
+| XGBoost (produção) | 500 / 0,01 / 3 | 0,7636 | 0,8490 |
+| MLP | `(32,)`, `alpha=0.001` | 0,7645 | 0,8494 |
+| *Random Forest* | 300 árvores, `max_depth=6`, `min_samples_leaf=2` | 0,7625 | 0,8484 |
 
-Empate técnico, com o XGBoost na maior acurácia. Antes disso, a 5.4 dizia
+Diferenças de milésimos, com o MLP ajustado ligeiramente à frente (+0,0009 de acurácia); o XGBoost é mantido pela escolha anterior, pela liderança na configuração de produção e pelo SHAP exato. Antes disso, a 5.4 dizia
 que o Quadro 3 comparava os três ajustados, mas *Random Forest* e MLP
 estavam na configuração de referência.
 
@@ -1060,7 +1060,7 @@ hiperparâmetros não cobre — ela variou só `n_estimators`,
 taxa-base.
 
 ```powershell
-# LENTO: ~40 min, validação cruzada aninhada sobre 39.188 linhas
+# LENTO: ~40 min, validação cruzada aninhada sobre 40.816 linhas
 .venv\Scripts\python.exe docs\experimento_calibracao.py
 
 # Reavalia o veredito a partir do JSON, sem reexecutar (1s)
@@ -1157,7 +1157,7 @@ jogo profissional, nos dois lados, com a mesma definição de faixa.
 
 O TCC afirmava 84,0% contra ~68% na faixa de +2.000 a +4.000, medido sobre
 ~12 mil partidas. Na base atual são 81,5% (profissional, n = 3.294) contra
-73,7% (*solo queue*, n = 5.166) — o efeito é real (z = 8,3) mas tem cerca de
+74,1% (*solo queue*, n = 5.368; base única de 2026-11-06, z = 8,0) — o efeito é real mas tem cerca de
 metade do tamanho antes declarado.
 
 A coluna de ouro do Oracle's Elixir é `golddiffat15`, não `gold_diff`, e há

@@ -18,19 +18,17 @@ Legends com DOIS datasets complementares:
 1. **Solo queue** (Riot API): partidas ranqueadas de elo alto (Challenger/GM/Master)
    multi-região (BR1/EUW1/KR/NA1, mais um resíduo EUN1, fila 420) —
    **41.063 partidas** no banco (BR1 11.936, EUW1 11.744, KR 10.204,
-   NA1 7.159, EUN1 20) e **39.188 linhas** na base do modelo preditivo
-   (corte de 15 min, retreino de 2026-10-04). A coleta foi retomável ao
+   NA1 7.159, EUN1 20) e **40.816 linhas** na base do modelo preditivo
+   (corte de 15 min; o número varia por corte, 40.942/40.816/35.637/27.761). A coleta foi retomável ao
    longo de todo o projeto: 10.295 em julho, 23.133 em 2026-07-06,
    24.154 em 2026-09-28, 33.713 em 2026-10-03 e 39.426 em 2026-10-04,
    quando a NA1 foi de 1.446 para 7.159, fechando em 41.063 com a
    última rodada da KR.
-   **Dois números coexistem de propósito:** a análise descritiva (Quadro
-   1, viés de lado, teste de faixa de duração) usa as 41.063;
-   *features* e modelos foram congelados nas 39.426 e não foram
-   retreinados — a diferença de 1.637 partidas é limitação declarada
-   (das 1.754 partidas sem *features*, 1.647 são da KR e 107 são de
-   BR1, EUW1 e NA1; as features cobrem 39.309 partidas distintas)
-   na Seção 6.1 do TCC (detalhe no Apêndice F). JSON bruto + timelines guardados para
+   **Base única (2026-11-06):** *features*, modelos, SHAP e experimentos
+   foram refeitos sobre as 41.063; não há mais duas bases. Antes, os modelos
+   usavam 39.426 (congelados em 2026-10-04); a comparação antes/depois está em
+   `docs/comparacao_rerun_41063.md` e os JSON antigos em
+   `data/backups/pre_rerun_41063/` (fora do git). JSON bruto + timelines guardados para
    reprocessamento.
 2. **Competitivo** (Oracle's Elixir): **99.259 jogos** profissionais de
    2014-2026 (LCK/LPL/LEC/LTA/CBLOL etc.), carregados de CSVs anuais.
@@ -88,7 +86,7 @@ tal na UI.
   10/15/20/25), `src/models/` (train_baseline, tune_models,
   tune_models_full, export_model, explain_shap). Produção:
   XGBoost n=500/lr=0.01/depth=3 por fase em `data/models_phases.joblib`,
-  retreinado em **39.188 linhas** (corte de 15 min, 2026-10-04) — ver
+  retreinado em **40.816 linhas** (corte de 15 min, 2026-11-06) — ver
   números abaixo.
 - **API**: `src/api/main.py` — todos os endpoints (stats solo queue,
   `/stats/pro/*` com `?year=` padrão mais-recente, análise de partida
@@ -135,18 +133,18 @@ tal na UI.
 
 ## Números que importam (para o texto do TCC)
 
-Modelo em produção, solo queue **39.188 partidas** no corte de 15 min
-(retreino de 2026-10-04 — números do CV 5-fold com semente 42 e
-hiperparâmetros de produção 500/0,01/3; o `GridSearchCV` sobre as 39 mil
+Modelo em produção, solo queue **40.816 partidas** no corte de 15 min
+(retreino de 2026-11-06 — números do CV 5-fold com semente 42 e
+hiperparâmetros de produção 500/0,01/3; o `GridSearchCV` sobre as 41 mil
 linhas devolveu ajuste equivalente, 200 árvores a taxa 0,05, o que
 confirma que a limitação de taxa-base registrada na Seção 6.1 e no Apêndice F do TCC não
 é subajuste):
 
 | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
 |---|---|---|---|---|---|
-| XGBoost (produção) | 0,7621 | 0,7561 | 0,7228 | 0,7391 | 0,8473 |
-| MLP | 0,7610 | 0,7537 | 0,7239 | 0,7385 | 0,8455 |
-| RandomForest | 0,7457 | 0,7330 | 0,7150 | 0,7239 | 0,8277 |
+| XGBoost (produção) | 0,7636 | 0,7577 | 0,7259 | 0,7415 | 0,8490 |
+| MLP | 0,7598 | 0,7483 | 0,7319 | 0,7400 | 0,8454 |
+| RandomForest | 0,7475 | 0,7350 | 0,7183 | 0,7265 | 0,8287 |
 
 (Números exatos, não aproximados: 0,7610 arredonda para 0,76 e 0,7457 para
 0,75 — escrever "~0,74" subestimava o MLP.) Reproduz com
@@ -196,8 +194,8 @@ transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
   Hipótese documentada: counter-pick garantido (solo queue) vs
   prioridade de primeiro pick (pro).
 - Conversão de vantagem: com +2k a +4k de ouro aos 15, o azul vence
-  81,5% no pro (n=3.294) contra 73,7% no solo queue (n=5.166) — "macro
-  ganha jogo", quantificado. Diferença de 7,8 pp, z = 8,28. A faixa
+  81,5% no pro (n=3.294) contra 74,1% no solo queue (n=5.368) — "macro
+  ganha jogo", quantificado. Diferença de 7,4 pp, z = 8,0. A faixa
   +4k a +6k no pro apoia-se em só 72 jogos e é indicativa. O valor
   antigo (84,0% vs ~68%, medido sobre ~12k partidas) era o dobro do
   efeito real. Mede com `python docs/confere_conversao_advantagem.py`.

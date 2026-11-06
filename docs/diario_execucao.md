@@ -5101,3 +5101,11 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 ## 2026-11-05 (madrugada) — Gabarito automático (medida principal)
 
 **O que foi feito.** `src/nlq/gerar_gabarito.py` gera 900 perguntas por template com SQL de referência (executada na geração); `src/nlq/avaliar_gabarito.py` compara por código. O crédito da API acabou depois de 203 perguntas: **181 de 203 certas (89,2%)**, IC 95% 84,1%–92,7%; 166/187 respondíveis, 15/16 recusas. As 22 falhas são do sistema (nomes de entidade, eliminações = kills+assists, roteamento). Depois da medida: `src/nlq/entidades.py` (nome exato do banco, roteamento por entidade) e checagem de eliminações, com testes unitários, **sem medida de ponta a ponta**. Decisão do autor: ficar com as 203 e não recarregar a API. TCC: Resumo, 5.6, 6.1, 6.2, Apêndice B (+ quadro por família) e Apêndice F; `verifica_tcc` confere 181/203; corpo em 29 páginas.
+
+## 2026-11-06 — Base única de 41.063 partidas
+
+**Decisão.** O TCC citava três números de partidas (41.063, 39.426 e 39.188) porque as *features* e os modelos tinham sido congelados antes da última rodada de coleta. Para ter uma base só, o pipeline inteiro foi refeito sobre as 41.063: `build_features`, modelos por corte, SHAP, `tune_models_full --completo`, robustez de dobras, divisão temporal e experimentos 1 a 19. O número de partidas passa a variar só por corte (40.942, 40.816, 35.637 e 27.761).
+
+**Resultado (15 min).** XGBoost 0,7636 de acurácia e 0,8490 de AUC-ROC (antes 0,7621 e 0,8473). Comparação completa em `docs/comparacao_rerun_41063.md`. Mudaram afirmações, não só números: o MLP ajustado fica 0,0009 acima do XGBoost em acurácia (o XGBoost não é mais o de maior acurácia entre os ajustados); a produção cai para 3º entre 27 combinações da grade; a divisão temporal nunca fica abaixo da aleatória; torres passam de ~15 para ~11 vezes; conversão de vantagem 74,1% contra 81,5% (7,4 pp, z = 8,0).
+
+**Ferramentas.** `docs/regenera_quadros.py` reescreve os quadros a partir de `reports/*.json`; `docs/verifica_tcc.py` passou a exigir base única. Backups: `data/backups/pre_rerun_41063/` e `data/backups/rerun_41063/` (fora do git). A Figura 5 (consulta em linguagem natural) não foi recapturada por falta de crédito na API e segue a antiga.
