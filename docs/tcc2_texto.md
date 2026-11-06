@@ -640,8 +640,7 @@ O Quadro 3 compara os três modelos no corte de 15 minutos (validação
 cruzada estratificada de 5 dobras, semente 42), no conjunto final de
 39.188 partidas, em que o azul vence 46,6%: o XGBoost com os
 hiperparâmetros da busca em grade (*GridSearchCV*), os outros dois na
-configuração de referência. O comando que reproduz a medição está no
-Apêndice C.
+configuração de referência.
 
 Quadro — Comparação entre modelos (corte de 15 minutos)
 
@@ -1033,9 +1032,7 @@ consultas geradas pela interface em linguagem natural.
 ## APÊNDICE B – Avaliação da interface em linguagem natural e auditoria do coach
 
 Medição de 5 de novembro de 2026 sobre a base de produção de **41.063
-partidas**: **26/26 = 100% de acurácia de execução**, pelo comando
-`python -m src.nlq.evaluate_nlq`, que grava `reports/nlq_benchmark.json` com
-a acurácia, a base, o modelo e o desfecho de cada pergunta. Esse resultado **não é independente**: as regras do esquema que corrigiram as três falhas foram escritas depois de conhecê-las. Até 3 de novembro, antes dos ajustes, o resultado era 23 de 26 (88%) em todas as execuções. A medida independente é o gabarito automático, descrito mais adiante.
+partidas**: **26/26 = 100% de acurácia de execução**, com o registro da acurácia, da base, do modelo e do desfecho de cada pergunta. Esse resultado **não é independente**: as regras do esquema que corrigiram as três falhas foram escritas depois de conhecê-las. Até 3 de novembro, antes dos ajustes, o resultado era 23 de 26 (88%) em todas as execuções. A medida independente é o gabarito automático, descrito mais adiante.
 
 Quadro — Execuções do benchmark de linguagem natural
 
@@ -1087,7 +1084,7 @@ envolvem um limiar mínimo de jogos ("com pelo menos N partidas") e erram na
 formatação da resposta, por coluna extra ou apresentação, sem erro de
 interpretação da pergunta nem de estrutura da SQL.
 
-**Gabarito automático (medida principal, 5 de novembro de 2026).** Um gerador (`src/nlq/gerar_gabarito.py`) monta perguntas por templates sobre entidades reais do banco (campeões, equipes, ligas, patches, jogadores e itens) e escreve, junto de cada uma, a SQL de referência, que é executada na hora; pergunta com gabarito vazio, com empate no limite de um ranking ou repetida é descartada. Parte das perguntas não tem resposta no banco (primeiro sangue, série, ouro aos 10 minutos, dano a estruturas) e espera uma recusa. O sistema roda as perguntas pelo caminho do produto e `src/nlq/avaliar_gabarito.py` compara: em escalar, algum valor da primeira linha bate com o do gabarito (tolerância de 0,1%, fração ou percentual); em ranking, a chave de cada linha do gabarito aparece na mesma posição; recusa esperada só passa se toda base consultada recusou; resposta na base errada falha. A comparação não depende de avaliador, e as regras estão no cabeçalho do módulo e em `tests/test_avaliar_gabarito.py`. O conjunto avaliado tem 203 perguntas, amostradas ao acaso: **181 de 203 certas (89,2%)**, intervalo de 95% de 84,1% a 92,7%. Falhas: 16 valores diferentes do gabarito, 2 recusas indevidas, 3 roteamentos para a base errada e 1 resposta onde o banco não tem o dado. Li as 22 uma a uma: todas são do sistema, nenhuma do gabarito ou do comparador. A maior família foi nome de entidade (o modelo escrevia 'Monkey King' para MonkeyKing, tratava ligas como equipe, trocava LPLOL por LPL), seguida de eliminações lidas como kills mais assistências. Duas correções (`src/nlq/entidades.py` e uma checagem que refaz a consulta) vieram depois da medida e não foram medidas de ponta a ponta. Limites: o texto é de template, o autor conhecia as famílias de erro e as famílias pequenas têm poucas perguntas. Artefatos: `docs/nlq_gabarito_203.json`, `reports/nlq_gabarito_bruto_parte1.json` a `3.json`, `reports/nlq_gabarito_resultado_203.json`.
+**Gabarito automático (medida principal, 5 de novembro de 2026).** Um gerador monta perguntas por templates sobre entidades reais do banco (campeões, equipes, ligas, patches, jogadores e itens) e escreve, junto de cada uma, a SQL de referência, que é executada na hora; pergunta com gabarito vazio, com empate no limite de um ranking ou repetida é descartada. Parte das perguntas não tem resposta no banco (primeiro sangue, série, ouro aos 10 minutos, dano a estruturas) e espera uma recusa. O sistema roda as perguntas pelo caminho do produto e um comparador automático compara: em escalar, algum valor da primeira linha bate com o do gabarito (tolerância de 0,1%, fração ou percentual); em ranking, a chave de cada linha do gabarito aparece na mesma posição; recusa esperada só passa se toda base consultada recusou; resposta na base errada falha. A comparação não depende de avaliador, e as regras do comparador têm testes automatizados. O conjunto avaliado tem 203 perguntas, amostradas ao acaso: **181 de 203 certas (89,2%)**, intervalo de 95% de 84,1% a 92,7%. Falhas: 16 valores diferentes do gabarito, 2 recusas indevidas, 3 roteamentos para a base errada e 1 resposta onde o banco não tem o dado. Li as 22 uma a uma: todas são do sistema, nenhuma do gabarito ou do comparador. A maior família foi nome de entidade (o modelo escrevia 'Monkey King' para MonkeyKing, tratava ligas como equipe, trocava LPLOL por LPL), seguida de eliminações lidas como kills mais assistências. Duas correções (a resolução do nome exato das entidades no banco e uma checagem que refaz a consulta) vieram depois da medida e não foram medidas de ponta a ponta. Limites: o texto é de template, o autor conhecia as famílias de erro e as famílias pequenas têm poucas perguntas.
 
 Quadro — Acerto do gabarito automático por família de pergunta
 
@@ -1128,7 +1125,7 @@ Quadro — Acerto do gabarito automático por família de pergunta
 | U7-itens-pro | competitivo | 1 | 1 | 100,0 |
 | U8-multikill | solo | 1 | 1 | 100,0 |
 
-Auditoria do coach, de 4 de novembro de 2026: 36 respostas do módulo de orientação estratégica, geradas pelo mesmo caminho do produto sobre partidas reais (12 de cada modo: partida completa, composição e só estado; cortes de 15, 20 e 25 minutos). Cada número da resposta foi conferido contra os dados fornecidos à IA (o prompt sem as instruções), e os 13 que o detector não encontrou nos dados foram revisados à mão. A saída da IA varia entre execuções (temperatura 0,4), e o quadro é de uma execução. Comando: `python -m src.coach.audit_grounding --n 36`; artefatos: `reports/coach_audit.json` e `reports/coach_audit_revisao.json`.
+Auditoria do coach, de 4 de novembro de 2026: 36 respostas do módulo de orientação estratégica, geradas pelo mesmo caminho do produto sobre partidas reais (12 de cada modo: partida completa, composição e só estado; cortes de 15, 20 e 25 minutos). Cada número da resposta foi conferido contra os dados fornecidos à IA (o prompt sem as instruções), e os 13 que o detector não encontrou nos dados foram revisados à mão. A saída da IA varia entre execuções (temperatura 0,4), e o quadro é de uma execução.
 
 Quadro — Auditoria de fundamentação do coach (36 respostas)
 
@@ -1178,10 +1175,6 @@ Quadro — Configuração dos três modelos comparados
 | *Random Forest* | 500 árvores, demais parâmetros do scikit-learn | configuração de referência, sem busca em grade |
 | MLP | camadas de 64 e 32 neurônios, variáveis padronizadas, até 500 iterações | configuração de referência, sem busca em grade |
 
-O comando que regenera o quadro de métricas é
-`python -m src.models.multi_cutoff_metrics`, que grava
-`reports/metricas_corte.json`.
-
 Quadro — Regressão logística como baseline e diferença do XGBoost para os demais modelos
 
 | Corte | Modelo | Acurácia | AUC-ROC | AUC-ROC do XGBoost menos a do modelo (IC de 95%) |
@@ -1200,8 +1193,6 @@ validação cruzada de 5 dobras. Na acurácia, a diferença do XGBoost para a
 regressão logística fica entre −0,0007 e −0,0016, com intervalo que inclui
 zero aos 10, 15 e 25 minutos. Todas as diferenças são de milésimos, exceto a
 da *Random Forest* de referência, que a busca em grade elimina (Seção 5.4).
-O comando é `python -m src.models.baseline_e_diferencas`, que grava
-`reports/baseline_e_diferencas.json`.
 
 Quadro — Validação cruzada com 5 e com 10 dobras
 
@@ -1216,9 +1207,7 @@ Quadro — Validação cruzada com 5 e com 10 dobras
 
 O número de dobras recomendado por Kohavi (1995) é 10. A diferença para as 5
 usadas no trabalho é de no máximo 0,0008 em acurácia e 0,0006 em AUC-ROC, e
-não altera nenhuma conclusão. O comando é
-`python -m src.models.robustez_dobras`, que grava
-`reports/robustez_dobras.json`.
+não altera nenhuma conclusão.
 
 Quadro — Treino no passado e teste no futuro, XGBoost
 
@@ -1248,9 +1237,7 @@ até 0,0012 de AUC-ROC para o XGBoost em todas as divisões. A ressalva é que a
 região se mistura ao tempo: aos 15 minutos, o teste cronológico tem
 49,7% de NA1 e nenhuma partida de BR1, que é 37,7% do treino. O resultado vale
 também para uma composição regional diferente da do treino, mas não separa o
-efeito do tempo do efeito da região. O comando é
-`python -m src.models.holdout_temporal`, que grava
-`reports/holdout_temporal.json`.
+efeito do tempo do efeito da região.
 
 ---
 
@@ -1271,14 +1258,14 @@ generalização, deixou de ser limitação.
 
 Quadro — Origem dos números da Seção 5.3
 
-| Número e base | Script (em `docs/`) | Artefato (em `reports/`) |
-|---|---|---|
-| Vitória do vermelho por região (Quadro 2), sobre 41.063 partidas | consulta SQL agregada por partida, na checagem 6 de `verifica_tcc.py` | `stats_regions.txt` |
-| Vitória do azul em partidas empatadas, por corte, sobre as variáveis congeladas (39.309 partidas) | `taxa_base_por_corte.py` | `taxa_base_por_corte.json` |
-| Comparação de pares com correção de Holm, sobre as variáveis congeladas | `testa_diferenca_taxas.py` | saída no terminal |
-| Vitória do azul por faixa de duração, sobre 41.063 partidas | `testa_faixa_duracao.py` | `faixa_duracao.json` |
-| Conversão de vantagem de ouro, sobre as variáveis congeladas (39.188 aos 15 minutos) | `confere_conversao_advantagem.py` | lê `features_phases.csv`, em `data/` |
-| Série anual do cenário profissional, sobre 99.259 jogos | consulta SQL em `pro_games` | |
+| Número e base | Como foi obtido |
+|---|---|
+| Vitória do vermelho por região (Quadro 2), sobre 41.063 partidas | consulta SQL agregada por partida, conferida automaticamente contra o texto |
+| Vitória do azul em partidas empatadas, por corte, sobre as variáveis congeladas (39.309 partidas) | cálculo da taxa de vitória do azul em cada corte |
+| Comparação de pares com correção de Holm, sobre as variáveis congeladas | teste de diferença entre pares, com correção de Holm |
+| Vitória do azul por faixa de duração, sobre 41.063 partidas | cálculo por faixa de duração total da partida |
+| Conversão de vantagem de ouro, sobre as variáveis congeladas (39.188 aos 15 minutos) | cálculo sobre as variáveis de cada partida no corte de 15 minutos |
+| Série anual do cenário profissional, sobre 99.259 jogos | consulta SQL na tabela de jogos profissionais |
 
 Quadro — Vitória do azul por faixa de duração total da partida
 
@@ -1316,8 +1303,7 @@ mudança no padrão.
 As seis telas da plataforma, inteiras, das quais a Seção 5 mostra recortes.
 Foram capturadas com a API e a interface rodando localmente sobre as 41.063
 partidas do Quadro 2, em tema escuro, com 1440 px de largura e altura
-ajustada à página. Os comandos que geram as capturas estão em
-`docs/comandos.md`.
+ajustada à página.
 
 | Arquivo | Página |
 |---|---|
@@ -1372,9 +1358,7 @@ Quadro — Alavancas testadas contra a discrepância de taxa-base
 | *Random Forest* de 500 árvores e profundidade 6 | Leva o desvio a 0,6 pp | Custa 0,0005 de AUC, e a acurácia fica em 0,7617 contra 0,7621. Não adotada, porque o critério de escolha foi a acurácia aos 15 minutos; a decisão é reversível e dispensa retreino |
 
 A discrepância é, portanto, uma propriedade da função que o XGBoost aprende
-neste recorte; não é um déficit de ajuste. Comando e artefato:
-`docs/experimento_calibracao.py` e
-`reports/experimento_calibracao_veredito.json`.
+neste recorte; não é um déficit de ajuste.
 
 ---
 
@@ -1405,7 +1389,7 @@ Quadro — Fundamentos dos métodos usados e o limite de cada um
 
 ## APÊNDICE H – Procedência dos dados e chaves da Riot Games API
 
-O primeiro quadro reúne medições sobre a composição das duas bases, feitas em 3 de novembro de 2026, sobre as 41.063 partidas e os 99.259 jogos descritos na Seção 4.3. As consultas estão registradas em `docs/conferencia_referencias.md`. O segundo quadro resume os tipos de chave da Riot Games API, conforme o portal de desenvolvedores consultado na mesma data.
+O primeiro quadro reúne medições sobre a composição das duas bases, feitas em 3 de novembro de 2026, sobre as 41.063 partidas e os 99.259 jogos descritos na Seção 4.3. O segundo quadro resume os tipos de chave da Riot Games API, conforme o portal de desenvolvedores consultado na mesma data.
 
 Quadro — Composição das bases de dados
 
@@ -1448,7 +1432,7 @@ Quadro — Objetivos específicos, onde são tratados e a evidência de cada um
 
 ## APÊNDICE J – Importância das variáveis por corte
 
-Valor médio absoluto do SHAP de cada variável, no modelo XGBoost de cada corte. Artefato: `reports/shap_importance_phases.json`.
+Valor médio absoluto do SHAP de cada variável, no modelo XGBoost de cada corte.
 
 Quadro — Importância média das variáveis (valor absoluto do SHAP) por corte
 
@@ -1464,7 +1448,7 @@ Quadro — Importância média das variáveis (valor absoluto do SHAP) por corte
 
 ## APÊNDICE K – Experimentos de precisão
 
-Experimentos 1 a 19, todos sobre a mesma base congelada de 39.426 partidas, com o mesmo protocolo (validação cruzada estratificada de 5 dobras, semente 42). Os experimentos 1 a 10, do Quadro 5, foram refeitos em 4 de novembro de 2026: tinham sido medidos antes, com bases de tamanhos diferentes e sem intervalo de confiança. O 11 não pôde ser refeito (adiante). Todas as variáveis vêm de `frames[: corte + 1]` da linha do tempo; as de campeão e de jogador usam só informação anterior à partida (teste `tests/test_features_v2_sem_vazamento.py`, 703 pares de partida e corte sem vazamento). O ganho é a diferença de AUC-ROC contra o XGBoost de produção com as cinco variáveis originais (0,8476 aos 15 minutos e 0,9089 aos 25 nesta base), com intervalo de 95% por *bootstrap* pareado.
+Experimentos 1 a 19, todos sobre a mesma base congelada de 39.426 partidas, com o mesmo protocolo (validação cruzada estratificada de 5 dobras, semente 42). Os experimentos 1 a 10, do Quadro 5, foram refeitos em 4 de novembro de 2026: tinham sido medidos antes, com bases de tamanhos diferentes e sem intervalo de confiança. O 11 não pôde ser refeito (adiante). Todas as variáveis vêm de `frames[: corte + 1]` da linha do tempo; as de campeão e de jogador usam só informação anterior à partida (teste automatizado de 703 pares de partida e corte, sem vazamento). O ganho é a diferença de AUC-ROC contra o XGBoost de produção com as cinco variáveis originais (0,8476 aos 15 minutos e 0,9089 aos 25 nesta base), com intervalo de 95% por *bootstrap* pareado.
 
 Quadro — Experimentos 1 a 10: ganho de AUC-ROC contra as cinco variáveis originais
 
@@ -1483,9 +1467,9 @@ Quadro — Experimentos 1 a 10: ganho de AUC-ROC contra as cinco variáveis orig
 | 10 | Placas de torre destruídas (1) | +0,0000 (−0,0000 a +0,0000) | +0,0000 (+0,0000 a +0,0001) |
 | 11 | Percentis de comportamento: cooperação e experiência (2) | −0,0031 e +0,0007, n = 2.987; não refeito | — |
 
-Só o experimento 6, nos atributos ofensivos, tem intervalo que exclui zero aos 15 minutos (XGBoost), e o ganho é pequeno; com cerca de 20 comparações, um intervalo isolado pode ser acaso. Os experimentos 1 e 10 usam colunas que já existem no conjunto 14, medidas isoladamente. No experimento 4, o desvio no estado de empate total (probabilidade prevista menos a taxa observada entre partidas com diferença de ouro menor que 500) foi de +1,1 pp na produção, +1,9 na sigmoide e +1,9 na isotônica aos 15 minutos, e de +2,1, +3,2 e +0,9 aos 25: a calibração adicional não fecha o desvio (Apêndice F). Comandos: `python -m src.features.build_features_antigos` e `python -m src.models.experiment_antigos --cutoffs 15 25`; artefato: `reports/experimentos_antigos.json`; teste de vazamento: `tests/test_features_antigos_sem_vazamento.py`.
+Só o experimento 6, nos atributos ofensivos, tem intervalo que exclui zero aos 15 minutos (XGBoost), e o ganho é pequeno; com cerca de 20 comparações, um intervalo isolado pode ser acaso. Os experimentos 1 e 10 usam colunas que já existem no conjunto 14, medidas isoladamente. No experimento 4, o desvio no estado de empate total (probabilidade prevista menos a taxa observada entre partidas com diferença de ouro menor que 500) foi de +1,1 pp na produção, +1,9 na sigmoide e +1,9 na isotônica aos 15 minutos, e de +2,1, +3,2 e +0,9 aos 25: a calibração adicional não fecha o desvio (Apêndice F).
 
-O experimento 11 (percentis do `lol-challenges-v1`) não foi refeito: o endpoint devolve o estado atual do jogador, então o teste usou as partidas mais recentes da KR, com 0 a 16 dias entre a coleta e a consulta (média de 7,8), para não usar dado do futuro. Um piloto de 199 partidas deu +0,0090 de AUC-ROC, mas era regressão à média: com 199 partidas, o modelo de referência já oscilava 0,018 de AUC-ROC em relação ao de produção. Com 2.987 partidas, o resultado foi −0,0031 (cooperação) e +0,0007 (experiência). Comando: `python -m src.models.experiment_challenges_pilot --n-matches 3000`; artefato: `reports/experimento_challenges_piloto.json`.
+O experimento 11 (percentis do `lol-challenges-v1`) não foi refeito: o endpoint devolve o estado atual do jogador, então o teste usou as partidas mais recentes da KR, com 0 a 16 dias entre a coleta e a consulta (média de 7,8), para não usar dado do futuro. Um piloto de 199 partidas deu +0,0090 de AUC-ROC, mas era regressão à média: com 199 partidas, o modelo de referência já oscilava 0,018 de AUC-ROC em relação ao de produção. Com 2.987 partidas, o resultado foi −0,0031 (cooperação) e +0,0007 (experiência).
 
 Quadro — Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis originais
 
@@ -1501,7 +1485,7 @@ Quadro — Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis ori
 | 18 | Tudo junto (59 variáveis), regressão logística | +0,0080 (+0,0068 a +0,0093) | +0,0074 (+0,0062 a +0,0087) |
 | 19 | Histórico do jogador sobre o estado rico, partidas com 5 ou mais jogadores com histórico, regressão logística | +0,0004 (+0,0001 a +0,0006) | +0,0001 (−0,0001 a +0,0003) |
 
-O maior ganho, com todas as variáveis e regressão logística, é de +0,0080 de AUC-ROC aos 15 minutos e de +0,0074 aos 25. A regressão logística aproveita as variáveis novas mais que o XGBoost, o que indica que o limite está na informação disponível e não no algoritmo. Campeões e histórico do jogador, sozinhos, dão AUC-ROC de 0,56 aos 15 minutos. O histórico do jogador não acrescenta ao estado de jogo mesmo nas partidas bem cobertas (experimento 19). Comando: `python -m src.models.experiment_precisao`; artefatos: `reports/experimentos_precisao.json` e `reports/experimento_historico.json`.
+O maior ganho, com todas as variáveis e regressão logística, é de +0,0080 de AUC-ROC aos 15 minutos e de +0,0074 aos 25. A regressão logística aproveita as variáveis novas mais que o XGBoost, o que indica que o limite está na informação disponível e não no algoritmo. Campeões e histórico do jogador, sozinhos, dão AUC-ROC de 0,56 aos 15 minutos. O histórico do jogador não acrescenta ao estado de jogo mesmo nas partidas bem cobertas (experimento 19).
 
 Quadro — Variáveis novas em treino no passado e teste no futuro
 
@@ -1514,7 +1498,7 @@ Quadro — Variáveis novas em treino no passado e teste no futuro
 | 25 min | Por *patch* | 0,9120 | 0,9202 | +0,0083 (+0,0066 a +0,0100) |
 | 25 min | Aleatória 80/20 | 0,9111 | 0,9188 | +0,0077 (+0,0049 a +0,0105) |
 
-O ganho se mantém quando se treina no passado e se testa no futuro, e a referência reproduz o Apêndice C. Comando: `python -m src.models.holdout_precisao`; artefato: `reports/holdout_precisao.json`.
+O ganho se mantém quando se treina no passado e se testa no futuro, e a referência reproduz o Apêndice C.
 
 ---
 

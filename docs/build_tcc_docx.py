@@ -1102,7 +1102,7 @@ LARGURAS_QUADROS = {
         [1.7, 3.6, 2.0, 2.0, 6.7],
     "Partidas por região na primeira e na última medição do viés de lado":
         [2.0, 4.2, 4.2, 5.6],
-    "Origem dos números da Seção 5.3": [5.4, 5.4, 5.2],
+    "Origem dos números da Seção 5.3": [8.0, 8.0],
     "Vitória do azul por faixa de duração total da partida": [5.0, 5.0, 6.0],
     "Vitória do azul por ano no cenário profissional": [2.5, 5.5, 3.5, 4.5],
     "Limitações do trabalho e a evidência de cada uma": [3.2, 6.4, 6.4],
