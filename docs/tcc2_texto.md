@@ -310,7 +310,7 @@ busca fixas; os critérios foram recência (até cinco anos), cobrir cada
 frente da plataforma (predição, explicabilidade, interface em linguagem
 natural e visualização, uma por subseção) e, na predição, preferência por
 estudos do próprio *League of Legends*. Lacunas identificadas numa revisão
-de afirmações sem fonte foram fechadas por busca na internet, com os
+de afirmações sem fonte foram fechadas por pesquisa complementar, com os
 artigos conferidos contra o texto completo, não só o resumo. As principais
 obras de método (Breiman, 2001; Chen; Guestrin, 2016; Hanley; McNeil, 1982; Lundberg; Lee, 2017; Ribeiro; Singh; Guestrin, 2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
 elas fundamentam é introduzido.
@@ -654,7 +654,7 @@ Os três modelos ficaram próximos. Com a mesma busca em grade, a *Random
 Forest* e o MLP chegam a 0,7625 e 0,7645 de acurácia (AUC-ROC de 0,8484 e
 0,8494): o MLP fica ligeiramente à frente do XGBoost, por 0,0009 de acurácia e 0,0004 de AUC-ROC. Uma regressão
 logística, usada como *baseline* simples, chega a 0,7649 de acurácia e 0,8498
-de AUC-ROC (Apêndice C) e fica à frente do XGBoost por milésimos (0,0008 de AUC-ROC aos 15 minutos; o intervalo exclui zero aos 10, 15 e 20): o limite está na informação das variáveis, não na complexidade do modelo. O XGBoost foi mantido por ser a escolha anterior ao *baseline*, por liderar a acurácia em todos os cortes diante dos outros dois na configuração de referência e porque o SHAP de árvores é exato e já sustenta a interface; trocá-lo não mudaria o resultado prático.
+de AUC-ROC (Apêndice C) e fica à frente do XGBoost por milésimos (0,0008 de AUC-ROC aos 15 minutos; o intervalo exclui zero aos 10, 15 e 20): o limite está na informação das variáveis, não na complexidade do modelo. O XGBoost foi mantido por ser a escolha anterior ao *baseline*, por liderar a acurácia em todos os cortes, contra a configuração de referência dos outros dois, e porque o SHAP de árvores é exato e já sustenta a interface; trocá-lo não mudaria o resultado prático.
 
 Com um modelo treinado para cada
 corte, com os mesmos hiperparâmetros e sobre as partidas que chegam a cada corte, o
@@ -1084,7 +1084,7 @@ envolvem um limiar mínimo de jogos ("com pelo menos N partidas") e erram na
 formatação da resposta, por coluna extra ou apresentação, sem erro de
 interpretação da pergunta nem de estrutura da SQL.
 
-**Gabarito automático (medida principal, 5 de novembro de 2026).** Um gerador monta perguntas por templates sobre entidades reais do banco (campeões, equipes, ligas, patches, jogadores e itens) e escreve, junto de cada uma, a SQL de referência, que é executada na hora; pergunta com gabarito vazio, com empate no limite de um ranking ou repetida é descartada. Parte das perguntas não tem resposta no banco (primeiro sangue, série, ouro aos 10 minutos, dano a estruturas) e espera uma recusa. O sistema roda as perguntas pelo caminho do produto e um comparador automático compara: em escalar, algum valor da primeira linha bate com o do gabarito (tolerância de 0,1%, fração ou percentual); em ranking, a chave de cada linha do gabarito aparece na mesma posição; recusa esperada só passa se toda base consultada recusou; resposta na base errada falha. A comparação não depende de avaliador, e as regras do comparador têm testes automatizados. O conjunto avaliado tem 203 perguntas, amostradas ao acaso: **181 de 203 certas (89,2%)**, intervalo de 95% de 84,1% a 92,7%. Falhas: 16 valores diferentes do gabarito, 2 recusas indevidas, 3 roteamentos para a base errada e 1 resposta onde o banco não tem o dado. Li as 22 uma a uma: todas são do sistema, nenhuma do gabarito ou do comparador. A maior família foi nome de entidade (o modelo escrevia 'Monkey King' para MonkeyKing, tratava ligas como equipe, trocava LPLOL por LPL), seguida de eliminações lidas como kills mais assistências. Duas correções (a resolução do nome exato das entidades no banco e uma checagem que refaz a consulta) vieram depois da medida e não foram medidas de ponta a ponta. Limites: o texto é de template, o autor conhecia as famílias de erro e as famílias pequenas têm poucas perguntas.
+**Gabarito automático (medida principal, 5 de novembro de 2026).** Um gerador monta perguntas por templates sobre entidades reais do banco (campeões, equipes, ligas, *patches*, jogadores e itens) e escreve, junto de cada uma, a SQL de referência, que é executada na hora; pergunta com gabarito vazio, com empate no limite de um ranking ou repetida é descartada. Parte das perguntas não tem resposta no banco (primeiro sangue, série, ouro aos 10 minutos, dano a estruturas) e espera uma recusa. O sistema roda as perguntas pelo caminho do produto e um comparador automático compara: em escalar, algum valor da primeira linha bate com o do gabarito (tolerância de 0,1%, fração ou percentual); em ranking, a chave de cada linha do gabarito aparece na mesma posição; recusa esperada só passa se toda base consultada recusou; resposta na base errada falha. A comparação não depende de avaliador, e as regras do comparador têm testes automatizados. O conjunto avaliado tem 203 perguntas, amostradas ao acaso: **181 de 203 certas (89,2%)**, intervalo de 95% de 84,1% a 92,7%. Falhas: 16 valores diferentes do gabarito, 2 recusas indevidas, 3 roteamentos para a base errada e 1 resposta onde o banco não tem o dado. Li as 22 uma a uma: todas são do sistema, nenhuma do gabarito ou do comparador. A maior família foi nome de entidade (o modelo escrevia 'Monkey King' para MonkeyKing, tratava ligas como equipe, trocava LPLOL por LPL), seguida de eliminações lidas como kills mais assistências. Duas correções (a resolução do nome exato das entidades no banco e uma checagem que refaz a consulta) vieram depois da medida e não foram medidas de ponta a ponta. Limites: o texto é de template, o autor conhecia as famílias de erro e as famílias pequenas têm poucas perguntas.
 
 Quadro — Acerto do gabarito automático por família de pergunta
 
@@ -1147,7 +1147,7 @@ A auditoria mede número, não afirmação qualitativa nem a correção do conhe
 ## APÊNDICE C – Métricas completas por corte temporal
 
 O quadro reúne os três modelos nos quatro cortes, com validação cruzada
-estratificada de 5 dobras (semente 42) sobre as 41.063 partidas do banco (o número de partidas varia por corte). Os
+estratificada de 5 dobras (semente 42) sobre as partidas do banco (41.063 no total; o número usado em cada corte varia, Quadro 4). Os
 valores do corte de 15 minutos são os do Quadro 3.
 
 Quadro — Métricas completas por corte temporal, comparação entre os três modelos
@@ -1306,7 +1306,7 @@ ajustada à página.
 | Arquivo | Página |
 |---|---|
 | `reports/anexo_a/01_inicio.png` | Início (busca unificada) |
-| `reports/anexo_a/02_dashboard.png` | Dashboard (KPIs, viés de lado por região, cobertura do dataset) |
+| `reports/anexo_a/02_dashboard.png` | Dashboard (KPIs, viés de lado por região, cobertura da base) |
 | `reports/anexo_a/03_campeoes.png` | Campeões |
 | `reports/anexo_a/04_partida_detalhe.png` | Partidas: análise de uma partida individual |
 | `reports/anexo_a/05_competitivo.png` | Competitivo (solo queue × profissional) |
@@ -1353,7 +1353,7 @@ Quadro — Alavancas testadas contra a discrepância de taxa-base
 | Calibração sigmoidal | Reduz o desvio de 2,5 para 2,2 pp | Melhora pouco e não chega ao critério de 1,0 pp |
 | Calibração isotônica | Piora o desvio, de 2,5 para 3,6 pp | O estado de empate total fica fora da distribuição observada, e o calibrador o extrapola |
 | Regularização alternativa | Move o desvio dentro do ruído | Sem efeito |
-| *Random Forest* de 500 árvores e profundidade 6 | Leva o desvio a 0,5 pp | Custa 0,0007 de AUC, e a acurácia fica em 0,7630 contra 0,7636. Não adotada, porque o critério de escolha foi a acurácia aos 15 minutos; a decisão é reversível e dispensa retreino |
+| *Random Forest* de 500 árvores e profundidade 6 | Leva o desvio a 0,5 pp | Custa 0,0007 de AUC, e a acurácia fica em 0,7630 contra 0,7636. Não adotada: o XGBoost já lidera a acurácia na configuração de produção e sustenta o SHAP exato (Seção 5.4); a decisão é reversível e dispensa retreino |
 
 A discrepância é, portanto, uma propriedade da função que o XGBoost aprende
 neste recorte; não é um déficit de ajuste.
