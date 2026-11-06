@@ -388,8 +388,8 @@ mesmo indicador nos dois contextos e mostra que o viés de lado do *solo
 queue* de elo alto se inverte no circuito profissional.
 
 **Consulta mensurável.** A interface em linguagem natural foi avaliada no
-próprio domínio, com 26 perguntas fixas de referência e um gabarito automático de
-203, ambos conferidos contra o banco, o que permite medir o erro de conversão,
+próprio domínio, com um gabarito automático de
+203 perguntas, conferido contra o banco, o que permite medir o erro de conversão,
 sem se limitar a exemplos ilustrativos.
 
 ---
@@ -493,7 +493,7 @@ A camada de apresentação é uma aplicação web em React com TypeScript, que c
 A interface em linguagem natural é um fluxo *text-to-SQL*: um modelo
 de linguagem (Claude) traduz a pergunta em SQL, a consulta é validada
 antes de executar (apenas `SELECT` ou `WITH...SELECT`, sobre uma lista fechada
-de tabelas) e o resultado vem sempre do banco, nunca do conhecimento genérico do modelo; a explicação pode acrescentar, rotulada como "Leitura de jogo", uma nota de conhecimento geral. Antes da SQL, a pergunta é roteada para o *solo queue*, o competitivo ou ambos (regras sobre o esquema e, no resíduo, um modelo pequeno); a consulta não mistura as bases, tem no máximo uma nova tentativa após erro do banco e roda em transação somente leitura. Perguntas sobre o que o banco não registra, como primeiro sangue ou série, recebem uma recusa antes de chegar ao modelo. A acurácia foi medida em um *benchmark* de 26 perguntas de referência, com SQL esperada, e em um gabarito automático de 203 perguntas, comparado por código (Apêndice B). A métrica de ambos é a acurácia de execução, que compara o resultado da consulta
+de tabelas) e o resultado vem sempre do banco, nunca do conhecimento genérico do modelo; a explicação pode acrescentar, rotulada como "Leitura de jogo", uma nota de conhecimento geral. Antes da SQL, a pergunta é roteada para o *solo queue*, o competitivo ou ambos (regras sobre o esquema e, no resíduo, um modelo pequeno); a consulta não mistura as bases, tem no máximo uma nova tentativa após erro do banco e roda em transação somente leitura. Perguntas sobre o que o banco não registra, como primeiro sangue ou série, recebem uma recusa antes de chegar ao modelo. A acurácia foi medida em um gabarito automático de 203 perguntas, comparado por código (Apêndice B). A métrica é a acurácia de execução, que compara o resultado da consulta
 gerada com o da consulta de referência. Zhong, Yu e Klein (2020) discutem
 seus limites e propõem avaliar a mesma consulta sobre vários bancos de
 teste, o que esta avaliação, feita sobre uma única base, não faz.
