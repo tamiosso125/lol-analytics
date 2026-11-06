@@ -3,29 +3,29 @@
   "n_linhas_match_x_cutoff": 81758,
   "cortes": {
     "10": {
-      "n": 39309,
+      "n": 40942,
       "baseline (5 features)": {
-        "auc": 0.7702,
-        "acuracia": 0.6977,
+        "auc": 0.7717,
+        "acuracia": 0.701,
         "delta_auc": 0.0
       },
       "+ plate_diff": {
-        "auc": 0.77,
-        "acuracia": 0.6978,
-        "delta_auc": -0.0002
+        "auc": 0.7711,
+        "acuracia": 0.7021,
+        "delta_auc": -0.0006
       }
     },
     "15": {
-      "n": 39188,
+      "n": 40816,
       "baseline (5 features)": {
-        "auc": 0.845,
-        "acuracia": 0.7609,
+        "auc": 0.8467,
+        "acuracia": 0.7612,
         "delta_auc": 0.0
       },
       "+ plate_diff": {
-        "auc": 0.8448,
-        "acuracia": 0.7613,
-        "delta_auc": -0.0002
+        "auc": 0.8468,
+        "acuracia": 0.7616,
+        "delta_auc": 0.0001
       }
     }
   }

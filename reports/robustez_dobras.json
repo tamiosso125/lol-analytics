@@ -1,72 +1,72 @@
 {
-  "gerado_em": "2026-11-03",
-  "base_linhas": 139671,
+  "gerado_em": "2026-11-05",
+  "base_linhas": 145156,
   "cv": "estratificada, seed 42, 5 e 10 dobras",
   "resultados": {
     "10": {
       "XGBoost": {
         "5": {
-          "acuracia": 0.7004,
-          "auc": 0.7742
+          "acuracia": 0.7028,
+          "auc": 0.7752
         },
         "10": {
-          "acuracia": 0.701,
-          "auc": 0.7741
+          "acuracia": 0.7029,
+          "auc": 0.7752
         }
       }
     },
     "15": {
       "XGBoost": {
         "5": {
-          "acuracia": 0.7621,
-          "auc": 0.8473
+          "acuracia": 0.7636,
+          "auc": 0.849
         },
         "10": {
-          "acuracia": 0.7619,
-          "auc": 0.8474
+          "acuracia": 0.7639,
+          "auc": 0.849
         }
       },
       "RandomForest": {
         "5": {
-          "acuracia": 0.7457,
-          "auc": 0.8277
+          "acuracia": 0.7475,
+          "auc": 0.8287
         },
         "10": {
-          "acuracia": 0.7459,
-          "auc": 0.8273
+          "acuracia": 0.745,
+          "auc": 0.8282
         }
       },
       "MLP": {
         "5": {
-          "acuracia": 0.761,
-          "auc": 0.8455
+          "acuracia": 0.7598,
+          "auc": 0.8454
         },
         "10": {
-          "acuracia": 0.7612,
-          "auc": 0.8449
+          "acuracia": 0.7623,
+          "auc": 0.8463
         }
       }
     },
     "20": {
       "XGBoost": {
         "5": {
-          "acuracia": 0.7917,
-          "auc": 0.8762
+          "acuracia": 0.7924,
+          "auc": 0.8772
         },
         "10": {
-          "acuracia": 0.7913,
-          "auc": 0.8763
+          "acuracia": 0.7927,
+          "auc": 0.8771
         }
       }
     },
     "25": {
       "XGBoost": {
         "5": {
-          "acuracia": 0.8241,
-          "auc": 0.909
+          "acuracia": 0.8261,
+          "auc": 0.9092
         },
         "10": {
-          "acuracia": 0.8249,
+          "acuracia": 0.8251,
           "auc": 0.909
         }
       }

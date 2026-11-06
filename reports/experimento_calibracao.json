@@ -1,8 +1,8 @@
 {
-  "medido_em": "2026-10-04",
+  "medido_em": "2026-11-06",
   "corte_min": 15,
-  "linhas": 39188,
-  "referencia_dado_bruto": 0.4788,
+  "linhas": 40816,
+  "referencia_dado_bruto": 0.4784,
   "producao": {
     "n_estimators": 500,
     "learning_rate": 0.01,
@@ -11,59 +11,59 @@
   "variantes": [
     {
       "nome": "producao (sem calibracao)",
-      "auc": 0.8473,
-      "taxa_base": 0.4955,
-      "desvio_pp": 1.7,
-      "acuracia": 0.7621
+      "auc": 0.849,
+      "taxa_base": 0.5036,
+      "desvio_pp": 2.5,
+      "acuracia": 0.7636
     },
     {
       "nome": "calibrada sigmoidal",
-      "auc": 0.8474,
-      "taxa_base": 0.5023,
-      "desvio_pp": 2.3,
-      "acuracia": 0.7621
+      "auc": 0.8491,
+      "taxa_base": 0.5006,
+      "desvio_pp": 2.2,
+      "acuracia": 0.7635
     },
     {
       "nome": "calibrada isotonica",
-      "auc": 0.8472,
-      "taxa_base": 0.4983,
-      "desvio_pp": 1.9,
-      "acuracia": 0.7629
+      "auc": 0.8488,
+      "taxa_base": 0.5145,
+      "desvio_pp": 3.6,
+      "acuracia": 0.7631
     },
     {
       "nome": "regularizada min_child_weight=20",
-      "auc": 0.8474,
-      "taxa_base": 0.4971,
-      "desvio_pp": 1.8,
-      "acuracia": 0.7621
+      "auc": 0.849,
+      "taxa_base": 0.5037,
+      "desvio_pp": 2.5,
+      "acuracia": 0.7636
     },
     {
       "nome": "regularizada gamma=1, subsample=0.8",
-      "auc": 0.8474,
-      "taxa_base": 0.495,
-      "desvio_pp": 1.6,
-      "acuracia": 0.7628
+      "auc": 0.8491,
+      "taxa_base": 0.5017,
+      "desvio_pp": 2.3,
+      "acuracia": 0.7636
     },
     {
       "nome": "regularizada forte (as duas)",
-      "auc": 0.8474,
-      "taxa_base": 0.4953,
-      "desvio_pp": 1.6,
-      "acuracia": 0.7628
+      "auc": 0.8491,
+      "taxa_base": 0.5019,
+      "desvio_pp": 2.3,
+      "acuracia": 0.7636
     },
     {
       "nome": "calib. sigmoidal + regularizacao",
-      "auc": 0.8475,
-      "taxa_base": 0.5024,
-      "desvio_pp": 2.4,
-      "acuracia": 0.7625
+      "auc": 0.8492,
+      "taxa_base": 0.5032,
+      "desvio_pp": 2.5,
+      "acuracia": 0.7635
     },
     {
       "nome": "RandomForest 500/prof6 (referencia de capacidade)",
-      "auc": 0.8468,
-      "taxa_base": 0.4852,
-      "desvio_pp": 0.6,
-      "acuracia": 0.7617
+      "auc": 0.8483,
+      "taxa_base": 0.4838,
+      "desvio_pp": 0.5,
+      "acuracia": 0.763
     }
   ],
   "alguma_variante_fecha": true,

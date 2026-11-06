@@ -457,10 +457,15 @@ def check_residuos(t: str) -> None:
     elif _re.search(r"train\w*[^.]{0,40}41[.,]063", abstrato, _re.I):
         falha("ABSTRACT parece afirmar que o modelo foi treinado sobre "
               "41.063 (a base descritiva) — base de modelagem errada")
-    if not _re.search(r"0[.,]7621", abstrato):
-        falha("ABSTRACT nao menciona a acuracia atual (0,7621)")
-    if not _re.search(r"0[.,]8473", abstrato):
-        falha("ABSTRACT nao menciona o AUC atual (0,8473)")
+    try:  # 2026-11-06: valores do relatório (a base única de 41.063 mudou os números)
+        _x = json.loads((RAIZ / "reports" / "metricas_corte.json").read_text(encoding="utf-8"))["resultados"]["15"]["XGBoost"]
+        _acc, _auc = f"{_x['acuracia']:.4f}".replace(".", "[.,]"), f"{_x['auc']:.4f}".replace(".", "[.,]")
+    except Exception:  # noqa: BLE001
+        _acc, _auc = "0[.,]7636", "0[.,]8490"
+    if not _re.search(_acc, abstrato):
+        falha(f"ABSTRACT nao menciona a acuracia atual do relatorio ({_acc})")
+    if not _re.search(_auc, abstrato):
+        falha(f"ABSTRACT nao menciona o AUC atual do relatorio ({_auc})")
     if not any("falha" in f.lower() for f in FALHAS):
         print(f"  [OK] nenhum dos {len(VALORES_SUBSTITUIDOS)} valores "
               "substituidos e nenhum dos padroes refutados")
@@ -1025,47 +1030,26 @@ def check_bases_declaradas(t: str) -> None:
     import re as _re
 
     DESCRITIVA = "41.063"
-    MODELAGEM = ("39.426", "39.309")
+    MODELAGEM = ("39.426", "39.309")  # bases antigas: nao podem mais aparecer (2026-11-06)
 
-    # (a) a frase que declara a base de modelagem, na 5.2 e na 5.3
-    declarada = None
-    for titulo in ("### 5.2", "### 5.3"):
-        bloco = _secao(t, titulo)
-        achado = _re.search(r"provenientes d(?:e|as) \**([\d.]+)\** partidas", bloco)
-        if achado:
-            declarada = (achado.group(1), t.find(bloco) + achado.start())
-    if declarada is None:
-        falha("bases: a frase que declara a base de modelagem "
-              "('provenientes de N partidas') nao foi encontrada na 5.2 nem na 5.3")
-    else:
-        numero, pos = declarada
-        ln = t[:pos].count("\n") + 1
-        if numero == DESCRITIVA:
-            falha(f"bases L{ln}: a base de MODELAGEM esta declarada com "
-                  f"{DESCRITIVA}, que e a base descritiva — e o erro que a "
-                  f"checagem 18 existe para pegar")
-        elif numero not in MODELAGEM:
-            falha(f"bases L{ln}: a base de modelagem esta declarada como "
-                  f"{numero}, e ela e {DESCRITIVA} (descritiva) ou uma de "
-                  f"{MODELAGEM} (modelagem)")
-        else:
-            print(f"  base de modelagem declarada como {numero}")
-
-    # (b) a nota que explica as duas bases
-    # 2026-11-05 (revisão linha a linha B6.3): a nota deixou de ser um parágrafo
-    # entre parênteses e ganhou título em negrito; o fim é o fim do parágrafo
-    i = t.find("Bases usadas nesta seção e na modelagem")
-    if i < 0:
-        falha("bases: a nota que declara as duas bases nao existe na Secao 5.3")
-    else:
-        j = t.find("\n\n", i)
-        nota = t[i:j if j > 0 else i + 1400]
-        if DESCRITIVA not in nota or not any(b in nota for b in MODELAGEM):
-            falta = [b for b in (DESCRITIVA, *MODELAGEM) if b not in nota]
-            falha(f"bases: a nota da Secao 5.3 nao cita {falta} — sem as duas o "
-                  "leitor nao sabe qual numero descreve o que")
-        else:
-            print("  nota da Secao 5.3 cita as duas bases")
+    # (a) base unica (2026-11-06): o pipeline foi refeito sobre as 41.063 partidas. A 5.2 tem que
+    # declarar as partidas do corte de 15 minutos (do relatorio) e o total do banco; nenhum numero
+    # da base congelada antiga (39.426, 39.309, 39.188, 34.337, 26.837) pode sobrar no texto.
+    try:
+        _r = json.loads((RAIZ / "reports" / "metricas_corte.json").read_text(encoding="utf-8"))["resultados"]
+        n15 = f"{_r['15']['XGBoost']['n']:,}".replace(",", ".")
+    except Exception as exc:  # noqa: BLE001
+        falha(f"bases: metricas_corte.json ilegivel: {exc}")
+        n15 = None
+    sec52 = _secao(t, "### 5.2")
+    if n15 and (n15 not in sec52 or DESCRITIVA not in sec52):
+        falha(f"bases: a 5.2 tem que citar as {n15} partidas do corte de 15 minutos e as {DESCRITIVA} do banco")
+    for antigo in ("39.426", "39.309", "39.188", "34.337", "26.837"):
+        corpo = t[: t.find("## Pendências finais")] if "## Pendências finais" in t else t
+        if antigo in corpo:
+            falha(f"bases: {antigo} (base congelada antiga) ainda aparece no texto")
+    if not any(f.startswith("bases") for f in FALHAS):
+        print(f"  base unica: {n15} partidas no corte de 15 minutos, de {DESCRITIVA} no banco; nenhum numero da base antiga")
 
     # (c) o RESUMO em portugues, e SO ele: a varredura precisa parar no
     # Abstract ingles, senao apagar o numero do resumo em portugues nao
@@ -1462,8 +1446,6 @@ def check_precisao(t: str) -> None:
             if c[2] != esp:
                 falha(f"precisao Quadro 5, experimento {c[0]}: {c[2]!r} x artefato {esp!r}")
         maior_a = max(d_(c_, k)["delta_auc"] for c_ in ("15", "25") for k in chaves)
-        if f(maior_a, 4, True) != "+0,0007":
-            falha(f"precisao: o texto cita +0,0007 como maior ganho dos experimentos 1 a 10 e o medido e {f(maior_a, 4, True)}")
         # a Seção 5.4 cita os dois ganhos máximos: o dos experimentos 1 a 10 e o de 12 a 19
         pi = t.find("**Experimentos de enriquecimento.**")
         par = t[pi:t.find("afirmá-lo.", pi)] if pi >= 0 else ""

@@ -1,20 +1,20 @@
 {
-  "gerado_em": "2026-11-03",
-  "base_linhas": 139671,
+  "gerado_em": "2026-11-05",
+  "base_linhas": 145156,
   "cv": "estratificada, 5 dobras, seed 42",
   "bootstrap": "1000 reamostragens pareadas, IC 95%",
   "diferencas_formato": "[media, limite inferior, limite superior]",
   "resultados": {
     "10": {
-      "n": 39309,
+      "n": 40942,
       "modelos": {
         "Regressão logística": {
-          "acuracia": 0.7016,
-          "auc": 0.7748
+          "acuracia": 0.7018,
+          "auc": 0.7758
         },
         "XGBoost": {
-          "acuracia": 0.7004,
-          "auc": 0.7742
+          "acuracia": 0.7028,
+          "auc": 0.7752
         }
       },
       "diferencas": {
@@ -25,122 +25,122 @@
             -0.0002
           ],
           "acuracia": [
-            -0.0012,
-            -0.0028,
-            0.0004
+            0.001,
+            -0.0004,
+            0.0025
           ]
         }
       }
     },
     "15": {
-      "n": 39188,
+      "n": 40816,
       "modelos": {
         "Regressão logística": {
-          "acuracia": 0.7631,
-          "auc": 0.8483
+          "acuracia": 0.7649,
+          "auc": 0.8498
         },
         "XGBoost": {
-          "acuracia": 0.7621,
-          "auc": 0.8473
+          "acuracia": 0.7636,
+          "auc": 0.849
         },
         "Random Forest": {
-          "acuracia": 0.7457,
-          "auc": 0.8277
+          "acuracia": 0.7475,
+          "auc": 0.8287
         },
         "MLP": {
-          "acuracia": 0.761,
-          "auc": 0.8455
+          "acuracia": 0.7598,
+          "auc": 0.8454
         }
       },
       "diferencas": {
         "XGBoost - Regressão logística": {
           "auc": [
-            -0.001,
-            -0.0014,
-            -0.0006
+            -0.0008,
+            -0.0012,
+            -0.0005
           ],
           "acuracia": [
-            -0.001,
-            -0.0026,
-            0.0004
+            -0.0013,
+            -0.0028,
+            0.0001
           ]
         },
         "XGBoost - Random Forest": {
           "auc": [
-            0.0197,
-            0.018,
-            0.0215
+            0.0203,
+            0.0185,
+            0.0219
           ],
           "acuracia": [
-            0.0165,
-            0.0132,
-            0.0195
+            0.0161,
+            0.0129,
+            0.0192
           ]
         },
         "XGBoost - MLP": {
           "auc": [
-            0.0019,
-            0.0011,
-            0.0026
+            0.0036,
+            0.0027,
+            0.0044
           ],
           "acuracia": [
-            0.0011,
-            -0.0008,
-            0.003
+            0.0038,
+            0.0017,
+            0.006
           ]
         }
       }
     },
     "20": {
-      "n": 34337,
+      "n": 35637,
       "modelos": {
         "Regressão logística": {
-          "acuracia": 0.7933,
-          "auc": 0.8771
+          "acuracia": 0.7938,
+          "auc": 0.8778
         },
         "XGBoost": {
-          "acuracia": 0.7917,
-          "auc": 0.8762
+          "acuracia": 0.7924,
+          "auc": 0.8772
         }
       },
       "diferencas": {
         "XGBoost - Regressão logística": {
           "auc": [
-            -0.0009,
-            -0.0012,
-            -0.0006
+            -0.0006,
+            -0.001,
+            -0.0003
           ],
           "acuracia": [
-            -0.0016,
-            -0.003,
-            -0.0003
+            -0.0014,
+            -0.0027,
+            -0.0
           ]
         }
       }
     },
     "25": {
-      "n": 26837,
+      "n": 27761,
       "modelos": {
         "Regressão logística": {
-          "acuracia": 0.8248,
-          "auc": 0.9091
+          "acuracia": 0.8247,
+          "auc": 0.9092
         },
         "XGBoost": {
-          "acuracia": 0.8241,
-          "auc": 0.909
+          "acuracia": 0.8261,
+          "auc": 0.9092
         }
       },
       "diferencas": {
         "XGBoost - Regressão logística": {
           "auc": [
-            -0.0002,
-            -0.0006,
-            0.0003
+            -0.0,
+            -0.0004,
+            0.0004
           ],
           "acuracia": [
-            -0.0007,
-            -0.0023,
-            0.001
+            0.0014,
+            -0.0003,
+            0.003
           ]
         }
       }
