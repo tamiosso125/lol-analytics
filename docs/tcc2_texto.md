@@ -305,7 +305,14 @@ posicionamento da análise de partida.
 
 Esta seção descreve os onze estudos de domínio que sustentam a pesquisa,
 com o objeto, a abordagem e a contribuição de cada um para o problema
-aqui tratado. As principais obras de método (Breiman, 2001; Chen; Guestrin, 2016; Hanley; McNeil, 1982; Lundberg; Lee, 2017; Ribeiro; Singh; Guestrin, 2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
+aqui tratado. A seleção não seguiu uma revisão sistemática com *strings* de
+busca fixas; os critérios foram recência (até cinco anos), cobrir cada
+frente da plataforma (predição, explicabilidade, interface em linguagem
+natural e visualização, uma por subseção) e, na predição, preferência por
+estudos do próprio *League of Legends*. Lacunas identificadas numa revisão
+de afirmações sem fonte foram fechadas por busca na internet, com os
+artigos conferidos contra o texto completo, não só o resumo. As principais
+obras de método (Breiman, 2001; Chen; Guestrin, 2016; Hanley; McNeil, 1982; Lundberg; Lee, 2017; Ribeiro; Singh; Guestrin, 2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que
 elas fundamentam é introduzido.
 
 ### 3.1 PREDIÇÃO DE VITÓRIA EM DOTA 2
