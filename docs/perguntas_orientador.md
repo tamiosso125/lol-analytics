@@ -9,6 +9,11 @@ são confirmações; as de C só se sobrar tempo.
 As demais perguntas deste arquivo ficam como referência e **não serão levadas**. Números
 atualizados em 2026-11-05 (corpo de 29 páginas; 11 apêndices e um anexo).
 
+**RESPONDIDAS (2026-11-06):** ponto e vírgula confirmado (já era o que o texto usava); não há
+número máximo de apêndices (os 11 ficam); a Seção 3 precisa dizer como os trabalhos relacionados
+foram buscados (acrescentado); limitações (6.1) e trabalhos futuros (6.2) ficam dentro da
+Conclusão (já estavam). As quatro aplicadas; nenhuma mudou a contagem de páginas (29/30).
+
 **1. (antiga 14) Palavras-chave com ponto e vírgula está certo?**
 - *Evidência:* o modelo de artigo dele (p. 4) diz "iniciais em minúscula, exceto substantivos
   próprios, nomes científicos ou siglas, separadas por ponto e vírgula e finalizadas por ponto".
