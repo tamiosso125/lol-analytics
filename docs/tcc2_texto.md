@@ -1022,10 +1022,8 @@ Quadro — Esquema relacional do banco de dados
 | `pro_players` | game_id, side, position, player_name, team_name, champion, kills, deaths, assists, win | PK: game_id+side+position |
 
 Em `item_events`, as compras e vendas já vêm com os desfazimentos
-resolvidos, e `items` é o catálogo do Data Dragon, usado para resolver nome
-e ícone de item. Índices B-tree cobrem as colunas mais usadas em filtro
-(campeão, jogador, versão do jogo e liga), tanto para a API quanto para as
-consultas geradas pela interface em linguagem natural.
+resolvidos; `items` é o catálogo do Data Dragon. Índices cobrem as colunas
+mais filtradas (campeão, jogador, versão do jogo e liga).
 
 ---
 
