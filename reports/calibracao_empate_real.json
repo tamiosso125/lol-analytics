@@ -1,0 +1,376 @@
+{
+  "medido_em": "2026-11-08",
+  "protocolo": "StratifiedKFold(5, shuffle=True, random_state=42); calibrador CalibratedClassifierCV(cv=5) só no treino de cada dobra; empate = |gold_diff| < 500",
+  "producao_por_corte": {
+    "10": {
+      "partidas": 40942,
+      "auc": 0.7752,
+      "brier": 0.1921,
+      "empatadas": 7641,
+      "taxa_observada": 0.4647,
+      "ic95_observada": [
+        0.4536,
+        0.4759
+      ],
+      "media_prevista_empatadas": 0.4647,
+      "diferenca_pp": -0.0,
+      "decis_maior_desvio_pp": 0.87,
+      "decis_desvio_medio_pp": 0.45,
+      "decis": [
+        {
+          "prevista": 0.1004,
+          "observada": 0.0957,
+          "n": 4097
+        },
+        {
+          "prevista": 0.2009,
+          "observada": 0.1953,
+          "n": 4092
+        },
+        {
+          "prevista": 0.2725,
+          "observada": 0.2706,
+          "n": 4095
+        },
+        {
+          "prevista": 0.3501,
+          "observada": 0.3515,
+          "n": 4094
+        },
+        {
+          "prevista": 0.4236,
+          "observada": 0.4173,
+          "n": 4093
+        },
+        {
+          "prevista": 0.4917,
+          "observada": 0.5004,
+          "n": 4095
+        },
+        {
+          "prevista": 0.5622,
+          "observada": 0.5632,
+          "n": 4093
+        },
+        {
+          "prevista": 0.6461,
+          "observada": 0.6426,
+          "n": 4094
+        },
+        {
+          "prevista": 0.7483,
+          "observada": 0.7523,
+          "n": 4098
+        },
+        {
+          "prevista": 0.8742,
+          "observada": 0.8819,
+          "n": 4091
+        }
+      ],
+      "estado_zerado_modelo_completo": 0.4904
+    },
+    "15": {
+      "partidas": 40816,
+      "auc": 0.849,
+      "brier": 0.158,
+      "empatadas": 4126,
+      "taxa_observada": 0.4784,
+      "ic95_observada": [
+        0.4632,
+        0.4937
+      ],
+      "media_prevista_empatadas": 0.4766,
+      "diferenca_pp": -0.18,
+      "decis_maior_desvio_pp": 1.25,
+      "decis_desvio_medio_pp": 0.5,
+      "decis": [
+        {
+          "prevista": 0.0382,
+          "observada": 0.0321,
+          "n": 4083
+        },
+        {
+          "prevista": 0.1161,
+          "observada": 0.1103,
+          "n": 4081
+        },
+        {
+          "prevista": 0.1991,
+          "observada": 0.2004,
+          "n": 4081
+        },
+        {
+          "prevista": 0.292,
+          "observada": 0.2795,
+          "n": 4082
+        },
+        {
+          "prevista": 0.3977,
+          "observada": 0.4021,
+          "n": 4081
+        },
+        {
+          "prevista": 0.4986,
+          "observada": 0.5015,
+          "n": 4082
+        },
+        {
+          "prevista": 0.6085,
+          "observada": 0.6105,
+          "n": 4085
+        },
+        {
+          "prevista": 0.7326,
+          "observada": 0.7333,
+          "n": 4079
+        },
+        {
+          "prevista": 0.8381,
+          "observada": 0.8437,
+          "n": 4088
+        },
+        {
+          "prevista": 0.9482,
+          "observada": 0.957,
+          "n": 4074
+        }
+      ],
+      "estado_zerado_modelo_completo": 0.5036
+    },
+    "20": {
+      "partidas": 35637,
+      "auc": 0.8772,
+      "brier": 0.1421,
+      "empatadas": 2501,
+      "taxa_observada": 0.4686,
+      "ic95_observada": [
+        0.4491,
+        0.4882
+      ],
+      "media_prevista_empatadas": 0.4698,
+      "diferenca_pp": 0.12,
+      "decis_maior_desvio_pp": 0.77,
+      "decis_desvio_medio_pp": 0.54,
+      "decis": [
+        {
+          "prevista": 0.0304,
+          "observada": 0.0247,
+          "n": 3567
+        },
+        {
+          "prevista": 0.0821,
+          "observada": 0.075,
+          "n": 3562
+        },
+        {
+          "prevista": 0.1513,
+          "observada": 0.146,
+          "n": 3562
+        },
+        {
+          "prevista": 0.2558,
+          "observada": 0.2577,
+          "n": 3566
+        },
+        {
+          "prevista": 0.388,
+          "observada": 0.381,
+          "n": 3562
+        },
+        {
+          "prevista": 0.5081,
+          "observada": 0.5069,
+          "n": 3563
+        },
+        {
+          "prevista": 0.6365,
+          "observada": 0.6431,
+          "n": 3575
+        },
+        {
+          "prevista": 0.7668,
+          "observada": 0.7703,
+          "n": 3553
+        },
+        {
+          "prevista": 0.8792,
+          "observada": 0.8869,
+          "n": 3563
+        },
+        {
+          "prevista": 0.9658,
+          "observada": 0.9733,
+          "n": 3564
+        }
+      ],
+      "estado_zerado_modelo_completo": 0.5143
+    },
+    "25": {
+      "partidas": 27761,
+      "auc": 0.9092,
+      "brier": 0.1217,
+      "empatadas": 1478,
+      "taxa_observada": 0.4743,
+      "ic95_observada": [
+        0.4489,
+        0.4998
+      ],
+      "media_prevista_empatadas": 0.4784,
+      "diferenca_pp": 0.41,
+      "decis_maior_desvio_pp": 1.18,
+      "decis_desvio_medio_pp": 0.73,
+      "decis": [
+        {
+          "prevista": 0.0132,
+          "observada": 0.0068,
+          "n": 2785
+        },
+        {
+          "prevista": 0.0462,
+          "observada": 0.039,
+          "n": 2768
+        },
+        {
+          "prevista": 0.1133,
+          "observada": 0.1095,
+          "n": 2777
+        },
+        {
+          "prevista": 0.2214,
+          "observada": 0.2195,
+          "n": 2775
+        },
+        {
+          "prevista": 0.3668,
+          "observada": 0.3559,
+          "n": 2776
+        },
+        {
+          "prevista": 0.5213,
+          "observada": 0.5147,
+          "n": 2780
+        },
+        {
+          "prevista": 0.6855,
+          "observada": 0.6973,
+          "n": 2772
+        },
+        {
+          "prevista": 0.8184,
+          "observada": 0.8293,
+          "n": 2776
+        },
+        {
+          "prevista": 0.9174,
+          "observada": 0.924,
+          "n": 2776
+        },
+        {
+          "prevista": 0.979,
+          "observada": 0.9863,
+          "n": 2776
+        }
+      ],
+      "estado_zerado_modelo_completo": 0.4979
+    }
+  },
+  "variantes": {
+    "15": {
+      "producao": {
+        "partidas": 40816,
+        "auc": 0.849,
+        "brier": 0.158,
+        "empatadas": 4126,
+        "taxa_observada": 0.4784,
+        "ic95_observada": [
+          0.4632,
+          0.4937
+        ],
+        "media_prevista_empatadas": 0.4766,
+        "diferenca_pp": -0.18,
+        "decis_maior_desvio_pp": 1.25,
+        "decis_desvio_medio_pp": 0.5,
+        "estado_zerado_modelo_completo": 0.5036
+      },
+      "sigmoide": {
+        "partidas": 40816,
+        "auc": 0.8491,
+        "brier": 0.1591,
+        "empatadas": 4126,
+        "taxa_observada": 0.4784,
+        "ic95_observada": [
+          0.4632,
+          0.4937
+        ],
+        "media_prevista_empatadas": 0.47,
+        "diferenca_pp": -0.84,
+        "decis_maior_desvio_pp": 4.66,
+        "decis_desvio_medio_pp": 2.8
+      },
+      "isotonica": {
+        "partidas": 40816,
+        "auc": 0.8488,
+        "brier": 0.1581,
+        "empatadas": 4126,
+        "taxa_observada": 0.4784,
+        "ic95_observada": [
+          0.4632,
+          0.4937
+        ],
+        "media_prevista_empatadas": 0.4774,
+        "diferenca_pp": -0.11,
+        "decis_maior_desvio_pp": 0.61,
+        "decis_desvio_medio_pp": 0.32
+      }
+    },
+    "25": {
+      "producao": {
+        "partidas": 27761,
+        "auc": 0.9092,
+        "brier": 0.1217,
+        "empatadas": 1478,
+        "taxa_observada": 0.4743,
+        "ic95_observada": [
+          0.4489,
+          0.4998
+        ],
+        "media_prevista_empatadas": 0.4784,
+        "diferenca_pp": 0.41,
+        "decis_maior_desvio_pp": 1.18,
+        "decis_desvio_medio_pp": 0.73,
+        "estado_zerado_modelo_completo": 0.4979
+      },
+      "sigmoide": {
+        "partidas": 27761,
+        "auc": 0.9092,
+        "brier": 0.1231,
+        "empatadas": 1478,
+        "taxa_observada": 0.4743,
+        "ic95_observada": [
+          0.4489,
+          0.4998
+        ],
+        "media_prevista_empatadas": 0.4685,
+        "diferenca_pp": -0.58,
+        "decis_maior_desvio_pp": 5.83,
+        "decis_desvio_medio_pp": 3.31
+      },
+      "isotonica": {
+        "partidas": 27761,
+        "auc": 0.9089,
+        "brier": 0.1218,
+        "empatadas": 1478,
+        "taxa_observada": 0.4743,
+        "ic95_observada": [
+          0.4489,
+          0.4998
+        ],
+        "media_prevista_empatadas": 0.4728,
+        "diferenca_pp": -0.15,
+        "decis_maior_desvio_pp": 0.64,
+        "decis_desvio_medio_pp": 0.31
+      }
+    }
+  }
+}

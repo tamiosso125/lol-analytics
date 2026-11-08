@@ -1053,6 +1053,12 @@ registradas no código:
 
 ### `docs/experimento_calibracao.py` e `docs/reavalia_calibracao.py`
 
+> **Substituídos em 2026-11-08 por `docs/calibracao_empate_real.py`.** Os dois
+> comparavam a previsão do estado sintético "tudo zero" com a taxa observada
+> nas partidas empatadas, populações diferentes (nenhuma partida empatada tem
+> as cinco diferenças nulas). Ficam no repositório como histórico; nenhum
+> número do TCC sai mais deles.
+
 Teste **D1**: calibração e regularização alternativa contra a discrepância
 de taxa-base da Seção 6.1 e do Apêndice F. São as duas alavancas que a grade de
 hiperparâmetros não cobre — ela variou só `n_estimators`,
@@ -1137,9 +1143,19 @@ diferença entre cortes é real ou ruído.
 
 O segundo é o que sustenta a afirmação da Seção 5.3. A versão anterior do
 texto afirmava que o viés de lado *enfraquecia* ao longo da partida, com
-pico aos 15 minutos; ao triplicar a amostra isso se desfez — nenhuma
-diferença entre pares sobrevive ao ajuste de Holm (menor p = 0,83). O
-achado correto é que o viés é **constante**, não que ele oscila.
+pico aos 15 minutos; ao triplicar a amostra isso se desfez.
+
+**2026-11-08 (parecer do orientador).** O teste era o z de duas proporções
+com variância combinada, que supõe grupos independentes; não são (2.767 das
+12.621 partidas empatadas estão em dois ou mais cortes, e os pares dividem
+15% a 34% do grupo menor). Agora o teste usa a **partida como unidade**:
+*bootstrap* das partidas (2.000 reamostragens, semente 42), IC por percentis,
+p bilateral pela reamostra centrada e Holm nos seis pares. Menor p de Holm:
+0,64; nenhuma diferença detectada. A formulação do texto é restrita a isso
+("taxas próximas nos quatro cortes, nenhuma diferença detectada"), e não
+"viés constante ao longo da partida". Grava `reports/vies_cortes_por_partida.json`.
+O `taxa_base_por_corte.py` ainda grava a previsão do estado todo-zero, que
+NÃO deve ser comparada com as partidas empatadas (ver `calibracao_empate_real.py`).
 
 Duas armadilhas de formato, das duasregistradas no código: o
 `features_phases.csv` está em formato **longo** (`cutoff_min` é coluna, não
@@ -1167,3 +1183,72 @@ conta cinco vezes.
 ### `src/features/build_features_v2.py`, `src/models/experiment_precisao.py`, `src/models/holdout_precisao.py`, `src/models/experiment_historico.py`
 
 Experimentos 12 a 19 (2026-11-03), exploratórios: não alteram o modelo de produção nem o `data/features.csv`. `build_features_v2` extrai 59 variáveis novas de `frames[: corte + 1]` para a base congelada de `features_phases.csv`; `tests/test_features_v2_sem_vazamento.py` confere que cortar a timeline no corte não muda nenhuma. `experiment_precisao` compara conjuntos de variáveis (trajetória, função, objetivos, campeões, jogadores) com 5 dobras e semente 42 e IC por *bootstrap* pareado. `holdout_precisao` repete com treino no passado e teste no futuro. `experiment_historico` mede o histórico do jogador por estrato de cobertura. Resultados no Apêndice K do TCC. Atenção: a codificação de campeões é ajustada só no treino e o histórico usa só partidas com `game_creation` anterior.
+
+## Medidas do parecer do orientador (2026-11-08)
+
+### `docs/calibracao_empate_real.py`
+
+Calibração do XGBoost de produção com probabilidades **fora da dobra** (5
+dobras, semente 42), nos quatro cortes: nas partidas empatadas (|ouro| < 500),
+média prevista contra taxa observada (IC de Wilson); por decis, maior desvio e
+desvio médio; Brier. Aos 15 e 25 min, sigmoide e isotônica com
+`CalibratedClassifierCV(cv=5)` ajustado só no treino de cada dobra externa (um
+protocolo só, no lugar das duas execuções antigas com 5 e 3 dobras internas).
+Grava `reports/calibracao_empate_real.json` e
+`reports/figuras_texto/fig_calibracao.png` (Figura 12). Resultado: diferença
+de −0,18 a +0,41 pp nas empatadas; maior desvio entre decis 1,25 pp aos 15 min;
+a calibração adicional não traz ganho.
+
+### `src/models/tune_models_aninhado.py`
+
+Busca em grade aninhada (5 dobras externas da semente 42, 3 internas) para
+XGBoost, Random Forest e MLP com as grades de `tune_models_full`. Resultado:
+0,8491 / 0,8483 / 0,8494 de AUC-ROC, a no máximo 0,0001 do não aninhado.
+Grava `reports/tune_models_aninhado.json` e `.log` (~20 min).
+
+### `src/models/curva_aprendizado.py`
+
+(1) Curva de aprendizado aos 15 min com teste fixo de 8.164 partidas e treino
+de 2.500 a 32.652 (5 sorteios): 0,8466 → 0,8495; o volume não explica a
+sequência 0,8214/0,8393/0,8490 das rodadas de coleta. (2) Os quatro cortes nas
+mesmas 27.761 partidas que chegam aos 25 min: 0,6653 / 0,7378 / 0,8135 /
+0,9092. Grava `reports/curva_aprendizado.json`.
+
+### `src/models/ganho_variaveis_logit.py`
+
+Ganho dos conjuntos 15 e 18 contra o MESMO classificador com as cinco
+variáveis (logística contra logística, XGBoost contra XGBoost), com o
+bootstrap pareado de `experiment_precisao`. O "+0,0078" do Apêndice K mistura
+variáveis e classificador; isolado, o ganho é +0,0070 aos 15 min e +0,0074
+aos 25 na logística, +0,0040 no XGBoost. Grava `reports/ganho_variaveis_logit.json`.
+
+### `src/nlq/confere_comparador.py`
+
+Reexecuta, sem API, a SQL gravada do sistema e a de referência dos acertos
+escalares do gabarito de 203 e conta quantos tinham mais de uma coluna
+numérica na primeira linha (os únicos em que a regra "qualquer valor da 1ª
+linha" de `bate_escalar` poderia decidir). Resultado: 0 de 146. Grava
+`reports/nlq_comparador_ambiguidade.json`.
+
+### Tag `gabarito-203`
+
+A rodada de 181/203 (05/11, 19:16) usou um `nl_to_sql.py` que não estava em
+commit nenhum (hash normalizado `f4c2ddbc799d6315`, gravado no resultado). A
+cópia exata foi recuperada do histórico local do editor e marcada na tag
+anotada `gabarito-203` (b83e53c + esse arquivo). Os quatro hashes gravados no
+resultado conferem com a tag. A main acrescenta depois a resolução de nomes,
+a checagem de eliminações e o roteamento por entidade, não medidos.
+
+### Outras mudanças do mesmo dia
+
+- `/predict` devolve também `shap_base_value` (referência em log-odds) e
+  `shap_unidade`; o Simulador mostra a unidade, a referência e a soma, e o
+  `/coach` aceita `shap_base_value` e informa a unidade à LLM.
+- `capturar_figuras_texto.py` aceita `SO_FIGURAS` (ex.: `simulador`) e
+  `recapturar_anexo_a.py` aceita `SO_TELAS` (ex.: `06_simulador.png`) para
+  recapturar só uma figura sem gastar crédito da API na da consulta.
+- `build_tcc_docx.py`: Abstract opcional (saiu do TCC), hífen simples nas
+  legendas, primeira figura do Apêndice E com 15 cm para caber com a abertura,
+  fonte própria para a Figura 12.
+- `verifica_tcc.py`: a checagem 14 passou a conferir calibração, viés por
+  partida, curva e seleção aninhada contra os artefatos.

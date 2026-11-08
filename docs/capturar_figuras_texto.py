@@ -93,9 +93,23 @@ def _abrir(contexto, rota: str, espera: str):
     return pagina
 
 
+# SO_FIGURAS (2026-11-08) recaptura só as figuras listadas (competitivo, partida,
+# simulador, shap, nlq) e mantém o registro das demais em figuras.json. Existe
+# porque a figura da consulta chama a API da Anthropic, e recapturar o Simulador
+# (unidade do SHAP, parecer do orientador) não deve depender de crédito.
+#   $env:SO_FIGURAS='simulador'; .venv\Scripts\python.exe docs\capturar_figuras_texto.py
+SO = {f.strip() for f in os.environ.get("SO_FIGURAS", "").split(",") if f.strip()}
+
+
+def _quer(nome: str) -> bool:
+    return not SO or nome in SO
+
+
 def main() -> None:
     SAIDA.mkdir(parents=True, exist_ok=True)
-    registro = {"tema": TEMA, "match_id": MATCH_ID}
+    anterior = SAIDA / "figuras.json"
+    registro = json.loads(anterior.read_text(encoding="utf-8")) if SO and anterior.exists() else {}
+    registro.update({"tema": TEMA, "match_id": MATCH_ID})
     with sync_playwright() as p:
         # --no-proxy-server: ver o comentário em recapturar_anexo_a.py
         nav = p.chromium.launch(args=["--no-proxy-server"])
@@ -105,16 +119,36 @@ def main() -> None:
                                    device_scale_factor=2)
         contexto.add_init_script(f"window.localStorage.setItem('theme', '{TEMA}');")
 
-        pg = _abrir(contexto, "/competitivo", "O viés de lado INVERTE")
-        _recortar(pg, "fig_competitivo.png",
-                  ["O viés de lado INVERTE", "Ouro aos 15 minutos"])
-        pg.close()
+        if _quer("competitivo"):
+            pg = _abrir(contexto, "/competitivo", "O viés de lado INVERTE")
+            _recortar(pg, "fig_competitivo.png",
+                      ["O viés de lado INVERTE", "Ouro aos 15 minutos"])
+            pg.close()
 
-        pg = _abrir(contexto, f"/partidas/{MATCH_ID}", "Mapa de calor da partida")
-        _recortar(pg, "fig_partida.png",
-                  ["Mapa de calor da partida", "Objetivos até"])
-        pg.close()
+        if _quer("partida"):
+            pg = _abrir(contexto, f"/partidas/{MATCH_ID}", "Mapa de calor da partida")
+            _recortar(pg, "fig_partida.png",
+                      ["Mapa de calor da partida", "Objetivos até"])
+            pg.close()
 
+        if _quer("simulador"):
+            _simulador(contexto, registro)
+        if _quer("shap"):
+            _shap(contexto)
+        if _quer("nlq"):
+            _nlq(contexto, registro)
+        nav.close()
+
+    registro["capturado_em"] = datetime.now().isoformat(timespec="seconds")
+    if SO:
+        registro["recapturadas_em_" + datetime.now().strftime("%Y-%m-%d")] = sorted(SO)
+    registro["base_partidas_fila_420"] = _partidas_fila_420()
+    (SAIDA / "figuras.json").write_text(
+        json.dumps(registro, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"registro: figuras.json (base {registro['base_partidas_fila_420']} partidas)")
+
+
+def _simulador(contexto, registro) -> None:
         pg = _abrir(contexto, "/simulador", "Simulador")
         pg.get_by_role("button", name="Estado").first.click()
         pg.wait_for_selector("#gold_diff", timeout=15000)
@@ -129,6 +163,8 @@ def main() -> None:
         registro["estado_simulador"]["prob_azul_pct_exibida"] = int(prob) if prob else None
         pg.close()
 
+
+def _shap(contexto) -> None:
         pg = _abrir(contexto, "/simulador", "Simulador")
         pg.get_by_role("button", name="Explicabilidade").first.click()
         pg.wait_for_selector("text=Como a importância de cada fator evolui", timeout=30000)
@@ -136,6 +172,8 @@ def main() -> None:
         _recortar(pg, "fig_shap_fases.png", ["Como a importância de cada fator evolui"])
         pg.close()
 
+
+def _nlq(contexto, registro) -> None:
         pg = _abrir(contexto, "/consulta", "Pergunte aos dados")
         pg.get_by_placeholder("Ex.: qual posição").fill(PERGUNTA_NLQ)
         pg.get_by_role("button", name="Perguntar").click()
@@ -150,13 +188,6 @@ def main() -> None:
         print(f"ok fig_nlq.png ({(SAIDA / 'fig_nlq.png').stat().st_size / 1024:.0f} KB)")
         registro["nlq"] = {"pergunta": PERGUNTA_NLQ, "sql_gerada": sql}
         pg.close()
-        nav.close()
-
-    registro["capturado_em"] = datetime.now().isoformat(timespec="seconds")
-    registro["base_partidas_fila_420"] = _partidas_fila_420()
-    (SAIDA / "figuras.json").write_text(
-        json.dumps(registro, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"registro: figuras.json (base {registro['base_partidas_fila_420']} partidas)")
 
 
 if __name__ == "__main__":

@@ -15,6 +15,9 @@
     "recapturada_em": "2026-11-05T14:51:36",
     "observacao": "tela com roteamento por base (selo Solo queue); as outras figuras não foram recapturadas"
   },
-  "capturado_em": "2026-11-03T20:43:45",
-  "base_partidas_fila_420": 41063
+  "capturado_em": "2026-11-08T15:27:02",
+  "base_partidas_fila_420": 41063,
+  "recapturadas_em_2026-11-08": [
+    "simulador"
+  ]
 }

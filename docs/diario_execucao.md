@@ -5109,3 +5109,20 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 **Resultado (15 min).** XGBoost 0,7636 de acurácia e 0,8490 de AUC-ROC (antes 0,7621 e 0,8473). Comparação completa em `docs/comparacao_rerun_41063.md`. Mudaram afirmações, não só números: o MLP ajustado fica 0,0009 acima do XGBoost em acurácia (o XGBoost não é mais o de maior acurácia entre os ajustados); a produção cai para 3º entre 27 combinações da grade; a divisão temporal nunca fica abaixo da aleatória; torres passam de ~15 para ~11 vezes; conversão de vantagem 74,1% contra 81,5% (7,4 pp, z = 8,0).
 
 **Ferramentas.** `docs/regenera_quadros.py` reescreve os quadros a partir de `reports/*.json`; `docs/verifica_tcc.py` passou a exigir base única. Backups: `data/backups/pre_rerun_41063/` e `data/backups/rerun_41063/` (fora do git). A Figura 5 (consulta em linguagem natural) não foi recapturada por falta de crédito na API e segue a antiga.
+
+## 2026-11-08 — Parecer do orientador sobre o TCC II
+
+**O que pediu.** Seis blocos: introdução sem subseções e sem menção ao TCC I; o viés de lado sem "estável ao longo da partida" e com teste que respeite a sobreposição entre cortes; a comparação dos modelos após o ajuste e com a regressão logística; calibração medida nas partidas empatadas reais, escala do SHAP, experimento 11 à parte e o +0,0078 isolado; NLQ com versões, congelamento e regra do comparador; formatação (chamadas, hífen, Anexo A, siglas).
+
+**O que se mediu (cada número com artefato em `reports/`).**
+- Viés por corte com a partida como unidade (`docs/testa_diferenca_taxas.py`, reescrito): 2.767 das 12.621 partidas empatadas estão em 2+ cortes; bootstrap por partida, menor p de Holm 0,64 (antes, com z independente, 0,93). Nenhuma diferença detectada.
+- Calibração nas empatadas reais, fora da dobra (`docs/calibracao_empate_real.py`): diferença −0,18 a +0,41 pp; maior desvio entre decis 1,25 pp aos 15 min. A "discrepância de 2,4 a 4,6 pp" vinha do estado todo-zero, que não ocorre em nenhuma partida empatada. Sigmoide piora a calibração por decis; isotônica não melhora Brier nem AUC.
+- Busca aninhada (`src/models/tune_models_aninhado.py`): XGBoost 0,8491, RF 0,8483, MLP 0,8494, a no máximo 0,0001 do não aninhado. As 10.295 partidas da grade do XGBoost estão dentro das 40.816 da avaliação (declarado na 4.6).
+- Curva de aprendizado com teste fixo (`src/models/curva_aprendizado.py`): 0,8466 (2.500) → 0,8484 (10.000) → 0,8495 (32.652). Mesmas 27.761 partidas nos quatro cortes: 0,6653 / 0,7378 / 0,8135 / 0,9092.
+- Ganho das variáveis no mesmo classificador (`src/models/ganho_variaveis_logit.py`): logística +0,0070 [0,0058; 0,0080] aos 15 min e +0,0074 aos 25; XGBoost +0,0040.
+- Comparador do gabarito (`src/nlq/confere_comparador.py`): 0 dos 146 acertos escalares tinham 2+ colunas numéricas.
+- Congelamento: última coleta de solo queue em 2026-10-04 19:41; CSVs profissionais de 2026-07-04; nada entrou depois. A versão medida do `nl_to_sql.py` não estava em commit; recuperada do histórico local e marcada na tag `gabarito-203`.
+
+**O que mudou no texto.** Introdução em parágrafos (sem 1.1 a 1.5), sem Abstract (opcional no modelo), sem menções ao TCC I, Anexo A eliminado (citação Riot Games na 4.3 e 5.1); Quadro 3 com a comparação após o ajuste, a logística e a coluna aninhada; Apêndice F com calibração nas empatadas e Figura 12; Apêndice C com Quadros 16 e 17; Apêndice K com o 11 à parte e a linha logística contra logística; SHAP em log-odds na 2.3, 5.5, Figura 4 (recapturada) e no coach; 5.6 com os controles de execução e sem "garante a segurança"; Apêndice B com versões, congelamento e regra do comparador; chamadas de todos os quadros dos apêndices; hífen nas legendas e títulos. Corpo: 30 páginas (no limite).
+
+**Código.** `/predict` devolve a referência e a unidade do SHAP; Simulador e coach mostram a unidade; `verifica_tcc.py` (checagem 14 nova) CONSISTENTE; `confere_docx.py` conforme.

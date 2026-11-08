@@ -27,6 +27,9 @@ import {
 } from "@/lib/matchState";
 import { cn } from "@/lib/utils";
 
+// transformação logística: leva log-odds (escala do SHAP do XGBoost) a probabilidade
+const sigmoid = (x: number) => 1 / (1 + Math.exp(-x));
+
 export function StatePanel() {
   const [state, setState] = useState<MatchState>(INITIAL);
   const predict = useMutation({ mutationFn: api.predict });
@@ -47,6 +50,8 @@ export function StatePanel() {
         .map(([key, value]) => ({ feature: SLIDER_LABELS[key] ?? key, value }))
         .sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
     : [];
+  const shapBase = predict.data?.shap_base_value;
+  const shapSum = shapData.reduce((acc, d) => acc + d.value, 0);
   const ranges = RANGES[state.minute];
 
   return (
@@ -163,13 +168,13 @@ export function StatePanel() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Contribuição de cada fator nesta predição (SHAP)</CardTitle>
+              <CardTitle>Contribuição de cada fator nesta predição (SHAP, em log-odds)</CardTitle>
             </CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer>
                 <BarChart data={shapData} layout="vertical" margin={{ left: 40, right: 16 }}>
                   <CartesianGrid horizontal={false} {...GRID} />
-                  <XAxis type="number" tick={AXIS_TICK} stroke="var(--baseline)" tickFormatter={(v: number) => v.toFixed(1)} />
+                  <XAxis type="number" tick={AXIS_TICK} stroke="var(--baseline)" tickFormatter={(v: number) => v.toFixed(2)} />
                   <YAxis type="category" dataKey="feature" width={130} tick={AXIS_TICK} stroke="var(--baseline)" />
                   <ReferenceLine x={0} stroke="var(--baseline)" />
                   <Tooltip
@@ -187,9 +192,20 @@ export function StatePanel() {
             {/* fora do CardContent de altura fixa: dentro dele a nota transbordava
                 o card (visível no recorte da figura do TCC, 2026-10-28) */}
             <CardContent className="pt-0">
+              {/* unidade e referência explícitas (2026-11-08, parecer do orientador): as
+                  barras são log-odds aditivas, não pontos percentuais */}
+              {shapBase !== undefined && prob !== undefined && (
+                <p className="mb-1 text-xs text-secondary-ink">
+                  Referência {shapBase >= 0 ? "+" : "−"}{Math.abs(shapBase).toFixed(3)} ({(sigmoid(shapBase) * 100).toFixed(1)}%)
+                  {" "}+ soma das barras {shapSum >= 0 ? "+" : "−"}{Math.abs(shapSum).toFixed(3)} ={" "}
+                  {(shapBase + shapSum).toFixed(3)} em log-odds, que a transformação logística leva
+                  a {(prob * 100).toFixed(1)}%.
+                </p>
+              )}
               <p className="text-xs text-muted-ink">
-                Azul empurra para vitória do time azul; vermelho, contra. Troque a fase para
-                ver a importância de cada fator mudar.
+                Escala logit (log-odds), não pontos percentuais. Azul empurra para vitória do
+                time azul; vermelho, contra. Troque a fase para ver a importância de cada fator
+                mudar.
               </p>
             </CardContent>
           </Card>

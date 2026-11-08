@@ -387,6 +387,11 @@ def check_residuos(t: str) -> None:
             linha = t[: m.start()].count("\n") + 1
             if linha in isentas:
                 continue
+            # 2026-11-08: "46,3% a 49,4%" é o intervalo de Wilson da taxa
+            # observada aos 15 min no quadro de calibração (Apêndice F), não a
+            # taxa antiga do pico; o limite inferior coincide com o valor velho
+            if valor == "46,3%" and t[m.end():m.end() + 8] == " a 49,4%":
+                continue
             trecho = t.splitlines()[linha - 1].strip()[:78]
             falha(f"linha {linha}: valor substituido {valor} ainda presente "
                   f"({porque}) -> {trecho!r}")
@@ -408,6 +413,17 @@ def check_residuos(t: str) -> None:
     # 39.426 (que estava no RESUMO) e rejeitava 41.063: ela checava o
     # resumo, nao o abstract.
     m = _re.search(r"(?s)\*\*Abstract:?\*\*(.*?)(?=\n##\s|\Z)", t)
+    # 2026-11-08 (parecer do orientador): o Abstract é opcional no modelo e saiu
+    # para a Introdução começar na primeira página. Sem Abstract no bloco
+    # pré-textual (do "## RESUMO" ao primeiro "---"), não há o que conferir;
+    # o build_tcc_docx também o trata como opcional.
+    _ini = t.find("## RESUMO")
+    _pre = t[_ini:t.find("\n---", _ini)] if _ini >= 0 else ""
+    if m is None and not _re.search(r"(?i)\babstract\b", _pre):
+        if not any("valor substituido" in f or "forma refutada" in f for f in FALHAS):
+            print(f"  [OK] nenhum dos {len(VALORES_SUBSTITUIDOS)} valores "
+                  "substituidos e nenhum dos padroes refutados (sem Abstract: retirado, opcional no modelo)")
+        return
     if m is None:
         # Reserva: sem ela, um "**ABSTRACT:**" ou "**Abstract**:" desliga
         # silenciosamente as sete asercoes do Abstract e ainda sai com
@@ -647,56 +663,86 @@ def check_citacoes(t: str) -> None:
         print("  [OK] nenhuma citacao autor-data em caixa alta")
 
 
-def check_calibracao(t: str) -> None:
-    """A conclusão da 5.8 sobre a discrepância de taxa-base tem que bater com o artefato.
+def check_parecer(t: str) -> None:
+    """Números trazidos pelo parecer do orientador (2026-11-08) x artefatos.
 
-    A 5.8 afirma três coisas que vieram de `experimento_calibracao.py`: que a
-    calibração PIORA a discrepância, que a regularização a move dentro do
-    ruído, e que só a troca de família a fecha. Cada uma é verificável contra
-    `reports/experimento_calibracao_veredito.json`.
-
-    Sem esta checagem o texto afirmaria "a calibração piora" sem que nada
-    registrasse que isso foi medido — e é a afirmação mais contraintuitiva
-    do trabalho, a que a banca mais vai questionar.
+    Substitui a antiga checagem da "discrepância de taxa-base", que comparava
+    o estado sintético todo-zero com as partidas empatadas (o parecer mostrou
+    que são populações diferentes). Confere:
+      a) o quadro de calibração do Apêndice F contra calibracao_empate_real.json;
+      b) o teste do viés com a partida como unidade (menor p de Holm e a maior
+         diferença) contra vies_cortes_por_partida.json;
+      c) a curva de aprendizado com teste fixo contra curva_aprendizado.json;
+      d) a coluna de seleção aninhada do Quadro 3 contra tune_models_aninhado.json.
+    E que a forma refutada ("viés estável/constante ao longo da partida",
+    "limitado pelo volume") não voltou.
     """
-    import json
+    import json as _json
+    import re as _re
 
-    rel = RAIZ / "reports" / "experimento_calibracao_veredito.json"
-    if not rel.exists():
-        aviso("experimento_calibracao_veredito.json ausente: a afirmação da 5.8 "
-              "sobre a discrepância não tem artefato")
-        return
+    def lê(nome):
+        return _json.loads((RAIZ / "reports" / nome).read_text(encoding="utf-8"))
+
+    def pct(x, d=1):
+        return f"{100 * x:.{d}f}".replace(".", ",") + "%"
+
+    def pp(x):
+        s_ = f"{x:+.2f}".replace(".", ",").replace("-", "−")
+        return "0,00 pp" if s_ in ("+0,00", "−0,00") else s_ + " pp"
+
+    flat = " ".join(t.split())
+    ok = len(FALHAS)
     try:
-        d = json.loads(rel.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        falha(f"experimento_calibracao_veredito.json invalido: {exc}")
-        return
-
-    prod = d["producao"]
-    pioram = d.get("variantes_que_pioram", [])
-    fecham = d.get("variantes_que_fecham", [])
-
-    def num(x: float) -> str:
-        return f"{x:.4f}".replace(".", ",")
-
-    # 1. a affirmacao central: nenhuma variante barata fecha
-    if fecham and not d.get("alguma_variante_fecha"):
-        falha("veredito contradiz a propria lista de variantes que fecham")
-    # 2. a calibracao tem de estar entre as que pioram
-    if not any("calib" in n for n in pioram):
-        aviso("a 5.8 afirma que a calibracao piora a discrepancia, mas o "
-              f"artefato lista {pioram} — confira a frase")
-    # 3. os numeros citados no texto tem de existir no artefato
-    for v in d.get("variantes_que_fecham", []):
-        pass
-    melhor = d.get("melhor_desvio")
-    if melhor:
-        for valor in (num(melhor["taxa_base"]), num(melhor["desvio_pp"] / 100)):
-            if valor not in t and f"{melhor['desvio_pp']:.1f}".replace(".", ",") not in t:
-                aviso(f"a taxa/desvio da variante que fecha ({valor}) não "
-                      "aparece no texto — o leitor não consegue conferir")
-        print(f"  [OK] variante que fecha: desvio {melhor['desvio_pp']:.1f} pp, "
-              f"AUC {num(melhor['auc'])}")
+        cal = lê("calibracao_empate_real.json")["producao_por_corte"]
+        for c, r in cal.items():
+            lo, hi = r["ic95_observada"]
+            linha = (f"| {c} min | {r['empatadas']:,}".replace(",", ".") +
+                     f" | {pct(r['taxa_observada'])} ({pct(lo)} a {pct(hi)}) | "
+                     f"{pct(r['media_prevista_empatadas'])} | {pp(r['diferenca_pp'])} | "
+                     f"{f'{r[chr(100) + "ecis_maior_desvio_pp"]:.2f}'.replace('.', ',')} pp |")
+            if linha not in t:
+                falha(f"calibracao {c} min: linha esperada {linha!r} nao esta no quadro do Apendice F")
+    except Exception as exc:  # noqa: BLE001
+        falha(f"calibracao: artefato ausente ou invalido: {exc}")
+    try:
+        v = lê("vies_cortes_por_partida.json")
+        p_holm = f"{v['menor_p_holm']:.2f}".replace(".", ",")
+        if f"menor valor-p corrigido de {p_holm}" not in flat:
+            falha(f"vies: a Secao 5.3 nao cita o menor p de Holm do artefato ({p_holm})")
+        maior = max(v["pares"], key=lambda p: abs(p["diferenca_pp"]))
+        lo, hi = (f"{x:+.1f}".replace(".", ",").replace("-", "−") for x in maior["ic95_pp"])
+        if f"intervalo de {lo} a {hi}" not in flat:
+            falha(f"vies: a maior diferenca ({maior['par']}) nao traz o intervalo do artefato ({lo} a {hi})")
+    except Exception as exc:  # noqa: BLE001
+        falha(f"vies: artefato ausente ou invalido: {exc}")
+    try:
+        cur = lê("curva_aprendizado.json")
+        for ponto in cur["curva_15min"]["pontos"]:
+            n_ = f"{ponto['treino']:,}".replace(",", ".")
+            if f"| {n_} | " + f"{ponto['auc_media']:.4f}".replace(".", ",") + " |" not in t:
+                falha(f"curva: a linha de {n_} partidas nao bate com o artefato")
+        for c, r in cur["cortes"].items():
+            if f"{r['mesmas_auc']:.4f}".replace(".", ",") not in t:
+                falha(f"curva: AUC nas mesmas partidas aos {c} min ausente do Apendice C")
+    except Exception as exc:  # noqa: BLE001
+        falha(f"curva: artefato ausente ou invalido: {exc}")
+    try:
+        an = lê("tune_models_aninhado.json")["modelos"]
+        for nome, rot in (("XGBoost", "XGBoost (produção)"), ("RandomForest", "*Random Forest*"), ("MLP", "MLP")):
+            esperado = f"{an[nome]['auc']:.4f}".replace(".", ",")
+            linhas = [l for l in t.splitlines() if l.startswith(f"| {rot} | busca em grade")]
+            if not linhas or not linhas[0].rstrip().endswith(f"| {esperado} |"):
+                falha(f"aninhado {nome}: o Quadro 3 nao traz a AUC com selecao aninhada do artefato ({esperado})")
+    except Exception as exc:  # noqa: BLE001
+        falha(f"aninhado: artefato ausente ou invalido: {exc}")
+    for padrao, porque in ((r"vi[ée]s\s+[ée]\s+est[áa]vel\s+ao\s+longo", "viés 'estável ao longo da partida'"),
+                           (r"constância\s+ao\s+longo", "viés 'constante ao longo da partida'"),
+                           (r"limitado\s+mais\s+pelo\s+volume", "'limitado pelo volume' sem teste fixo"),
+                           (r"discrepância de taxa-base", "discrepância de taxa-base do estado sintético")):
+        if _re.search(padrao, t, _re.I):
+            falha(f"parecer: o texto voltou a afirmar {porque}")
+    if len(FALHAS) == ok:
+        print("  [OK] calibracao nas empatadas, vies por partida, curva de aprendizado e selecao aninhada conferem")
 
 
 def check_regioes_significativas(t: str) -> None:
@@ -1367,6 +1413,8 @@ def check_precisao(t: str) -> None:
         return _json.loads((RAIZ / "reports" / nome).read_text(encoding="utf-8"))
 
     try:
+        # 2026-11-08 (parecer): ganho das variáveis dentro do mesmo classificador
+        proprio = lê("ganho_variaveis_logit.json")["cortes"]
         exp = lê("experimentos_precisao.json")
         hist = lê("experimento_historico.json")
         hold = lê("holdout_precisao.json")
@@ -1389,13 +1437,17 @@ def check_precisao(t: str) -> None:
     ganhos = [l for l in t[i:j].splitlines() if l.startswith("|") and "---" not in l][1:]
     mapa = [("E12_trajetoria", "xgb_prod"), ("E13_funcao", "xgb_prod"), ("E14_objetivos", "xgb_prod"),
             ("E15_rico", "xgb_prod"), ("E16_campeoes", "xgb_prod"), ("E17_jogadores", "xgb_prod"),
-            ("E18_tudo", "xgb_prod"), ("E18_tudo", "logit")]
+            ("E18_tudo", "xgb_prod"), ("E18_tudo", "logit"), ("E18_tudo", "logit_proprio")]
     if len(ganhos) != len(mapa) + 1:
         falha(f"precisao: o quadro de ganhos tem {len(ganhos)} linhas e eram {len(mapa) + 1}")
     for linha, (conj, mdl) in zip(ganhos, mapa):
         c = [x.strip() for x in linha.strip("|").split("|")]
-        esp = [ic(exp[corte][conj][mdl]["delta_auc"], exp[corte][conj][mdl]["ic_lo"],
-                  exp[corte][conj][mdl]["ic_hi"]) for corte in ("15", "25")]
+        if mdl == "logit_proprio":
+            esp = [ic(proprio[corte]["logit"][conj]["ganho_auc"], proprio[corte]["logit"][conj]["ic_lo"],
+                      proprio[corte]["logit"][conj]["ic_hi"]) for corte in ("15", "25")]
+        else:
+            esp = [ic(exp[corte][conj][mdl]["delta_auc"], exp[corte][conj][mdl]["ic_lo"],
+                      exp[corte][conj][mdl]["ic_hi"]) for corte in ("15", "25")]
         if c[2:4] != esp:
             falha(f"precisao {conj}/{mdl}: quadro {c[2:4]} x artefato {esp}")
     if len(ganhos) == len(mapa) + 1:
@@ -1425,8 +1477,9 @@ def check_precisao(t: str) -> None:
         chaves = ["A01_barao_arauto", "A02_dispersao", "tuning", "sigmoide", "isotonica", "A05_ouro_itens",
                   "A06_ofensivas", "A06_defensivas", "A08_visao_ambas", "A09_dragoes_tipo", "A10_placas"]
         linhas_a = [l for l in t[ia:i].splitlines() if l.startswith("|") and "---" not in l][1:]
-        if len(linhas_a) != len(chaves) + 1:
-            falha(f"precisao: o quadro dos experimentos 1 a 10 tem {len(linhas_a)} linhas e eram {len(chaves) + 1}")
+        # o experimento 11 saiu do quadro (2026-11-08, parecer): fica à parte no texto
+        if len(linhas_a) != len(chaves):
+            falha(f"precisao: o quadro dos experimentos 1 a 10 tem {len(linhas_a)} linhas e eram {len(chaves)}")
         for linha, chave in zip(linhas_a, chaves):
             c = [x.strip() for x in linha.strip("|").split("|")]
             esp = [ic(d_(corte, chave)["delta_auc"], d_(corte, chave)["ic_lo"], d_(corte, chave)["ic_hi"])
@@ -1448,12 +1501,16 @@ def check_precisao(t: str) -> None:
         maior_a = max(d_(c_, k)["delta_auc"] for c_ in ("15", "25") for k in chaves)
         # a Seção 5.4 cita os dois ganhos máximos: o dos experimentos 1 a 10 e o de 12 a 19
         pi = t.find("**Experimentos de enriquecimento.**")
-        par = t[pi:t.find("afirmá-lo.", pi)] if pi >= 0 else ""
+        par = t[pi:t.find("quase não muda o resultado.", pi)] if pi >= 0 else ""
         if not par:
             falha("precisao: o paragrafo 'Experimentos de enriquecimento' da Secao 5.4 nao existe")
         else:
+            # 12 a 19: o ganho dentro do mesmo classificador (parecer, 2026-11-08)
             for esperado, quem in ((f(maior_a, 4, True), "experimentos 1 a 10"),
-                                   (f(exp["15"]["E18_tudo"]["logit"]["delta_auc"], 4, True), "experimentos 12 a 19")):
+                                   (f(proprio["15"]["logit"]["E18_tudo"]["ganho_auc"], 4, True),
+                                    "experimentos 12 a 19, logistica contra ela mesma"),
+                                   (f(proprio["15"]["xgb_prod"]["E18_tudo"]["ganho_auc"], 4, True),
+                                    "experimentos 12 a 19, XGBoost contra ele mesmo")):
                 if esperado not in par:
                     falha(f"precisao: a Secao 5.4 nao cita o maior ganho dos {quem} ({esperado})")
 
@@ -1466,10 +1523,11 @@ def check_precisao(t: str) -> None:
         exclui = [c for c in ("10", "15", "20", "25")
                   if base[c]["diferencas"][dif]["auc"][2] < 0 or base[c]["diferencas"][dif]["auc"][1] > 0]
         lista = ", ".join(exclui[:-1]) + " e " + exclui[-1] if len(exclui) > 1 else "".join(exclui)
+        # 2026-11-08: a logística virou linha do Quadro 3 (comparação após o ajuste)
         esperado = [
-            f"chega a {f(base['15']['modelos']['Regressão logística']['acuracia'])} de acurácia e "
-            f"{f(base['15']['modelos']['Regressão logística']['auc'])}",
-            f"({f(-d15[0])} de AUC-ROC aos 15 minutos; o intervalo exclui zero aos {lista})",
+            f"| {f(base['15']['modelos']['Regressão logística']['acuracia'])} | "
+            f"{f(base['15']['modelos']['Regressão logística']['auc'])} |",
+            f"por {f(-d15[0])} de AUC-ROC aos 15 minutos (o intervalo exclui zero aos {lista};",
         ]
         flat = " ".join(t.split())
         for e_ in esperado:
@@ -1687,8 +1745,8 @@ def main() -> None:
     check_gridsearch(t)
     print("13. Citacoes autor-data em caixa alta (NBR 10520)")
     check_citacoes(t)
-    print("14. Discrepancia de taxa-base x artefato do experimento")
-    check_calibracao(t)
+    print("14. Calibracao, vies por partida, curva e selecao aninhada x artefatos")
+    check_parecer(t)
     print("15. Scripts que produzem medida estao em comandos.md")
     check_scripts_documentados()
     print("16. Regioes: o texto nao pode uniformizar o que o IC nao sustenta")

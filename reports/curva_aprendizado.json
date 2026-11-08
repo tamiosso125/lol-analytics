@@ -1,0 +1,66 @@
+{
+  "medido_em": "2026-11-08",
+  "curva_15min": {
+    "teste_fixo": 8164,
+    "treino_maximo": 32652,
+    "divisao": "train_test_split(test_size=0.2, stratify, random_state=42)",
+    "pontos": [
+      {
+        "treino": 2500,
+        "auc_media": 0.8466,
+        "auc_dp": 0.0008,
+        "sorteios": 5
+      },
+      {
+        "treino": 5000,
+        "auc_media": 0.8476,
+        "auc_dp": 0.0009,
+        "sorteios": 5
+      },
+      {
+        "treino": 10000,
+        "auc_media": 0.8484,
+        "auc_dp": 0.0002,
+        "sorteios": 5
+      },
+      {
+        "treino": 20000,
+        "auc_media": 0.8491,
+        "auc_dp": 0.0001,
+        "sorteios": 5
+      },
+      {
+        "treino": 32652,
+        "auc_media": 0.8495,
+        "auc_dp": 0.0,
+        "sorteios": 1
+      }
+    ]
+  },
+  "cortes": {
+    "10": {
+      "elegiveis_n": 40942,
+      "elegiveis_auc": 0.7752,
+      "mesmas_n": 27761,
+      "mesmas_auc": 0.6653
+    },
+    "15": {
+      "elegiveis_n": 40816,
+      "elegiveis_auc": 0.849,
+      "mesmas_n": 27761,
+      "mesmas_auc": 0.7378
+    },
+    "20": {
+      "elegiveis_n": 35637,
+      "elegiveis_auc": 0.8772,
+      "mesmas_n": 27761,
+      "mesmas_auc": 0.8135
+    },
+    "25": {
+      "elegiveis_n": 27761,
+      "elegiveis_auc": 0.9092,
+      "mesmas_n": 27761,
+      "mesmas_auc": 0.9092
+    }
+  }
+}

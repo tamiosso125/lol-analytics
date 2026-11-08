@@ -106,6 +106,12 @@ FONTE_FIGURAS_TEXTO = (
     "Fonte: Elaborado pelo autor (2026), recorte de tela da plataforma "
     "(Playwright, tema escuro)."
 )
+# figuras do texto que NÃO são recorte de tela (a curva de calibração é um
+# gráfico gerado por docs/calibracao_empate_real.py)
+FONTES_FIGURA = {
+    "fig_calibracao.png": "Fonte: Elaborado pelo autor (2026), a partir das "
+                          "probabilidades fora da dobra da validação cruzada.",
+}
 
 # As 6 capturas de página inteira do Apêndice F (era Anexo A até
 # 2026-10-28: são de autoria própria, e o modelo reserva "Anexo" para
@@ -137,9 +143,10 @@ _RE_BLOCO_TRABALHO = re.compile(r"^>.*?(?=^## RESUMO)", re.M | re.S)
 # Key-words), montado no passo 3 - nao pode virar um heading do corpo, e as
 # linhas de Palavras-chave/Abstract/Key-words tambem sao consumidas aqui
 # (senao duplicam no corpo, ja que o passo 3 as reconstroi no pre-textual).
-_RE_SECAO_RESUMO = re.compile(
-    r"^## RESUMO.*?^\*\*Key-words:\*\*.*?$\n*?^---", re.M | re.S
-)
+# O Abstract é opcional no modelo (parecer do orientador, 2026-11-08: saiu
+# para a Introdução começar na primeira página); o bloco vai de "## RESUMO"
+# até o primeiro "---", com ou sem Abstract.
+_RE_SECAO_RESUMO = re.compile(r"^## RESUMO.*?^---", re.M | re.S)
 
 
 def preprocessar() -> str:
@@ -460,19 +467,21 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     _runs_italico(p, palavras_chave)
     novos.append(p)
 
-    p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
-    p.paragraph_format.line_spacing = 1.0
-    r = p.add_run("Abstract: ")
-    r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
-    _runs_italico(p, abstract)
-    novos.append(p)
+    # Abstract opcional no modelo: só entra se o markdown o tiver
+    if abstract:
+        p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+        p.paragraph_format.line_spacing = 1.0
+        r = p.add_run("Abstract: ")
+        r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
+        _runs_italico(p, abstract)
+        novos.append(p)
 
-    p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=12)
-    p.paragraph_format.line_spacing = 1.0
-    r = p.add_run("Key-words: ")
-    r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
-    _runs_italico(p, key_words)
-    novos.append(p)
+        p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=12)
+        p.paragraph_format.line_spacing = 1.0
+        r = p.add_run("Key-words: ")
+        r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
+        _runs_italico(p, key_words)
+        novos.append(p)
 
     # SEM SUMÁRIO / LISTA DE ILUSTRAÇÕES / LISTA DE QUADROS — removido em
     # 2026-10-05 (Bloco B da revisão): os 10 TCC II aprovados usados como
@@ -525,7 +534,7 @@ def extrair_pre_textual(md: str) -> tuple[str, str, str, str]:
         return re.sub(r"\s+", " ", m.group(1).replace("**", "")).strip()
 
     resumo = bloco(r"^## RESUMO\s*$", r"^\*\*Palavras-chave:\*\*")
-    palavras = bloco(r"^\*\*Palavras-chave:\*\*\s*", r"^\*\*Abstract:\*\*")
+    palavras = bloco(r"^\*\*Palavras-chave:\*\*\s*", r"^(?:\*\*Abstract:\*\*|---\s*$)")
     abstract = bloco(r"^\*\*Abstract:\*\*\s*", r"^\*\*Key-words:\*\*")
     kwords = bloco(r"^\*\*Key-words:\*\*\s*", r"^---\s*$")
     return resumo, palavras, abstract, kwords
@@ -570,8 +579,10 @@ def _legenda(doc, tipo: str, titulo: str) -> "docx.text.paragraph.Paragraph":
     REGRA ESCRITA NO MODELO OFICIAL (lida em 2026-10-23): a legenda vem
     "precedida da palavra designativa, SEM NEGRITO, seguida do número [...],
     travessão e do respectivo título, em FONTE 12", e o estilo Legenda do
-    modelo é centralizado; o exemplo usa meia-risca ("Figura 1 – ..."). Até
-    aqui saía em negrito, 10 pt, à esquerda e com travessão longo.
+    modelo é centralizado. Até aqui saía em negrito, 10 pt, à esquerda e com
+    travessão longo. 2026-11-08 (parecer do orientador): hífen simples "-"
+    nos títulos de quadros, figuras, apêndices e anexo, como no exemplo do
+    modelo ("Tabela 1 - ..."), no lugar da meia-risca usada até então.
     """
     p = doc.add_paragraph()
     try:
@@ -589,7 +600,7 @@ def _legenda(doc, tipo: str, titulo: str) -> "docx.text.paragraph.Paragraph":
     _campo_seq(p, tipo)
     # *trecho* do título sai em itálico (revisão linha a linha B12, 2026-11-05:
     # "solo queue" na legenda da Figura 1 saía sem o itálico do corpo)
-    for j, parte in enumerate(re.split(r"\*([^*]+)\*", f" – {titulo}")):
+    for j, parte in enumerate(re.split(r"\*([^*]+)\*", f" - {titulo}")):
         if not parte:
             continue
         r = p.add_run(parte)
@@ -712,7 +723,7 @@ def inserir_figuras_texto(doc) -> int:
         p_img.paragraph_format.line_spacing = 1.0
         p_img.add_run().add_picture(caminho, width=largura, height=altura)
         p._p.addprevious(p_img._p)
-        fonte = _fonte(doc, FONTE_FIGURAS_TEXTO)
+        fonte = _fonte(doc, FONTES_FIGURA.get(os.path.basename(rel), FONTE_FIGURAS_TEXTO))
         p._p.addprevious(fonte._p)
         p._p.getparent().remove(p._p)
         n += 1
@@ -728,9 +739,10 @@ def inserir_figuras_texto(doc) -> int:
 # para legenda+fonte (~1-1,5cm) dentro dos 24,7cm úteis.
 _FIGURA_LARGURA_MAX_CM = 15.0
 _FIGURA_ALTURA_MAX_CM = 19.0
+_FIGURA_ALTURA_PRIMEIRA_CM = 15.0
 
 
-def _tamanho_figura(caminho: str):
+def _tamanho_figura(caminho: str, altura_max_cm: float = _FIGURA_ALTURA_MAX_CM):
     """Largura/altura (Cm) preservando proporção, sem estourar a página."""
     from PIL import Image
     from docx.shared import Cm
@@ -739,8 +751,8 @@ def _tamanho_figura(caminho: str):
         w_px, h_px = im.size
     largura = _FIGURA_LARGURA_MAX_CM
     altura = largura * h_px / w_px
-    if altura > _FIGURA_ALTURA_MAX_CM:
-        altura = _FIGURA_ALTURA_MAX_CM
+    if altura > altura_max_cm:
+        altura = altura_max_cm
         largura = altura * w_px / h_px
     return Cm(largura), Cm(altura)
 
@@ -775,7 +787,13 @@ def inserir_figuras(doc) -> int:
     for arquivo, titulo in FIGURAS:
         leg = _legenda(doc, "Figura", titulo)
         alvo.addprevious(leg._p)
-        largura, altura = _tamanho_figura(os.path.join(pasta, arquivo))
+        # a 1ª figura divide a página com o título e a abertura do apêndice; com
+        # 19 cm ela não cabia e ia para a página seguinte, deixando a abertura
+        # sozinha numa página quase vazia (parecer do orientador, 2026-11-08)
+        largura, altura = _tamanho_figura(
+            os.path.join(pasta, arquivo),
+            altura_max_cm=_FIGURA_ALTURA_PRIMEIRA_CM if n == 0 else _FIGURA_ALTURA_MAX_CM,
+        )
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         # sem o recuo de 1a linha do Normal, que deslocava a imagem 0,6 cm
@@ -1078,7 +1096,7 @@ LARGURAS_QUADROS = {
     # corpo
     "Tabelas do banco de dados e o que cada uma guarda": [5.0, 11.0],
     "Vitória do time vermelho por região": [2.8, 4.2, 9.0],
-    "Comparação entre modelos (corte de 15 minutos)": [3.4, 2.5, 2.3, 2.1, 2.3, 3.4],
+    "Comparação entre modelos após o ajuste (corte de 15 minutos)": [3.6, 5.0, 2.2, 2.2, 3.0],
     "Desempenho do XGBoost por corte temporal": [3.0, 4.0, 4.5, 4.5],
     "Experimentos negativos de enriquecimento de variáveis": [0.9, 6.1, 9.0],
     "Acerto da consulta em linguagem natural nas 50 perguntas do conjunto cego, por versão do sistema":
@@ -1106,9 +1124,15 @@ LARGURAS_QUADROS = {
     "Vitória do azul por faixa de duração total da partida": [5.0, 5.0, 6.0],
     "Vitória do azul por ano no cenário profissional": [2.5, 5.5, 3.5, 4.5],
     "Limitações do trabalho e a evidência de cada uma": [3.2, 6.4, 6.4],
-    "Taxa de vitória do azul no estado de empate, modelo e dados":
-        [2.4, 4.4, 5.0, 4.2],
-    "Alavancas testadas contra a discrepância de taxa-base": [3.6, 6.0, 6.4],
+    # parecer do orientador (2026-11-08): calibração nas partidas empatadas reais
+    # no lugar do estado sintético; curva de aprendizado e cortes nas mesmas partidas
+    "Calibração do XGBoost nas partidas empatadas, com probabilidades fora da dobra":
+        [1.8, 2.6, 4.0, 2.4, 2.2, 3.0],
+    "Calibração adicional sobre o XGBoost de produção, sob o mesmo protocolo":
+        [1.7, 2.3, 2.6, 2.6, 2.6, 2.0, 2.2],
+    "Curva de aprendizado do XGBoost com teste fixo (corte de 15 minutos)": [5.0, 5.5, 5.5],
+    "AUC-ROC do XGBoost por corte, nas partidas elegíveis e nas mesmas partidas":
+        [2.4, 3.6, 3.0, 3.6, 3.4],
     # apêndices G a K (2026-11-03; o antigo Apêndice I, estudos de domínio, saiu em
     # 2026-11-04 por repetir a Seção 3 e a 5.7; o antigo D, experimentos negativos, foi
     # fundido no de precisão no mesmo dia; as letras E a L viraram D a K)
@@ -1162,8 +1186,9 @@ def main() -> None:
     resumo, palavras, abstract, kwords = extrair_pre_textual(
         open(MD, encoding="utf-8").read()
     )
-    for nome, val in (("resumo", resumo), ("palavras-chave", palavras),
-                      ("abstract", abstract), ("key-words", kwords)):
+    if bool(abstract) != bool(kwords):
+        sys.exit("Abstract e Key-words andam juntos: há um sem o outro no markdown")
+    for nome, val in (("resumo", resumo), ("palavras-chave", palavras)):
         if not val:
             sys.exit(f"falha ao extrair '{nome}' do markdown - revise a regex")
 

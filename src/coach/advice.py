@@ -24,6 +24,7 @@ da orientação em cima de um ESTADO, `generate_draft_analysis()` lê os
 10 campeões ANTES de existir qualquer estado de jogo — win condition,
 contra-pick, quem escala melhor. Não precisa de MatchState nem
 probabilidade do modelo."""
+import math
 import os
 
 import anthropic
@@ -171,6 +172,7 @@ def generate_advice(
     red_synergies: list[dict] | None = None,
     tactical: dict | None = None,
     top_items: dict[str, list[dict]] | None = None,
+    shap_base_value: float | None = None,
 ) -> tuple[str, list[dict]]:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
@@ -191,9 +193,22 @@ def generate_advice(
             f"- {FEATURE_LABELS[f]}: {shap_contributions.get(f, 0.0):+.3f}"
             for f in FEATURE_LABELS
         )
+        # a unidade vai explícita (2026-11-08, parecer do orientador): o SHAP
+        # do XGBoost é aditivo em log-odds, não em pontos percentuais, e a LLM
+        # sem a unidade podia ler "+0.590" como "+59%" ou "+0,59 ponto"
+        referencia = ""
+        if shap_base_value is not None:
+            referencia = (
+                f" Valor de referência (média do modelo): {shap_base_value:+.3f} "
+                f"log-odds, equivalente a {100 / (1 + math.exp(-shap_base_value)):.1f}%; "
+                "a probabilidade acima é a transformação logística da referência "
+                "somada às contribuições."
+            )
         sections.append(
-            "Contribuição de cada fator para essa predição (SHAP — positivo "
-            f"empurra a favor do azul, negativo a favor do vermelho):\n{shap_lines}"
+            "Contribuição de cada fator para essa predição (SHAP, em log-odds, "
+            "aditivas na escala logit; positivo empurra a favor do azul, negativo "
+            "a favor do vermelho). Não converta essas contribuições em pontos "
+            f"percentuais; use-as só para ordenar os fatores.{referencia}\n{shap_lines}"
         )
 
     # Camada 2: composição — campeões e, quando fornecidos, matchups/

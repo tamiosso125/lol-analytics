@@ -1,0 +1,126 @@
+{
+  "medido_em": "2026-11-08",
+  "metodo": "bootstrap por partida, 2000 reamostragens, semente 42; IC por percentis; p bilateral pela reamostra centrada; Holm para 6 pares",
+  "limite_ouro": 500,
+  "partidas_empatadas_distintas": 12621,
+  "linhas_partida_corte": 15746,
+  "partidas_por_numero_de_cortes": {
+    "1": 9854,
+    "2": 2431,
+    "3": 314,
+    "4": 22
+  },
+  "taxas": {
+    "10": {
+      "vitorias_azul": 3551,
+      "partidas": 7641,
+      "taxa": 0.4647,
+      "ic95_wilson": [
+        0.4536,
+        0.4759
+      ]
+    },
+    "15": {
+      "vitorias_azul": 1974,
+      "partidas": 4126,
+      "taxa": 0.4784,
+      "ic95_wilson": [
+        0.4632,
+        0.4937
+      ]
+    },
+    "20": {
+      "vitorias_azul": 1172,
+      "partidas": 2501,
+      "taxa": 0.4686,
+      "ic95_wilson": [
+        0.4491,
+        0.4882
+      ]
+    },
+    "25": {
+      "vitorias_azul": 701,
+      "partidas": 1478,
+      "taxa": 0.4743,
+      "ic95_wilson": [
+        0.4489,
+        0.4998
+      ]
+    }
+  },
+  "pares": [
+    {
+      "par": "10x15",
+      "diferenca_pp": -1.37,
+      "ic95_pp": [
+        -3.07,
+        0.28
+      ],
+      "p": 0.107,
+      "em_comum": 1399,
+      "pct_do_menor": 33.9,
+      "p_holm": 0.642
+    },
+    {
+      "par": "10x20",
+      "diferenca_pp": -0.39,
+      "ic95_pp": [
+        -2.51,
+        1.67
+      ],
+      "p": 0.701,
+      "em_comum": 716,
+      "pct_do_menor": 28.6,
+      "p_holm": 1.0
+    },
+    {
+      "par": "10x25",
+      "diferenca_pp": -0.96,
+      "ic95_pp": [
+        -3.65,
+        1.71
+      ],
+      "p": 0.471,
+      "em_comum": 374,
+      "pct_do_menor": 25.3,
+      "p_holm": 1.0
+    },
+    {
+      "par": "15x20",
+      "diferenca_pp": 0.98,
+      "ic95_pp": [
+        -1.21,
+        3.29
+      ],
+      "p": 0.396,
+      "em_comum": 544,
+      "pct_do_menor": 21.8,
+      "p_holm": 1.0
+    },
+    {
+      "par": "15x25",
+      "diferenca_pp": 0.41,
+      "ic95_pp": [
+        -2.55,
+        3.26
+      ],
+      "p": 0.79,
+      "em_comum": 249,
+      "pct_do_menor": 16.8,
+      "p_holm": 1.0
+    },
+    {
+      "par": "20x25",
+      "diferenca_pp": -0.57,
+      "ic95_pp": [
+        -3.67,
+        2.38
+      ],
+      "p": 0.736,
+      "em_comum": 223,
+      "pct_do_menor": 15.1,
+      "p_holm": 1.0
+    }
+  ],
+  "menor_p_holm": 0.642
+}

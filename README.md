@@ -59,6 +59,9 @@ uvicorn src.api.main:app --reload             # 10. API para os dashboards
 streamlit run src/dashboard/app.py            # 11. dashboards interativos
 python -m src.models.explain_shap             # 12. explicabilidade (SHAP)
 python -m src.models.export_model             # 13. exporta os modelos p/ a API (/predict)
+python docs/calibracao_empate_real.py         # 14. calibração fora da dobra nas partidas empatadas
+python -m src.models.tune_models_aninhado     # 15. busca em grade aninhada (RF/MLP/XGBoost)
+python -m src.models.curva_aprendizado        # 16. curva de aprendizado com teste fixo
 ```
 
 ## Front end (React)

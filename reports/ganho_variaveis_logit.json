@@ -1,0 +1,86 @@
+{
+ "medido_em": "2026-11-08",
+ "protocolo": "StratifiedKFold(5, shuffle, 42); bootstrap pareado por partida, 300 reamostragens",
+ "cortes": {
+  "15": {
+   "logit": {
+    "base_auc": 0.8498,
+    "E15_rico": {
+     "n_vars": 57,
+     "n": 40816,
+     "auc": 0.8542,
+     "ganho_auc": 0.0044,
+     "ic_lo": 0.0035,
+     "ic_hi": 0.0052
+    },
+    "E18_tudo": {
+     "n_vars": 64,
+     "n": 40814,
+     "auc": 0.8568,
+     "ganho_auc": 0.007,
+     "ic_lo": 0.0058,
+     "ic_hi": 0.008
+    }
+   },
+   "xgb_prod": {
+    "base_auc": 0.849,
+    "E15_rico": {
+     "n_vars": 57,
+     "n": 40816,
+     "auc": 0.8519,
+     "ganho_auc": 0.0029,
+     "ic_lo": 0.0023,
+     "ic_hi": 0.0034
+    },
+    "E18_tudo": {
+     "n_vars": 64,
+     "n": 40814,
+     "auc": 0.8531,
+     "ganho_auc": 0.004,
+     "ic_lo": 0.0033,
+     "ic_hi": 0.0047
+    }
+   }
+  },
+  "25": {
+   "logit": {
+    "base_auc": 0.9092,
+    "E15_rico": {
+     "n_vars": 57,
+     "n": 27761,
+     "auc": 0.9142,
+     "ganho_auc": 0.005,
+     "ic_lo": 0.0039,
+     "ic_hi": 0.006
+    },
+    "E18_tudo": {
+     "n_vars": 64,
+     "n": 27759,
+     "auc": 0.9167,
+     "ganho_auc": 0.0074,
+     "ic_lo": 0.0063,
+     "ic_hi": 0.0085
+    }
+   },
+   "xgb_prod": {
+    "base_auc": 0.9092,
+    "E15_rico": {
+     "n_vars": 57,
+     "n": 27761,
+     "auc": 0.9117,
+     "ganho_auc": 0.0025,
+     "ic_lo": 0.002,
+     "ic_hi": 0.0031
+    },
+    "E18_tudo": {
+     "n_vars": 64,
+     "n": 27759,
+     "auc": 0.9133,
+     "ganho_auc": 0.004,
+     "ic_lo": 0.0033,
+     "ic_hi": 0.0046
+    }
+   }
+  }
+ }
+}

@@ -241,7 +241,8 @@ def main() -> None:
             continue
         pj = pred.json()
         corpo = {"state": estado, "blue_win_probability": pj["blue_win_probability"],
-                 "shap_contributions": pj["shap_contributions"]}
+                 "shap_contributions": pj["shap_contributions"],
+                 "shap_base_value": pj.get("shap_base_value")}
         if modo in ("completo", "composicao"):
             cur.execute(
                 "SELECT team_id, team_position, champion_name FROM participants "

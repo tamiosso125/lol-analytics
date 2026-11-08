@@ -67,6 +67,9 @@ TELAS = [
 
 
 TEMA = os.environ.get("ANEXO_TEMA", "dark")  # "dark" ou "light"
+# SO_TELAS (2026-11-08): recaptura só os arquivos listados (ex.: 06_simulador.png,
+# para a unidade do SHAP) e mantém o registro das demais em captura.json
+SO = {f.strip() for f in os.environ.get("SO_TELAS", "").split(",") if f.strip()}
 
 
 def main() -> None:
@@ -89,6 +92,8 @@ def main() -> None:
             f"window.localStorage.setItem('theme', '{TEMA}');"
         )
         for nome, rota, espera in TELAS:
+            if SO and nome not in SO:
+                continue
             pagina = contexto.new_page()
             try:
                 # A Home (rota "/") nunca fica ociosa na rede: com
@@ -159,6 +164,14 @@ def main() -> None:
     # momento da captura" so se sustenta pelo mtime do PNG, que qualquer
     # regeracao posterior torna falso sem aviso.
     base = _partidas_fila_420()
+    anterior = SAIDA / "captura.json"
+    if SO and anterior.exists():
+        registro = json.loads(anterior.read_text(encoding="utf-8"))
+        registro["recapturadas_em_" + datetime.now().strftime("%Y-%m-%d")] = sorted(SO)
+        registro["base_partidas_fila_420"] = base
+        anterior.write_text(json.dumps(registro, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"recapturadas: {sorted(SO)}; registro atualizado (base {base} partidas)")
+        return
     registro = {
         "capturado_em": datetime.now().isoformat(timespec="seconds"),
         "base_partidas_fila_420": base,

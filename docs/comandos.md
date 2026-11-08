@@ -186,9 +186,31 @@ resultado está em `reports/`.**
 # + reports/taxa_base_por_corte.json:
 .venv\Scripts\python.exe docs\taxa_base_por_corte.py
 
-# Teste (iv) de robustez: Wilson + Holm sobre as taxas por corte.
-# É o teste que sustenta a afirmação central da Seção 5.3:
+# Teste (iv) de robustez: Wilson + Holm sobre as taxas por corte, com a
+# PARTIDA como unidade (bootstrap por partida, 2.000 reamostragens; a mesma
+# partida pode estar empatada em mais de um corte). Sustenta a Seção 5.3;
+# grava reports/vies_cortes_por_partida.json:
 .venv\Scripts\python.exe docs\testa_diferenca_taxas.py
+
+# --- Medidas do parecer do orientador (2026-11-08) ---
+# Calibração nas partidas empatadas REAIS, fora da dobra, nos 4 cortes, mais
+# sigmoide/isotônica sob o mesmo protocolo e a Figura 12 (~5 min). Substitui a
+# comparação com o estado sintético todo-zero (Apêndice F, Quadros 23 e 24):
+.venv\Scripts\python.exe docs\calibracao_empate_real.py
+# Busca em grade ANINHADA de XGBoost, RF e MLP aos 15 min (~20 min). Coluna
+# "seleção aninhada" do Quadro 3 e Quadro 12; grava reports/tune_models_aninhado.json:
+.venv\Scripts\python.exe -m src.models.tune_models_aninhado
+# Curva de aprendizado com teste FIXO e cortes sobre as MESMAS partidas (~2 min).
+# Quadros 16 e 17; grava reports/curva_aprendizado.json:
+.venv\Scripts\python.exe -m src.models.curva_aprendizado
+# Ganho das variáveis novas dentro do mesmo classificador (logística contra
+# logística; ~5 min, precisa do banco). Apêndice K; grava reports/ganho_variaveis_logit.json:
+.venv\Scripts\python.exe -m src.models.ganho_variaveis_logit
+# Quantos acertos escalares do gabarito dependem da regra "qualquer valor da
+# 1ª linha" (sem API; reexecuta as SQLs gravadas). Grava reports/nlq_comparador_ambiguidade.json:
+.venv\Scripts\python.exe -m src.nlq.confere_comparador
+# Versão do text-to-SQL medida no gabarito de 203: tag git `gabarito-203`
+git show gabarito-203:src/nlq/nl_to_sql.py
 
 # Teste (ii) de robustez: taxa do azul por faixa de duração total
 # + reports/faixa_duracao.json:

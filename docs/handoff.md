@@ -140,11 +140,18 @@ linhas devolveu ajuste equivalente, 200 árvores a taxa 0,05, o que
 confirma que a limitação de taxa-base registrada na Seção 6.1 e no Apêndice F do TCC não
 é subajuste):
 
-| Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
-|---|---|---|---|---|---|
-| XGBoost (produção) | 0,7636 | 0,7577 | 0,7259 | 0,7415 | 0,8490 |
-| MLP | 0,7598 | 0,7483 | 0,7319 | 0,7400 | 0,8454 |
-| RandomForest | 0,7475 | 0,7350 | 0,7183 | 0,7265 | 0,8287 |
+| Modelo (15 min) | Acurácia | AUC-ROC | AUC-ROC com seleção aninhada |
+|---|---|---|---|
+| Regressão logística | 0,7649 | 0,8498 | — |
+| MLP ajustado | 0,7645 | 0,8494 | 0,8494 |
+| XGBoost (produção) | 0,7636 | 0,8490 | 0,8491 |
+| RandomForest ajustada | 0,7625 | 0,8484 | 0,8483 |
+| MLP referência | 0,7598 | 0,8454 | — |
+| RandomForest referência | 0,7475 | 0,8287 | — |
+
+Desde o parecer de 2026-11-08 o Quadro 3 do TCC mostra a comparação APÓS o
+ajuste e a logística; o XGBoost é mantido pela proximidade e pela integração
+com o SHAP, **nunca** por superioridade de desempenho.
 
 (Números exatos, não aproximados: 0,7610 arredonda para 0,76 e 0,7457 para
 0,75 — escrever "~0,74" subestimava o MLP.) Reproduz com
@@ -175,6 +182,11 @@ transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
   texto (o próprio TCC adverte, Seção 5.3). A direção do achado se
   manteve idêntica à leitura original de 2026-07-06; ver diário
   2026-09-28.
+- **Formulação atual (parecer de 2026-11-08):** entre partidas com diferença
+  de ouro < 500, as taxas são PRÓXIMAS nos quatro cortes (46,5/47,8/46,9/47,4%)
+  e o teste com a partida como unidade (bootstrap) não detecta diferença
+  (menor p de Holm 0,64). NÃO escrever "estável/constante ao longo da
+  partida". Histórico abaixo.
 - **E O VIÉS É CONSTANTE POR FASE** — resultado de 2026-10-04, que
   substitui e refuta o achado de 2026-07-08. Entre partidas genuinamente
   empatadas (|diferença de ouro| < 500) a taxa de vitória do azul é 46,4%
@@ -204,6 +216,13 @@ transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
   A série **não é monôtona** (20 min é menor que 10 e 15): é
   concentração tardia, não crescimento contínuo. As placas caem
   aos 14 min, razão de existir um modelo por fase.
+- **Parecer de 2026-11-08:** o experimento 11 ficou À PARTE no Apêndice K
+  (atributo consultado 0 a 16 dias depois das partidas; não prova
+  disponibilidade). No corpo, são dez. A curva de aprendizado com teste fixo é
+  plana acima de 10 mil partidas (0,8484 → 0,8495): "limitado pelo volume"
+  saiu do texto. A calibração foi medida nas empatadas reais (−0,18 a +0,41
+  pp): a "discrepância de taxa-base" era artefato do estado todo-zero e saiu
+  das limitações.
 - **11 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
   dispersão de time, tuning por fase, calibração extra, ouro em itens,
   split def/off, dragões por tipo, item_gold_diff refeito,
@@ -247,7 +266,9 @@ de novo se `data/items.json` mudar de versão (não depende de coleta).
   rotula "Leitura de jogo"; shrinkage de dupla (com IC) já shipped
   (2026-07-06), ver `team_synergies()`.
 - Benchmark NLQ (26): 23/26 antes, 26/26 hoje, **não independente**; a medida
-  independente é o gabarito automático (181/203). Falhas declaradas no TCC (6.1), sem ajuste depois da medida.
+  principal, em conjunto separado, é o gabarito automático (181/203, versão
+  medida na tag `gabarito-203`, base congelada desde 04/10). Três correções
+  feitas depois da medida não foram medidas de ponta a ponta.
 - Cobertura por patch desigual no solo queue (16.13 domina) — exposto
   no Dashboard.
 - Wave/micro state não existe em nenhuma API da Riot — caminhos reais

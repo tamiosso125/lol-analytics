@@ -11,6 +11,7 @@ import os
 
 import anthropic
 import joblib
+import numpy as np
 import pandas as pd
 import psycopg2
 from fastapi import FastAPI, HTTPException
@@ -227,6 +228,9 @@ class CoachRequest(BaseModel):
     state: MatchState
     blue_win_probability: float
     shap_contributions: dict[str, float] = {}
+    # referência do SHAP em log-odds (o /predict devolve); opcional para não
+    # quebrar quem chama sem ela, como a composição sem estado de jogo
+    shap_base_value: float | None = None
     blue_champions: dict[str, str] = {}
     red_champions: dict[str, str] = {}
     lanes: list[CoachLane] = []
@@ -1792,11 +1796,18 @@ def predict(state: MatchState):
         contributions = {
             feat: float(shap_values.values[0, i]) for i, feat in enumerate(FEATURES)
         }
+        # o TreeExplainer explica a saída BRUTA do XGBoost: as contribuições são
+        # aditivas em log-odds, e a probabilidade é a sigmoide de (referência +
+        # soma). Sem a referência e a unidade, o gráfico parecia somar pontos
+        # percentuais (2026-11-08, parecer do orientador)
+        base_value = float(np.ravel(shap_values.base_values)[0])
     except Exception as exc:
         raise _external_call_error(exc)
     return {
         "blue_win_probability": prob,
         "shap_contributions": contributions,
+        "shap_base_value": base_value,
+        "shap_unidade": "log-odds",
         "minute": state.minute,
     }
 
@@ -1837,6 +1848,7 @@ def coach(req: CoachRequest):
             req.state.model_dump(),
             req.blue_win_probability,
             req.shap_contributions,
+            shap_base_value=req.shap_base_value,
             blue_champions=req.blue_champions,
             red_champions=req.red_champions,
             lanes=[l.model_dump() for l in req.lanes],

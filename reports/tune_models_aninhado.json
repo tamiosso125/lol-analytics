@@ -1,0 +1,128 @@
+{
+  "medido_em": "2026-11-08",
+  "partidas": 40816,
+  "corte_min": 15,
+  "externo": "StratifiedKFold(5, shuffle=True, random_state=42)",
+  "interno": "StratifiedKFold(3, shuffle=True, random_state=1)",
+  "modelos": {
+    "XGBoost": {
+      "acuracia": 0.7636,
+      "auc": 0.8491,
+      "escolhas_por_dobra": [
+        {
+          "learning_rate": 0.01,
+          "max_depth": 3,
+          "n_estimators": 500
+        },
+        {
+          "learning_rate": 0.01,
+          "max_depth": 3,
+          "n_estimators": 500
+        },
+        {
+          "learning_rate": 0.01,
+          "max_depth": 3,
+          "n_estimators": 500
+        },
+        {
+          "learning_rate": 0.01,
+          "max_depth": 3,
+          "n_estimators": 500
+        },
+        {
+          "learning_rate": 0.05,
+          "max_depth": 3,
+          "n_estimators": 200
+        }
+      ],
+      "referencia_nao_aninhada": {
+        "acuracia": 0.7636,
+        "auc": 0.849,
+        "origem": "produção 500/0,01/3 (tune_models_39k.json)"
+      },
+      "dif_auc": 0.0001,
+      "tempo_segundos": 49.4
+    },
+    "RandomForest": {
+      "acuracia": 0.7626,
+      "auc": 0.8483,
+      "escolhas_por_dobra": [
+        {
+          "max_depth": 6,
+          "min_samples_leaf": 2,
+          "n_estimators": 500
+        },
+        {
+          "max_depth": 6,
+          "min_samples_leaf": 5,
+          "n_estimators": 500
+        },
+        {
+          "max_depth": 6,
+          "min_samples_leaf": 5,
+          "n_estimators": 300
+        },
+        {
+          "max_depth": 6,
+          "min_samples_leaf": 2,
+          "n_estimators": 200
+        },
+        {
+          "max_depth": 6,
+          "min_samples_leaf": 5,
+          "n_estimators": 500
+        }
+      ],
+      "referencia_nao_aninhada": {
+        "acuracia": 0.7625,
+        "auc": 0.8484,
+        "origem": "grade nas 40.816, avaliada nas mesmas dobras (tune_models_39k.json)"
+      },
+      "dif_auc": -0.0001,
+      "tempo_segundos": 346.4
+    },
+    "MLP": {
+      "acuracia": 0.7645,
+      "auc": 0.8494,
+      "escolhas_por_dobra": [
+        {
+          "mlpclassifier__alpha": 0.01,
+          "mlpclassifier__hidden_layer_sizes": [
+            32
+          ]
+        },
+        {
+          "mlpclassifier__alpha": 0.01,
+          "mlpclassifier__hidden_layer_sizes": [
+            32
+          ]
+        },
+        {
+          "mlpclassifier__alpha": 0.01,
+          "mlpclassifier__hidden_layer_sizes": [
+            32
+          ]
+        },
+        {
+          "mlpclassifier__alpha": 0.01,
+          "mlpclassifier__hidden_layer_sizes": [
+            32
+          ]
+        },
+        {
+          "mlpclassifier__alpha": 0.0001,
+          "mlpclassifier__hidden_layer_sizes": [
+            32
+          ]
+        }
+      ],
+      "referencia_nao_aninhada": {
+        "acuracia": 0.7645,
+        "auc": 0.8494,
+        "origem": "grade nas 40.816, avaliada nas mesmas dobras (tune_models_39k.json)"
+      },
+      "dif_auc": 0.0,
+      "tempo_segundos": 759.2
+    }
+  }
+}

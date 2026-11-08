@@ -421,7 +421,10 @@ export interface MatchState {
 
 export interface Prediction {
   blue_win_probability: number;
+  /** contribuições SHAP aditivas em log-odds (saída bruta do XGBoost) */
   shap_contributions: Record<string, number>;
+  /** valor de referência do SHAP, em log-odds; probabilidade = sigmoide(referência + soma) */
+  shap_base_value?: number;
   minute: number;
 }
 
@@ -688,6 +691,7 @@ export const api = {
         state,
         blue_win_probability: prediction.blue_win_probability,
         shap_contributions: prediction.shap_contributions,
+        shap_base_value: prediction.shap_base_value ?? null,
         blue_champions: ctx.blueChampions ?? {},
         red_champions: ctx.redChampions ?? {},
         lanes: ctx.lanes ?? [],

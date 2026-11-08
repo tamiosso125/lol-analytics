@@ -1,0 +1,10 @@
+{
+  "medido_em": "2026-11-08",
+  "rodada": "reports/nlq_gabarito_resultado_203.json",
+  "acertos_respondiveis": 166,
+  "acertos_escalares": 146,
+  "acertos_ranking": 20,
+  "escalares_com_2_ou_mais_colunas_numericas": 0,
+  "casos": [],
+  "falhas_ao_reexecutar": []
+}
