@@ -37,25 +37,26 @@ A exploração dos dados de esports ainda depende de ferramentas
 fragmentadas e de conhecimento técnico. Este trabalho desenvolveu uma
 plataforma inteligente para análise de dados de *League of Legends* que
 integra coleta, modelagem preditiva com *machine learning*,
-explicabilidade, visualização e consulta em linguagem natural. Trata-se
-de pesquisa aplicada, de abordagem quantitativa, sobre 41.063 partidas
-ranqueadas de elo alto em cinco regiões, coletadas pela interface de
-programação de aplicações (API, *Application Programming Interface*) da
-Riot Games, e 99.259 jogos profissionais de 2014 a 2026 (Oracle's
-Elixir). XGBoost, *Random Forest* e uma rede neural perceptron
-multicamadas (MLP) foram comparados por validação cruzada estratificada
-para predizer o vencedor em quatro cortes temporais, de 10 a 25 minutos.
-Após o ajuste, aos 15 minutos, a área sob a curva ROC (AUC-ROC) ficou
-entre 0,8484 e 0,8494, e uma regressão logística chegou a 0,8498; o
-XGBoost (0,8490) foi mantido pela proximidade dos resultados e pela
-integração com as explicações SHAP. A análise exploratória identificou
-viés favorável ao lado vermelho no *solo queue* de elo alto (56,3% de
-vitórias na região com maior amostra); entre partidas com diferença de
-ouro inferior a 500, as taxas foram próximas nos quatro cortes, sem
-diferença detectada entre eles. No cenário profissional, o viés se
-inverte (53,2% para o azul). Uma interface *text-to-SQL* com validação acertou 181 de 203 perguntas (89,2%) de um
-gabarito gerado por modelos de pergunta: 166 de 187 respondíveis e 15 de
-16 recusas esperadas. Os resultados mostram que é viável integrar essas etapas.
+explicabilidade, visualização e consulta em linguagem natural. A pesquisa
+é aplicada e quantitativa, sobre 41.063 partidas ranqueadas de elo alto,
+coletadas pela interface de programação de aplicações (API, *Application
+Programming Interface*) da Riot Games, e 99.259 jogos profissionais
+(Oracle's Elixir). XGBoost, *Random Forest* e uma rede neural perceptron
+multicamadas (MLP) foram comparados por validação cruzada para predizer o
+vencedor em cortes de 10 a 25 minutos. Após o ajuste, aos 15 minutos, a
+área sob a curva ROC (AUC-ROC) ficou entre 0,8484 e 0,8494, e uma
+regressão logística chegou a 0,8498; o XGBoost (0,8490) foi mantido pela
+proximidade dos resultados e pela integração com as explicações SHAP. A
+análise exploratória identificou viés favorável ao lado vermelho no *solo
+queue* (56,3% de vitórias na região com maior amostra); entre
+partidas com diferença de ouro inferior a 500, as taxas foram próximas
+nos quatro cortes, sem diferença detectada. No cenário profissional, o
+viés se inverte (53,2% para o azul), achado sustentado por testes de
+robustez. Uma interface *text-to-SQL* com validação acertou 181 de 203
+perguntas (89,2%) de um gabarito gerado por modelos de pergunta: 166 de
+187 respondíveis e 15 de 16 recusas esperadas. A plataforma reúne seis
+páginas de visualização com predição explicável. Os resultados mostram
+que é viável integrar essas etapas.
 
 **Palavras-chave:** esports; *League of Legends*; análise de dados;
 *machine learning*; interface em linguagem natural.
@@ -606,14 +607,14 @@ configuração de referência, sem busca em grade.
 
 Quadro — Comparação entre modelos após o ajuste (corte de 15 minutos)
 
-| Modelo | Configuração | Acurácia | AUC-ROC | AUC-ROC com seleção aninhada |
-|---|---|---:|---:|---:|
-| Regressão logística | variáveis padronizadas, sem hiperparâmetro ajustado | 0,7649 | 0,8498 | — |
-| MLP | busca em grade | 0,7645 | 0,8494 | 0,8494 |
-| XGBoost (produção) | busca em grade | 0,7636 | 0,8490 | 0,8491 |
-| *Random Forest* | busca em grade | 0,7625 | 0,8484 | 0,8483 |
-| MLP | configuração de referência | 0,7598 | 0,8454 | — |
-| *Random Forest* | configuração de referência | 0,7475 | 0,8287 | — |
+| Modelo | Acurácia | Precisão | *Recall* | F1 | AUC-ROC | AUC-ROC com seleção aninhada |
+|---|---:|---:|---:|---:|---:|---:|
+| Regressão logística (sem hiperparâmetro ajustado) | 0,7649 | 0,7566 | 0,7322 | 0,7442 | 0,8498 | — |
+| MLP ajustado | 0,7645 | 0,7544 | 0,7351 | 0,7446 | 0,8494 | 0,8494 |
+| XGBoost ajustado (produção) | 0,7636 | 0,7577 | 0,7259 | 0,7415 | 0,8490 | 0,8491 |
+| *Random Forest* ajustada | 0,7625 | 0,7512 | 0,7349 | 0,7429 | 0,8484 | 0,8483 |
+| MLP (referência) | 0,7598 | 0,7483 | 0,7319 | 0,7400 | 0,8454 | — |
+| *Random Forest* (referência) | 0,7475 | 0,7350 | 0,7183 | 0,7265 | 0,8287 | — |
 
 Após o ajuste, os quatro modelos ficam a 0,0014 de AUC-ROC e 0,0024 de
 acurácia uns dos outros, e escolher os hiperparâmetros só no treino de cada
@@ -750,7 +751,12 @@ por jogador de Bahrololloomi et al. (2022) entrou apenas nos perfis de
 jogador, fora da modelagem de vitória. A limitação que García-Méndez e
 Arriba-Pérez (2025) apontam nos trabalhos anteriores, a falta de
 interpretação das previsões, foi enfrentada com o SHAP na interface e com um
-módulo de orientação que separa o dado real do conhecimento geral. Jiang et al. (2025) e Guo et al. (2024) motivam a consulta a dados estruturados por
+módulo de orientação que separa o dado real do conhecimento geral. A
+auditoria desse módulo confere apenas os números, contra os dados
+fornecidos ao modelo de linguagem, e a interpretação qualitativa fica fora
+dela: no caso 5 do Apêndice B, a resposta atribui atraso em ouro e
+experiência a dois campeões específicos, quando os dados daquele modo
+trazem só a diferença agregada do time. Jiang et al. (2025) e Guo et al. (2024) motivam a consulta a dados estruturados por
 modelos de linguagem. Este trabalho acrescenta a validação da consulta
 antes da execução. O mapa de calor aplica, de forma mais simples, a
 integração de tempo e posição de Wallner, Wang e Dormann (2023), sem a
@@ -844,8 +850,6 @@ direção à média.
 **Limitações do modelo.** O XGBoost não garante monotonicidade isolada por variável, por não usar restrição formal. A calibração foi verificada nas previsões fora da dobra: nas partidas empatadas, a média prevista fica a menos de 0,5 ponto percentual da taxa observada em todos os cortes (Apêndice F).
 
 **Validade da consulta em linguagem natural.** A medida principal (203 perguntas de template, escritas pelo autor a partir de famílias de erro já conhecidas) pode superestimar o resultado em perguntas livres: em versões anteriores do sistema, perguntas escritas à mão acertaram entre 54% e 60%. As correções posteriores não foram medidas, e o *benchmark* de 26 não é independente.
-
-**Validade do módulo de orientação.** A auditoria das 36 respostas do *coach* confere apenas os números, contra os dados fornecidos ao modelo de linguagem; as afirmações qualitativas não foram avaliadas. O caso 5 do Apêndice B mostra esse limite: a resposta atribui atraso em ouro e experiência a dois campeões específicos, quando os dados daquele modo trazem só a diferença agregada do time.
 
 ### 6.2 TRABALHOS FUTUROS
 
@@ -997,7 +1001,9 @@ Linguistics, 2020. p. 396-411. DOI: 10.18653/v1/2020.emnlp-main.29.
 O banco de dados (PostgreSQL) segue o esquema do Quadro 6. As
 tabelas `raw_matches` e `raw_timelines` guardam o JSON bruto da Riot API,
 para reprocessar sem nova coleta; as demais são a normalização relacional
-usada pela análise e pela modelagem.
+usada pela análise e pela modelagem. Na coluna de chaves, PK indica a
+chave primária (*primary key*) e FK, a chave estrangeira (*foreign key*);
+JSONB é o tipo do PostgreSQL que guarda JSON em formato binário.
 
 Quadro — Esquema relacional do banco de dados
 
@@ -1042,7 +1048,7 @@ Quadro — Execuções do benchmark de linguagem natural
 O Quadro 8 traz as 26 perguntas de referência, com a SQL esperada e o
 resultado da medição de referência.
 
-Quadro — Benchmark de 26 perguntas de referência (NLQ)
+Quadro — Benchmark de 26 perguntas de referência da consulta em linguagem natural
 
 | # | Pergunta | SQL de referência | Resultado |
 |---|---|---|---|
@@ -1121,7 +1127,7 @@ Quadro — Acerto do gabarito automático por família de pergunta
 | U7-itens-pro | competitivo | 1 | 1 | 100,0 |
 | U8-multikill | solo | 1 | 1 | 100,0 |
 
-Auditoria do coach, de 4 de novembro de 2026: 36 respostas do módulo de orientação estratégica, geradas pelo mesmo caminho do produto sobre partidas reais (12 de cada modo: partida completa, composição e só estado; cortes de 15, 20 e 25 minutos). Cada número da resposta foi conferido contra os dados fornecidos à IA (o prompt sem as instruções), e os 13 que o detector não encontrou nos dados foram revisados à mão. A saída da IA varia entre execuções (temperatura 0,4), e o Quadro 10 é de uma execução.
+Auditoria do coach, de 4 de novembro de 2026: 36 respostas do módulo de orientação estratégica, geradas pelo mesmo caminho do produto sobre partidas reais (12 de cada modo: partida completa, composição e só estado; cortes de 15, 20 e 25 minutos). Cada número da resposta foi conferido contra os dados fornecidos ao modelo de linguagem (o *prompt* sem as instruções), e os 13 que o detector não encontrou nos dados foram revisados à mão. A saída do modelo de linguagem varia entre execuções (temperatura 0,4), e o Quadro 10 é de uma execução.
 
 Quadro — Auditoria de fundamentação do coach (36 respostas)
 
@@ -1181,7 +1187,7 @@ Quadro — Configuração dos três modelos comparados
 
 Quadro — Regressão logística como baseline e diferença do XGBoost para os demais modelos
 
-| Corte | Modelo | Acurácia | AUC-ROC | AUC-ROC do XGBoost menos a do modelo (IC de 95%) |
+| Corte | Modelo | Acurácia | AUC-ROC | AUC-ROC do XGBoost menos a do modelo (intervalo de 95%) |
 |---|---|---:|---:|---|
 | 10 min | Regressão logística | 0,7018 | 0,7758 | −0,0006 (−0,0011 a −0,0002) |
 | 15 min | Regressão logística | 0,7649 | 0,8498 | −0,0008 (−0,0012 a −0,0005) |
@@ -1215,7 +1221,7 @@ não altera nenhuma conclusão.
 
 Quadro — Treino no passado e teste no futuro, XGBoost
 
-| Corte | Divisão | Treino | Teste | Acurácia | AUC-ROC | IC 95% da AUC-ROC |
+| Corte | Divisão | Treino | Teste | Acurácia | AUC-ROC | Intervalo de 95% da AUC-ROC |
 |---|---|---:|---:|---:|---:|---|
 | 10 min | Cronológica 80/20 | 32.753 | 8.189 | 0,7033 | 0,7795 | 0,7696 a 0,7887 |
 | 10 min | Por *patch* | 23.639 | 17.303 | 0,7084 | 0,7844 | 0,7779 a 0,7911 |
@@ -1345,7 +1351,7 @@ ajustada à página.
 | Arquivo | Página |
 |---|---|
 | `reports/anexo_a/01_inicio.png` | Início (busca unificada) |
-| `reports/anexo_a/02_dashboard.png` | Dashboard (KPIs, viés de lado por região, cobertura da base) |
+| `reports/anexo_a/02_dashboard.png` | Dashboard (indicadores principais, viés de lado por região, cobertura da base) |
 | `reports/anexo_a/03_campeoes.png` | Campeões |
 | `reports/anexo_a/04_partida_detalhe.png` | Partidas: análise de uma partida individual |
 | `reports/anexo_a/05_competitivo.png` | Competitivo (solo queue × profissional) |
@@ -1357,7 +1363,8 @@ ajustada à página.
 
 O Quadro 22 reúne a evidência medida para cada limitação resumida na
 Seção 6.1. Os Quadros 23 e 24 e a Figura 12 detalham a
-calibração do modelo de produção.
+calibração do modelo de produção, com as diferenças em pontos percentuais
+(pp).
 
 Quadro — Limitações do trabalho e a evidência de cada uma
 
@@ -1368,12 +1375,12 @@ Quadro — Limitações do trabalho e a evidência de cada uma
 | Desequilíbrio de amostra por região | BR1 11.936, EUW1 11.744, KR 10.204 e NA1 7.159 partidas (a NA1 tinha 1.446 antes da rodada final). Em três das quatro regiões o intervalo de 95% exclui 50%; a KR tem 50,4%, com intervalo que inclui 50% | O achado de viés de elo alto, além do Brasil, se apoia nas três regiões com evidência firme |
 | Cobertura desigual por versão do jogo | O *patch* 16.13 concentra 40,4% das partidas (16.572 de 41.063), em dez *patches* de 16.10 a 16.19 | Treinar nos *patches* 16.10 a 16.13 e testar nos 16.14 a 16.19 não reduz a AUC-ROC (Apêndice C). A generalização para versões com balanceamento muito diferente segue sem medida |
 | Monotonicidade isolada por variável | O XGBoost não garante que aumentar apenas a diferença de abates ou de torres nunca reduza a probabilidade prevista, por interações e redundâncias entre variáveis | Comportamento documentado e compreendido, sem restrição formal de monotonicidade (`monotone_constraints`) nesta versão |
-| Consulta em linguagem natural | 181 de 203 (89,2%, intervalo de 95% de 84,1% a 92,7%) em gabarito automático de template; *benchmark* de 26 ajustado pelo autor, sem independência | Falhas declaradas; as três correções feitas depois não foram medidas. Consulta em transação somente leitura. Verificação do resultado depois da execução fica como trabalho futuro |
+| Consulta em linguagem natural | 181 de 203 (89,2%, intervalo de 95% de 84,1% a 92,7%) em gabarito gerado por modelos de pergunta, com 166 de 187 respondíveis e 15 de 16 recusas esperadas; *benchmark* de 26 ajustado pelo autor, sem independência | Falhas declaradas; as três correções feitas depois não foram medidas. Consulta em transação somente leitura. Verificação do resultado depois da execução fica como trabalho futuro |
 | Interpretação qualitativa do *coach* | A auditoria de 36 respostas confere só os números; no caso 5 (Apêndice B), a resposta atribui atraso a campeões específicos com dados só do time | A interface rotula o conhecimento geral do modelo de linguagem; a correção das afirmações qualitativas não foi avaliada |
 
 Quadro — Calibração do XGBoost nas partidas empatadas, com probabilidades fora da dobra
 
-| Corte | Partidas empatadas | Taxa observada do azul (IC 95%) | Média prevista | Diferença | Maior desvio entre decis |
+| Corte | Partidas empatadas | Taxa observada do azul (intervalo de 95%) | Média prevista | Diferença | Maior desvio entre decis |
 |---|---:|---:|---:|---:|---:|
 | 10 min | 7.641 | 46,5% (45,4% a 47,6%) | 46,5% | 0,00 pp | 0,87 pp |
 | 15 min | 4.126 | 47,8% (46,3% a 49,4%) | 47,7% | −0,18 pp | 1,25 pp |
@@ -1485,7 +1492,7 @@ Quadro — Objetivos específicos, onde são tratados e a evidência de cada um
 | d | 5.3 e Apêndice D | Quadro 2 e viés de lado com quatro testes de robustez; inversão no profissional; conversão de vantagem |
 | e | 5.4 e Apêndice C | Quadros 3 e 4: três modelos comparados em quatro cortes; XGBoost em produção |
 | f | 5.5 e Apêndice E | Seis páginas de visualização; Figuras 3 e 4 no texto |
-| g | 5.6 e Apêndice B | 181 de 203 perguntas certas (89,2%) no gabarito automático |
+| g | 5.6 e Apêndice B | 181 de 203 perguntas certas (89,2%) no gabarito gerado por modelos de pergunta: 166 de 187 respondíveis e 15 de 16 recusas esperadas |
 
 ---
 
@@ -1525,7 +1532,7 @@ Quadro — Experimentos 1 a 10: ganho de AUC-ROC contra as cinco variáveis orig
 | 9 | Dragões por tipo (7) | −0,0001 (−0,0001 a −0,0000) | +0,0000 (−0,0000 a +0,0001) |
 | 10 | Placas de torre destruídas (1) | −0,0000 (−0,0001 a +0,0000) | +0,0000 (−0,0000 a +0,0000) |
 
-Só o experimento 6, nos atributos ofensivos, tem intervalo que exclui zero aos 15 minutos (XGBoost), e o ganho é pequeno; com cerca de 20 comparações, um intervalo isolado pode ser acaso. Os experimentos 1 e 10 usam colunas que já existem no conjunto 14, medidas isoladamente. O experimento 4 reporta só a AUC-ROC da calibração adicional; o efeito sobre a calibração, medido com o mesmo protocolo, está no Quadro 24, no Apêndice F.
+Só o experimento 6, nos atributos ofensivos, tem intervalo que exclui zero aos 15 minutos (XGBoost), e o ganho é pequeno; com cerca de 20 comparações, um intervalo isolado pode ser acaso. Os experimentos 1 e 10 usam colunas que já existem no conjunto 14, medidas isoladamente. O experimento 4 reporta só a AUC-ROC da calibração adicional, medida em 4 de novembro de 2026 com calibrador de 3 dobras internas, ajustado só no treino de cada uma das 5 dobras externas. Refeita no protocolo do Quadro 24 (5 dobras internas), a diferença de AUC-ROC para a produção é a mesma (+0,0001 e −0,0002 aos 15 minutos; 0,0000 e −0,0003 aos 25), e o efeito sobre a calibração está naquele quadro, no Apêndice F.
 
 O Quadro 31 traz os conjuntos novos de variáveis.
 

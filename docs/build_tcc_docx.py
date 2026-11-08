@@ -118,7 +118,7 @@ FONTES_FIGURA = {
 # material de terceiros). Descrições da tabela de arquivos do markdown.
 FIGURAS = [
     ("01_inicio.png", "Página inicial: busca unificada e rankings"),
-    ("02_dashboard.png", "Dashboard: KPIs, viés de lado por região e cobertura do dataset"),
+    ("02_dashboard.png", "Dashboard: indicadores principais, viés de lado por região e cobertura da base"),
     ("03_campeoes.png", "Campeões"),
     ("04_partida_detalhe.png", "Partidas: análise de uma partida individual"),
     ("05_competitivo.png", "Competitivo: solo queue × profissional"),
@@ -453,7 +453,9 @@ def montar_pre_textual(doc, resumo: str, palavras_chave: str,
     # setar so no nivel do paragrafo (nao da duplicar no `_p`, que outros
     # ~1.500 paragrafos do corpo tambem usam) e setar DEPOIS de `_p()`
     # (que sempre aplica 1.5) para nao ser sobrescrito.
-    p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
+    # space_after: no modelo há uma linha em branco entre o Resumo e as
+    # Palavras-chave (2026-11-08; antes saíam coladas)
+    p = _p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=12)
     p.paragraph_format.line_spacing = 1.0
     r = p.add_run("Resumo: ")
     r.font.name, r.font.size, r.font.bold = "Arial", Pt(12), True
@@ -1096,14 +1098,14 @@ LARGURAS_QUADROS = {
     # corpo
     "Tabelas do banco de dados e o que cada uma guarda": [5.0, 11.0],
     "Vitória do time vermelho por região": [2.8, 4.2, 9.0],
-    "Comparação entre modelos após o ajuste (corte de 15 minutos)": [3.6, 5.0, 2.2, 2.2, 3.0],
+    "Comparação entre modelos após o ajuste (corte de 15 minutos)": [4.0, 1.95, 1.95, 1.75, 1.65, 1.75, 2.95],
     "Desempenho do XGBoost por corte temporal": [3.0, 4.0, 4.5, 4.5],
     "Experimentos negativos de enriquecimento de variáveis": [0.9, 6.1, 9.0],
     "Acerto da consulta em linguagem natural nas 50 perguntas do conjunto cego, por versão do sistema":
         [3.4, 1.6, 1.9, 1.9, 2.8, 2.0, 2.4],
     # apêndices
     "Esquema relacional do banco de dados": [3.0, 9.5, 3.5],
-    "Benchmark de 26 perguntas de referência (NLQ)": [0.8, 4.4, 7.4, 3.4],
+    "Benchmark de 26 perguntas de referência da consulta em linguagem natural": [0.8, 4.4, 7.4, 3.4],
     "Métricas completas por corte temporal, comparação entre os três modelos":
         [1.4, 1.5, 1.45, 2.85, 1.95, 1.8, 1.6, 1.6, 1.75],
     # apêndices reescritos em quadros (2026-11-03)
@@ -1167,6 +1169,9 @@ QUADROS_ESQUERDA = {
     "Limitações do trabalho e a evidência de cada uma",
     "Alavancas testadas contra a discrepância de taxa-base",
     "Partidas por região na primeira e na última medição do viés de lado",
+    # 2026-11-08: o nome do modelo justificado saía "XGBoost      ajustado"
+    "Comparação entre modelos após o ajuste (corte de 15 minutos)",
+    "Calibração adicional sobre o XGBoost de produção, sob o mesmo protocolo",
 }
 
 

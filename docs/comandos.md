@@ -209,6 +209,9 @@ resultado está em `reports/`.**
 # Quantos acertos escalares do gabarito dependem da regra "qualquer valor da
 # 1ª linha" (sem API; reexecuta as SQLs gravadas). Grava reports/nlq_comparador_ambiguidade.json:
 .venv\Scripts\python.exe -m src.nlq.confere_comparador
+# Precisão, recall e F1 dos modelos ajustados e da logística (Quadro 3, ~3 min).
+# Grava reports/metricas_ajustados.json:
+.venv\Scripts\python.exe -m src.models.metricas_ajustados
 # Versão do text-to-SQL medida no gabarito de 203: tag git `gabarito-203`
 git show gabarito-203:src/nlq/nl_to_sql.py
 

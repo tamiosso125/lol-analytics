@@ -728,9 +728,10 @@ def check_parecer(t: str) -> None:
         falha(f"curva: artefato ausente ou invalido: {exc}")
     try:
         an = lê("tune_models_aninhado.json")["modelos"]
-        for nome, rot in (("XGBoost", "XGBoost (produção)"), ("RandomForest", "*Random Forest*"), ("MLP", "MLP")):
+        for nome, rot in (("XGBoost", "XGBoost ajustado (produção)"), ("RandomForest", "*Random Forest* ajustada"),
+                          ("MLP", "MLP ajustado")):
             esperado = f"{an[nome]['auc']:.4f}".replace(".", ",")
-            linhas = [l for l in t.splitlines() if l.startswith(f"| {rot} | busca em grade")]
+            linhas = [l for l in t.splitlines() if l.startswith(f"| {rot} |")]
             if not linhas or not linhas[0].rstrip().endswith(f"| {esperado} |"):
                 falha(f"aninhado {nome}: o Quadro 3 nao traz a AUC com selecao aninhada do artefato ({esperado})")
     except Exception as exc:  # noqa: BLE001
@@ -741,8 +742,19 @@ def check_parecer(t: str) -> None:
                            (r"discrepância de taxa-base", "discrepância de taxa-base do estado sintético")):
         if _re.search(padrao, t, _re.I):
             falha(f"parecer: o texto voltou a afirmar {porque}")
+    # Quadro 3: as linhas dos ajustados e da logística saem de metricas_ajustados.json
+    try:
+        aj = lê("metricas_ajustados.json")["modelos"]
+        for nome, rot in (("Regressão logística", "Regressão logística (sem hiperparâmetro ajustado)"),
+                          ("MLP ajustado", "MLP ajustado"), ("Random Forest ajustada", "*Random Forest* ajustada")):
+            r = aj[nome]
+            celulas = " | ".join(f"{r[k]:.4f}".replace(".", ",") for k in ("acuracia", "precisao", "recall", "f1", "auc"))
+            if f"| {rot} | {celulas} |" not in t:
+                falha(f"Quadro 3: a linha {rot!r} nao bate com metricas_ajustados.json ({celulas})")
+    except Exception as exc:  # noqa: BLE001
+        falha(f"Quadro 3: metricas_ajustados.json ausente ou invalido: {exc}")
     if len(FALHAS) == ok:
-        print("  [OK] calibracao nas empatadas, vies por partida, curva de aprendizado e selecao aninhada conferem")
+        print("  [OK] calibracao nas empatadas, vies por partida, curva, selecao aninhada e Quadro 3 conferem")
 
 
 def check_regioes_significativas(t: str) -> None:
@@ -1525,8 +1537,8 @@ def check_precisao(t: str) -> None:
         lista = ", ".join(exclui[:-1]) + " e " + exclui[-1] if len(exclui) > 1 else "".join(exclui)
         # 2026-11-08: a logística virou linha do Quadro 3 (comparação após o ajuste)
         esperado = [
-            f"| {f(base['15']['modelos']['Regressão logística']['acuracia'])} | "
-            f"{f(base['15']['modelos']['Regressão logística']['auc'])} |",
+            f"| Regressão logística (sem hiperparâmetro ajustado) | "
+            f"{f(base['15']['modelos']['Regressão logística']['acuracia'])} |",
             f"por {f(-d15[0])} de AUC-ROC aos 15 minutos (o intervalo exclui zero aos {lista};",
         ]
         flat = " ".join(t.split())

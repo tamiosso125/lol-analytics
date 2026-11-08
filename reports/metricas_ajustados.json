@@ -1,0 +1,28 @@
+{
+  "medido_em": "2026-11-08",
+  "partidas": 40816,
+  "cv": "StratifiedKFold(5, shuffle=True, random_state=42)",
+  "modelos": {
+    "Regressão logística": {
+      "acuracia": 0.7649,
+      "precisao": 0.7566,
+      "recall": 0.7322,
+      "f1": 0.7442,
+      "auc": 0.8498
+    },
+    "Random Forest ajustada": {
+      "acuracia": 0.7625,
+      "precisao": 0.7512,
+      "recall": 0.7349,
+      "f1": 0.7429,
+      "auc": 0.8484
+    },
+    "MLP ajustado": {
+      "acuracia": 0.7645,
+      "precisao": 0.7544,
+      "recall": 0.7351,
+      "f1": 0.7446,
+      "auc": 0.8494
+    }
+  }
+}

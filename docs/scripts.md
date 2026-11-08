@@ -1252,3 +1252,14 @@ a checagem de eliminações e o roteamento por entidade, não medidos.
   fonte própria para a Figura 12.
 - `verifica_tcc.py`: a checagem 14 passou a conferir calibração, viés por
   partida, curva e seleção aninhada contra os artefatos.
+
+### `src/models/metricas_ajustados.py`
+
+Acurácia, precisão, *recall*, F1 e AUC-ROC fora da dobra da regressão
+logística e da *Random Forest* e do MLP com as melhores combinações de
+`reports/tune_models_39k.json`, no protocolo do Quadro 3. Existe porque o
+Quadro 3 passou a mostrar a comparação após o ajuste e `tune_models_full`
+grava só acurácia e AUC-ROC. Avisa se não reproduzir os valores publicados
+(reproduziu: 0,7649/0,8498, 0,7625/0,8484, 0,7645/0,8494). Grava
+`reports/metricas_ajustados.json`; a checagem 14 do `verifica_tcc.py` confere
+as linhas do Quadro 3 contra ele.
