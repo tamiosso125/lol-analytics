@@ -1,73 +1,73 @@
 {
-  "gerado_em": "2026-11-05",
-  "base_linhas": 145156,
+  "gerado_em": "2026-11-08",
+  "base_linhas": 141300,
   "cv": "estratificada, seed 42, 5 e 10 dobras",
   "resultados": {
     "10": {
       "XGBoost": {
         "5": {
-          "acuracia": 0.7028,
+          "acuracia": 0.702,
           "auc": 0.7752
         },
         "10": {
-          "acuracia": 0.7029,
-          "auc": 0.7752
+          "acuracia": 0.7025,
+          "auc": 0.7751
         }
       }
     },
     "15": {
       "XGBoost": {
         "5": {
-          "acuracia": 0.7636,
-          "auc": 0.849
+          "acuracia": 0.7641,
+          "auc": 0.8487
         },
         "10": {
-          "acuracia": 0.7639,
-          "auc": 0.849
+          "acuracia": 0.7642,
+          "auc": 0.8488
         }
       },
       "RandomForest": {
         "5": {
-          "acuracia": 0.7475,
-          "auc": 0.8287
+          "acuracia": 0.7439,
+          "auc": 0.8278
         },
         "10": {
-          "acuracia": 0.745,
+          "acuracia": 0.746,
           "auc": 0.8282
         }
       },
       "MLP": {
         "5": {
-          "acuracia": 0.7598,
-          "auc": 0.8454
+          "acuracia": 0.7619,
+          "auc": 0.8459
         },
         "10": {
-          "acuracia": 0.7623,
-          "auc": 0.8463
+          "acuracia": 0.7613,
+          "auc": 0.8458
         }
       }
     },
     "20": {
       "XGBoost": {
         "5": {
-          "acuracia": 0.7924,
-          "auc": 0.8772
+          "acuracia": 0.7856,
+          "auc": 0.869
         },
         "10": {
-          "acuracia": 0.7927,
-          "auc": 0.8771
+          "acuracia": 0.7856,
+          "auc": 0.8691
         }
       }
     },
     "25": {
       "XGBoost": {
         "5": {
-          "acuracia": 0.8261,
-          "auc": 0.9092
+          "acuracia": 0.8068,
+          "auc": 0.8899
         },
         "10": {
-          "acuracia": 0.8251,
-          "auc": 0.909
+          "acuracia": 0.8062,
+          "auc": 0.8899
         }
       }
     }

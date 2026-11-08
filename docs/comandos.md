@@ -119,6 +119,8 @@ salvar em `data/pro/{ano}_LoL_esports_match_data_from_OraclesElixir.csv`.
 
 # Gerar features por fase (10/15/20/25 min):
 .venv\Scripts\python.exe -m src.features.build_features
+# Garante que nenhum corte usa o quadro final de partida já encerrada (precisa do banco):
+.venv\Scripts\python.exe tests	est_corte_sem_quadro_final.py
 ```
 
 ---

@@ -61,10 +61,13 @@ export function Dashboard() {
     patches.data[0],
   );
   const totalPatchGames = patches.data?.reduce((s, p) => s + p.matches, 0) ?? 0;
+  // só regiões com amostra suficiente: a EUN1 (20 partidas) inflava a variação
+  // (2026-11-08); mesmo critério da Seção 5.3 do TCC
+  const regioesFirmes = regions.data?.filter((r) => r.matches >= 1000) ?? [];
   const regionSpread =
-    regions.data && regions.data.length > 1
-      ? Math.max(...regions.data.map((r) => r.red_win_rate)) -
-        Math.min(...regions.data.map((r) => r.red_win_rate))
+    regioesFirmes.length > 1
+      ? Math.max(...regioesFirmes.map((r) => r.red_win_rate)) -
+        Math.min(...regioesFirmes.map((r) => r.red_win_rate))
       : null;
 
   return (
@@ -207,12 +210,11 @@ export function Dashboard() {
                   ))}
                 </div>
                 <Takeaway>
-                  neste dataset (elo alto, múltiplas regiões) o vermelho vence mais no
+                  nesta base (elo alto, múltiplas regiões) o vermelho vence mais no
                   agregado — embora o viés varie por região (ver "Viés de lado por região"
                   abaixo): mais forte no BR, quase neutro no KR. No jogo profissional (Oracle's
-                  Elixir) o padrão se inverte e o azul vence mais. Hipótese: counter-pick
-                  garantido pesa mais no elo em que todos punem draft, somado ao acesso ao pit
-                  do dragão. É por isso que a predição "empatada" não dá 50%.
+                  Elixir) o padrão se inverte e o azul vence mais. A causa não está nos dados:
+                  o counter-pick garantido do vermelho é hipótese, não testada aqui.
                 </Takeaway>
               </>
             ) : null}
@@ -288,7 +290,7 @@ export function Dashboard() {
       {/* ---------------- cobertura do dataset ---------------- */}
       <SectionTitle
         eyebrow="Seção 3"
-        title="Cobertura do dataset"
+        title="Cobertura da base"
         desc="De onde vêm os números — tamanho e distribuição da amostra."
       />
 
@@ -334,7 +336,7 @@ export function Dashboard() {
               <CardContent className="pt-0">
                 <Takeaway>
                   o patch {topPatch.patch} concentra{" "}
-                  {pct(topPatch.matches / totalPatchGames)} do dataset — estatísticas de meta
+                  {pct(topPatch.matches / totalPatchGames)} da base — estatísticas de meta
                   (win/ban rate) refletem sobretudo essa versão; patches com poucas partidas
                   merecem menos confiança.
                 </Takeaway>
@@ -348,8 +350,8 @@ export function Dashboard() {
         <CardHeader>
           <CardTitle>Viés de lado por região</CardTitle>
           <p className="mt-0.5 text-xs text-muted-ink">
-            Win rate do time vermelho por plataforma (planejamento v2, sprint 5) — o viés
-            documentado no BR é do solo queue de elo alto em geral, ou específico daqui?
+            Win rate do time vermelho por região — o viés é do solo queue de elo alto em
+            geral, ou específico de uma região?
           </p>
         </CardHeader>
         <CardContent>
@@ -398,10 +400,10 @@ export function Dashboard() {
                 </>
               ) : (
                 <>
-                  variação de {pct(regionSpread ?? 0)} entre regiões no viés de lado — se
-                  todas ficarem próximas de {pct(regions.data[0].red_win_rate)}, o viés é do
-                  solo queue de elo alto em geral; se divergirem bastante, é mais específico
-                  de cada região/cultura de jogo.
+                  variação de {pct(regionSpread ?? 0)} entre as regiões com amostra
+                  suficiente (EUN1, com poucas partidas, fica de fora). A direção é a mesma em
+                  todas — o vermelho vence mais —, mas a intensidade varia: o viés é do solo
+                  queue de elo alto em geral, mais forte em algumas regiões.
                 </>
               )}
             </Takeaway>

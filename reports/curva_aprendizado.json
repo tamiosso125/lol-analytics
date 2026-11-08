@@ -1,37 +1,37 @@
 {
   "medido_em": "2026-11-08",
   "curva_15min": {
-    "teste_fixo": 8164,
-    "treino_maximo": 32652,
+    "teste_fixo": 8156,
+    "treino_maximo": 32622,
     "divisao": "train_test_split(test_size=0.2, stratify, random_state=42)",
     "pontos": [
       {
         "treino": 2500,
-        "auc_media": 0.8466,
-        "auc_dp": 0.0008,
+        "auc_media": 0.8494,
+        "auc_dp": 0.0011,
         "sorteios": 5
       },
       {
         "treino": 5000,
-        "auc_media": 0.8476,
-        "auc_dp": 0.0009,
+        "auc_media": 0.8509,
+        "auc_dp": 0.0007,
         "sorteios": 5
       },
       {
         "treino": 10000,
-        "auc_media": 0.8484,
-        "auc_dp": 0.0002,
+        "auc_media": 0.8519,
+        "auc_dp": 0.0004,
         "sorteios": 5
       },
       {
         "treino": 20000,
-        "auc_media": 0.8491,
-        "auc_dp": 0.0001,
+        "auc_media": 0.8525,
+        "auc_dp": 0.0002,
         "sorteios": 5
       },
       {
-        "treino": 32652,
-        "auc_media": 0.8495,
+        "treino": 32622,
+        "auc_media": 0.8527,
         "auc_dp": 0.0,
         "sorteios": 1
       }
@@ -39,28 +39,28 @@
   },
   "cortes": {
     "10": {
-      "elegiveis_n": 40942,
+      "elegiveis_n": 40919,
       "elegiveis_auc": 0.7752,
-      "mesmas_n": 27761,
-      "mesmas_auc": 0.6653
+      "mesmas_n": 25098,
+      "mesmas_auc": 0.6444
     },
     "15": {
-      "elegiveis_n": 40816,
-      "elegiveis_auc": 0.849,
-      "mesmas_n": 27761,
-      "mesmas_auc": 0.7378
+      "elegiveis_n": 40778,
+      "elegiveis_auc": 0.8487,
+      "mesmas_n": 25098,
+      "mesmas_auc": 0.7126
     },
     "20": {
-      "elegiveis_n": 35637,
-      "elegiveis_auc": 0.8772,
-      "mesmas_n": 27761,
-      "mesmas_auc": 0.8135
+      "elegiveis_n": 34505,
+      "elegiveis_auc": 0.869,
+      "mesmas_n": 25098,
+      "mesmas_auc": 0.787
     },
     "25": {
-      "elegiveis_n": 27761,
-      "elegiveis_auc": 0.9092,
-      "mesmas_n": 27761,
-      "mesmas_auc": 0.9092
+      "elegiveis_n": 25098,
+      "elegiveis_auc": 0.8899,
+      "mesmas_n": 25098,
+      "mesmas_auc": 0.8899
     }
   }
 }

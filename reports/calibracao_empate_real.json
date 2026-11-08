@@ -3,373 +3,373 @@
   "protocolo": "StratifiedKFold(5, shuffle=True, random_state=42); calibrador CalibratedClassifierCV(cv=5) só no treino de cada dobra; empate = |gold_diff| < 500",
   "producao_por_corte": {
     "10": {
-      "partidas": 40942,
+      "partidas": 40919,
       "auc": 0.7752,
       "brier": 0.1921,
-      "empatadas": 7641,
-      "taxa_observada": 0.4647,
+      "empatadas": 7639,
+      "taxa_observada": 0.4646,
       "ic95_observada": [
-        0.4536,
-        0.4759
+        0.4534,
+        0.4758
       ],
-      "media_prevista_empatadas": 0.4647,
-      "diferenca_pp": -0.0,
-      "decis_maior_desvio_pp": 0.87,
-      "decis_desvio_medio_pp": 0.45,
+      "media_prevista_empatadas": 0.4645,
+      "diferenca_pp": -0.01,
+      "decis_maior_desvio_pp": 1.21,
+      "decis_desvio_medio_pp": 0.62,
       "decis": [
         {
-          "prevista": 0.1004,
-          "observada": 0.0957,
-          "n": 4097
+          "prevista": 0.1005,
+          "observada": 0.0936,
+          "n": 4092
         },
         {
-          "prevista": 0.2009,
-          "observada": 0.1953,
+          "prevista": 0.2011,
+          "observada": 0.1938,
           "n": 4092
         },
         {
           "prevista": 0.2725,
-          "observada": 0.2706,
-          "n": 4095
-        },
-        {
-          "prevista": 0.3501,
-          "observada": 0.3515,
+          "observada": 0.2728,
           "n": 4094
         },
         {
-          "prevista": 0.4236,
-          "observada": 0.4173,
-          "n": 4093
+          "prevista": 0.3498,
+          "observada": 0.358,
+          "n": 4101
         },
         {
-          "prevista": 0.4917,
-          "observada": 0.5004,
-          "n": 4095
+          "prevista": 0.4237,
+          "observada": 0.4117,
+          "n": 4081
         },
         {
-          "prevista": 0.5622,
-          "observada": 0.5632,
-          "n": 4093
+          "prevista": 0.492,
+          "observada": 0.5002,
+          "n": 4092
         },
         {
-          "prevista": 0.6461,
-          "observada": 0.6426,
-          "n": 4094
-        },
-        {
-          "prevista": 0.7483,
-          "observada": 0.7523,
-          "n": 4098
-        },
-        {
-          "prevista": 0.8742,
-          "observada": 0.8819,
+          "prevista": 0.5614,
+          "observada": 0.5656,
           "n": 4091
+        },
+        {
+          "prevista": 0.646,
+          "observada": 0.6416,
+          "n": 4093
+        },
+        {
+          "prevista": 0.7485,
+          "observada": 0.7507,
+          "n": 4091
+        },
+        {
+          "prevista": 0.874,
+          "observada": 0.8822,
+          "n": 4092
         }
       ],
       "estado_zerado_modelo_completo": 0.4904
     },
     "15": {
-      "partidas": 40816,
-      "auc": 0.849,
-      "brier": 0.158,
+      "partidas": 40778,
+      "auc": 0.8487,
+      "brier": 0.1582,
       "empatadas": 4126,
       "taxa_observada": 0.4784,
       "ic95_observada": [
         0.4632,
         0.4937
       ],
-      "media_prevista_empatadas": 0.4766,
-      "diferenca_pp": -0.18,
-      "decis_maior_desvio_pp": 1.25,
-      "decis_desvio_medio_pp": 0.5,
+      "media_prevista_empatadas": 0.4765,
+      "diferenca_pp": -0.19,
+      "decis_maior_desvio_pp": 1.19,
+      "decis_desvio_medio_pp": 0.57,
       "decis": [
         {
-          "prevista": 0.0382,
-          "observada": 0.0321,
-          "n": 4083
+          "prevista": 0.0385,
+          "observada": 0.0316,
+          "n": 4078
         },
         {
-          "prevista": 0.1161,
-          "observada": 0.1103,
+          "prevista": 0.1163,
+          "observada": 0.1095,
           "n": 4081
         },
         {
-          "prevista": 0.1991,
-          "observada": 0.2004,
+          "prevista": 0.2001,
+          "observada": 0.2032,
+          "n": 4075
+        },
+        {
+          "prevista": 0.2923,
+          "observada": 0.2804,
+          "n": 4077
+        },
+        {
+          "prevista": 0.3983,
+          "observada": 0.4024,
+          "n": 4078
+        },
+        {
+          "prevista": 0.4992,
+          "observada": 0.5044,
+          "n": 4080
+        },
+        {
+          "prevista": 0.608,
+          "observada": 0.6064,
+          "n": 4075
+        },
+        {
+          "prevista": 0.7328,
+          "observada": 0.7314,
           "n": 4081
         },
         {
-          "prevista": 0.292,
-          "observada": 0.2795,
-          "n": 4082
-        },
-        {
-          "prevista": 0.3977,
-          "observada": 0.4021,
-          "n": 4081
-        },
-        {
-          "prevista": 0.4986,
-          "observada": 0.5015,
-          "n": 4082
-        },
-        {
-          "prevista": 0.6085,
-          "observada": 0.6105,
-          "n": 4085
-        },
-        {
-          "prevista": 0.7326,
-          "observada": 0.7333,
-          "n": 4079
-        },
-        {
-          "prevista": 0.8381,
+          "prevista": 0.8375,
           "observada": 0.8437,
-          "n": 4088
+          "n": 4076
         },
         {
-          "prevista": 0.9482,
-          "observada": 0.957,
-          "n": 4074
+          "prevista": 0.948,
+          "observada": 0.9581,
+          "n": 4077
         }
       ],
-      "estado_zerado_modelo_completo": 0.5036
+      "estado_zerado_modelo_completo": 0.5018
     },
     "20": {
-      "partidas": 35637,
-      "auc": 0.8772,
-      "brier": 0.1421,
-      "empatadas": 2501,
-      "taxa_observada": 0.4686,
+      "partidas": 34505,
+      "auc": 0.869,
+      "brier": 0.1468,
+      "empatadas": 2500,
+      "taxa_observada": 0.4688,
       "ic95_observada": [
-        0.4491,
-        0.4882
+        0.4493,
+        0.4884
       ],
-      "media_prevista_empatadas": 0.4698,
-      "diferenca_pp": 0.12,
-      "decis_maior_desvio_pp": 0.77,
-      "decis_desvio_medio_pp": 0.54,
+      "media_prevista_empatadas": 0.4696,
+      "diferenca_pp": 0.08,
+      "decis_maior_desvio_pp": 0.73,
+      "decis_desvio_medio_pp": 0.43,
       "decis": [
         {
-          "prevista": 0.0304,
-          "observada": 0.0247,
-          "n": 3567
+          "prevista": 0.0364,
+          "observada": 0.031,
+          "n": 3454
         },
         {
-          "prevista": 0.0821,
-          "observada": 0.075,
-          "n": 3562
+          "prevista": 0.0907,
+          "observada": 0.085,
+          "n": 3447
         },
         {
-          "prevista": 0.1513,
-          "observada": 0.146,
-          "n": 3562
+          "prevista": 0.1597,
+          "observada": 0.1573,
+          "n": 3451
         },
         {
-          "prevista": 0.2558,
-          "observada": 0.2577,
-          "n": 3566
+          "prevista": 0.2644,
+          "observada": 0.2625,
+          "n": 3451
         },
         {
-          "prevista": 0.388,
-          "observada": 0.381,
-          "n": 3562
+          "prevista": 0.3935,
+          "observada": 0.3915,
+          "n": 3456
         },
         {
           "prevista": 0.5081,
-          "observada": 0.5069,
-          "n": 3563
+          "observada": 0.5044,
+          "n": 3444
         },
         {
-          "prevista": 0.6365,
-          "observada": 0.6431,
-          "n": 3575
+          "prevista": 0.6337,
+          "observada": 0.6409,
+          "n": 3450
         },
         {
-          "prevista": 0.7668,
-          "observada": 0.7703,
-          "n": 3553
+          "prevista": 0.7593,
+          "observada": 0.7611,
+          "n": 3453
         },
         {
-          "prevista": 0.8792,
-          "observada": 0.8869,
-          "n": 3563
+          "prevista": 0.8694,
+          "observada": 0.8744,
+          "n": 3448
         },
         {
-          "prevista": 0.9658,
-          "observada": 0.9733,
-          "n": 3564
+          "prevista": 0.9588,
+          "observada": 0.9661,
+          "n": 3451
         }
       ],
-      "estado_zerado_modelo_completo": 0.5143
+      "estado_zerado_modelo_completo": 0.5145
     },
     "25": {
-      "partidas": 27761,
-      "auc": 0.9092,
-      "brier": 0.1217,
-      "empatadas": 1478,
-      "taxa_observada": 0.4743,
+      "partidas": 25098,
+      "auc": 0.8899,
+      "brier": 0.1343,
+      "empatadas": 1474,
+      "taxa_observada": 0.4742,
       "ic95_observada": [
-        0.4489,
-        0.4998
+        0.4488,
+        0.4997
       ],
-      "media_prevista_empatadas": 0.4784,
-      "diferenca_pp": 0.41,
-      "decis_maior_desvio_pp": 1.18,
+      "media_prevista_empatadas": 0.478,
+      "diferenca_pp": 0.38,
+      "decis_maior_desvio_pp": 1.78,
       "decis_desvio_medio_pp": 0.73,
       "decis": [
         {
-          "prevista": 0.0132,
-          "observada": 0.0068,
-          "n": 2785
+          "prevista": 0.0225,
+          "observada": 0.0155,
+          "n": 2512
         },
         {
-          "prevista": 0.0462,
-          "observada": 0.039,
-          "n": 2768
+          "prevista": 0.0655,
+          "observada": 0.0601,
+          "n": 2512
         },
         {
-          "prevista": 0.1133,
-          "observada": 0.1095,
-          "n": 2777
+          "prevista": 0.1383,
+          "observada": 0.1302,
+          "n": 2511
         },
         {
-          "prevista": 0.2214,
-          "observada": 0.2195,
-          "n": 2775
+          "prevista": 0.2446,
+          "observada": 0.2484,
+          "n": 2504
         },
         {
-          "prevista": 0.3668,
-          "observada": 0.3559,
-          "n": 2776
+          "prevista": 0.3797,
+          "observada": 0.3672,
+          "n": 2511
         },
         {
-          "prevista": 0.5213,
-          "observada": 0.5147,
-          "n": 2780
+          "prevista": 0.517,
+          "observada": 0.5163,
+          "n": 2510
         },
         {
-          "prevista": 0.6855,
-          "observada": 0.6973,
-          "n": 2772
+          "prevista": 0.6682,
+          "observada": 0.6734,
+          "n": 2508
         },
         {
-          "prevista": 0.8184,
-          "observada": 0.8293,
-          "n": 2776
+          "prevista": 0.7937,
+          "observada": 0.8116,
+          "n": 2510
         },
         {
-          "prevista": 0.9174,
-          "observada": 0.924,
-          "n": 2776
+          "prevista": 0.891,
+          "observada": 0.8884,
+          "n": 2510
         },
         {
-          "prevista": 0.979,
-          "observada": 0.9863,
-          "n": 2776
+          "prevista": 0.962,
+          "observada": 0.9721,
+          "n": 2510
         }
       ],
-      "estado_zerado_modelo_completo": 0.4979
+      "estado_zerado_modelo_completo": 0.4848
     }
   },
   "variantes": {
     "15": {
       "producao": {
-        "partidas": 40816,
-        "auc": 0.849,
-        "brier": 0.158,
+        "partidas": 40778,
+        "auc": 0.8487,
+        "brier": 0.1582,
         "empatadas": 4126,
         "taxa_observada": 0.4784,
         "ic95_observada": [
           0.4632,
           0.4937
         ],
-        "media_prevista_empatadas": 0.4766,
-        "diferenca_pp": -0.18,
-        "decis_maior_desvio_pp": 1.25,
-        "decis_desvio_medio_pp": 0.5,
-        "estado_zerado_modelo_completo": 0.5036
+        "media_prevista_empatadas": 0.4765,
+        "diferenca_pp": -0.19,
+        "decis_maior_desvio_pp": 1.19,
+        "decis_desvio_medio_pp": 0.57,
+        "estado_zerado_modelo_completo": 0.5018
       },
       "sigmoide": {
-        "partidas": 40816,
-        "auc": 0.8491,
-        "brier": 0.1591,
+        "partidas": 40778,
+        "auc": 0.8488,
+        "brier": 0.1592,
         "empatadas": 4126,
         "taxa_observada": 0.4784,
         "ic95_observada": [
           0.4632,
           0.4937
         ],
-        "media_prevista_empatadas": 0.47,
-        "diferenca_pp": -0.84,
-        "decis_maior_desvio_pp": 4.66,
-        "decis_desvio_medio_pp": 2.8
+        "media_prevista_empatadas": 0.4702,
+        "diferenca_pp": -0.82,
+        "decis_maior_desvio_pp": 4.59,
+        "decis_desvio_medio_pp": 2.95
       },
       "isotonica": {
-        "partidas": 40816,
-        "auc": 0.8488,
-        "brier": 0.1581,
+        "partidas": 40778,
+        "auc": 0.8485,
+        "brier": 0.1582,
         "empatadas": 4126,
         "taxa_observada": 0.4784,
         "ic95_observada": [
           0.4632,
           0.4937
         ],
-        "media_prevista_empatadas": 0.4774,
-        "diferenca_pp": -0.11,
-        "decis_maior_desvio_pp": 0.61,
-        "decis_desvio_medio_pp": 0.32
+        "media_prevista_empatadas": 0.4783,
+        "diferenca_pp": -0.02,
+        "decis_maior_desvio_pp": 0.66,
+        "decis_desvio_medio_pp": 0.36
       }
     },
     "25": {
       "producao": {
-        "partidas": 27761,
-        "auc": 0.9092,
-        "brier": 0.1217,
-        "empatadas": 1478,
-        "taxa_observada": 0.4743,
+        "partidas": 25098,
+        "auc": 0.8899,
+        "brier": 0.1343,
+        "empatadas": 1474,
+        "taxa_observada": 0.4742,
         "ic95_observada": [
-          0.4489,
-          0.4998
+          0.4488,
+          0.4997
         ],
-        "media_prevista_empatadas": 0.4784,
-        "diferenca_pp": 0.41,
-        "decis_maior_desvio_pp": 1.18,
+        "media_prevista_empatadas": 0.478,
+        "diferenca_pp": 0.38,
+        "decis_maior_desvio_pp": 1.78,
         "decis_desvio_medio_pp": 0.73,
-        "estado_zerado_modelo_completo": 0.4979
+        "estado_zerado_modelo_completo": 0.4848
       },
       "sigmoide": {
-        "partidas": 27761,
-        "auc": 0.9092,
-        "brier": 0.1231,
-        "empatadas": 1478,
-        "taxa_observada": 0.4743,
+        "partidas": 25098,
+        "auc": 0.8899,
+        "brier": 0.1355,
+        "empatadas": 1474,
+        "taxa_observada": 0.4742,
         "ic95_observada": [
-          0.4489,
-          0.4998
+          0.4488,
+          0.4997
         ],
-        "media_prevista_empatadas": 0.4685,
-        "diferenca_pp": -0.58,
-        "decis_maior_desvio_pp": 5.83,
-        "decis_desvio_medio_pp": 3.31
+        "media_prevista_empatadas": 0.4695,
+        "diferenca_pp": -0.48,
+        "decis_maior_desvio_pp": 5.69,
+        "decis_desvio_medio_pp": 3.04
       },
       "isotonica": {
-        "partidas": 27761,
-        "auc": 0.9089,
-        "brier": 0.1218,
-        "empatadas": 1478,
-        "taxa_observada": 0.4743,
+        "partidas": 25098,
+        "auc": 0.8896,
+        "brier": 0.1343,
+        "empatadas": 1474,
+        "taxa_observada": 0.4742,
         "ic95_observada": [
-          0.4489,
-          0.4998
+          0.4488,
+          0.4997
         ],
-        "media_prevista_empatadas": 0.4728,
-        "diferenca_pp": -0.15,
-        "decis_maior_desvio_pp": 0.64,
-        "decis_desvio_medio_pp": 0.31
+        "media_prevista_empatadas": 0.4746,
+        "diferenca_pp": 0.04,
+        "decis_maior_desvio_pp": 0.74,
+        "decis_desvio_medio_pp": 0.37
       }
     }
   }

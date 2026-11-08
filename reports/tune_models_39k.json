@@ -1,6 +1,6 @@
 {
   "XGBoost": {
-    "linhas": 40816,
+    "linhas": 40778,
     "cv": "StratifiedKFold(5, shuffle=True, random_state=42)",
     "scoring": "roc_auc",
     "grade": {
@@ -26,27 +26,27 @@
       "max_depth": 3
     },
     "melhor_combinacao": {
-      "learning_rate": 0.05,
+      "learning_rate": 0.01,
       "max_depth": 3,
-      "n_estimators": 200
+      "n_estimators": 500
     },
-    "auc_melhor": 0.8491,
-    "auc_producao": 0.849,
+    "auc_melhor": 0.8488,
+    "auc_producao": 0.8487,
     "delta_auc": 0.0001,
-    "posicao_producao_na_grade": 3,
+    "posicao_producao_na_grade": 1,
     "mesma_profundidade": true,
-    "acuracia_producao": 0.7636,
-    "tempo_segundos": 51.4
+    "acuracia_producao": 0.7641,
+    "tempo_segundos": 16.7
   },
   "RandomForest": {
     "melhor_combinacao": {
       "max_depth": 6,
-      "min_samples_leaf": 2,
-      "n_estimators": 300
+      "min_samples_leaf": 5,
+      "n_estimators": 200
     },
-    "auc_melhor": 0.8485,
-    "acuracia_quadro3": 0.7625,
-    "auc_quadro3": 0.8484
+    "auc_melhor": 0.8481,
+    "acuracia_quadro3": 0.7628,
+    "auc_quadro3": 0.848
   },
   "MLP": {
     "melhor_combinacao": {
@@ -55,8 +55,8 @@
         32
       ]
     },
-    "auc_melhor": 0.8495,
-    "acuracia_quadro3": 0.7645,
-    "auc_quadro3": 0.8494
+    "auc_melhor": 0.8492,
+    "acuracia_quadro3": 0.7638,
+    "auc_quadro3": 0.8491
   }
 }

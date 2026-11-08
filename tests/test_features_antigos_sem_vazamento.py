@@ -29,7 +29,10 @@ def main() -> int:
             if cheio is None:
                 continue
             cortado = copy.deepcopy(payload)
-            cortado["info"]["frames"] = cortado["info"]["frames"][: cutoff + 1]
+            # depois do corte fica só um quadro VAZIO: marca que o jogo seguiu
+            # (corte_disponivel exige um quadro posterior, 2026-11-08) sem
+            # carregar nenhum dado do futuro
+            cortado["info"]["frames"] = cortado["info"]["frames"][: cutoff + 1] + [{}]
             igual = antigos_features(cortado, cutoff, item_gold)
             testadas += 1
             if cheio != igual:

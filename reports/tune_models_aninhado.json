@@ -1,13 +1,13 @@
 {
   "medido_em": "2026-11-08",
-  "partidas": 40816,
+  "partidas": 40778,
   "corte_min": 15,
   "externo": "StratifiedKFold(5, shuffle=True, random_state=42)",
   "interno": "StratifiedKFold(3, shuffle=True, random_state=1)",
   "modelos": {
     "XGBoost": {
-      "acuracia": 0.7636,
-      "auc": 0.8491,
+      "acuracia": 0.7637,
+      "auc": 0.8485,
       "escolhas_por_dobra": [
         {
           "learning_rate": 0.01,
@@ -16,12 +16,7 @@
         },
         {
           "learning_rate": 0.01,
-          "max_depth": 3,
-          "n_estimators": 500
-        },
-        {
-          "learning_rate": 0.01,
-          "max_depth": 3,
+          "max_depth": 4,
           "n_estimators": 500
         },
         {
@@ -33,57 +28,62 @@
           "learning_rate": 0.05,
           "max_depth": 3,
           "n_estimators": 200
+        },
+        {
+          "learning_rate": 0.01,
+          "max_depth": 3,
+          "n_estimators": 500
         }
       ],
       "referencia_nao_aninhada": {
-        "acuracia": 0.7636,
-        "auc": 0.849,
+        "acuracia": 0.7641,
+        "auc": 0.8487,
         "origem": "produção 500/0,01/3 (tune_models_39k.json)"
       },
-      "dif_auc": 0.0001,
-      "tempo_segundos": 49.4
+      "dif_auc": -0.0002,
+      "tempo_segundos": 95.4
     },
     "RandomForest": {
-      "acuracia": 0.7626,
-      "auc": 0.8483,
+      "acuracia": 0.7625,
+      "auc": 0.848,
       "escolhas_por_dobra": [
         {
           "max_depth": 6,
-          "min_samples_leaf": 2,
+          "min_samples_leaf": 1,
           "n_estimators": 500
         },
         {
           "max_depth": 6,
-          "min_samples_leaf": 5,
-          "n_estimators": 500
+          "min_samples_leaf": 1,
+          "n_estimators": 200
         },
         {
           "max_depth": 6,
-          "min_samples_leaf": 5,
-          "n_estimators": 300
-        },
-        {
-          "max_depth": 6,
-          "min_samples_leaf": 2,
+          "min_samples_leaf": 1,
           "n_estimators": 200
         },
         {
           "max_depth": 6,
           "min_samples_leaf": 5,
           "n_estimators": 500
+        },
+        {
+          "max_depth": 6,
+          "min_samples_leaf": 5,
+          "n_estimators": 200
         }
       ],
       "referencia_nao_aninhada": {
-        "acuracia": 0.7625,
-        "auc": 0.8484,
+        "acuracia": 0.7628,
+        "auc": 0.848,
         "origem": "grade nas 40.816, avaliada nas mesmas dobras (tune_models_39k.json)"
       },
-      "dif_auc": -0.0001,
-      "tempo_segundos": 346.4
+      "dif_auc": -0.0,
+      "tempo_segundos": 787.5
     },
     "MLP": {
-      "acuracia": 0.7645,
-      "auc": 0.8494,
+      "acuracia": 0.7635,
+      "auc": 0.8491,
       "escolhas_por_dobra": [
         {
           "mlpclassifier__alpha": 0.01,
@@ -110,19 +110,19 @@
           ]
         },
         {
-          "mlpclassifier__alpha": 0.0001,
+          "mlpclassifier__alpha": 0.01,
           "mlpclassifier__hidden_layer_sizes": [
             32
           ]
         }
       ],
       "referencia_nao_aninhada": {
-        "acuracia": 0.7645,
-        "auc": 0.8494,
+        "acuracia": 0.7638,
+        "auc": 0.8491,
         "origem": "grade nas 40.816, avaliada nas mesmas dobras (tune_models_39k.json)"
       },
-      "dif_auc": 0.0,
-      "tempo_segundos": 759.2
+      "dif_auc": -0.0,
+      "tempo_segundos": 1847.6
     }
   }
 }

@@ -2,22 +2,22 @@
   "medido_em": "2026-11-08",
   "metodo": "bootstrap por partida, 2000 reamostragens, semente 42; IC por percentis; p bilateral pela reamostra centrada; Holm para 6 pares",
   "limite_ouro": 500,
-  "partidas_empatadas_distintas": 12621,
-  "linhas_partida_corte": 15746,
+  "partidas_empatadas_distintas": 12615,
+  "linhas_partida_corte": 15739,
   "partidas_por_numero_de_cortes": {
-    "1": 9854,
-    "2": 2431,
+    "1": 9849,
+    "2": 2430,
     "3": 314,
     "4": 22
   },
   "taxas": {
     "10": {
-      "vitorias_azul": 3551,
-      "partidas": 7641,
-      "taxa": 0.4647,
+      "vitorias_azul": 3549,
+      "partidas": 7639,
+      "taxa": 0.4646,
       "ic95_wilson": [
-        0.4536,
-        0.4759
+        0.4534,
+        0.4758
       ]
     },
     "15": {
@@ -31,45 +31,45 @@
     },
     "20": {
       "vitorias_azul": 1172,
-      "partidas": 2501,
-      "taxa": 0.4686,
+      "partidas": 2500,
+      "taxa": 0.4688,
       "ic95_wilson": [
-        0.4491,
-        0.4882
+        0.4493,
+        0.4884
       ]
     },
     "25": {
-      "vitorias_azul": 701,
-      "partidas": 1478,
-      "taxa": 0.4743,
+      "vitorias_azul": 699,
+      "partidas": 1474,
+      "taxa": 0.4742,
       "ic95_wilson": [
-        0.4489,
-        0.4998
+        0.4488,
+        0.4997
       ]
     }
   },
   "pares": [
     {
       "par": "10x15",
-      "diferenca_pp": -1.37,
+      "diferenca_pp": -1.38,
       "ic95_pp": [
-        -3.07,
-        0.28
+        -3.06,
+        0.21
       ],
-      "p": 0.107,
+      "p": 0.108,
       "em_comum": 1399,
       "pct_do_menor": 33.9,
-      "p_holm": 0.642
+      "p_holm": 0.651
     },
     {
       "par": "10x20",
-      "diferenca_pp": -0.39,
+      "diferenca_pp": -0.42,
       "ic95_pp": [
-        -2.51,
-        1.67
+        -2.43,
+        1.64
       ],
-      "p": 0.701,
-      "em_comum": 716,
+      "p": 0.682,
+      "em_comum": 715,
       "pct_do_menor": 28.6,
       "p_holm": 1.0
     },
@@ -77,50 +77,50 @@
       "par": "10x25",
       "diferenca_pp": -0.96,
       "ic95_pp": [
-        -3.65,
-        1.71
+        -3.58,
+        1.73
       ],
-      "p": 0.471,
+      "p": 0.486,
       "em_comum": 374,
-      "pct_do_menor": 25.3,
+      "pct_do_menor": 25.4,
       "p_holm": 1.0
     },
     {
       "par": "15x20",
-      "diferenca_pp": 0.98,
+      "diferenca_pp": 0.96,
       "ic95_pp": [
-        -1.21,
-        3.29
+        -1.26,
+        3.17
       ],
-      "p": 0.396,
+      "p": 0.388,
       "em_comum": 544,
       "pct_do_menor": 21.8,
       "p_holm": 1.0
     },
     {
       "par": "15x25",
-      "diferenca_pp": 0.41,
+      "diferenca_pp": 0.42,
       "ic95_pp": [
-        -2.55,
-        3.26
+        -2.32,
+        3.45
       ],
-      "p": 0.79,
+      "p": 0.77,
       "em_comum": 249,
-      "pct_do_menor": 16.8,
+      "pct_do_menor": 16.9,
       "p_holm": 1.0
     },
     {
       "par": "20x25",
-      "diferenca_pp": -0.57,
+      "diferenca_pp": -0.54,
       "ic95_pp": [
-        -3.67,
-        2.38
+        -3.6,
+        2.55
       ],
-      "p": 0.736,
+      "p": 0.738,
       "em_comum": 223,
       "pct_do_menor": 15.1,
       "p_holm": 1.0
     }
   ],
-  "menor_p_holm": 0.642
+  "menor_p_holm": 0.651
 }

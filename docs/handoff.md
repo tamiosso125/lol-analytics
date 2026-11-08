@@ -142,12 +142,18 @@ confirma que a limitação de taxa-base registrada na Seção 6.1 e no Apêndice
 
 | Modelo (15 min) | Acurácia | AUC-ROC | AUC-ROC com seleção aninhada |
 |---|---|---|---|
-| Regressão logística | 0,7649 | 0,8498 | — |
-| MLP ajustado | 0,7645 | 0,8494 | 0,8494 |
-| XGBoost (produção) | 0,7636 | 0,8490 | 0,8491 |
-| RandomForest ajustada | 0,7625 | 0,8484 | 0,8483 |
-| MLP referência | 0,7598 | 0,8454 | — |
-| RandomForest referência | 0,7475 | 0,8287 | — |
+| Regressão logística | 0,7648 | 0,8495 | — |
+| MLP ajustado | 0,7638 | 0,8491 | 0,8491 |
+| XGBoost (produção) | 0,7641 | 0,8487 | 0,8485 |
+| RandomForest ajustada | 0,7628 | 0,8480 | 0,8480 |
+| MLP referência | 0,7619 | 0,8459 | — |
+| RandomForest referência | 0,7439 | 0,8278 | — |
+
+**2026-11-08 (noite): números acima já sem o vazamento do quadro final** (ver
+diário). Partidas por corte: 40.919 / 40.778 / 34.505 / 25.098. AUC-ROC do
+XGBoost por corte: 0,7752 / 0,8487 / 0,8690 / 0,8899 (antes 0,8772 e 0,9092
+aos 20 e 25). Torres aos 25 min ~6× o valor dos 15 (não mais 11×). Toda
+variável de corte passa por `corte_disponivel`.
 
 Desde o parecer de 2026-11-08 o Quadro 3 do TCC mostra a comparação APÓS o
 ajuste e a logística; o XGBoost é mantido pela proximidade e pela integração

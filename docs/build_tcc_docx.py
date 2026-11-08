@@ -121,8 +121,8 @@ FIGURAS = [
     ("02_dashboard.png", "Dashboard: indicadores principais, viés de lado por região e cobertura da base"),
     ("03_campeoes.png", "Campeões"),
     ("04_partida_detalhe.png", "Partidas: análise de uma partida individual"),
-    ("05_competitivo.png", "Competitivo: solo queue × profissional"),
-    ("06_simulador.png", "Simulador: aba Estado, com probabilidade e contribuições SHAP"),
+    ("05_competitivo.png", "Competitivo: *solo queue* × profissional"),
+    ("06_simulador.png", "Simulador: aba Estado, com probabilidade e contribuições SHAP em log-odds"),
 ]
 FONTE_IMAGENS = (
     "Fonte: Elaborado pelo autor (2026). Capturas de tela geradas via Playwright "

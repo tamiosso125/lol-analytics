@@ -21,6 +21,7 @@ produção.
 
 Uso:  python -m src.models.experiment_vision
 """
+from src.features.build_features import corte_disponivel  # noqa: E402
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold, cross_validate
 from xgboost import XGBClassifier
@@ -50,7 +51,7 @@ def vision_diffs_by_cutoff(payload: dict) -> dict[int, dict[str, int]]:
 
     out = {}
     for cutoff in CUTOFFS:
-        if len(frames) <= cutoff:
+        if not corte_disponivel(frames, cutoff):  # 2026-11-08: quadro final
             continue
         cutoff_ms = cutoff * 60_000
         p = {100: 0, 200: 0}

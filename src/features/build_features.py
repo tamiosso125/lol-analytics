@@ -29,10 +29,26 @@ CUTOFF_MIN = 15  # corte padrão (fim da fase de rotas)
 CUTOFFS = [10, 15, 20, 25]
 
 
+def corte_disponivel(frames: list, cutoff_min: int) -> bool:
+    """True se a partida ainda estava em andamento no minuto do corte.
+
+    A timeline da Riot tem um quadro por minuto e, no fim, um quadro EXTRA no
+    instante em que o jogo acaba. Checar só `len(frames) > cutoff` deixava
+    passar a partida que terminou antes do corte: numa partida de 24:16,
+    `frames[25]` é esse quadro final, e o "estado aos 25 minutos" era o estado
+    do fim do jogo, com o vencedor decidido (AUC-ROC de 1,0 nessas linhas).
+    Achado na revisão de 2026-11-08: 22, 37, 1.120 e 2.642 partidas aos 10,
+    15, 20 e 25 minutos. Exigir um quadro DEPOIS do quadro do corte garante
+    que o quadro do corte é um quadro de minuto, com o jogo em andamento.
+    """
+    return len(frames) > cutoff_min + 1
+
+
+
 def features_from_timeline(payload: dict, cutoff_min: int = CUTOFF_MIN) -> dict | None:
     frames = payload.get("info", {}).get("frames", [])
-    if len(frames) <= cutoff_min:
-        return None  # partida acabou antes do corte
+    if not corte_disponivel(frames, cutoff_min):
+        return None  # partida acabou antes do corte (ver corte_disponivel)
     frame = frames[cutoff_min]
 
     gold = {100: 0, 200: 0}

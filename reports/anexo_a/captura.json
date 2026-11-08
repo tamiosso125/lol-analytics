@@ -1,5 +1,5 @@
 {
-  "capturado_em": "2026-11-06T00:41:55",
+  "capturado_em": "2026-11-08T17:43:34",
   "base_partidas_fila_420": 41063,
   "telas": [
     {
@@ -27,8 +27,5 @@
       "rota": "/simulador"
     }
   ],
-  "match_id_usado": "NA1_5653867149",
-  "recapturadas_em_2026-11-08": [
-    "06_simulador.png"
-  ]
+  "match_id_usado": "NA1_5653867149"
 }

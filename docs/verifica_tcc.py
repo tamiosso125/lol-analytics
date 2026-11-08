@@ -1404,7 +1404,17 @@ def check_holdout_temporal(t: str) -> None:
     if v(dmax) not in resto:
         falha(f"holdout: a diferenca maxima para a logistica e {v(dmax)} e o texto nao a cita")
     if pior < -0.002:
-        falha(f"holdout: a pior diferenca ({v(pior)}) contradiz 'nao infla o resultado'")
+        # 2026-11-08 (correção do vazamento): a cronológica aos 10 min ficou 0,0026 abaixo da
+        # aleatória. Aceito só se os intervalos se sobrepõem E o texto declara a exceção;
+        # senão "não infla o resultado" seria afirmação acima do que o dado sustenta.
+        caso = min(((c, d) for c in j["cortes"] for d in ("cronologica", "por_patch")),
+                   key=lambda cd: j["cortes"][cd[0]][cd[1]]["XGBoost"]["auc"]
+                   - j["cortes"][cd[0]]["aleatoria"]["XGBoost"]["auc"])
+        ic_t = j["cortes"][caso[0]][caso[1]]["XGBoost"]["auc_ic95"]
+        ic_a = j["cortes"][caso[0]]["aleatoria"]["XGBoost"]["auc_ic95"]
+        sobrepoe = ic_t[1] >= ic_a[0] and ic_a[1] >= ic_t[0]
+        if not (sobrepoe and "fica abaixo da aleatória" in resto):
+            falha(f"holdout: a pior diferenca ({v(pior)}) contradiz 'nao infla o resultado'")
     if not any(f.startswith("holdout") for f in FALHAS):
         print(f"  holdout: 12 linhas conferem; pior diferenca {v(pior)}, logistica ate {v(dmax)}")
 

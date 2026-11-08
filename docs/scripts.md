@@ -1263,3 +1263,12 @@ grava só acurácia e AUC-ROC. Avisa se não reproduzir os valores publicados
 (reproduziu: 0,7649/0,8498, 0,7625/0,8484, 0,7645/0,8494). Grava
 `reports/metricas_ajustados.json`; a checagem 14 do `verifica_tcc.py` confere
 as linhas do Quadro 3 contra ele.
+
+### `tests/test_corte_sem_quadro_final.py` e `corte_disponivel` (2026-11-08)
+
+`src/features/build_features.corte_disponivel(frames, corte)` exige que exista
+um quadro depois do quadro do corte. Sem isso, a partida que terminou antes do
+corte entrava com o quadro final da linha do tempo (o estado do fim do jogo)
+como se fosse o estado no corte. O teste confere um caso sintético e 400
+partidas reais mais curtas que o corte. Uso:
+`.venv\Scripts\python.exe tests	est_corte_sem_quadro_final.py` (precisa do banco).

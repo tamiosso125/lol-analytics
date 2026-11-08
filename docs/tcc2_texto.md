@@ -44,8 +44,8 @@ Programming Interface*) da Riot Games, e 99.259 jogos profissionais
 (Oracle's Elixir). XGBoost, *Random Forest* e uma rede neural perceptron
 multicamadas (MLP) foram comparados por validação cruzada para predizer o
 vencedor em cortes de 10 a 25 minutos. Após o ajuste, aos 15 minutos, a
-área sob a curva ROC (AUC-ROC) ficou entre 0,8484 e 0,8494, e uma
-regressão logística chegou a 0,8498; o XGBoost (0,8490) foi mantido pela
+área sob a curva ROC (AUC-ROC) ficou entre 0,8480 e 0,8491, e uma
+regressão logística chegou a 0,8495; o XGBoost (0,8487) foi mantido pela
 proximidade dos resultados e pela integração com as explicações SHAP. A
 análise exploratória identificou viés favorável ao lado vermelho no *solo
 queue* (56,3% de vitórias na região com maior amostra); entre
@@ -179,7 +179,7 @@ amostras de porte médio, de cerca de 10 mil exemplos, com indício de que a
 diferença diminui em amostras maiores (Grinsztajn; Oyallon; Varoquaux,
 2022).
 
-A terceira são as redes neurais *feedforward*, ou perceptrons multicamada
+A terceira são as redes neurais *feedforward*, ou perceptrons multicamadas
 (MLP). Com capacidade de aproximação universal (Hornik; Stinchcombe; White, 1989), elas capturam interações sem que precisem ser
 especificadas, mas exigem mais dados e mais cuidado com escala e
 regularização, restrição relevante em uma amostra de dezenas de milhares de
@@ -433,16 +433,18 @@ mediu acurácia, precisão, *recall*, F1 e AUC-ROC. Depois de um modelo de
 referência, os hiperparâmetros foram ajustados por *GridSearchCV*, do
 scikit-learn (Pedregosa et al., 2011), otimizando a AUC-ROC. No XGBoost, a
 busca foi feita na primeira base ampla, de 10.295 partidas, que estão
-contidas nas 40.816 da avaliação final e aparecem nas suas dobras; repetida
-na base final, manteve a configuração. Na *Random Forest* e no MLP, a busca
-rodou nas 40.816 partidas e foi avaliada nas mesmas dobras. Para medir o
+contidas nas 40.778 da avaliação final e aparecem nas suas dobras; repetida
+na base final, a busca escolheu a mesma configuração. Na *Random Forest* e no MLP, a busca
+rodou nas 40.778 partidas e foi avaliada nas mesmas dobras. Para medir o
 otimismo dessa seleção, as três buscas foram repetidas de forma aninhada,
 com a escolha feita só no treino de cada dobra (Apêndice C). O modelo de
 produção recebeu curva de calibração, sobre as probabilidades fora da
 dobra, e explicações SHAP, globais e por predição. Dez experimentos de
 enriquecimento testaram se outros sinais da linha do tempo melhoravam a
 previsão; um décimo primeiro, com um *endpoint* de progressão do jogador,
-fica à parte (Apêndice K). Uma regressão logística serviu de *baseline* simples. Outros oito conjuntos de variáveis foram testados depois (Apêndice K), e a estabilidade no tempo foi verificada treinando nas partidas mais antigas e testando nas mais recentes (Apêndice C).
+fica à parte (Apêndice K). Em cada corte entram só as partidas ainda em
+andamento naquele minuto: a linha do tempo termina com um quadro no instante
+em que o jogo acaba, e esse quadro nunca é usado como estado do corte. Uma regressão logística serviu de *baseline* simples. Outros oito conjuntos de variáveis foram testados depois (Apêndice K), e a estabilidade no tempo foi verificada treinando nas partidas mais antigas e testando nas mais recentes (Apêndice C).
 
 ### 4.7 PROPOSTA DE VISUALIZAÇÃO E INTERFACE EM LINGUAGEM NATURAL
 
@@ -468,7 +470,7 @@ partida. O modelo preditivo não vê itens, posição nem o estado das ondas de 
 
 ### 4.8 MATERIAIS E MÉTODOS UTILIZADOS
 
-Foram utilizados Python (coleta, ETL (extração, transformação e carga) e modelagem, com pandas, NumPy,
+Foram utilizados Python (coleta, extração, transformação e carga, ou ETL, e modelagem, com pandas, NumPy,
 scikit-learn, XGBoost e SHAP), PostgreSQL, FastAPI e React com
 TypeScript e Recharts. A interface em linguagem natural e o módulo de
 orientação estratégica (*coach*) usam a API da Anthropic (modelo Claude).
@@ -485,7 +487,7 @@ os objetivos específicos definidos na introdução (Apêndice I).
 
 ### 5.1 Mapeamento de dados e recursos da Riot Games API (objetivo a)
 
-Foram mapeados e utilizados os endpoints *league-v4*, *account-v1* e *match-v5* (partida e linha do tempo) da Riot Games API (Riot Games, [s.d.]), além da documentação
+Foram mapeados e utilizados os *endpoints* *league-v4*, *account-v1* e *match-v5* (partida e linha do tempo) da Riot Games API (Riot Games, [s.d.]), além da documentação
 técnica necessária para compreender limitações de taxa de requisição e
 o ciclo de expiração da chave de desenvolvedor (24 horas). Esse
 mapeamento orientou o desenho de um coletor resumível, capaz de operar
@@ -494,7 +496,7 @@ duplicar dados já salvos.
 
 ### 5.2 Estruturação da base de dados (objetivos b e c)
 
-A base de modelagem reúne **40.816 partidas** de *solo queue* no corte de 15 minutos, das **41.063** que o banco tem; as demais acabaram antes desse minuto ou não têm linha do tempo, e o número varia por corte (Quadro 4). O banco guarda o JSON (*JavaScript Object Notation*) bruto de partida e linha do tempo para reprocessamento e **99.259 jogos profissionais** (2014-2026, Oracle's Elixir). O Quadro 1 resume as tabelas do banco. Os campos e as chaves de cada uma estão no Apêndice A.
+A base de modelagem reúne **40.778 partidas** de *solo queue* no corte de 15 minutos, das **41.063** que o banco tem; as demais acabaram antes desse minuto ou não têm linha do tempo, e o número varia por corte (Quadro 4). O banco guarda o JSON (*JavaScript Object Notation*) bruto de partida e linha do tempo para reprocessamento e **99.259 jogos profissionais** (2014-2026, Oracle's Elixir). O Quadro 1 resume as tabelas do banco. Os campos e as chaves de cada uma estão no Apêndice A.
 
 Quadro — Tabelas do banco de dados e o que cada uma guarda
 
@@ -538,18 +540,18 @@ de 95% exclui 50%; na KR, com 50,4% e intervalo [49,5%, 51,4%], o
 intervalo inclui 50%, e o viés não é distinguível de zero. A BR1 sustenta
 a assimetria com folga ([55,4%, 57,2%]). O padrão não se limita ao Brasil, mas as quatro regiões não o demonstram com a mesma força.
 
-**Taxas próximas nos quatro cortes.** Com amostras menores, parecia haver um pico no meio do jogo, e a base ampliada não confirma essa forma. Entre as partidas com diferença absoluta de ouro inferior a 500 em cada corte, o azul venceu 46,5% aos 10 minutos (n = 7.641),
-47,8% aos 15 (n = 4.126), 46,9% aos 20 (n = 2.501) e 47,4% aos 25
-(n = 1.478). Os grupos não são independentes: a mesma partida pode estar
-nessa faixa em mais de um corte (2.767 das 12.621 partidas estão em dois ou
+**Taxas próximas nos quatro cortes.** Com amostras menores, parecia haver um pico no meio do jogo, e a base ampliada não confirma essa forma. Entre as partidas com diferença absoluta de ouro inferior a 500 em cada corte, o azul venceu 46,5% aos 10 minutos (n = 7.639),
+47,8% aos 15 (n = 4.126), 46,9% aos 20 (n = 2.500) e 47,4% aos 25
+(n = 1.474). Os grupos não são independentes: a mesma partida pode estar
+nessa faixa em mais de um corte (2.766 das 12.615 partidas estão em dois ou
 mais), e a composição muda a cada corte. Por isso a comparação usou a
 partida como unidade: as partidas foram reamostradas com reposição
 (*bootstrap*, 2.000 reamostragens), recalculando a taxa de cada corte em
 cada reamostra, o que preserva a sobreposição. Nenhuma das seis diferenças
 entre pares foi detectada após a correção de Holm (menor valor-p corrigido
-de 0,64; a maior diferença, de 1,4 ponto entre 10 e 15 minutos, tem
-intervalo de −3,1 a +0,3), e o intervalo de Wilson do corte de 10 minutos,
-o de maior amostra, [45,4%, 47,6%], exclui 50%. O resultado se limita a
+de 0,65; a maior diferença, de 1,4 ponto entre 10 e 15 minutos, tem
+intervalo de −3,1 a +0,2), e o intervalo de Wilson do corte de 10 minutos,
+o de maior amostra, [45,3%, 47,6%], exclui 50%. O resultado se limita a
 isso: taxas próximas e nenhuma diferença detectada entre os cortes, o que
 não demonstra que o viés seja igual em toda a partida.
 A lição vale para o trabalho todo: em corpus de esports, um ponto
@@ -568,7 +570,7 @@ pares com correção de Holm, é o que impede ler a dispersão entre cortes como
 
 **Comparação com o cenário profissional.** Nos dados competitivos
 (Oracle's Elixir, 99.259 jogos), o time azul venceu 53,2% das partidas,
-com série anual estável desde 2016 (entre 52,5% e 55,0%). O viés vai na direção oposta à do *solo queue* de
+com série anual estável desde 2015 (entre 52,5% e 55,0%). O viés vai na direção oposta à do *solo queue* de
 elo alto: a mesma métrica, em dois contextos institucionalmente
 diferentes, produz sinais opostos. Uma hipótese, não testada aqui, é que
 no *solo queue*, sem coordenação de *draft*, pese mais o *counter-pick*
@@ -582,9 +584,9 @@ própria em Guan e Tung (2026), mas isso não comprova a hipótese.
 
 **Conversão de vantagem.** Com vantagem de ouro entre +2.000 e +4.000 aos
 15 minutos, o azul venceu 81,5% das partidas no profissional (n = 3.294)
-contra 74,1% no *solo queue* (n = 5.368); entre +4.000 e +6.000, 91,7%
-(n = 72) contra 86,3% (n = 3.501). A diferença observada entre os dois
-recortes na faixa com amostra suficiente, de 7,4 pontos percentuais, é
+contra 74,1% no *solo queue* (n = 5.366); entre +4.000 e +6.000, 91,7%
+(n = 72) contra 86,3% (n = 3.497). A diferença observada entre os dois
+recortes na faixa com amostra suficiente, de 7,5 pontos percentuais, é
 pequena em termos absolutos, mas significativa (teste z de duas proporções,
 com grupos independentes; z = 8,0, p < 0,001). Atribuí-la à coordenação
 das equipes exigiria evidência que este trabalho não tem: os recortes
@@ -600,7 +602,7 @@ Figura — Tela Competitivo: viés de lado e conversão de vantagem de ouro, *so
 
 O Quadro 3 compara os modelos no corte de 15 minutos (validação
 cruzada estratificada de 5 dobras, semente 42), no conjunto final de
-40.816 partidas, em que o azul vence 46,7%. As quatro primeiras linhas são
+40.778 partidas, em que o azul vence 46,7%. As quatro primeiras linhas são
 a comparação após o ajuste de hiperparâmetros, com a regressão logística
 como *baseline* simples; as duas últimas, a *Random Forest* e o MLP na
 configuração de referência, sem busca em grade.
@@ -609,16 +611,16 @@ Quadro — Comparação entre modelos após o ajuste (corte de 15 minutos)
 
 | Modelo | Acurácia | Precisão | *Recall* | F1 | AUC-ROC | AUC-ROC com seleção aninhada |
 |---|---:|---:|---:|---:|---:|---:|
-| Regressão logística (sem hiperparâmetro ajustado) | 0,7649 | 0,7566 | 0,7322 | 0,7442 | 0,8498 | — |
-| MLP ajustado | 0,7645 | 0,7544 | 0,7351 | 0,7446 | 0,8494 | 0,8494 |
-| XGBoost ajustado (produção) | 0,7636 | 0,7577 | 0,7259 | 0,7415 | 0,8490 | 0,8491 |
-| *Random Forest* ajustada | 0,7625 | 0,7512 | 0,7349 | 0,7429 | 0,8484 | 0,8483 |
-| MLP (referência) | 0,7598 | 0,7483 | 0,7319 | 0,7400 | 0,8454 | — |
-| *Random Forest* (referência) | 0,7475 | 0,7350 | 0,7183 | 0,7265 | 0,8287 | — |
+| Regressão logística (sem hiperparâmetro ajustado) | 0,7648 | 0,7568 | 0,7317 | 0,7440 | 0,8495 | — |
+| MLP ajustado | 0,7638 | 0,7562 | 0,7296 | 0,7427 | 0,8491 | 0,8491 |
+| XGBoost ajustado (produção) | 0,7641 | 0,7576 | 0,7278 | 0,7424 | 0,8487 | 0,8485 |
+| *Random Forest* ajustada | 0,7628 | 0,7513 | 0,7356 | 0,7434 | 0,8480 | 0,8480 |
+| MLP (referência) | 0,7619 | 0,7488 | 0,7378 | 0,7433 | 0,8459 | — |
+| *Random Forest* (referência) | 0,7439 | 0,7312 | 0,7144 | 0,7227 | 0,8278 | — |
 
-Após o ajuste, os quatro modelos ficam a 0,0014 de AUC-ROC e 0,0024 de
+Após o ajuste, os quatro modelos ficam a 0,0015 de AUC-ROC e 0,0020 de
 acurácia uns dos outros, e escolher os hiperparâmetros só no treino de cada
-dobra (seleção aninhada) muda a AUC-ROC em no máximo 0,0001. A regressão
+dobra (seleção aninhada) muda a AUC-ROC em no máximo 0,0002. A regressão
 logística fica à frente do XGBoost por 0,0008 de AUC-ROC aos 15 minutos (o
 intervalo exclui zero aos 10, 15 e 20; Apêndice C): o limite está na
 informação das variáveis, não na complexidade do modelo. O XGBoost foi
@@ -628,11 +630,11 @@ apoia em superioridade de desempenho, e trocá-lo não mudaria o resultado
 prático.
 
 Há um modelo para cada corte, com os mesmos hiperparâmetros, avaliado nas
-partidas elegíveis, isto é, que chegam ao corte; o conjunto muda de 40.942
-partidas aos 10 minutos para 27.761 aos 25 (Quadro 4). Entre as partidas
-elegíveis, a AUC-ROC vai de 0,775 aos 10 minutos a 0,909 aos 25. Restrito
-às mesmas 27.761 partidas, as que chegam aos 25 minutos, o crescimento se
-mantém e fica maior: 0,665, 0,738, 0,814 e 0,909 (Apêndice C). Isso indica
+partidas elegíveis, isto é, ainda em andamento no corte; o conjunto muda de
+40.919 partidas aos 10 minutos para 25.098 aos 25 (Quadro 4). Entre as
+partidas elegíveis, a AUC-ROC vai de 0,775 aos 10 minutos a 0,890 aos 25.
+Restrito às mesmas 25.098 partidas, as que chegam aos 25 minutos, o
+crescimento se mantém e fica maior: 0,644, 0,713, 0,787 e 0,890 (Apêndice C). Isso indica
 que as partidas curtas, que só entram nos primeiros cortes, são mais fáceis
 de prever cedo. As métricas dos três modelos nos quatro cortes estão no
 Apêndice C.
@@ -641,22 +643,22 @@ Quadro — Desempenho do XGBoost por corte temporal
 
 | Corte | Partidas | Acurácia | AUC-ROC |
 |---|---:|---:|---:|
-| 10 min | 40.942 | 0,7028 | 0,7752 |
-| 15 min | 40.816 | 0,7636 | 0,8490 |
-| 20 min | 35.637 | 0,7924 | 0,8772 |
-| 25 min | 27.761 | 0,8261 | 0,9092 |
+| 10 min | 40.919 | 0,7020 | 0,7752 |
+| 15 min | 40.778 | 0,7641 | 0,8487 |
+| 20 min | 34.505 | 0,7856 | 0,8690 |
+| 25 min | 25.098 | 0,8068 | 0,8899 |
 
 Na importância das variáveis (SHAP, média do valor absoluto), as
 diferenças de ouro e de experiência dominam em todos os cortes. A
 diferença de torres é quase irrelevante até os 20 minutos (0,0038 aos 10,
-0,0082 aos 15 e 0,0015 aos 20) e salta para 0,0927 aos 25, cerca de 11 vezes o valor dos 15 minutos (Figura 2 e Apêndice J). É coerente com a mecânica do
+0,0076 aos 15 e 0,0023 aos 20) e sobe para 0,0429 aos 25, cerca de 6 vezes o valor dos 15 minutos (Figura 2 e Apêndice J). É coerente com a mecânica do
 jogo: as placas de defesa das torres caem por volta dos 14 minutos, e
 antes disso destruir uma torre é raro e pouco informativo. É a
 justificativa concreta para treinar um modelo *por fase* em vez de um
 único modelo genérico. A calibração, preocupação conhecida em modelos de
 *boosting* (Niculescu-Mizil; Caruana, 2005), foi avaliada nas probabilidades
 fora da dobra de cada corte: entre os decis da probabilidade prevista, o
-maior desvio para a taxa observada é de 1,25 ponto percentual aos 15
+maior desvio para a taxa observada é de 1,19 ponto percentual aos 15
 minutos, e nas partidas empatadas a média prevista fica a menos de 0,5
 ponto da taxa observada (Apêndice F e Figura 12). O modelo não exigiu
 correção.
@@ -667,30 +669,31 @@ Figura — Importância média de cada variável (|SHAP|, em log-odds) nos quatr
 de variáveis, refeitas na base final, deram no máximo +0,0006 de AUC-ROC
 (Quadro 5); um décimo primeiro experimento, com atributo consultado depois
 das partidas, fica à parte (Apêndice K). Oito conjuntos novos (12 a 19)
-acrescentaram até +0,0040 no XGBoost e +0,0070 na regressão logística, cada
-um contra o mesmo classificador com as cinco variáveis originais, e o ganho
-se manteve ao treinar no passado e testar no futuro (Apêndice K). A
-sequência de 0,8214, 0,8393 e 0,8490 de AUC-ROC nas bases de 10.295, 23.133
-e 40.816 partidas registra as rodadas de coleta, com conjuntos de teste
-diferentes, e não isola o efeito do volume. Com o teste fixo em 8.164
-partidas aos 15 minutos e o treino crescendo, a AUC-ROC passa de 0,8466 com
-2.500 partidas para 0,8484 com 10.000 e 0,8495 com 32.652 (Apêndice C):
+acrescentaram, aos 15 minutos, até +0,0044 no XGBoost e +0,0073 na regressão
+logística, cada um contra o mesmo classificador com as cinco variáveis
+originais; o ganho combinado (logística com todas as variáveis contra o
+XGBoost com cinco) se manteve ao treinar no passado e testar no futuro
+(Apêndice K). A sequência de 0,8214, 0,8393 e 0,8487 de AUC-ROC nas bases de
+10.295, 23.133 e 40.778 partidas registra as rodadas de coleta, com conjuntos
+de teste diferentes, e não isola o efeito do volume. Com o teste fixo em 8.156
+partidas aos 15 minutos e o treino crescendo, a AUC-ROC passa de 0,8494 com
+2.500 partidas para 0,8519 com 10.000 e 0,8527 com 32.622 (Apêndice C):
 acima de 10 mil partidas, mais volume quase não muda o resultado.
 
 Quadro — Experimentos negativos de enriquecimento de variáveis
 
 | # | Experimento | Δ AUC-ROC aos 15 e aos 25 min |
 |---|---|---|
-| 1 | Diferença de abates de Barão/Arauto | +0,0000 e −0,0000 |
-| 2 | Dispersão espacial do time | −0,0000 e +0,0002 |
-| 3 | Tuning específico por fase | +0,0001 e −0,0000 |
-| 4 | Calibração adicional (sigmoide) | +0,0001 e +0,0000 |
-| 5 | Ouro convertido em itens | +0,0000 e +0,0000 |
-| 6 | Variáveis defensivas/ofensivas (ofensivas) | +0,0006 e −0,0000 |
-| 7 | Ouro em itens (`item_gold_diff`) | +0,0000 e +0,0000 |
+| 1 | Diferença de abates de Barão/Arauto | +0,0000 e +0,0000 |
+| 2 | Dispersão espacial do time | +0,0000 e +0,0003 |
+| 3 | Tuning específico por fase | +0,0001 e +0,0001 |
+| 4 | Calibração adicional (sigmoide) | +0,0001 e +0,0001 |
+| 5 | Ouro convertido em itens | −0,0001 e −0,0000 |
+| 6 | Variáveis defensivas/ofensivas (ofensivas) | +0,0006 e +0,0001 |
+| 7 | Ouro em itens (`item_gold_diff`) | −0,0001 e −0,0000 |
 | 8 | Visão (ward_diff / ward_kill_diff) | −0,0000 e −0,0000 |
-| 9 | Dragões por tipo (`monsterSubType`) | −0,0001 e +0,0000 |
-| 10 | Placas de torre (`plate_diff`, `TURRET_PLATE_DESTROYED`) | −0,0000 e +0,0000 |
+| 9 | Dragões por tipo (`monsterSubType`) | −0,0000 e +0,0000 |
+| 10 | Placas de torre (`plate_diff`, `TURRET_PLATE_DESTROYED`) | −0,0000 e −0,0000 |
 
 ### 5.5 Dashboards (objetivo f)
 
@@ -707,8 +710,8 @@ o simulador no estado de jogo: o usuário define as diferenças aos 15
 minutos, o modelo de produção devolve a probabilidade de vitória do time
 azul e o SHAP decompõe a previsão por variável, em log-odds, na mesma
 tela. No estado da Figura 4, o valor de referência de −0,132 (46,7%)
-somado às contribuições, que totalizam +1,044, dá 0,912 em log-odds, que a
-transformação logística leva a 71,3%; o gráfico identifica essa unidade e
+somado às contribuições, que totalizam +1,038, dá 0,906 em log-odds, que a
+transformação logística leva a 71,2%; o gráfico identifica essa unidade e
 a referência. As seis telas completas estão no Apêndice E.
 
 Figura — Análise de partida: mapa de calor, diferença de ouro e objetivos até o minuto 14 | reports/figuras_texto/fig_partida.png
@@ -738,8 +741,8 @@ predição por fases a *League of Legends* e a integra a explicabilidade,
 visualização e consulta em uma mesma solução. Entre os estudos de *League of
 Legends*, Jadowski e Cunningham (2022) reportam 67% de acerto em jogos
 profissionais e Do et al. (2021), 75,1% antes de a partida começar, a
-partir da experiência com o campeão. As acurácias deste trabalho, de 70,3%
-a 82,6% conforme o corte, ficam na mesma ordem de grandeza, mas a
+partir da experiência com o campeão. As acurácias deste trabalho, de 70,2%
+a 80,7% conforme o corte, ficam na mesma ordem de grandeza, mas a
 comparação é apenas indicativa: mudam o nível dos jogadores, o momento da
 previsão e a informação usada. Maymin (2021) trata de eventos individuais
 e Guan e Tung (2026) avaliam o erro de probabilidade (Brier) em vez da
@@ -776,7 +779,7 @@ resultados apresentados na Seção 5 indicam que o objetivo geral foi
 alcançado, com evidência para cada objetivo específico:
 
 a) os dados e recursos da Riot Games API foram mapeados e utilizados de
-forma sistemática (endpoints *league-v4*, *account-v1* e *match-v5*, com linha do tempo);
+forma sistemática (*endpoints* *league-v4*, *account-v1* e *match-v5*, com linha do tempo);
 
 b) as informações relevantes de partidas, jogadores e estatísticas
 foram identificadas e organizadas em um esquema relacional específico;
@@ -794,8 +797,8 @@ estatística, não apenas observação pontual;
 
 e) três modelos de *machine learning* (XGBoost, *Random Forest* e MLP) e
 uma regressão logística de referência foram comparados e ficaram próximos
-após o ajuste (AUC-ROC de 0,8484 a 0,8498 no corte de 15 minutos); o
-XGBoost foi mantido em produção (acurácia 0,7636, AUC-ROC 0,8490) pela
+após o ajuste (AUC-ROC de 0,8480 a 0,8495 no corte de 15 minutos); o
+XGBoost foi mantido em produção (acurácia 0,7641, AUC-ROC 0,8487) pela
 proximidade dos resultados e pela integração com o SHAP, com modelos
 adicionais para os cortes de 10, 20 e 25 minutos;
 
@@ -826,9 +829,9 @@ valem. O detalhe e os experimentos de cada uma estão no Apêndice F.
 **Validade de construto.** A linha do tempo do *match-v5* não registra o estado das ondas
 de *minions* nem a ordem de escolha de campeões (*draft*), e nenhuma API
 pública da Riot expõe micro-posicionamento. Dez experimentos de
-enriquecimento superaram as cinco variáveis originais em até +0,0006 de AUC-ROC (Quadro 5),
+enriquecimento ficaram a no máximo +0,0006 de AUC-ROC das cinco variáveis originais (Quadro 5),
 inclusive a posição dos jogadores, que existe na *timeline* e foi testada.
-Variáveis mais ricas acrescentam até +0,0070 de AUC-ROC na regressão logística e +0,0040 no XGBoost, cada um contra o mesmo classificador com as cinco variáveis (Apêndice K); um ganho maior provavelmente depende do que a fonte não tem. Que parte do erro
+Variáveis mais ricas acrescentam, aos 15 minutos, até +0,0073 de AUC-ROC na regressão logística e +0,0044 no XGBoost, cada um contra o mesmo classificador com as cinco variáveis (Apêndice K); um ganho maior provavelmente depende do que a fonte não tem. Que parte do erro
 do modelo venha dessa informação ausente é hipótese, não resultado medido.
 Por isso nenhuma orientação da plataforma que dependa de itemização ou de
 ondas vem do modelo, e a interface a marca como inferência geral.
@@ -842,14 +845,14 @@ arquitetura seja reaproveitável.
 
 **Validade interna.** As partidas foram coletadas em janelas de tempo, sem amostragem ao longo de todo o histórico. Um padrão sazonal pode estar
 confundido com o que os dados descrevem. Além disso, a validação cruzada sorteia
-partidas ao acaso, e jogadores que se repetem entre partidas tornam as dobras menos independentes do que a técnica supõe. Treinar no passado e testar no futuro, porém, não reduziu a AUC-ROC (Apêndice C). Recortes finos, como um
+partidas ao acaso, e jogadores que se repetem entre partidas tornam as dobras menos independentes do que a técnica supõe. Treinar no passado e testar no futuro, porém, só reduziu a AUC-ROC em um caso, de 0,0026 e dentro do intervalo de confiança (Apêndice C). Recortes finos, como um
 jogador em um campeão ou um confronto de rota, seguem frágeis mesmo com
 41.063 partidas, apesar do encolhimento estatístico (*shrinkage*) em
 direção à média.
 
 **Limitações do modelo.** O XGBoost não garante monotonicidade isolada por variável, por não usar restrição formal. A calibração foi verificada nas previsões fora da dobra: nas partidas empatadas, a média prevista fica a menos de 0,5 ponto percentual da taxa observada em todos os cortes (Apêndice F).
 
-**Validade da consulta em linguagem natural.** A medida principal (203 perguntas de template, escritas pelo autor a partir de famílias de erro já conhecidas) pode superestimar o resultado em perguntas livres: em versões anteriores do sistema, perguntas escritas à mão acertaram entre 54% e 60%. As correções posteriores não foram medidas, e o *benchmark* de 26 não é independente.
+**Validade da consulta em linguagem natural.** A medida principal (203 perguntas de template, escritas pelo autor a partir de famílias de erro já conhecidas) pode superestimar o resultado em perguntas livres: em versões anteriores do sistema, dois conjuntos de 50 perguntas escritas à mão acertaram 27 e 30 (54% e 60%). As correções posteriores não foram medidas, e o *benchmark* de 26 não é independente.
 
 ### 6.2 TRABALHOS FUTUROS
 
@@ -979,7 +982,7 @@ trabalho científico**: métodos e técnicas da pesquisa e do trabalho acadêmic
 RIBEIRO, Marco Tulio; SINGH, Sameer; GUESTRIN, Carlos. "Why should I trust you?": explaining the predictions of any classifier. In: ACM SIGKDD INTERNATIONAL CONFERENCE ON KNOWLEDGE DISCOVERY AND DATA MINING, 22., 2016, San Francisco. **Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining**. New York: ACM, 2016. p. 1135-1144. DOI: 10.1145/2939672.2939778.
 
 RIOT GAMES. **APIs**. [S. l.], [s. d.]. Disponível em:
-https://developer.riotgames.com/apis. Acesso em: 12 maio 2026.
+https://developer.riotgames.com/apis. Acesso em: 3 nov. 2026.
 
 WALLNER, Günter; WANG, Letian; DORMANN, Claire. Visualizing the spatio-
 temporal evolution of gameplay using storyline visualization: a study with League of
@@ -990,7 +993,7 @@ WANG, Bailin; SHIN, Richard; LIU, Xiaodong; POLOZOV, Oleksandr; RICHARDSON, Matt
 
 ZHONG, Ruiqi; YU, Tao; KLEIN, Dan. Semantic evaluation for text-to-SQL with
 distilled test suites. In: CONFERENCE ON EMPIRICAL METHODS IN NATURAL LANGUAGE
-PROCESSING, 2020. **Proceedings of the 2020 Conference on Empirical Methods in
+PROCESSING, 2020, on-line. **Proceedings of the 2020 Conference on Empirical Methods in
 Natural Language Processing (EMNLP)**. [S. l.]: Association for Computational
 Linguistics, 2020. p. 396-411. DOI: 10.18653/v1/2020.emnlp-main.29.
 
@@ -1082,18 +1085,15 @@ envolvem um limiar mínimo de jogos ("com pelo menos N partidas") e erram na
 formatação da resposta, por coluna extra ou apresentação, sem erro de
 interpretação da pergunta nem de estrutura da SQL.
 
-**Gabarito automático (medida principal, 5 de novembro de 2026).** Um gerador monta perguntas por templates sobre entidades reais do banco (campeões, equipes, ligas, *patches*, jogadores e itens) e escreve, junto de cada uma, a SQL de referência, que é executada na hora; pergunta com gabarito vazio, com empate no limite de um ranking ou repetida é descartada. Parte das perguntas não tem resposta no banco (primeiro sangue, série, ouro aos 10 minutos, dano a estruturas) e espera uma recusa. O sistema roda as perguntas pelo caminho do produto e um comparador automático compara: em pergunta de valor único (escalar), passa se qualquer valor numérico da primeira linha do sistema coincidir com o último valor da primeira linha do gabarito (tolerância de 0,1%, aceitando fração ou percentual), sem conferir o nome da coluna; essa regra poderia aceitar a coluna errada, mas nenhum dos 146 acertos escalares tinha mais de uma coluna numérica na primeira linha; em ranking, a chave de cada linha do gabarito aparece na mesma posição; recusa esperada só passa se toda base consultada recusou; resposta na base errada falha. A comparação não depende de avaliador, e as regras do comparador têm testes automatizados. O conjunto avaliado tem 203 perguntas, amostradas ao acaso: **181 de 203 certas (89,2%)**, intervalo de 95% de 84,1% a 92,7%, com 166 de 187 respondíveis e 15 de 16 recusas esperadas (Quadro 9). Falhas: 16 valores diferentes do gabarito, 2 recusas indevidas, 3 roteamentos para a base errada e 1 resposta onde o banco não tem o dado. Li as 22 uma a uma: todas são do sistema, nenhuma do gabarito ou do comparador. A maior família foi nome de entidade (o modelo escrevia 'Monkey King' para MonkeyKing, tratava ligas como equipe, trocava LPLOL por LPL), seguida de eliminações lidas como kills mais assistências. Três correções (a resolução do nome exato das entidades no banco, o envio ao competitivo de pergunta com liga, equipe ou jogador profissional e uma checagem que refaz a consulta) vieram depois da medida e não foram medidas de ponta a ponta. Limites: o texto é de template, o autor conhecia as famílias de erro e as famílias pequenas têm poucas perguntas.
+**Gabarito automático (medida principal, 5 de novembro de 2026).** Um gerador monta perguntas por templates sobre entidades reais do banco (campeões, equipes, ligas, *patches*, jogadores e itens) e escreve, junto de cada uma, a SQL de referência, que é executada na hora; pergunta com gabarito vazio, com empate no limite de um ranking ou repetida é descartada. Parte das perguntas não tem resposta no banco (primeiro sangue, série, ouro aos 10 minutos, dano a estruturas) e espera uma recusa. O sistema roda as perguntas pelo caminho do produto e um comparador automático compara: em pergunta de valor único (escalar), passa se qualquer valor numérico da primeira linha do sistema coincidir com o último valor da primeira linha do gabarito (tolerância de 0,1%, aceitando fração ou percentual), sem conferir o nome da coluna; essa regra poderia aceitar a coluna errada, mas nenhum dos 146 acertos escalares tinha mais de uma coluna numérica na primeira linha; em ranking, a chave de cada linha do gabarito aparece na mesma posição; recusa esperada só passa se toda base consultada recusou; resposta na base errada falha. A comparação não depende de avaliador, e as regras do comparador têm testes automatizados. O conjunto avaliado tem 203 perguntas, amostradas ao acaso: **181 de 203 certas (89,2%)**, intervalo de 95% de 84,1% a 92,7%, com 166 de 187 respondíveis e 15 de 16 recusas esperadas (Quadro 9). Falhas: 16 valores diferentes do gabarito, 2 recusas indevidas, 3 roteamentos para a base errada e 1 resposta onde o banco não tem o dado. As 22 foram lidas uma a uma: todas são do sistema, nenhuma do gabarito ou do comparador. A maior família foi nome de entidade (o modelo escrevia 'Monkey King' para MonkeyKing, tratava ligas como equipe, trocava LPLOL por LPL), seguida de eliminações lidas como kills mais assistências. Três correções (a resolução do nome exato das entidades no banco, o envio ao competitivo de pergunta com liga, equipe ou jogador profissional e uma checagem que refaz a consulta) vieram depois da medida e não foram medidas de ponta a ponta. Limites: o texto é de template, o autor conhecia as famílias de erro e as famílias pequenas têm poucas perguntas.
 
-**Versões e congelamento dos dados.** As etapas com modelo de linguagem usam o Claude Haiku 4.5 (`claude-haiku-4-5-20251001`), pela API da Anthropic: a geração de SQL com temperatura 0 e até 1.200 *tokens* de saída; o roteamento, no resíduo das regras, com temperatura 0 e até 16 *tokens*; e o *coach* com temperatura 0,4 (0,2 na releitura que extrai os itens sugeridos). O gabarito rodou em 5 de novembro de 2026, às 19h16, sobre a versão marcada no repositório como `gabarito-203`, que reproduz os *hashes* dos arquivos de roteamento, validação, esquema e geração de SQL gravados no resultado; a versão final acrescenta as três correções citadas. A base estava congelada: a última partida de *solo queue* entrou no banco em 4 de outubro de 2026, e os arquivos profissionais são de 4 de julho de 2026, sem linha nova depois disso. A SQL de referência e a do sistema rodaram na mesma execução, sobre o mesmo estado do banco.
+**Versões e congelamento dos dados.** As etapas com modelo de linguagem usam o Claude Haiku 4.5 (`claude-haiku-4-5-20251001`), pela API da Anthropic: a geração de SQL com temperatura 0 e até 1.200 *tokens* de saída; o roteamento, no resíduo das regras, com temperatura 0 e até 16 *tokens*; a explicação do resultado ("Leitura de jogo") com temperatura 0 e até 500 *tokens*; e o *coach* com temperatura 0,4 (0,2 na releitura que extrai os itens sugeridos). O gabarito rodou em 5 de novembro de 2026, às 19h16, sobre a versão marcada no repositório como `gabarito-203`, que reproduz os *hashes* dos arquivos de roteamento, validação, esquema e geração de SQL gravados no resultado; a versão final acrescenta as três correções citadas. A base estava congelada: a última partida de *solo queue* entrou no banco em 4 de outubro de 2026, e os arquivos profissionais são de 4 de julho de 2026, sem linha nova depois disso. A SQL de referência e a do sistema rodaram na mesma execução, sobre o mesmo estado do banco.
 
 Quadro — Acerto do gabarito automático por família de pergunta
 
 | Família | Base | Certas | Total | % |
 |---|---|---:|---:|---:|
 | C1-winrate-equipe | competitivo | 14 | 16 | 87,5 |
-| C10-contagem | competitivo | 4 | 4 | 100,0 |
-| C11-lado | competitivo | 1 | 1 | 100,0 |
-| C12-posicao | competitivo | 2 | 2 | 100,0 |
 | C2-jogos-equipe | competitivo | 5 | 5 | 100,0 |
 | C3-media-equipe | competitivo | 13 | 14 | 92,9 |
 | C4-liga | competitivo | 8 | 12 | 66,7 |
@@ -1102,12 +1102,10 @@ Quadro — Acerto do gabarito automático por família de pergunta
 | C7-patch | competitivo | 2 | 2 | 100,0 |
 | C8-ranking | competitivo | 3 | 3 | 100,0 |
 | C9-ano | competitivo | 8 | 8 | 100,0 |
+| C10-contagem | competitivo | 4 | 4 | 100,0 |
+| C11-lado | competitivo | 1 | 1 | 100,0 |
+| C12-posicao | competitivo | 2 | 2 | 100,0 |
 | S1-winrate-campeao | solo | 11 | 14 | 78,6 |
-| S10-plataforma | solo | 3 | 3 | 100,0 |
-| S12-itens | solo | 6 | 6 | 100,0 |
-| S14-kda | solo | 2 | 3 | 66,7 |
-| S15-posicao-campeao | solo | 6 | 6 | 100,0 |
-| S16-visao | solo | 2 | 2 | 100,0 |
 | S2-partidas-campeao | solo | 12 | 12 | 100,0 |
 | S3-media-campeao | solo | 13 | 18 | 72,2 |
 | S4-top-campeoes-posicao | solo | 8 | 10 | 80,0 |
@@ -1116,6 +1114,11 @@ Quadro — Acerto do gabarito automático por família de pergunta
 | S7-duracao | solo | 1 | 1 | 100,0 |
 | S8-bans | solo | 8 | 9 | 88,9 |
 | S9-campeoes-wr | solo | 2 | 2 | 100,0 |
+| S10-plataforma | solo | 3 | 3 | 100,0 |
+| S12-itens | solo | 6 | 6 | 100,0 |
+| S14-kda | solo | 2 | 3 | 66,7 |
+| S15-posicao-campeao | solo | 6 | 6 | 100,0 |
+| S16-visao | solo | 2 | 2 | 100,0 |
 | U1-primeiro | competitivo | 6 | 6 | 100,0 |
 | U2-serie | competitivo | 2 | 2 | 100,0 |
 | U3-minuto | competitivo | 1 | 1 | 100,0 |
@@ -1125,7 +1128,7 @@ Quadro — Acerto do gabarito automático por família de pergunta
 | U7-itens-pro | competitivo | 1 | 1 | 100,0 |
 | U8-multikill | solo | 1 | 1 | 100,0 |
 
-Auditoria do coach, de 4 de novembro de 2026: 36 respostas do módulo de orientação estratégica, geradas pelo mesmo caminho do produto sobre partidas reais (12 de cada modo: partida completa, composição e só estado; cortes de 15, 20 e 25 minutos). Cada número da resposta foi conferido contra os dados fornecidos ao modelo de linguagem (o *prompt* sem as instruções), e os 13 que o detector não encontrou nos dados foram revisados à mão. A saída do modelo de linguagem varia entre execuções (temperatura 0,4), e o Quadro 10 é de uma execução.
+Auditoria do coach, de 4 de novembro de 2026: 36 respostas do módulo de orientação estratégica, geradas pelo mesmo caminho do produto sobre partidas reais (12 de cada modo: partida completa, composição e só estado; cortes de 15, 20 e 25 minutos). Cada número da resposta foi conferido contra os dados fornecidos ao modelo de linguagem (o *prompt* sem as instruções), e os 13 que o detector não encontrou nos dados foram revisados à mão. A saída do modelo de linguagem varia entre execuções (temperatura 0,4), e o Quadro 10 é de uma execução. A auditoria é anterior à mudança de 8 de novembro de 2026, em que o *prompt* passou a informar a unidade (log-odds) e o valor de referência do SHAP.
 
 Quadro — Auditoria de fundamentação do coach (36 respostas)
 
@@ -1157,86 +1160,86 @@ efeito do volume e o do corte.
 
 Quadro — Métricas completas por corte temporal, comparação entre os três modelos
 
-| Corte | n | Taxa vitória azul | Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
+| Corte | n | Taxa de vitória do azul | Modelo | Acurácia | Precisão | *Recall* | F1 | AUC-ROC |
 |---|---:|---:|---|---:|---:|---:|---:|---:|
-| 10 min | 40.942 | 0,467 | *Random Forest* | 0,6770 | 0,6589 | 0,6394 | 0,6490 | 0,7390 |
-| 10 min | 40.942 | 0,467 | **XGBoost** | 0,7028 | 0,6948 | 0,6487 | 0,6709 | 0,7752 |
-| 10 min | 40.942 | 0,467 | MLP | 0,7017 | 0,6920 | 0,6511 | 0,6709 | 0,7750 |
-| 15 min | 40.816 | 0,467 | *Random Forest* | 0,7475 | 0,7350 | 0,7183 | 0,7265 | 0,8287 |
-| 15 min | 40.816 | 0,467 | **XGBoost** | 0,7636 | 0,7577 | 0,7259 | 0,7415 | 0,8490 |
-| 15 min | 40.816 | 0,467 | MLP | 0,7598 | 0,7483 | 0,7319 | 0,7400 | 0,8454 |
-| 20 min | 35.637 | 0,466 | *Random Forest* | 0,7799 | 0,7682 | 0,7563 | 0,7622 | 0,8642 |
-| 20 min | 35.637 | 0,466 | **XGBoost** | 0,7924 | 0,7840 | 0,7660 | 0,7749 | 0,8772 |
-| 20 min | 35.637 | 0,466 | MLP | 0,7903 | 0,7825 | 0,7622 | 0,7722 | 0,8750 |
-| 25 min | 27.761 | 0,468 | *Random Forest* | 0,8146 | 0,8046 | 0,7976 | 0,8011 | 0,8989 |
-| 25 min | 27.761 | 0,468 | **XGBoost** | 0,8261 | 0,8194 | 0,8063 | 0,8128 | 0,9092 |
-| 25 min | 27.761 | 0,468 | MLP | 0,8246 | 0,8158 | 0,8078 | 0,8118 | 0,9080 |
+| 10 min | 40.919 | 0,467 | *Random Forest* | 0,6721 | 0,6538 | 0,6331 | 0,6433 | 0,7362 |
+| 10 min | 40.919 | 0,467 | **XGBoost** | 0,7020 | 0,6932 | 0,6492 | 0,6704 | 0,7752 |
+| 10 min | 40.919 | 0,467 | MLP | 0,7003 | 0,6928 | 0,6436 | 0,6673 | 0,7741 |
+| 15 min | 40.778 | 0,467 | *Random Forest* | 0,7439 | 0,7312 | 0,7144 | 0,7227 | 0,8278 |
+| 15 min | 40.778 | 0,467 | **XGBoost** | 0,7641 | 0,7576 | 0,7278 | 0,7424 | 0,8487 |
+| 15 min | 40.778 | 0,467 | MLP | 0,7619 | 0,7488 | 0,7378 | 0,7433 | 0,8459 |
+| 20 min | 34.505 | 0,467 | *Random Forest* | 0,7699 | 0,7575 | 0,7466 | 0,7520 | 0,8533 |
+| 20 min | 34.505 | 0,467 | **XGBoost** | 0,7856 | 0,7770 | 0,7590 | 0,7679 | 0,8690 |
+| 20 min | 34.505 | 0,467 | MLP | 0,7832 | 0,7706 | 0,7635 | 0,7670 | 0,8666 |
+| 25 min | 25.098 | 0,468 | *Random Forest* | 0,7937 | 0,7825 | 0,7749 | 0,7786 | 0,8761 |
+| 25 min | 25.098 | 0,468 | **XGBoost** | 0,8068 | 0,7991 | 0,7848 | 0,7919 | 0,8899 |
+| 25 min | 25.098 | 0,468 | MLP | 0,8029 | 0,7945 | 0,7811 | 0,7877 | 0,8846 |
 
 Quadro — Configuração dos três modelos comparados
 
 | Modelo | Configuração | Origem |
 |---|---|---|
-| XGBoost | 500 árvores, taxa de aprendizado 0,01, profundidade 3 | busca em grade (27 combinações) sobre a base de 10.295 partidas, contidas nas 40.816 da avaliação; repetida nas 40.816, a produção ficou em 3º lugar, a 0,0001 de AUC-ROC da melhor |
-| XGBoost aninhado | grade de 27 combinações escolhida só no treino de cada dobra (3 dobras internas) | a produção foi escolhida em 4 das 5 dobras; acurácia 0,7636, AUC-ROC 0,8491 |
+| XGBoost | 500 árvores, taxa de aprendizado 0,01, profundidade 3 | busca em grade (27 combinações) sobre a base de 10.295 partidas, contidas nas 40.778 da avaliação; repetida nas 40.778, a busca escolheu a mesma configuração (1º lugar entre 27) |
+| XGBoost aninhado | grade de 27 combinações escolhida só no treino de cada dobra (3 dobras internas) | a produção foi escolhida em 3 das 5 dobras; acurácia 0,7637, AUC-ROC 0,8485 |
 | *Random Forest* (referência) | 500 árvores, demais parâmetros do scikit-learn | sem busca em grade |
-| *Random Forest* ajustada | 300 árvores, profundidade 6, mínimo de 2 amostras por folha | busca em grade (27 combinações) nas 40.816, avaliada nas mesmas dobras: 0,7625 e 0,8484; aninhada: 0,7626 e 0,8483 |
+| *Random Forest* ajustada | 200 árvores, profundidade 6, mínimo de 5 amostras por folha | busca em grade (27 combinações) nas 40.778, avaliada nas mesmas dobras: 0,7628 e 0,8480; aninhada: 0,7625 e 0,8480 |
 | MLP (referência) | camadas de 64 e 32 neurônios, variáveis padronizadas, até 500 iterações | sem busca em grade |
-| MLP ajustado | camada de 32 neurônios, regularização 0,001, até 1.000 iterações | busca em grade (9 combinações) nas 40.816, avaliada nas mesmas dobras: 0,7645 e 0,8494; aninhada: 0,7645 e 0,8494 |
+| MLP ajustado | camada de 32 neurônios, regularização 0,001, até 1.000 iterações | busca em grade (9 combinações) nas 40.778, avaliada nas mesmas dobras: 0,7638 e 0,8491; aninhada: 0,7635 e 0,8491 |
 
 Quadro — Regressão logística como baseline e diferença do XGBoost para os demais modelos
 
 | Corte | Modelo | Acurácia | AUC-ROC | AUC-ROC do XGBoost menos a do modelo (intervalo de 95%) |
 |---|---|---:|---:|---|
-| 10 min | Regressão logística | 0,7018 | 0,7758 | −0,0006 (−0,0011 a −0,0002) |
-| 15 min | Regressão logística | 0,7649 | 0,8498 | −0,0008 (−0,0012 a −0,0005) |
-| 15 min | MLP | 0,7598 | 0,8454 | +0,0036 (+0,0027 a +0,0044) |
-| 15 min | *Random Forest* (referência) | 0,7475 | 0,8287 | +0,0203 (+0,0185 a +0,0219) |
-| 20 min | Regressão logística | 0,7938 | 0,8778 | −0,0006 (−0,0010 a −0,0003) |
-| 25 min | Regressão logística | 0,8247 | 0,9092 | −0,0000 (−0,0004 a +0,0004) |
+| 10 min | Regressão logística | 0,7019 | 0,7757 | −0,0005 (−0,0010 a −0,0001) |
+| 15 min | Regressão logística | 0,7648 | 0,8495 | −0,0008 (−0,0012 a −0,0005) |
+| 15 min | MLP (referência) | 0,7619 | 0,8459 | +0,0028 (+0,0020 a +0,0036) |
+| 15 min | *Random Forest* (referência) | 0,7439 | 0,8278 | +0,0209 (+0,0192 a +0,0226) |
+| 20 min | Regressão logística | 0,7863 | 0,8700 | −0,0009 (−0,0012 a −0,0006) |
+| 25 min | Regressão logística | 0,8062 | 0,8900 | −0,0002 (−0,0007 a +0,0004) |
 
 O *baseline* é uma regressão logística com as variáveis padronizadas. Os
 intervalos vêm de *bootstrap* pareado (1.000 reamostragens das mesmas
 partidas para os dois modelos), sobre as previsões fora da amostra da
 validação cruzada de 5 dobras. Na acurácia, a diferença do XGBoost para a
-regressão logística fica entre −0,0007 e −0,0016, com intervalo que inclui
-zero aos 10, 15 e 25 minutos. Todas as diferenças são de milésimos, exceto a
+regressão logística fica entre −0,0007 e +0,0006, com intervalo que inclui
+zero nos quatro cortes. Todas as diferenças são de milésimos, exceto a
 da *Random Forest* de referência, que a busca em grade elimina (Quadro 3).
 
 Quadro — Validação cruzada com 5 e com 10 dobras
 
 | Corte | Modelo | Acurácia (5 dobras) | Acurácia (10 dobras) | AUC-ROC (5 dobras) | AUC-ROC (10 dobras) |
 |---|---|---:|---:|---:|---:|
-| 10 min | XGBoost | 0,7028 | 0,7029 | 0,7752 | 0,7752 |
-| 15 min | XGBoost | 0,7636 | 0,7639 | 0,8490 | 0,8490 |
-| 15 min | *Random Forest* | 0,7475 | 0,7450 | 0,8287 | 0,8282 |
-| 15 min | MLP | 0,7598 | 0,7623 | 0,8454 | 0,8463 |
-| 20 min | XGBoost | 0,7924 | 0,7927 | 0,8772 | 0,8771 |
-| 25 min | XGBoost | 0,8261 | 0,8251 | 0,9092 | 0,9090 |
+| 10 min | XGBoost | 0,7020 | 0,7025 | 0,7752 | 0,7751 |
+| 15 min | XGBoost | 0,7641 | 0,7642 | 0,8487 | 0,8488 |
+| 15 min | *Random Forest* (referência) | 0,7439 | 0,7460 | 0,8278 | 0,8282 |
+| 15 min | MLP (referência) | 0,7619 | 0,7613 | 0,8459 | 0,8458 |
+| 20 min | XGBoost | 0,7856 | 0,7856 | 0,8690 | 0,8691 |
+| 25 min | XGBoost | 0,8068 | 0,8062 | 0,8899 | 0,8899 |
 
 O número de dobras recomendado por Kohavi (1995) é 10. A diferença para as 5
-usadas no trabalho é de no máximo 0,0025 em acurácia e 0,0009 em AUC-ROC (na *Random Forest* e no MLP aos 15 minutos; no XGBoost, no máximo 0,0010 e 0,0002), e
+usadas no trabalho é de no máximo 0,0021 em acurácia e 0,0004 em AUC-ROC (na *Random Forest* aos 15 minutos; no XGBoost, no máximo 0,0006 e 0,0001), e
 não altera nenhuma conclusão.
 
 Quadro — Treino no passado e teste no futuro, XGBoost
 
 | Corte | Divisão | Treino | Teste | Acurácia | AUC-ROC | Intervalo de 95% da AUC-ROC |
 |---|---|---:|---:|---:|---:|---|
-| 10 min | Cronológica 80/20 | 32.753 | 8.189 | 0,7033 | 0,7795 | 0,7696 a 0,7887 |
-| 10 min | Por *patch* | 23.639 | 17.303 | 0,7084 | 0,7844 | 0,7779 a 0,7911 |
-| 10 min | Aleatória 80/20 | 32.753 | 8.189 | 0,7020 | 0,7724 | 0,7619 a 0,7819 |
-| 15 min | Cronológica 80/20 | 32.652 | 8.164 | 0,7733 | 0,8573 | 0,8487 a 0,8653 |
-| 15 min | Por *patch* | 23.558 | 17.258 | 0,7691 | 0,8569 | 0,8513 a 0,8622 |
-| 15 min | Aleatória 80/20 | 32.652 | 8.164 | 0,7660 | 0,8503 | 0,8415 a 0,8584 |
-| 20 min | Cronológica 80/20 | 28.509 | 7.128 | 0,8005 | 0,8839 | 0,8765 a 0,8912 |
-| 20 min | Por *patch* | 20.754 | 14.883 | 0,7990 | 0,8824 | 0,8775 a 0,8874 |
-| 20 min | Aleatória 80/20 | 28.509 | 7.128 | 0,7887 | 0,8740 | 0,8667 a 0,8811 |
-| 25 min | Cronológica 80/20 | 22.208 | 5.553 | 0,8316 | 0,9136 | 0,9062 a 0,9202 |
-| 25 min | Por *patch* | 16.546 | 11.215 | 0,8288 | 0,9124 | 0,9075 a 0,9174 |
-| 25 min | Aleatória 80/20 | 22.208 | 5.553 | 0,8221 | 0,9112 | 0,9042 a 0,9185 |
+| 10 min | Cronológica 80/20 | 32.735 | 8.184 | 0,7034 | 0,7792 | 0,7694 a 0,7890 |
+| 10 min | Por *patch* | 23.625 | 17.294 | 0,7082 | 0,7841 | 0,7773 a 0,7905 |
+| 10 min | Aleatória 80/20 | 32.735 | 8.184 | 0,7087 | 0,7818 | 0,7713 a 0,7912 |
+| 15 min | Cronológica 80/20 | 32.622 | 8.156 | 0,7739 | 0,8570 | 0,8491 a 0,8641 |
+| 15 min | Por *patch* | 23.532 | 17.246 | 0,7691 | 0,8567 | 0,8514 a 0,8621 |
+| 15 min | Aleatória 80/20 | 32.622 | 8.156 | 0,7553 | 0,8415 | 0,8333 a 0,8501 |
+| 20 min | Cronológica 80/20 | 27.604 | 6.901 | 0,7948 | 0,8762 | 0,8683 a 0,8839 |
+| 20 min | Por *patch* | 20.138 | 14.367 | 0,7919 | 0,8743 | 0,8686 a 0,8800 |
+| 20 min | Aleatória 80/20 | 27.604 | 6.901 | 0,7858 | 0,8699 | 0,8616 a 0,8780 |
+| 25 min | Cronológica 80/20 | 20.078 | 5.020 | 0,8122 | 0,8937 | 0,8849 a 0,9020 |
+| 25 min | Por *patch* | 15.055 | 10.043 | 0,8082 | 0,8920 | 0,8859 a 0,8984 |
+| 25 min | Aleatória 80/20 | 20.078 | 5.020 | 0,8098 | 0,8891 | 0,8799 a 0,8980 |
 
 Na divisão cronológica, as 80% mais antigas treinam e as 20% mais recentes testam; na divisão por *patch*, os *patches* 16.10 a 16.13 treinam e
 os 16.14 a 16.19 testam; na aleatória, o teste tem o mesmo tamanho do
-cronológico. A divisão temporal nunca fica abaixo da aleatória: a menor diferença de AUC-ROC é de +0,0012 (25 minutos, por *patch*), de modo que misturar épocas na validação cruzada não infla o
+cronológico. A divisão temporal só fica abaixo da aleatória uma vez, na cronológica aos 10 minutos (−0,0026, com intervalos sobrepostos); nos demais casos fica igual ou acima, de modo que misturar épocas na validação cruzada não infla o
 resultado. Esta é a resposta ao aviso de Kaufman et al. (2012) sobre dados que
 mudam com o tempo. A regressão logística dá o mesmo padrão, com diferença de
 até 0,0013 de AUC-ROC para o XGBoost em todas as divisões. A ressalva é que a
@@ -1249,29 +1252,29 @@ Quadro — Curva de aprendizado do XGBoost com teste fixo (corte de 15 minutos)
 
 | Partidas no treino | AUC-ROC no teste fixo | Desvio-padrão entre sorteios |
 |---:|---:|---:|
-| 2.500 | 0,8466 | 0,0008 |
-| 5.000 | 0,8476 | 0,0009 |
-| 10.000 | 0,8484 | 0,0002 |
-| 20.000 | 0,8491 | 0,0001 |
-| 32.652 | 0,8495 | — |
+| 2.500 | 0,8494 | 0,0011 |
+| 5.000 | 0,8509 | 0,0007 |
+| 10.000 | 0,8519 | 0,0004 |
+| 20.000 | 0,8525 | 0,0002 |
+| 32.622 | 0,8527 | — |
 
-O teste fixo tem 8.164 partidas (20% das 40.816, estratificado, semente
+O teste fixo tem 8.156 partidas (20% das 40.778, estratificado, semente
 42), e o treino cresce dentro dos 80% restantes, com 5 sorteios por tamanho.
 É a forma de separar o volume das rodadas de coleta: a sequência de 0,8214,
-0,8393 e 0,8490 nas bases de 10.295, 23.133 e 40.816 partidas mudava ao
+0,8393 e 0,8487 nas bases de 10.295, 23.133 e 40.778 partidas mudava ao
 mesmo tempo o treino, o teste e a composição por região e versão do jogo.
-Com o teste fixo, o ganho entre 10 mil e 32,6 mil partidas é de 0,0011.
+Com o teste fixo, o ganho entre 10 mil e 32,6 mil partidas é de 0,0008.
 
 Quadro — AUC-ROC do XGBoost por corte, nas partidas elegíveis e nas mesmas partidas
 
 | Corte | Partidas elegíveis | AUC-ROC | Mesmas partidas | AUC-ROC |
 |---|---:|---:|---:|---:|
-| 10 min | 40.942 | 0,7752 | 27.761 | 0,6653 |
-| 15 min | 40.816 | 0,8490 | 27.761 | 0,7378 |
-| 20 min | 35.637 | 0,8772 | 27.761 | 0,8135 |
-| 25 min | 27.761 | 0,9092 | 27.761 | 0,9092 |
+| 10 min | 40.919 | 0,7752 | 25.098 | 0,6444 |
+| 15 min | 40.778 | 0,8487 | 25.098 | 0,7126 |
+| 20 min | 34.505 | 0,8690 | 25.098 | 0,7870 |
+| 25 min | 25.098 | 0,8899 | 25.098 | 0,8899 |
 
-As mesmas partidas são as 27.761 que chegam aos 25 minutos, avaliadas nos
+As mesmas partidas são as 25.098 que chegam aos 25 minutos, avaliadas nos
 quatro cortes com o mesmo protocolo (5 dobras, semente 42). O desempenho
 cresce com o corte nos dois casos.
 
@@ -1302,10 +1305,10 @@ Quadro — Origem dos números da Seção 5.3
 | Número e base | Como foi obtido |
 |---|---|
 | Vitória do vermelho por região (Quadro 2), sobre 41.063 partidas | consulta SQL agregada por partida, conferida automaticamente contra o texto |
-| Vitória do azul em partidas empatadas, por corte, sobre as variáveis congeladas (40.942 aos 10 minutos) | cálculo da taxa de vitória do azul em cada corte |
+| Vitória do azul em partidas empatadas, por corte, sobre as variáveis congeladas (40.919 aos 10 minutos) | cálculo da taxa de vitória do azul em cada corte |
 | Comparação de pares com correção de Holm, sobre as variáveis congeladas | *bootstrap* com a partida como unidade (2.000 reamostragens) para as seis diferenças entre cortes, com correção de Holm |
 | Vitória do azul por faixa de duração, sobre 41.063 partidas | cálculo por faixa de duração total da partida |
-| Conversão de vantagem de ouro, sobre as variáveis congeladas (40.816 aos 15 minutos) | cálculo sobre as variáveis de cada partida no corte de 15 minutos; teste z de duas proporções entre os recortes, que são grupos independentes |
+| Conversão de vantagem de ouro, sobre as variáveis congeladas (40.778 aos 15 minutos) | cálculo sobre as variáveis de cada partida no corte de 15 minutos; teste z de duas proporções entre os recortes, que são grupos independentes |
 | Série anual do cenário profissional, sobre 99.259 jogos | consulta SQL na tabela de jogos profissionais |
 
 Quadro — Vitória do azul por faixa de duração total da partida
@@ -1333,9 +1336,8 @@ Quadro — Vitória do azul por ano no cenário profissional
 | 2019 | 53,2% | 2026 | 53,1% |
 | 2020 | 52,7% | Todos os anos | 53,2% |
 
-Os anos de 2014 e 2015 divergem, mas se apoiam em 814 e 1.806 jogos, contra
-99.259 no total, e a diferença é atribuída a esse volume menor, não a uma
-mudança no padrão.
+Só o ano de 2014 diverge, e se apoia em 814 jogos, contra 99.259 no total; a
+diferença é atribuída a esse volume menor, não a uma mudança no padrão.
 
 ---
 
@@ -1368,7 +1370,7 @@ Quadro — Limitações do trabalho e a evidência de cada uma
 
 | Limitação | Evidência medida | Tratamento |
 |---|---|---|
-| Teto de desempenho das variáveis atuais | Dez experimentos sobre a linha do tempo sem ganho relevante (até +0,0006 de AUC-ROC). A posição dos jogadores existe na linha do tempo e foi testada (experimento 2). Os experimentos 12 a 19, com 59 variáveis novas, acrescentam até +0,0040 no XGBoost e +0,0070 na regressão logística aos 15 minutos, cada um contra o mesmo classificador com as cinco variáveis originais (Apêndice K) | O ganho maior provavelmente depende de dado que a API pública não fornece: a ordem de escolha de campeões (*draft*) e o estado das ondas de *minions*. O histórico do jogador não acrescenta ao estado de jogo |
+| Teto de desempenho das variáveis atuais | Dez experimentos sobre a linha do tempo sem ganho relevante (até +0,0006 de AUC-ROC). A posição dos jogadores existe na linha do tempo e foi testada (experimento 2). Os experimentos 12 a 19, com 59 variáveis novas, acrescentam até +0,0044 no XGBoost e +0,0073 na regressão logística aos 15 minutos, cada um contra o mesmo classificador com as cinco variáveis originais (Apêndice K) | O ganho maior provavelmente depende de dado que a API pública não fornece: a ordem de escolha de campeões (*draft*) e o estado das ondas de *minions*. O histórico do jogador não acrescenta ao estado de jogo |
 | Ausência de micro-posicionamento | Nenhuma API pública da Riot expõe movimentação de *minions* nem controle de onda | Replays (`.rofl`) e visão computacional sobre o minimapa foram considerados, mas não implementados |
 | Desequilíbrio de amostra por região | BR1 11.936, EUW1 11.744, KR 10.204 e NA1 7.159 partidas (a NA1 tinha 1.446 antes da rodada final). Em três das quatro regiões o intervalo de 95% exclui 50%; a KR tem 50,4%, com intervalo que inclui 50% | O achado de viés de elo alto, além do Brasil, se apoia nas três regiões com evidência firme |
 | Cobertura desigual por versão do jogo | O *patch* 16.13 concentra 40,4% das partidas (16.572 de 41.063), em dez *patches* de 16.10 a 16.19 | Treinar nos *patches* 16.10 a 16.13 e testar nos 16.14 a 16.19 não reduz a AUC-ROC (Apêndice C). A generalização para versões com balanceamento muito diferente segue sem medida |
@@ -1380,19 +1382,19 @@ Quadro — Calibração do XGBoost nas partidas empatadas, com probabilidades fo
 
 | Corte | Partidas empatadas | Taxa observada do azul (intervalo de 95%) | Média prevista | Diferença | Maior desvio entre decis |
 |---|---:|---:|---:|---:|---:|
-| 10 min | 7.641 | 46,5% (45,4% a 47,6%) | 46,5% | 0,00 pp | 0,87 pp |
-| 15 min | 4.126 | 47,8% (46,3% a 49,4%) | 47,7% | −0,18 pp | 1,25 pp |
-| 20 min | 2.501 | 46,9% (44,9% a 48,8%) | 47,0% | +0,12 pp | 0,77 pp |
-| 25 min | 1.478 | 47,4% (44,9% a 50,0%) | 47,8% | +0,41 pp | 1,18 pp |
+| 10 min | 7.639 | 46,5% (45,3% a 47,6%) | 46,5% | −0,01 pp | 1,21 pp |
+| 15 min | 4.126 | 47,8% (46,3% a 49,4%) | 47,6% | −0,19 pp | 1,19 pp |
+| 20 min | 2.500 | 46,9% (44,9% a 48,8%) | 47,0% | +0,08 pp | 0,73 pp |
+| 25 min | 1.474 | 47,4% (44,9% a 50,0%) | 47,8% | +0,38 pp | 1,78 pp |
 
 As probabilidades vêm da validação cruzada estratificada de 5 dobras
-(semente 42) sobre as partidas elegíveis de cada corte (de 40.942 aos 10
-minutos a 27.761 aos 25): cada partida é prevista por um modelo que não a
+(semente 42) sobre as partidas elegíveis de cada corte (de 40.919 aos 10
+minutos a 25.098 aos 25): cada partida é prevista por um modelo que não a
 viu no treino. As partidas empatadas são as de diferença absoluta de ouro
 inferior a 500 no corte, as mesmas da Seção 5.3, e nelas a média prevista
 fica dentro do intervalo de 95% da taxa observada em todos os cortes. A
 previsão para um estado sintético com as cinco diferenças iguais a zero
-(de 49,0% a 51,4%, conforme o corte) não serve a essa comparação: nenhuma
+(de 48,5% a 51,5%, conforme o corte) não serve a essa comparação: nenhuma
 das partidas empatadas tem as cinco diferenças nulas, e a experiência, os
 abates, as torres e os dragões também informam o modelo. A última coluna
 compara, em cada decil da probabilidade prevista, a média prevista com a
@@ -1402,12 +1404,12 @@ Quadro — Calibração adicional sobre o XGBoost de produção, sob o mesmo pro
 
 | Corte | Variante | Diferença nas empatadas | Maior desvio entre decis | Desvio médio entre decis | Brier | AUC-ROC |
 |---|---|---:|---:|---:|---:|---:|
-| 15 min | Produção | −0,18 pp | 1,25 pp | 0,50 pp | 0,1580 | 0,8490 |
-| 15 min | Sigmoidal | −0,84 pp | 4,66 pp | 2,80 pp | 0,1591 | 0,8491 |
-| 15 min | Isotônica | −0,11 pp | 0,61 pp | 0,32 pp | 0,1581 | 0,8488 |
-| 25 min | Produção | +0,41 pp | 1,18 pp | 0,73 pp | 0,1217 | 0,9092 |
-| 25 min | Sigmoidal | −0,58 pp | 5,83 pp | 3,31 pp | 0,1231 | 0,9092 |
-| 25 min | Isotônica | −0,15 pp | 0,64 pp | 0,31 pp | 0,1218 | 0,9089 |
+| 15 min | Produção | −0,19 pp | 1,19 pp | 0,57 pp | 0,1582 | 0,8487 |
+| 15 min | Sigmoidal | −0,82 pp | 4,59 pp | 2,95 pp | 0,1592 | 0,8488 |
+| 15 min | Isotônica | −0,02 pp | 0,66 pp | 0,36 pp | 0,1582 | 0,8485 |
+| 25 min | Produção | +0,38 pp | 1,78 pp | 0,73 pp | 0,1343 | 0,8899 |
+| 25 min | Sigmoidal | −0,48 pp | 5,69 pp | 3,04 pp | 0,1355 | 0,8899 |
+| 25 min | Isotônica | +0,04 pp | 0,74 pp | 0,37 pp | 0,1343 | 0,8896 |
 
 O protocolo é um só para as três variantes: 5 dobras externas
 estratificadas (semente 42) e, nas calibradas, calibrador com 5 dobras
@@ -1439,10 +1441,10 @@ Quadro — Fundamentos dos métodos usados e o limite de cada um
 | SHAP (Lundberg; Lee, 2017) | Explicação por variável, global e por previsão | Valor de Shapley: atribuição aditiva com consistência e importância nula para variável ausente | Explica o modelo, não o jogo |
 | AUC-ROC (Hanley; McNeil, 1982) | Métrica ao lado da acurácia | Equivale à probabilidade de um caso positivo receber pontuação maior que um negativo | Mede discriminação, não calibração |
 | Calibração (Niculescu-Mizil; Caruana, 2005) | Curva de calibração do modelo de produção, fora da dobra (Figura 12) | Calibração é preocupação conhecida em modelos de *boosting* | Não exigiu correção neste trabalho |
-| Validação cruzada estratificada (Kohavi, 1995) | Cinco dobras, semente 42 | Estima o desempenho com a proporção de classes preservada | O autor recomenda 10 dobras; a diferença para 5 é de até 0,0025 (Apêndice C) |
+| Validação cruzada estratificada (Kohavi, 1995) | Cinco dobras, semente 42 | Estima o desempenho com a proporção de classes preservada | O autor recomenda 10 dobras; a diferença para 5 é de até 0,0021 (Apêndice C) |
 | Vazamento de dados (Kaufman et al., 2012) | Variáveis só do estado até o corte | Prever com informação que não existiria no momento da previsão invalida o resultado | A coleta pode ter viés de seleção, não medido |
 | Intervalo de Wilson (Brown; Cai; DasGupta, 2001) | Intervalo de confiança das proporções | Funciona melhor que o intervalo usual em amostras menores | Supõe observações independentes |
-| Correção de Holm (Holm, 1979) | Comparação de pares de cortes | Controla a multiplicidade quando várias diferenças são testadas | Controla o erro do conjunto de testes, com menos perda de poder que a correção de Bonferroni |
+| Correção de Holm (Holm, 1979) | Comparação de pares de cortes | Controla o erro do conjunto de testes, com menos perda de poder que a correção de Bonferroni | Não trata a dependência entre os testes; aqui ela foi tratada com a partida como unidade (Seção 5.3) |
 | Esquema no *text-to-SQL* (Wang et al., 2020) | Contexto da consulta gerada | Representar o esquema com os relacionamentos entre tabelas melhora a precisão da conversão | Consulta correta na forma pode responder à pergunta errada |
 | Acurácia de execução (Zhong; Yu; Klein, 2020) | Métrica do *benchmark* de linguagem natural | Compara o resultado da consulta gerada com o da consulta de referência | Propõem avaliar sobre vários bancos de teste, o que o *benchmark* feito sobre uma base não faz |
 
@@ -1456,13 +1458,13 @@ Quadro — Composição das bases de dados
 
 | Aspecto | Medida | Observação |
 |---|---|---|
-| Jogos profissionais nos arquivos | 99.259 jogos únicos, de 122 ligas | Arquivos do Oracle’s Elixir de 4 de julho de 2026 |
+| Jogos profissionais nos arquivos | 99.259 jogos únicos, de 122 ligas | Arquivos do Oracle's Elixir de 4 de julho de 2026 |
 | Concentração por liga | 40,0% em 22 ligas principais e 60,0% nas outras 100 | As outras são de desenvolvimento, acadêmicas e regionais |
 | Vitória do azul por grupo de ligas | 53,4% nas principais e 53,0% nas demais | A conclusão não depende da mistura |
 | Carga no banco | 2.543 jogos perdidos por erro do carregador, corrigido | O carregador apagava por ano do arquivo; agora apaga por jogo |
 | Jogadores da tabela `players` | 60.680, dos quais 93% de Mestre | A semeadura incluiu a faixa Mestre |
 | Partidas com ao menos um Desafiante ou Grão-Mestre | 97,2% das 41.063 | Média de 5,4 jogadores desses elos por partida |
-| Partidas só com jogadores de Mestre | 2,8% (1.163), das quais 769 na KR | Na KR, a última rodada de coleta desceu no ladder |
+| Partidas só com jogadores de Mestre | 2,8% (1.163), das quais 769 na KR | Na KR, a última rodada de coleta desceu no *ladder* |
 | Elo dos participantes com elo conhecido | 25% Desafiante, 31% Grão-Mestre e 44% Mestre | Elo da tabela `players`, não o da data da partida |
 
 Quadro — Tipos de chave da Riot Games API
@@ -1496,41 +1498,41 @@ Quadro — Objetivos específicos, onde são tratados e a evidência de cada um
 
 ## APÊNDICE J - Importância das variáveis por corte
 
-Valor médio absoluto do SHAP de cada variável, em log-odds, no modelo XGBoost de cada corte, no Quadro 29.
+O Quadro 29 traz o valor médio absoluto do SHAP de cada variável, em log-odds, no modelo XGBoost de cada corte.
 
 Quadro — Importância média das variáveis (valor absoluto do SHAP) por corte
 
 | Variável | 10 min | 15 min | 20 min | 25 min |
 |---|---:|---:|---:|---:|
-| Diferença de ouro | 0,6528 | 0,9036 | 1,0688 | 1,0522 |
-| Diferença de experiência | 0,2759 | 0,4178 | 0,4898 | 0,8190 |
-| Diferença de abates | 0,0260 | 0,0658 | 0,0189 | 0,0026 |
-| Diferença de torres | 0,0038 | 0,0082 | 0,0015 | 0,0927 |
-| Diferença de dragões | 0,1878 | 0,2260 | 0,2683 | 0,2590 |
+| Diferença de ouro | 0,6546 | 0,9026 | 1,0137 | 0,9453 |
+| Diferença de experiência | 0,2743 | 0,4143 | 0,4682 | 0,7028 |
+| Diferença de abates | 0,0259 | 0,0673 | 0,0165 | 0,0037 |
+| Diferença de torres | 0,0038 | 0,0076 | 0,0023 | 0,0429 |
+| Diferença de dragões | 0,1887 | 0,2276 | 0,2704 | 0,2821 |
 
 ---
 
 ## APÊNDICE K - Experimentos de precisão
 
-Os experimentos 1 a 10 e 12 a 19 usam a mesma base de 41.063 partidas (as que chegam a cada corte) e o mesmo protocolo (validação cruzada estratificada de 5 dobras, semente 42). Os experimentos 1 a 10, do Quadro 5, foram refeitos em 4 e 6 de novembro de 2026 (Quadro 30): tinham sido medidos antes, com bases de tamanhos diferentes e sem intervalo de confiança. O experimento 11 usou outra amostra e fica à parte, no fim deste apêndice. Todas as variáveis vêm de `frames[: corte + 1]` da linha do tempo; as de campeão e de jogador usam só informação anterior à partida (teste automatizado de 703 pares de partida e corte, sem vazamento). O ganho é a diferença de AUC-ROC contra o XGBoost de produção com as cinco variáveis originais (0,8490 aos 15 minutos e 0,9093 aos 25 nesta base), com intervalo de 95% por *bootstrap* pareado.
+Os experimentos 1 a 10 e 12 a 19 usam a mesma base de 41.063 partidas (as que chegam a cada corte) e o mesmo protocolo (validação cruzada estratificada de 5 dobras, semente 42). Os experimentos 1 a 10, do Quadro 5, foram refeitos em 4 e 6 de novembro de 2026 (Quadro 30): tinham sido medidos antes, com bases de tamanhos diferentes e sem intervalo de confiança. O experimento 11 usou outra amostra e fica à parte, no fim deste apêndice. Todas as variáveis vêm de `frames[: corte + 1]` da linha do tempo; as de campeão e de jogador usam só informação anterior à partida (teste automatizado de 687 pares de partida e corte, sem vazamento). O ganho é a diferença de AUC-ROC contra o XGBoost de produção com as cinco variáveis originais (0,8487 aos 15 minutos e 0,8899 aos 25 nesta base), com intervalo de 95% por *bootstrap* pareado.
 
 Quadro — Experimentos 1 a 10: ganho de AUC-ROC contra as cinco variáveis originais
 
 | Exp. | Variáveis acrescentadas | 15 minutos | 25 minutos |
 |---|---|---|---|
-| 1 | Diferença de abates de Barão e Arauto (2 variáveis, as mesmas do conjunto 14) | +0,0000 (+0,0000 a +0,0000) | −0,0000 (−0,0000 a −0,0000) |
-| 2 | Dispersão espacial: distância média dos jogadores ao centro do time (1) | −0,0000 (−0,0001 a +0,0000) | +0,0002 (+0,0000 a +0,0004) |
-| 3 | Tuning por fase: grade de 18 combinações escolhida só no treino (nenhuma variável nova) | +0,0001 (−0,0000 a +0,0003) | −0,0000 (−0,0002 a +0,0002) |
-| 4 | Calibração sigmoide sobre o XGBoost de produção | +0,0001 (−0,0000 a +0,0002) | +0,0000 (−0,0001 a +0,0002) |
-| 4 | Calibração isotônica sobre o XGBoost de produção | −0,0002 (−0,0004 a −0,0000) | −0,0003 (−0,0004 a −0,0001) |
-| 5 e 7 | Valor em ouro dos itens finalizados que cada time possui (1) | +0,0000 (−0,0001 a +0,0001) | +0,0000 (−0,0000 a +0,0001) |
-| 6 | Atributos ofensivos: dano de ataque, poder de habilidade, velocidade de ataque (3) | +0,0006 (+0,0004 a +0,0009) | −0,0000 (−0,0001 a +0,0001) |
-| 6 | Atributos defensivos: armadura, resistência mágica, vida (3) | +0,0001 (−0,0001 a +0,0003) | +0,0000 (−0,0001 a +0,0002) |
-| 8 | Visão: sentinelas colocadas e destruídas (2) | −0,0000 (−0,0001 a +0,0000) | −0,0000 (−0,0001 a +0,0000) |
-| 9 | Dragões por tipo (7) | −0,0001 (−0,0001 a −0,0000) | +0,0000 (−0,0000 a +0,0001) |
-| 10 | Placas de torre destruídas (1) | −0,0000 (−0,0001 a +0,0000) | +0,0000 (−0,0000 a +0,0000) |
+| 1 | Diferença de abates de Barão e Arauto (2 variáveis, as mesmas do conjunto 14) | +0,0000 (+0,0000 a +0,0000) | +0,0000 (−0,0000 a +0,0000) |
+| 2 | Dispersão espacial: distância média dos jogadores ao centro do time (1) | +0,0000 (−0,0000 a +0,0001) | +0,0003 (+0,0001 a +0,0005) |
+| 3 | Tuning por fase: grade de 18 combinações escolhida só no treino (nenhuma variável nova) | +0,0001 (−0,0001 a +0,0003) | +0,0001 (−0,0001 a +0,0003) |
+| 4 | Calibração sigmoide sobre o XGBoost de produção | +0,0001 (+0,0000 a +0,0003) | +0,0001 (−0,0001 a +0,0002) |
+| 4 | Calibração isotônica sobre o XGBoost de produção | −0,0003 (−0,0005 a −0,0001) | −0,0001 (−0,0004 a +0,0001) |
+| 5 e 7 | Valor em ouro dos itens finalizados que cada time possui (1) | −0,0001 (−0,0002 a +0,0000) | −0,0000 (−0,0001 a +0,0001) |
+| 6 | Atributos ofensivos: dano de ataque, poder de habilidade, velocidade de ataque (3) | +0,0006 (+0,0003 a +0,0008) | +0,0001 (−0,0001 a +0,0002) |
+| 6 | Atributos defensivos: armadura, resistência mágica, vida (3) | +0,0000 (−0,0002 a +0,0002) | +0,0002 (+0,0000 a +0,0004) |
+| 8 | Visão: sentinelas colocadas e destruídas (2) | −0,0000 (−0,0001 a +0,0000) | −0,0000 (−0,0001 a +0,0001) |
+| 9 | Dragões por tipo (7) | −0,0000 (−0,0001 a +0,0000) | +0,0000 (−0,0001 a +0,0001) |
+| 10 | Placas de torre destruídas (1) | −0,0000 (−0,0000 a +0,0000) | −0,0000 (−0,0001 a +0,0000) |
 
-Só o experimento 6, nos atributos ofensivos, tem intervalo que exclui zero aos 15 minutos (XGBoost), e o ganho é pequeno; com cerca de 20 comparações, um intervalo isolado pode ser acaso. Os experimentos 1 e 10 usam colunas que já existem no conjunto 14, medidas isoladamente. O experimento 4 reporta só a AUC-ROC da calibração adicional, medida em 4 de novembro de 2026 com calibrador de 3 dobras internas, ajustado só no treino de cada uma das 5 dobras externas. Refeita no protocolo do Quadro 24 (5 dobras internas), a diferença de AUC-ROC para a produção é a mesma (+0,0001 e −0,0002 aos 15 minutos; 0,0000 e −0,0003 aos 25), e o efeito sobre a calibração está naquele quadro, no Apêndice F.
+Aos 15 minutos, só o experimento 6, nos atributos ofensivos, tem ganho com intervalo que exclui zero, e pequeno; aos 25, a dispersão espacial e os atributos defensivos, com +0,0003 e +0,0002. A calibração do experimento 4 também tem intervalos que excluem zero, de 0,0003 ou menos. Com cerca de 20 comparações, um intervalo isolado pode ser acaso. Os experimentos 1 e 10 usam colunas que já existem no conjunto 14, medidas isoladamente. O experimento 4 reporta só a AUC-ROC da calibração adicional, medida em 4 de novembro de 2026 com calibrador de 3 dobras internas, ajustado só no treino de cada uma das 5 dobras externas. Refeita no protocolo do Quadro 24 (5 dobras internas), a diferença de AUC-ROC para a produção fica na mesma ordem (+0,0001 e −0,0002 aos 15 minutos; 0,0000 e −0,0003 aos 25), e o efeito sobre a calibração está naquele quadro, no Apêndice F.
 
 O Quadro 31 traz os conjuntos novos de variáveis.
 
@@ -1538,33 +1540,33 @@ Quadro — Experimentos 12 a 19: ganho de AUC-ROC contra as cinco variáveis ori
 
 | Exp. | Variáveis acrescentadas | 15 minutos | 25 minutos |
 |---|---|---|---|
-| 12 | Trajetória: ouro, experiência e abates dos 3 e 5 minutos anteriores (8 variáveis) | +0,0005 (+0,0001 a +0,0008) | +0,0014 (+0,0010 a +0,0019) |
-| 13 | Por função, nível, farm, dano e atributos (37 variáveis) | +0,0028 (+0,0022 a +0,0033) | +0,0018 (+0,0013 a +0,0023) |
-| 14 | Objetivos: arauto, barão, vastilarvas, inibidor, placas, primeiros abate e torre (7 variáveis) | +0,0000 (−0,0001 a +0,0002) | +0,0001 (+0,0000 a +0,0002) |
-| 15 | Estado rico: 12 a 14 juntos (52 variáveis) | +0,0029 (+0,0023 a +0,0034) | +0,0025 (+0,0020 a +0,0031) |
-| 16 | Campeões de cada time, taxa de vitória calculada fora da dobra (2 variáveis) | +0,0013 (+0,0010 a +0,0017) | +0,0021 (+0,0016 a +0,0025) |
-| 17 | Histórico prévio do jogador, só com partidas anteriores (5 variáveis) | +0,0011 (+0,0007 a +0,0014) | +0,0002 (+0,0000 a +0,0004) |
-| 18 | Tudo junto (59 variáveis), XGBoost | +0,0040 (+0,0033 a +0,0047) | +0,0040 (+0,0033 a +0,0046) |
-| 18 | Tudo junto (59 variáveis), regressão logística contra o XGBoost de produção (muda variáveis e classificador) | +0,0078 (+0,0065 a +0,0089) | +0,0074 (+0,0063 a +0,0086) |
-| 18 | Tudo junto (59 variáveis), regressão logística contra a regressão logística com as 5 variáveis | +0,0070 (+0,0058 a +0,0080) | +0,0074 (+0,0063 a +0,0085) |
-| 19 | Histórico do jogador sobre o estado rico, partidas com 5 ou mais jogadores com histórico, regressão logística | +0,0004 (+0,0002 a +0,0006) | +0,0001 (−0,0001 a +0,0003) |
+| 12 | Trajetória: ouro, experiência e abates dos 3 e 5 minutos anteriores (8 variáveis) | +0,0004 (+0,0001 a +0,0008) | +0,0015 (+0,0010 a +0,0021) |
+| 13 | Por função, nível, farm, dano e atributos (37 variáveis) | +0,0029 (+0,0023 a +0,0035) | +0,0021 (+0,0016 a +0,0027) |
+| 14 | Objetivos: arauto, barão, vastilarvas, inibidor, placas, primeiros abate e torre (7 variáveis) | +0,0000 (−0,0001 a +0,0001) | +0,0000 (−0,0001 a +0,0001) |
+| 15 | Estado rico: 12 a 14 juntos (52 variáveis) | +0,0030 (+0,0025 a +0,0036) | +0,0030 (+0,0023 a +0,0037) |
+| 16 | Campeões de cada time, taxa de vitória calculada fora da dobra (2 variáveis) | +0,0015 (+0,0011 a +0,0019) | +0,0029 (+0,0022 a +0,0034) |
+| 17 | Histórico prévio do jogador, só com partidas anteriores (5 variáveis) | +0,0010 (+0,0007 a +0,0014) | +0,0004 (+0,0002 a +0,0006) |
+| 18 | Tudo junto (59 variáveis), XGBoost | +0,0044 (+0,0038 a +0,0050) | +0,0051 (+0,0044 a +0,0059) |
+| 18 | Tudo junto (59 variáveis), regressão logística contra o XGBoost de produção (muda variáveis e classificador) | +0,0081 (+0,0069 a +0,0090) | +0,0092 (+0,0080 a +0,0105) |
+| 18 | Tudo junto (59 variáveis), regressão logística contra a regressão logística com as 5 variáveis | +0,0073 (+0,0062 a +0,0083) | +0,0090 (+0,0078 a +0,0104) |
+| 19 | Histórico do jogador sobre o estado rico, partidas com 5 ou mais jogadores com histórico, regressão logística | +0,0003 (+0,0001 a +0,0006) | +0,0001 (−0,0001 a +0,0003) |
 
-O ganho de +0,0078 aos 15 minutos compara a regressão logística com 64 variáveis ao XGBoost com cinco e muda ao mesmo tempo as variáveis e o classificador. Sob o mesmo protocolo, contra a própria regressão logística com as cinco variáveis originais, o ganho das variáveis é de +0,0070 aos 15 minutos e de +0,0074 aos 25; no XGBoost, contra ele mesmo, de +0,0040 nos dois cortes. A regressão logística aproveita as variáveis novas mais que o XGBoost, o que indica que o limite está na informação disponível e não no algoritmo. Campeões e histórico do jogador, sozinhos, dão AUC-ROC de 0,56 aos 15 minutos. O histórico do jogador não acrescenta ao estado de jogo mesmo nas partidas bem cobertas (experimento 19). O Quadro 32 repete a comparação treinando no passado e testando no futuro.
+O ganho de +0,0081 aos 15 minutos compara a regressão logística com 64 variáveis ao XGBoost com cinco e muda ao mesmo tempo as variáveis e o classificador. Sob o mesmo protocolo, contra a própria regressão logística com as cinco variáveis originais, o ganho das variáveis é de +0,0073 aos 15 minutos e de +0,0090 aos 25; no XGBoost, contra ele mesmo, de +0,0044 e +0,0051. A regressão logística aproveita as variáveis novas mais que o XGBoost, o que indica que o limite está na informação disponível e não no algoritmo. Campeões e histórico do jogador, sozinhos, dão AUC-ROC de 0,56 aos 15 minutos. O histórico do jogador não acrescenta ao estado de jogo mesmo nas partidas bem cobertas (experimento 19). O Quadro 32 repete a comparação treinando no passado e testando no futuro.
 
 Quadro — Variáveis novas em treino no passado e teste no futuro
 
 | Corte | Divisão | XGBoost, 5 variáveis | Regressão logística, 64 variáveis | Ganho de AUC-ROC |
 |---|---|---:|---:|---|
-| 15 min | Cronológica 80/20 | 0,8573 | 0,8664 | +0,0092 (+0,0069 a +0,0118) |
-| 15 min | Por *patch* | 0,8569 | 0,8651 | +0,0082 (+0,0066 a +0,0098) |
-| 15 min | Aleatória 80/20 | 0,8503 | 0,8572 | +0,0070 (+0,0043 a +0,0094) |
-| 25 min | Cronológica 80/20 | 0,9136 | 0,9209 | +0,0072 (+0,0047 a +0,0097) |
-| 25 min | Por *patch* | 0,9124 | 0,9207 | +0,0082 (+0,0066 a +0,0100) |
-| 25 min | Aleatória 80/20 | 0,9112 | 0,9187 | +0,0075 (+0,0050 a +0,0101) |
+| 15 min | Cronológica 80/20 | 0,8570 | 0,8663 | +0,0093 (+0,0071 a +0,0116) |
+| 15 min | Por *patch* | 0,8567 | 0,8650 | +0,0082 (+0,0065 a +0,0099) |
+| 15 min | Aleatória 80/20 | 0,8415 | 0,8483 | +0,0066 (+0,0038 a +0,0092) |
+| 25 min | Cronológica 80/20 | 0,8937 | 0,9026 | +0,0089 (+0,0058 a +0,0117) |
+| 25 min | Por *patch* | 0,8920 | 0,9019 | +0,0100 (+0,0081 a +0,0123) |
+| 25 min | Aleatória 80/20 | 0,8891 | 0,8978 | +0,0088 (+0,0059 a +0,0120) |
 
-O ganho se mantém quando se treina no passado e se testa no futuro, e a referência reproduz o Apêndice C. Como o +0,0078, essa comparação usa o XGBoost com cinco variáveis como referência e mistura as duas mudanças.
+O ganho se mantém quando se treina no passado e se testa no futuro, e a referência reproduz o Apêndice C. Como o +0,0081, essa comparação usa o XGBoost com cinco variáveis como referência e mistura as duas mudanças.
 
-**Experimento 11, à parte.** Testou os percentis de comportamento do *endpoint* `lol-challenges-v1` (cooperação e experiência) em 2.987 partidas recentes da KR, e não na base final, porque o *endpoint* devolve o estado do jogador na data da consulta. A consulta ocorreu depois das partidas, de 0 a 16 dias (média de 7,8). Esse intervalo curto não comprova que o atributo estava disponível no momento da previsão: o valor consultado pode refletir partidas posteriores, inclusive a própria. Por isso o resultado, −0,0031 (cooperação) e +0,0007 (experiência) de AUC-ROC aos 15 minutos, não é comparável aos demais e não entra em nenhuma conclusão. Um piloto de 199 partidas tinha dado +0,0090, mas era regressão à média: com essa amostra, o modelo de referência já oscilava 0,018 de AUC-ROC em relação ao de produção.
+**Experimento 11, à parte.** Testou os percentis de comportamento do *endpoint* `lol-challenges-v1` (cooperação e experiência) em 2.987 partidas recentes da KR, e não na base final, porque o *endpoint* devolve o estado do jogador na data da consulta. A consulta ocorreu depois das partidas, de 0 a 16 dias (média de 7,8). Esse intervalo curto não comprova que o atributo estava disponível no momento da previsão: o valor consultado pode refletir partidas posteriores, inclusive a própria. Por isso o resultado, −0,0031 (cooperação) e +0,0007 (experiência) de AUC-ROC aos 15 minutos, não é comparável aos demais e não entra em nenhuma conclusão. Um piloto de 199 partidas tinha dado +0,0090, efeito de regressão à média em amostra pequena.
 
 ---
 

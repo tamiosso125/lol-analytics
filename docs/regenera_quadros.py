@@ -65,21 +65,24 @@ for l in ls:
                  f"{f(r['precisao'])} | {f(r['recall'])} | {f(r['f1'])} | {f(r['auc'])} |")
 troca("Quadro — Métricas completas por corte temporal", novas)
 
-# ---- Quadro 3 (corpo) e Quadro 4 -------------------------------------------------------------
-_, _, ls = linhas_de("Quadro — Comparação entre modelos (corte de 15 minutos)")
-# o Quadro 3 tem negrito em linhas; reconstrói preservando o rótulo
-novas = []
-for l in ls:
-    c = cel(l)
-    negrito = c[0].startswith("**")
-    nome = c[0].replace("**", "").replace("(produção)", "").strip()
-    chave = {"XGBoost": "XGBoost", "MLP": "MLP", "*Random Forest*": "RandomForest"}[nome]
-    r = mc["15"][chave]
-    vals = [f(r["acuracia"]), f(r["precisao"]), f(r["recall"]), f(r["f1"]), f(r["auc"])]
-    if negrito:
-        vals[0], vals[4] = f"**{vals[0]}**", f"**{vals[4]}**"
-    novas.append("| " + " | ".join([c[0]] + vals) + " |")
-troca("Quadro — Comparação entre modelos (corte de 15 minutos)", novas)
+# ---- Quadro 3 (corpo): comparação após o ajuste (2026-11-08, parecer do orientador) -------
+aj = J("metricas_ajustados.json")["modelos"]
+an = J("tune_models_aninhado.json")["modelos"]
+
+
+def linha_q3(nome, r, aninhado="—"):
+    return (f"| {nome} | {f(r['acuracia'])} | {f(r['precisao'])} | {f(r['recall'])} | {f(r['f1'])} | "
+            f"{f(r['auc'])} | {aninhado} |")
+
+
+troca("Quadro — Comparação entre modelos após o ajuste (corte de 15 minutos)", [
+    linha_q3("Regressão logística (sem hiperparâmetro ajustado)", aj["Regressão logística"]),
+    linha_q3("MLP ajustado", aj["MLP ajustado"], f(an["MLP"]["auc"])),
+    linha_q3("XGBoost ajustado (produção)", mc["15"]["XGBoost"], f(an["XGBoost"]["auc"])),
+    linha_q3("*Random Forest* ajustada", aj["Random Forest ajustada"], f(an["RandomForest"]["auc"])),
+    linha_q3("MLP (referência)", mc["15"]["MLP"]),
+    linha_q3("*Random Forest* (referência)", mc["15"]["RandomForest"]),
+])
 
 _, _, ls = linhas_de("Quadro — Desempenho do XGBoost por corte temporal")
 novas = []
@@ -100,7 +103,7 @@ for l in ls:
     m = c[1]
     if m == "Regressão logística":
         mod, d = bd[corte]["modelos"][m], bd[corte]["diferencas"][dif]["auc"]
-    elif m == "MLP":
+    elif m == "MLP (referência)":
         mod, d = bd[corte]["modelos"]["MLP"], bd[corte]["diferencas"]["XGBoost - MLP"]["auc"]
     else:
         mod, d = bd[corte]["modelos"]["Random Forest"], bd[corte]["diferencas"]["XGBoost - Random Forest"]["auc"]
@@ -109,7 +112,7 @@ troca("Quadro — Regressão logística como baseline", novas)
 
 # ---- Apêndice C: 5 e 10 dobras ---------------------------------------------------------------
 rd = J("robustez_dobras.json")["resultados"]
-rotm = {"XGBoost": "XGBoost", "*Random Forest*": "RandomForest", "MLP": "MLP"}
+rotm = {"XGBoost": "XGBoost", "*Random Forest* (referência)": "RandomForest", "MLP (referência)": "MLP"}
 _, _, ls = linhas_de("Quadro — Validação cruzada com 5 e com 10 dobras")
 novas = []
 for l in ls:
@@ -143,7 +146,12 @@ for l, (conj, mdl) in zip(ls[:8], mapa):
     c = cel(l)
     a15, a25 = (exp[k][conj][mdl] for k in ("15", "25"))
     novas.append(f"| {c[0]} | {c[1]} | {ic(a15['delta_auc'], a15['ic_lo'], a15['ic_hi'])} | {ic(a25['delta_auc'], a25['ic_lo'], a25['ic_hi'])} |")
+gl = J("ganho_variaveis_logit.json")["cortes"]
 c = cel(ls[8])
+g15, g25 = (gl[k]["logit"]["E18_tudo"] for k in ("15", "25"))
+novas.append(f"| {c[0]} | {c[1]} | {ic(g15['ganho_auc'], g15['ic_lo'], g15['ic_hi'])} | "
+             f"{ic(g25['ganho_auc'], g25['ic_lo'], g25['ic_hi'])} |")
+c = cel(ls[9])
 h15, h25 = (hist[k]["5+"]["logit"]["dauc_ic"] for k in ("15", "25"))
 novas.append(f"| {c[0]} | {c[1]} | {ic(*h15)} | {ic(*h25)} |")
 troca("Quadro — Experimentos 12 a 19", novas)
@@ -165,7 +173,6 @@ for l, ch in zip(ls[:11], chaves):
     c = cel(l)
     a15, a25 = d_("15", ch), d_("25", ch)
     novas.append(f"| {c[0]} | {c[1]} | {ic(a15['delta_auc'], a15['ic_lo'], a15['ic_hi'])} | {ic(a25['delta_auc'], a25['ic_lo'], a25['ic_hi'])} |")
-novas.append(ls[11])
 troca("Quadro — Experimentos 1 a 10", novas)
 
 q5 = ["A01_barao_arauto", "A02_dispersao", "tuning", "sigmoide", "A05_ouro_itens", "A06_ofensivas", "A05_ouro_itens",
@@ -175,7 +182,6 @@ novas = []
 for l, ch in zip(ls[:10], q5):
     c = cel(l)
     novas.append(f"| {c[0]} | {c[1]} | {f(d_('15', ch)['delta_auc'], 4, True)} e {f(d_('25', ch)['delta_auc'], 4, True)} |")
-novas.append(ls[10])
 troca("Quadro — Experimentos negativos de enriquecimento", novas)
 
 _, _, ls = linhas_de("Quadro — Variáveis novas em treino no passado")
@@ -203,13 +209,71 @@ for l in ls:
     novas.append(f"| {c[0]} | " + " | ".join(f(sh[k][rotv[c[0]]]) for k in ("10", "15", "20", "25")) + " |")
 troca("Quadro — Importância média das variáveis", novas)
 
-tb = J("taxa_base_por_corte.json")
-_, _, ls = linhas_de("Quadro — Taxa de vitória do azul no estado de empate")
+# ---- quadros do parecer (2026-11-08): 12, 16, 17, 23 e 24 --------------------------------------
+tf = J("tune_models_39k.json")
+xg = tf["XGBoost"]
+rf_p, mlp_p = tf["RandomForest"]["melhor_combinacao"], tf["MLP"]["melhor_combinacao"]
+prod = xg["producao"]
+n_prod = sum(1 for e in an["XGBoost"]["escolhas_por_dobra"] if all(e.get(k) == v for k, v in prod.items()))
+ordinal = f"{xg['posicao_producao_na_grade']}º"
+camadas_l = mlp_p["mlpclassifier__hidden_layer_sizes"]
+camadas = " e ".join(str(x) for x in camadas_l)
+alpha = f"{mlp_p['mlpclassifier__alpha']:g}".replace(".", ",")
+troca("Quadro — Configuração dos três modelos comparados", [
+    "| XGBoost | 500 árvores, taxa de aprendizado 0,01, profundidade 3 | busca em grade (27 combinações) sobre a base "
+    f"de 10.295 partidas, contidas nas {n(xg['linhas'])} da avaliação; repetida nas {n(xg['linhas'])}, "
+    + ("a busca escolheu a mesma configuração (1º lugar entre 27) |" if xg["posicao_producao_na_grade"] == 1 else
+       f"a produção ficou em {ordinal} lugar, a {f(xg['delta_auc'])} de AUC-ROC da melhor |"),
+    "| XGBoost aninhado | grade de 27 combinações escolhida só no treino de cada dobra (3 dobras internas) | "
+    f"a produção foi escolhida em {n_prod} das 5 dobras; acurácia {f(an['XGBoost']['acuracia'])}, "
+    f"AUC-ROC {f(an['XGBoost']['auc'])} |",
+    "| *Random Forest* (referência) | 500 árvores, demais parâmetros do scikit-learn | sem busca em grade |",
+    f"| *Random Forest* ajustada | {rf_p['n_estimators']} árvores, profundidade {rf_p['max_depth']}, mínimo de "
+    f"{rf_p['min_samples_leaf']} amostras por folha | busca em grade (27 combinações) nas {n(xg['linhas'])}, "
+    f"avaliada nas mesmas dobras: {f(aj['Random Forest ajustada']['acuracia'])} e "
+    f"{f(aj['Random Forest ajustada']['auc'])}; aninhada: {f(an['RandomForest']['acuracia'])} e "
+    f"{f(an['RandomForest']['auc'])} |",
+    "| MLP (referência) | camadas de 64 e 32 neurônios, variáveis padronizadas, até 500 iterações | sem busca em grade |",
+    f"| MLP ajustado | {'camada' if len(camadas_l) == 1 else 'camadas'} de {camadas} neurônios, regularização "
+    f"{alpha}, até 1.000 iterações | busca em grade (9 combinações) nas {n(xg['linhas'])}, avaliada nas mesmas "
+    f"dobras: {f(aj['MLP ajustado']['acuracia'])} e {f(aj['MLP ajustado']['auc'])}; aninhada: "
+    f"{f(an['MLP']['acuracia'])} e {f(an['MLP']['auc'])} |",
+])
+
+ca = J("curva_aprendizado.json")
 novas = []
-for l in ls:
-    corte = cel(l)[0].split()[0]
-    m, d = tb["modelo"][corte] * 100, tb["bruto"][corte][2] * 100
-    novas.append(f"| {corte} min | {f(m, 1)}% | {f(d, 1)}% | {f(m - d, 1)} pp |")
-troca("Quadro — Taxa de vitória do azul no estado de empate", novas)
+for p_ in ca["curva_15min"]["pontos"]:
+    dp = "—" if p_["sorteios"] == 1 else f(p_["auc_dp"])
+    novas.append(f"| {n(p_['treino'])} | {f(p_['auc_media'])} | {dp} |")
+troca("Quadro — Curva de aprendizado do XGBoost com teste fixo", novas)
+troca("Quadro — AUC-ROC do XGBoost por corte, nas partidas elegíveis", [
+    f"| {c_} min | {n(r['elegiveis_n'])} | {f(r['elegiveis_auc'])} | {n(r['mesmas_n'])} | {f(r['mesmas_auc'])} |"
+    for c_, r in ca["cortes"].items()])
+
+cal = J("calibracao_empate_real.json")
+
+
+def pct_(x):
+    return f(100 * x, 1) + "%"
+
+
+def pp_(x):
+    v = f(x, 2, True)
+    return "0,00 pp" if v in ("+0,00", "−0,00") else v + " pp"
+
+
+troca("Quadro — Calibração do XGBoost nas partidas empatadas", [
+    f"| {c_} min | {n(r['empatadas'])} | {pct_(r['taxa_observada'])} ({pct_(r['ic95_observada'][0])} a "
+    f"{pct_(r['ic95_observada'][1])}) | {pct_(r['media_prevista_empatadas'])} | {pp_(r['diferenca_pp'])} | "
+    f"{f(r['decis_maior_desvio_pp'], 2)} pp |"
+    for c_, r in cal["producao_por_corte"].items()])
+rotv2 = {"producao": "Produção", "sigmoide": "Sigmoidal", "isotonica": "Isotônica"}
+novas = []
+for c_ in ("15", "25"):
+    for k, nome in rotv2.items():
+        r = cal["variantes"][c_][k]
+        novas.append(f"| {c_} min | {nome} | {pp_(r['diferenca_pp'])} | {f(r['decis_maior_desvio_pp'], 2)} pp | "
+                     f"{f(r['decis_desvio_medio_pp'], 2)} pp | {f(r['brier'])} | {f(r['auc'])} |")
+troca("Quadro — Calibração adicional sobre o XGBoost", novas)
 MD.write_text(t, encoding="utf-8", newline="")
-print("J e F regenerados")
+print("quadros do parecer regenerados")

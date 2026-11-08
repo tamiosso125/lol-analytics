@@ -32,7 +32,7 @@ import os
 
 import pandas as pd
 
-from src.features.build_features import CUTOFFS
+from src.features.build_features import CUTOFFS, corte_disponivel
 
 ITEMS_PATH = "data/items.json"
 DRAGOES = ["FIRE", "WATER", "EARTH", "AIR", "HEXTECH", "CHEMTECH", "ELDER"]
@@ -81,7 +81,7 @@ def _spread(frame: dict) -> dict[int, float]:
 
 def antigos_features(payload: dict, cutoff: int, item_gold: dict[int, int]) -> dict | None:
     frames_all = payload.get("info", {}).get("frames", [])
-    if len(frames_all) <= cutoff:
+    if not corte_disponivel(frames_all, cutoff):  # quadro final não é estado no corte
         return None
     frames = frames_all[: cutoff + 1]
     out: dict = {}

@@ -155,11 +155,17 @@ export function StatePanel() {
                     <span>Azul vence</span>
                   </div>
                   <p className="mt-3 border-t border-border pt-2 text-xs leading-relaxed text-muted-ink">
-                    Com tudo zerado a probabilidade não é 50%: zerar significa "empate em
-                    ouro/XP/objetivos", e o modelo aprendeu dos dados que, mesmo empatado, o
-                    lado vermelho vence mais neste elo — viés que não aparece em nenhum dos 5
-                    fatores e por isso vive na taxa-base. A causa é hipótese, não medida
-                    (counter-pick garantido, acesso ao dragão).
+                    {/* 2026-11-08: a nota antiga dizia que "com tudo zerado" a previsão
+                        favorecia o vermelho; aos 15 min o estado zerado dá ~50%. O viés de
+                        lado entra na referência do SHAP (previsão média), não no estado
+                        sintético zerado. */}
+                    Neste elo o vermelho vence mais
+                    {shapBase !== undefined
+                      ? ` (referência do modelo: ${(sigmoid(shapBase) * 100).toFixed(1)}% para o azul)`
+                      : ""}
+                    : é essa média que o modelo usa como referência antes de olhar o estado. O estado
+                    sintético com as cinco diferenças zeradas não ocorre nas partidas reais e
+                    não mede esse viés. A causa do viés é hipótese, não medida.
                   </p>
                 </>
               )}

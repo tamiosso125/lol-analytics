@@ -192,7 +192,7 @@ export function ExplainPanel() {
         <CardContent className="border-t border-border pt-3">
           <p className="text-xs leading-relaxed text-secondary-ink">
             <span className="font-medium text-gold">Leitura: </span>
-            este é o achado central do modelo por fases: o ouro cresce e domina sempre, mas
+            este é o achado central do modelo por fases: o ouro domina em todos os cortes, mas
             as torres saem de quase zero aos 15 minutos para{" "}
             {towerRatio ? `${Math.round(towerRatio)}× mais importância` : "dezenas de vezes mais importância"}{" "}
             aos 25 — as placas caem aos 14, então antes disso quase não há torre destruída
@@ -225,12 +225,15 @@ export function ExplainPanel() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Curva de calibração dos modelos</CardTitle>
+            <CardTitle>Curva de calibração do XGBoost (fora da dobra, quatro cortes)</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* 2026-11-08: a imagem antiga (calibration_curve.png, de 04/10) era da base
+                anterior e in-sample; esta é a Figura 12 do TCC, gerada por
+                docs/calibracao_empate_real.py com as probabilidades fora da dobra */}
             <img
-              src={api.reportImage("calibration_curve.png")}
-              alt="Curva de calibração comparando RandomForest, XGBoost e MLP"
+              src={api.reportImage("figuras_texto/fig_calibracao.png")}
+              alt="Curva de calibração do XGBoost nos quatro cortes, por decis da probabilidade prevista fora da dobra"
               className="w-full rounded-lg bg-white"
             />
             <p className="mt-2 text-xs leading-relaxed text-secondary-ink">

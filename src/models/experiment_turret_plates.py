@@ -20,6 +20,7 @@ teria por que ajudar.
 
 Uso:  python -m src.models.experiment_turret_plates
 """
+from src.features.build_features import corte_disponivel  # noqa: E402
 import json
 
 import pandas as pd
@@ -51,7 +52,7 @@ def plate_diff_by_cutoff(payload: dict) -> dict[int, int]:
 
     out = {}
     for cutoff in CUTOFFS_RELEVANTES:
-        if len(frames) <= cutoff:
+        if not corte_disponivel(frames, cutoff):  # 2026-11-08: quadro final
             continue
         cutoff_ms = cutoff * 60_000
         count = {100: 0, 200: 0}

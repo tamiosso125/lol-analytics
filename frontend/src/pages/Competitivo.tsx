@@ -161,13 +161,14 @@ export function Competitivo() {
           {/* Sem "a literatura aponta...": frase sem fonte, tirada do Dashboard e da
               Home em 2026-10-20 e que tinha ficado aqui. A explicação é HIPÓTESE (é
               assim que o TCC a trata, Seção 5.3), não fato. */}
+          {/* 2026-11-08 (parecer do orientador): a ordem de escolha não está nos dados,
+              então a explicação fica como hipótese não testada, sem afirmar fato */}
           <Takeaway>
             no competitivo o azul vence {pct(p.blue_win_rate)}; no solo queue de elo
-            altíssimo, só {s ? pct(s.blue_win_rate) : "…"}. Hipótese: no pro, a prioridade
-            de primeiro pick pesa (times escolhem lado nos playoffs); no solo queue, sem
-            draft coordenado de 5 pessoas, o counter-pick garantido do vermelho pesa mais.
-            Mesma métrica, sinais opostos — qualquer análise precisa dizer de QUAL contexto
-            está falando.
+            alto, só {s ? pct(s.blue_win_rate) : "…"}. Mesma métrica, sinais opostos —
+            qualquer análise precisa dizer de QUAL contexto está falando. Uma hipótese, não
+            testada aqui, é o peso da prioridade de escolha no pro e do counter-pick
+            garantido do vermelho no solo queue; os dados não registram a ordem de escolha.
           </Takeaway>
         </CardContent>
       </Card>
@@ -211,12 +212,13 @@ export function Competitivo() {
           )}
         </CardContent>
         <CardContent className="pt-0">
+          {/* 2026-11-08 (parecer do orientador): diferença OBSERVADA entre os recortes;
+              atribuí-la à coordenação das equipes exigiria evidência que não temos */}
           <Takeaway>
-            times profissionais convertem vantagem de ouro de forma mais confiável — jogam
-            fechado em volta da liderança (macro coordenado), enquanto no solo queue uma
-            vantagem igual escorre com mais frequência. É o argumento quantitativo para a
-            frase "macro ganha jogo": a MESMA vantagem material vale mais nas mãos de quem
-            coordena o mapa.
+            com a mesma vantagem de ouro aos 15 minutos, o azul vence mais no competitivo do
+            que no solo queue. É uma diferença observada entre os dois recortes, que diferem
+            também no nível dos jogadores, na versão do jogo e na época; os dados não
+            permitem atribuí-la à coordenação das equipes.
           </Takeaway>
         </CardContent>
       </Card>

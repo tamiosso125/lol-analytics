@@ -356,7 +356,9 @@ def regions():
         {
             "platform": r[0],
             "matches": r[1],
-            "red_win_rate": round(float(r[2]), 4),
+            # 6 casas, não 4 (2026-11-08): 0,533549 arredondado para 0,5335 virava
+            # "53.3%" no front (53,35 em ponto flutuante), contra 53,4% no TCC
+            "red_win_rate": round(float(r[2]), 6),
             "avg_duration_min": round(float(r[3]), 1),
         }
         for r in rows

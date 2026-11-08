@@ -299,7 +299,7 @@ export function Home() {
         </div>
       </div>
 
-      <SectionTitle eyebrow="Rankings" title="O topo do alto elo BR" />
+      <SectionTitle eyebrow="Rankings" title="O topo do alto elo" />
       <div className="grid grid-cols-3 gap-4">
         <RankingCard
           title="Maior win rate (200+ jogos)"
@@ -330,7 +330,7 @@ export function Home() {
         {h.best_player && (
           <InsightCard
             icon={Crown}
-            title="Melhor jogador do dataset"
+            title="Melhor jogador da base"
             headline={
               h.best_player.name
                 ? `${h.best_player.name}#${h.best_player.tag}`
@@ -371,7 +371,7 @@ export function Home() {
             title="Campeão mais banido"
             headline={championDisplayName(h.most_banned.champion)}
             detail={`banido em ${pct(h.most_banned.ban_rate)} das partidas`}
-            why="A taxa de banimento mede o quanto os jogadores consideram um campeão opressor — mais de metade das partidas removendo-o do jogo é o maior 'voto de medo' do dataset."
+            why="A taxa de banimento mede o quanto os jogadores consideram um campeão opressor — mais de metade das partidas removendo-o do jogo é o maior 'voto de medo' da base."
             to={`/campeoes/${h.most_banned.champion}`}
             image={championIcon(h.most_banned.champion_id)}
           />
@@ -381,7 +381,7 @@ export function Home() {
           title="O lado do mapa importa"
           headline={`Vermelho vence ${pct(h.red_side_win_rate)}`}
           detail={`vs ${pct(1 - h.red_side_win_rate)} do lado azul`}
-          why="No alto elo o vermelho vence mais que o azul, provavelmente pelo counter-pick garantido (que pesa mais quando todos sabem punir draft) e pelo acesso ao pit do dragão. No jogo profissional o padrão se inverte. Um achado do dataset que qualquer análise aqui precisa descontar."
+          why="No alto elo o vermelho vence mais que o azul; no jogo profissional o padrão se inverte. A causa não está nos dados (o counter-pick garantido do vermelho é hipótese, não testada). Um achado da base que qualquer análise aqui precisa descontar."
           to="/dashboard"
         />
         <Card>
