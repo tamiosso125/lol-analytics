@@ -16,7 +16,6 @@ Requer ANTHROPIC_API_KEY no ambiente (.env).
 Uso:  python -m src.nlq.nl_to_sql "qual campeão tem maior win rate?"
 """
 import os
-import re
 import sys
 
 import anthropic
@@ -28,7 +27,6 @@ from src.nlq.schema_context import SCHEMA_DESCRIPTION
 # a validação (camadas 1 a 3) vive em sql_guard.py, testável sem banco nem chave:
 # tests/test_validate_sql.py. Reexportada aqui porque evaluate_nlq e a API importam daqui.
 from src.nlq.dados_ausentes import dado_ausente, sql_de_recusa  # noqa: E402
-from src.nlq.entidades import dica as dica_de_nomes, so_do_competitivo  # noqa: E402
 from src.nlq.route import AMBOS, PRO, SOLO, rotear  # noqa: E402
 from src.nlq.sql_guard import (  # noqa: E402,F401
     ALLOWED_TABLES, FORBIDDEN, BaseMixError, validate_base, validate_sql,
@@ -82,14 +80,6 @@ def generate_sql(
         messages.append({"role": "user", "content": turn["question"]})
         messages.append({"role": "assistant", "content": turn["sql"]})
     pergunta = f"{DICA_BASE[base]}\n\n{question}" if base in DICA_BASE else question
-    # nomes citados resolvidos no banco (2026-11-05, src/nlq/entidades.py): o modelo corrigia
-    # 'MonkeyKing' para 'Monkey King', tratava liga como equipe e recusava campeão novo
-    try:
-        nomes = dica_de_nomes(question, base)
-    except Exception:  # sem banco (testes, falha de conexão): segue sem a dica, como antes
-        nomes = ""
-    if nomes:
-        pergunta = f"{nomes}\n\n{pergunta}"
     messages.append({"role": "user", "content": pergunta})
     if erro_anterior:
         sql_ruim, erro = erro_anterior
@@ -122,27 +112,6 @@ def generate_sql(
             "terminar. Tente dividir em perguntas menores."
         )
     return extrair_sql(msg.content[0].text)
-
-
-_PEDE_ASSIST = re.compile(r"assist|participa|kda")
-_SOMA_ASSIST = re.compile(r"kills\s*\+\s*(?:\w+\.)?assists|assists\s*\+\s*(?:\w+\.)?kills")
-_ELIMINACOES = re.compile(r"eliminac|abates?\b|\bkills?\b")
-AVISO_ELIMINACOES = ("A consulta somou kills + assists, mas a pergunta fala em ELIMINAÇÕES: "
-                     "isso é só a coluna kills (assistências não entram). Refaça com kills.")
-
-
-def _sem_acento(s: str) -> str:
-    import unicodedata
-
-    return "".join(c for c in unicodedata.normalize("NFKD", s.lower()) if not unicodedata.combining(c))
-
-
-def soma_assist_indevida(question: str, sql: str) -> bool:
-    """True se a pergunta pede 'eliminações' (kills) sem citar assistência/participação/KDA e a
-    SQL somou kills + assists. A regra em texto do esquema foi ignorada pelo modelo (gabarito
-    automático, 2026-11-05); esta checagem é determinística e dispara UMA nova geração."""
-    q = _sem_acento(question)
-    return bool(_ELIMINACOES.search(q)) and not _PEDE_ASSIST.search(q) and bool(_SOMA_ASSIST.search(sql.lower()))
 
 
 def extrair_sql(texto: str) -> str:
@@ -203,9 +172,6 @@ def ask_base(question: str, history: list[dict] | None = None, base: str | None 
                 "rows": rows, "tentativas": 0}
     sql = generate_sql(question, history, base=base)
     validate_sql(sql)
-    if soma_assist_indevida(question, sql):
-        sql = generate_sql(question, history, erro_anterior=(sql, AVISO_ELIMINACOES), base=base)
-        validate_sql(sql)
     try:
         validate_base(sql, base)
         try:
@@ -277,13 +243,6 @@ def ask(question: str, history: list[dict] | None = None, modelo_roteador=None) 
     Devolve {"roteamento", "base", "resultados": [...]} e, por compatibilidade com a
     tela antiga, `sql`/`columns`/`rows`/`tentativas` do primeiro resultado que deu certo."""
     roteamento = rotear(question, _base_anterior(history), modelo=modelo_roteador)
-    # liga, equipe ou jogador profissional só existem no competitivo (src/nlq/entidades.py)
-    if roteamento["classe"] != PRO and not history:
-        try:
-            if so_do_competitivo(question):
-                roteamento = {**roteamento, "classe": PRO, "origem": "entidade"}
-        except Exception:  # sem banco: mantém o roteamento das regras
-            pass
     bases = [SOLO, PRO] if roteamento["classe"] == AMBOS else [roteamento["classe"]]
     resultados, ultimo_erro = [], None
     for base in bases:
