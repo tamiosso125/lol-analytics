@@ -27,7 +27,7 @@
 9. Os três modelos: Random Forest, XGBoost e MLP
 10. Como os modelos foram avaliados (métricas)
 11. Explicabilidade: SHAP
-12. Os 11 experimentos que não funcionaram (e por que isso é bom)
+12. Os experimentos que não funcionaram (e por que isso é bom)
 13. A análise exploratória: o viés de lado
 14. A interface em linguagem natural (text-to-SQL)
 15. Perguntas prováveis da banca, com respostas
@@ -75,8 +75,8 @@ visualização (*dashboards*) → consulta em linguagem natural.
 | Partidas ranqueadas coletadas (solo queue) | **41.063** (5 regiões) |
 | Partidas profissionais incorporadas | **99.259** (2014-2026) |
 | Modelo adotado (os três ficaram a menos de 0,002) | **XGBoost** |
-| Acurácia aos 15 minutos | **0,7636** (≈ 76 de cada 100 partidas certas) |
-| AUC-ROC aos 15 minutos | **0,8490** |
+| Acurácia aos 15 minutos | **0,7641** (≈ 76 de cada 100 partidas certas) |
+| AUC-ROC aos 15 minutos | **0,8487** |
 | Viés de lado no solo queue | vermelho vence mais (56,3% na BR1) |
 | Viés de lado no profissional | **inverte**: azul vence 53,2% |
 | Interface em linguagem natural | **89,2%** (181 de 203) no gabarito automático, comparado por código; 26 de 26 no *benchmark* de referência, que não é independente |
@@ -151,7 +151,7 @@ cumprido? onde?".
 | **b** | Identificar quais informações organizar | Seção 5.2 | Quadro 1 (tabelas do banco) e esquema completo no Apêndice A |
 | **c** | Estruturar coleta e tratamento | Seção 5.2 | Coletor resumível, 41.063 partidas |
 | **d** | Avaliar análise de dados para achar padrões | Seção 5.3 | Viés de lado, conversão de vantagem |
-| **e** | Comparar XGBoost, Random Forest e redes neurais | Seção 5.4 | Diferenças de milésimos; XGBoost adotado: 0,7636 / 0,8490 |
+| **e** | Comparar XGBoost, Random Forest e redes neurais | Seção 5.4 | Diferenças de milésimos; XGBoost adotado: 0,7641 / 0,8487 |
 | **f** | Propor *dashboards* | Seção 5.5 | 6 páginas de visualização |
 | **g** | Propor interface em linguagem natural | Seção 5.6 | 181 de 203 (89,2%) no gabarito automático; 26/26 no *benchmark* ajustado |
 
@@ -847,9 +847,13 @@ minutos e de repente importam muito aos 25 (Parte 11). Um modelo único
 misturaria essas fases e ficaria pior.
 
 **Se a partida acabou antes do corte** (ex.: alguém se rendeu aos 14
-minutos), ela simplesmente não entra naquele corte. Por isso o número
-de partidas cai nos cortes tardios: 40.942 aos 10, 40.816 aos 15,
-35.637 aos 20, 27.761 aos 25.
+minutos), ela não entra naquele corte. Por isso o número de partidas cai
+nos cortes tardios: 40.919 aos 10, 40.778 aos 15, 34.505 aos 20, 25.098
+aos 25. **Atenção (corrigido em 2026-11-08):** a linha do tempo termina com
+um quadro extra no instante em que o jogo acaba. Antes, uma partida de
+24:16 entrava no corte de 25 minutos com esse quadro final, que é o fim do
+jogo (vazamento). A regra `corte_disponivel` exige um quadro depois do
+quadro do corte, e um teste automatizado garante isso (Parte 22).
 
 ### 8.4 Vazamento de dados (*data leakage*) — A REGRA MAIS IMPORTANTE
 
@@ -977,12 +981,19 @@ aprende sozinho dos dados. Hiperparâmetros são configurações que
 **você** escolhe antes de treinar.
 
 **Por que o XGBoost foi escolhido como modelo de produção (Seção 5.4):**
-- Na configuração de produção, teve a **maior acurácia e a maior AUC nos quatro cortes** (aos 15 minutos, 0,7636 e 0,8490, contra 0,7598 e 0,8454 do MLP de referência). Com a busca em grade feita nos três, o MLP ajustado fica **0,0009 acima em acurácia e 0,0004 em AUC** (0,7645 e 0,8494 contra 0,7636 e 0,8490) e a *Random Forest* ajustada, abaixo (0,7625 e 0,8484). Ou seja: **diferença de milésimos**, sem vencedor claro.
-- **Por isso a escolha não foi "porque ganhou em tudo".** O texto (Seção 5.4) diz que o XGBoost foi **mantido por ser a escolha anterior ao baseline, por liderar a acurácia em todos os cortes na configuração de produção e porque o SHAP de árvores é exato e já sustenta a interface**; a regressão logística (0,7649 e 0,8498) fica à frente por milésimos, e os números dos quatro cortes estão no Apêndice C.
-- **Resposta pronta se perguntarem "mas o MLP ajustado ganhou!":**
-  "Ganhou por 0,0009 de acurácia e 0,0004 de AUC, diferença que não muda nada na prática. O XGBoost vinha do TCC I e já sustentava a interface; ele se integra direto com o SHAP de árvore (TreeExplainer), que dá explicações exatas e rápidas."
-  (Essa última parte é verdade técnica: o `export_model.py` usa
-  `shap.TreeExplainer`, que é específico para árvores.)
+- O Quadro 3 mostra a comparação **depois do ajuste**: regressão logística
+  0,7648 / 0,8495, MLP ajustado 0,7638 / 0,8491, XGBoost 0,7641 / 0,8487 e
+  *Random Forest* ajustada 0,7628 / 0,8480. Os quatro ficam a **0,0015 de
+  AUC** uns dos outros: **diferença de milésimos**, sem vencedor.
+- **A escolha não se apoia em superioridade de desempenho** (pedido do
+  orientador no parecer). O XGBoost foi mantido **pela proximidade dos
+  resultados e porque a integração com o SHAP de árvores, exato, já estava
+  implementada**.
+- **Resposta pronta se perguntarem "a logística ganhou, por que não ela?":**
+  "Por 0,0008 de AUC, uma diferença que não muda nada na prática; é o sinal
+  de que o limite está nas cinco variáveis, não no modelo. O XGBoost já
+  sustentava a interface com o SHAP de árvore (TreeExplainer), que dá
+  explicações exatas e rápidas."
 
 **De onde veio o conhecimento para usar o XGBoost:**
 1. **O artigo original** (Chen e Guestrin, 2016), citado na Seção 2.2,
@@ -999,11 +1010,14 @@ aprende sozinho dos dados. Hiperparâmetros são configurações que
 - A grade do XGBoost tinha 3 valores para cada um dos 3 hiperparâmetros:
   árvores (200, 300, 500), taxa (0,01; 0,05; 0,1) e profundidade (3, 4,
   6) = **27 combinações**.
-- Sobre as 41 mil partidas, a melhor combinação foi 200 árvores, taxa
-  0,05, profundidade 3, com AUC **0,8491**. A de produção (500/0,01/3)
-  teve **0,8490**: **3º lugar entre 27**, diferença de **0,0001**.
+- Sobre as 40.778 partidas do corte de 15 minutos, a busca refeita
+  escolheu **a própria configuração de produção** (500/0,01/3): **1º lugar
+  entre 27**.
+- **Seleção aninhada (parecer):** escolhendo os hiperparâmetros só no
+  treino de cada dobra, a AUC muda no máximo 0,0002 nos três modelos. O
+  otimismo da busca é desprezível.
 - **Conclusão importante:** o modelo de produção **não está mal
-  ajustado** (não é "subajuste"). Escolheu a **mesma profundidade** (3).
+  ajustado** (não é "subajuste").
 
 ### 9.5 MLP — rede neural (perceptron multicamadas)
 
@@ -1047,35 +1061,33 @@ make_pipeline(StandardScaler(),
 **Histórico de desempenho (AUC aos 15 min, MLP × XGBoost):** 7.353
 partidas sem ajuste 0,8050 × 0,8144; ajustada (32 neurônios, alpha 0,01)
 0,8278 × 0,8260; 10.295 partidas ajustada 0,8325 × 0,8319; base final
-(Quadro 3, configuração de referência 64/32) 0,8454 × 0,8490.
+(Quadro 3, configuração de referência 64/32) 0,8459 × 0,8487.
 
-**Por que não foi a de produção:** diferenças de milésimos (XGBoost à frente em AUC e acurácia nos quatro cortes na configuração de referência; o MLP ajustado fica 0,0009 acima aos 15 minutos), e a
+**Por que não foi a de produção:** diferenças de milésimos (ajustado, o
+MLP fica 0,0004 acima do XGBoost em AUC e 0,0003 abaixo em acurácia), e a
 explicação: para árvores o SHAP usa o `TreeExplainer`, exato e rápido; para
 uma rede do scikit-learn usaria o `KernelExplainer`, aproximado e muito
 mais lento, ruim para a tela interativa.
 
-**A comparação do Quadro 3 (achado e corrigido no texto em 2026-11-02).**
-A 5.4 dizia que o Quadro 3 comparava os três "após ajuste de
-hiperparâmetros", mas na base final só o XGBoost passou pela busca em
-grade; a *Random Forest* (500 árvores, sem limite de profundidade) e o MLP
-(64, 32) estão na configuração de referência. Agora a 5.4 diz isso e cita a
-busca feita também para os outros dois, sobre as mesmas 40.816 partidas
-(`tune_models_full --completo`, gravado em `reports/tune_models_39k.json`; o nome do arquivo ficou do tempo da base menor),
-medida do mesmo jeito do Quadro 3:
+**A comparação do Quadro 3 (revista pelo parecer de 2026-11-08).** O
+Quadro 3 agora mostra os quatro modelos ajustados (a logística sem
+hiperparâmetro) e, embaixo, a *Random Forest* e o MLP na configuração de
+referência. A busca dos três rodou nas 40.778 partidas
+(`tune_models_full --completo`, `reports/tune_models_39k.json`; o nome do
+arquivo ficou do tempo da base menor) e foi repetida de forma aninhada
+(`tune_models_aninhado`):
 
-| 15 min | Acurácia | AUC |
-|---|---|---|
-| XGBoost (produção) | 0,7636 | 0,8490 |
-| MLP ajustada: (32), alpha 0,001 | **0,7645** | **0,8494** |
-| *Random Forest* ajustada: 300 árvores, profundidade 6, folha 2 | 0,7625 | 0,8484 |
+| 15 min | Acurácia | AUC | AUC aninhada |
+|---|---|---|---|
+| Regressão logística | 0,7648 | 0,8495 | — |
+| MLP ajustado: (32), alpha 0,001 | 0,7638 | 0,8491 | 0,8491 |
+| XGBoost (produção) | 0,7641 | 0,8487 | 0,8485 |
+| *Random Forest* ajustada: 200 árvores, profundidade 6, folha 5 | 0,7628 | 0,8480 | 0,8480 |
 
-Diferenças de milésimos. O MLP ajustado fica ligeiramente à frente, e o XGBoost é mantido pelas razões da 5.4 (escolha anterior, liderança na configuração de produção, SHAP exato); a conclusão não muda. Se a banca comparar o Quadro 3
-(*Random Forest* com 0,8287) com o Apêndice F (*Random Forest* de
-profundidade 6 a 0,0007 do XGBoost), a resposta está na própria 5.4: o
-quadro traz a configuração de referência, e a frase seguinte, a ajustada.
-**Resposta pronta:** "Na base final, ajustei por busca em
-grade o XGBoost. Rodando a mesma busca para a *Random Forest* e a rede, os
-três ficam a menos de 0,001 em AUC e em acurácia. O MLP ajustado fica um pouco à frente; mantive o XGBoost por ser a escolha anterior, por liderar na configuração de produção e pelo SHAP exato."
+**Resposta pronta:** "Ajustei os três por busca em grade e repeti a busca
+de forma aninhada. Com a regressão logística, os quatro ficam a 0,0015 de
+AUC uns dos outros. Mantive o XGBoost pela proximidade dos resultados e
+pela integração com o SHAP exato de árvores, não por ser melhor."
 
 ### 9.6 Validação cruzada estratificada de 5 *folds* (semente 42)
 
@@ -1108,27 +1120,27 @@ estratificada com **10** dobras. O projeto usou 5 por custo: a busca em
 grade treina cada combinação uma vez por dobra (27 combinações no XGBoost,
 mais as grades da *Random Forest* e do MLP em `tune_models_full.py`), e 10
 dobras dobrariam o número de treinos. Com ~41 mil partidas, cada dobra de
-teste ainda tem perto de **8.100 partidas** (40.816 ÷ 5), amostra grande o
+teste ainda tem perto de **8.150 partidas** (40.778 ÷ 5), amostra grande o
 bastante para a média ser estável. Do Kohavi, o projeto segue a parte
 central: validação cruzada **estratificada**. Um bônus: a mesma divisão
 (`StratifiedKFold(n_splits=5, random_state=42)`) é usada em todos os
-scripts (modelo de referência, busca em grade, os 11 experimentos), então
+scripts (modelo de referência, busca em grade, os experimentos), então
 toda comparação do trabalho é feita sobre as mesmas dobras.
 
 **Resposta pronta:** "O Kohavi recomenda 10 dobras. Usei 5 por custo
 computacional, porque a busca em grade treina cada combinação uma vez por
 dobra, nos três modelos. Com quase 40 mil partidas, cada dobra de teste tem
-cerca de 8.100, o que deixa a estimativa estável. A parte da recomendação
+cerca de 8.150, o que deixa a estimativa estável. A parte da recomendação
 que mais importa, a estratificação, foi seguida, e a mesma divisão vale
 para todos os experimentos."
 
-**Medido em 2026-11-03 e refeito em 6/11 na base única:** rodando de novo com 10 dobras (`src/models/robustez_dobras.py`, Apêndice C), a diferença é de no máximo 0,0025 em acurácia e 0,0009 em AUC (na *Random Forest* e no MLP aos 15 minutos; no XGBoost, no máximo 0,0010 e 0,0002). A resposta agora é "medi, e não muda".
+**Medido em 2026-11-03 e refeito em 6/11 na base única:** rodando de novo com 10 dobras (`src/models/robustez_dobras.py`, Apêndice C), a diferença é de no máximo 0,0021 em acurácia e 0,0004 em AUC (na *Random Forest* aos 15 minutos; no XGBoost, no máximo 0,0006 e 0,0001). A resposta agora é "medi, e não muda".
 
-**Não exagere o custo.** A grade do XGBoost sobre as 40.816 partidas levou
-**51,4 segundos** (`reports/tune_models_39k.json`). Se a banca disser "então
+**Não exagere o custo.** A grade do XGBoost sobre as 40.778 partidas levou
+**16,7 segundos** (`reports/tune_models_39k.json`). Se a banca disser "então
 10 dobras custariam dois minutos", concorde: o custo pesava mais nas grades
-da *Random Forest* (500 árvores) e do MLP e na repetição dos 11
-experimentos, e o argumento principal é outro: com 8.100 partidas por dobra
+da *Random Forest* (500 árvores) e do MLP e na repetição dos
+experimentos, e o argumento principal é outro: com 8.150 partidas por dobra
 de teste, a diferença entre 5 e 10 dobras na estimativa é pequena, e manter
 a mesma divisão em todo o trabalho deixa os resultados comparáveis entre si.
 
@@ -1157,27 +1169,34 @@ seria mais rigorosa; fica como limitação declarada.
 
 ### 9.7 Os resultados completos (Quadros 3 e 4, Apêndice C)
 
-**Corte de 15 minutos (Quadro 3):**
+**Corte de 15 minutos (Quadro 3, comparação após o ajuste):**
 
-| Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC |
-|---|---|---|---|---|---|
-| **XGBoost** | **0,7636** | 0,7577 | 0,7259 | 0,7415 | **0,8490** |
-| MLP | 0,7598 | 0,7483 | 0,7319 | 0,7400 | 0,8454 |
-| Random Forest | 0,7475 | 0,7350 | 0,7183 | 0,7265 | 0,8287 |
+| Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC | AUC aninhada |
+|---|---|---|---|---|---|---|
+| Regressão logística | 0,7648 | 0,7568 | 0,7317 | 0,7440 | 0,8495 | — |
+| MLP ajustado | 0,7638 | 0,7562 | 0,7296 | 0,7427 | 0,8491 | 0,8491 |
+| **XGBoost ajustado (produção)** | **0,7641** | 0,7576 | 0,7278 | 0,7424 | **0,8487** | 0,8485 |
+| *Random Forest* ajustada | 0,7628 | 0,7513 | 0,7356 | 0,7434 | 0,8480 | 0,8480 |
+| MLP (referência) | 0,7619 | 0,7488 | 0,7378 | 0,7433 | 0,8459 | — |
+| *Random Forest* (referência) | 0,7439 | 0,7312 | 0,7144 | 0,7227 | 0,8278 | — |
 
-**XGBoost em todos os cortes (Quadro 4):**
+**XGBoost em todos os cortes (Quadro 4), só com partidas em andamento no corte:**
 
-| Corte | Acurácia | AUC-ROC |
-|---|---|---|
-| 10 min | 0,7028 | 0,775 |
-| 15 min | 0,7636 | 0,849 |
-| 20 min | 0,7924 | 0,877 |
-| 25 min | 0,8261 | 0,909 |
+| Corte | Partidas | Acurácia | AUC-ROC |
+|---|---|---|---|
+| 10 min | 40.919 | 0,7020 | 0,775 |
+| 15 min | 40.778 | 0,7641 | 0,849 |
+| 20 min | 34.505 | 0,7856 | 0,869 |
+| 25 min | 25.098 | 0,8068 | 0,890 |
 
 **Leitura:** quanto mais tarde, mais o modelo acerta. **Faz sentido:**
-aos 25 minutos já aconteceu muito mais coisa, a partida está mais
-"definida". Mas a previsão aos 25 também é **menos útil**, porque sobra
-menos tempo para mudar o rumo.
+aos 25 minutos já aconteceu muito mais coisa. **Cuidado (parecer):** cada
+corte tem um conjunto diferente de partidas (as que ainda estão em
+andamento). Nas **mesmas 25.098 partidas** que chegam aos 25 minutos, a AUC
+vai de 0,644 (10 min) a 0,713, 0,787 e 0,890 (Quadro 17): o crescimento
+existe e é até maior, porque as partidas curtas, que só entram nos
+primeiros cortes, são mais fáceis de prever cedo. A previsão aos 25 também
+é **menos útil**, porque sobra menos tempo para mudar o rumo.
 
 **Tudo isso é reproduzível** com `python -m src.models.multi_cutoff_metrics`,
 que grava `reports/metricas_corte.json`.
@@ -1192,7 +1211,7 @@ que grava `reports/metricas_corte.json`.
 Para explicar, imagine **1.000 partidas** no corte de 15 minutos. Em
 ~467 o azul venceu (46,7%), em ~533 o vermelho venceu.
 
-### 10.1 Acurácia — 0,7636
+### 10.1 Acurácia — 0,7641
 
 **De todas as previsões, quantas acertaram?** ≈ 764 de 1.000.
 
@@ -1201,32 +1220,32 @@ Para explicar, imagine **1.000 partidas** no corte de 15 minutos. Em
 76% não deve ser comparado com 50%, e sim com esse "chute" de ~53%.
 O ganho real é de uns 23 pontos percentuais acima do chute.
 
-### 10.2 Precisão — 0,7577
+### 10.2 Precisão — 0,7576
 
 **Quando o modelo diz "azul vence", quantas vezes ele está certo?**
 De cada 100 vezes que ele aposta no azul, ~76 o azul vence mesmo.
 
-### 10.3 *Recall* (revocação) — 0,7259
+### 10.3 *Recall* (revocação) — 0,7278
 
 **De todas as partidas que o azul realmente venceu, quantas o modelo
-pegou?** ~72 de cada 100.
+pegou?** ~73 de cada 100.
 
 **Precisão x recall, exemplo de detector de incêndio:** precisão alta =
 quando apita, é incêndio mesmo. Recall alto = não deixa nenhum incêndio
 passar sem apitar. Normalmente melhorar um piora o outro.
 
-### 10.4 F1 — 0,7415
+### 10.4 F1 — 0,7424
 
 A **média harmônica** entre precisão e recall: um número só que só é
 alto se **os dois** forem altos.
 
-### 10.5 AUC-ROC — 0,8490 (a métrica principal)
+### 10.5 AUC-ROC — 0,8487 (a métrica principal)
 
 **A pergunta que ela responde:** pegue **uma partida que o azul venceu**
 e **uma que o azul perdeu**, ao acaso. O modelo dá uma probabilidade de
 vitória do azul para cada uma. Em quantos desses pares ele dá a
 probabilidade **maior** para a partida que o azul de fato venceu?
-Resposta: **84,73%** das vezes.
+Resposta: **84,87%** das vezes.
 
 Isso é exatamente o que Hanley e McNeil (1982) mostraram que a AUC
 significa: a probabilidade de um caso positivo receber nota maior que
@@ -1234,7 +1253,7 @@ um negativo.
 
 - **AUC = 0,5:** igual a jogar moeda.
 - **AUC = 1,0:** perfeito.
-- **0,8490:** bom poder de separação.
+- **0,8487:** bom poder de separação.
 
 **Por que ela é a principal:** não depende do "corte de 50%" e não é
 enganada pela proporção desigual de vitórias. O texto reporta acurácia
@@ -1248,29 +1267,30 @@ azul vence mesmo em ~70% dessas partidas?
 **Exemplo:** a previsão do tempo. Se em 100 dias a previsão disse "70%
 de chuva" e choveu em 70 deles, ela é **bem calibrada**.
 
-**Resultado:** a curva de calibração (`reports/calibration_curve.png`)
-mostrou que os modelos, especialmente o XGBoost, **já eram bem
-calibrados**, sem precisar de ajuste extra.
+**Resultado (refeito pelo parecer):** a curva de calibração do XGBoost
+(Figura 12, Apêndice F) usa as probabilidades **fora da dobra**: cada
+partida é prevista por um modelo que não a viu. Entre os decis, o maior
+desvio aos 15 minutos é de 1,19 ponto percentual. Calibração extra
+(sigmoide ou isotônica) não traz ganho (Quadro 24).
 
-### 10.7 Taxa-base e a limitação do empate (Seção 6.1 e Apêndice F)
+### 10.7 O "empate" e a taxa-base (Apêndice F) — a limitação que caiu
 
-**Pergunta crítica:** se as duas equipes estão **totalmente empatadas**,
-o que o modelo prevê?
+**Versão antiga (refutada pelo parecer, não use):** "o modelo prevê 49-51%
+para o azul no empate total, e os dados dão 46-48%, uma discrepância de 2,4
+a 4,6 pontos".
 
-- O modelo prevê ~49-51% para o azul (49,2% aos 10, 49,6% aos 15, 51,4%
-  aos 20, 49,0% aos 25).
-- Mas os **dados reais** de partidas empatadas mostram o azul vencendo
-  só **46,4% a 47,9%** (o viés de lado, Parte 13).
-- Diferença: **2,4 a 4,6 pontos percentuais**.
+**O erro:** comparava a previsão para um **estado sintético** (as cinco
+diferenças iguais a zero) com **partidas reais** empatadas só no ouro.
+Nenhuma partida empatada real tem as cinco diferenças nulas.
 
-**Foi investigado a fundo:**
-- **Não é subajuste:** a busca em grade não melhorou (Parte 9.4).
-- **Calibrar não resolve:** a sigmoide reduz o desvio só de 2,5 para 2,2 pp, e a isotônica piora, de 2,5 para 3,6 pp, porque o "empate total" é um
-  estado raro e o calibrador o extrapola.
-- **Trocar para Random Forest (500 árvores, profundidade 6) resolve**
-  (desvio cai para 0,5 pp), mas custa 0,0007 de AUC e a acurácia fica
-  0,7630 contra 0,7636.
-- **Decisão:** manter o XGBoost (escolha anterior, liderança na configuração de produção, SHAP exato). Decisão consciente, registrada como limitação.
+**A medida certa (Quadro 23):** nas partidas empatadas reais (diferença de
+ouro menor que 500), a **média das probabilidades previstas** fica a menos
+de **0,4 ponto** da taxa observada em todos os cortes (−0,19 a +0,38 pp). O
+modelo está bem calibrado ali também, e a limitação saiu da Seção 6.1.
+
+**Resposta pronta:** "O orientador apontou que eu comparava um estado
+sintético com partidas reais. Medi do jeito certo, com as previsões fora da
+dobra nas próprias partidas empatadas, e a diferença some."
 
 ---
 
@@ -1309,12 +1329,19 @@ jogos**, do **valor de Shapley**.
 
 ### 11.3 O que o SHAP mostrou (Seção 5.4)
 
+- **Unidade (parecer):** os valores estão em **log-odds**. O SHAP do
+  XGBoost decompõe a saída bruta do modelo: referência (a previsão média,
+  −0,132 = 46,7%) mais a soma das contribuições, e a transformação
+  logística dá a probabilidade. Na Figura 4: −0,132 + 1,038 = 0,906, que
+  vira **71,2%**. A tela do Simulador mostra essa conta.
 - **Ouro e experiência dominam** em todos os cortes. `gold_diff` vai de
-  0,66 (10 min) a 1,07 (20 min). `xp_diff` vai de 0,27 (10 min) a 0,81
+  0,65 (10 min) a 1,01 (20 min). `xp_diff` vai de 0,27 (10 min) a 0,70
   (25 min).
 - **Torres têm um comportamento curioso:** quase zero nos três primeiros
-  cortes (0,0044 aos 10; 0,0060 aos 15; 0,0031 aos 20) e **saltam para
-  0,0928 aos 25** — cerca de **15 vezes** entre 15 e 25 minutos.
+  cortes (0,0038 aos 10; 0,0076 aos 15; 0,0023 aos 20) e **sobem para
+  0,0429 aos 25**, cerca de **6 vezes** o valor dos 15 minutos. (Antes da
+  correção do vazamento eram 0,0927 e "11 vezes": as partidas que já tinham
+  acabado traziam as torres do fim do jogo.)
 - **Não é crescimento contínuo:** aos 20 minutos é menor que aos 10 e 15.
   É uma **concentração tardia**.
 - **Por quê, no jogo:** as placas de torre caem aos 14 minutos, e antes
@@ -1325,13 +1352,13 @@ jogos**, do **valor de Shapley**.
 
 ---
 
-## 12. Os 11 experimentos que não funcionaram (e por que isso é bom)
+## 12. Os experimentos que não funcionaram (e por que isso é bom)
 
 ### 12.1 O que foi tentado (Quadro 5, Seção 5.4; detalhe no Apêndice K)
 
-Para tentar melhorar o modelo, foram testadas 11 ideias. **Nenhuma**
-melhorou de forma distinguível de ruído (mudanças de ±0,001 a 0,003 na
-AUC):
+Para tentar melhorar o modelo, foram testadas 10 ideias sobre a linha do
+tempo, refeitas na base final. **Nenhuma** passou de +0,0006 de AUC. A 11ª
+fica à parte (abaixo):
 
 | # | Ideia | Resultado |
 |---|---|---|
@@ -1345,9 +1372,15 @@ AUC):
 | 8 | Visão (sentinelas colocadas/destruídas) | ruído |
 | 9 | Tipo de dragão | **piorou** (0,8319 → 0,8295) |
 | 10 | Placas de torre | -0,0002 |
-| 11 | Percentis comportamentais do jogador (`lol-challenges-v1`) | -0,0031 / +0,0007 |
+| 11 | Percentis comportamentais do jogador (`lol-challenges-v1`) | à parte: −0,0031 / +0,0007, não comparável |
 
 ### 12.2 A história do experimento 11 (ótima para contar)
+
+**Por que está à parte (parecer):** o *endpoint* devolve o estado do
+jogador na data da consulta, feita de 0 a 16 dias depois das partidas. Um
+intervalo curto não prova que o atributo existia no momento da previsão,
+então o resultado não entra em nenhuma conclusão.
+
 
 - Um **piloto pequeno** (199 partidas) mostrou um ganho de **+0,009**,
   maior que qualquer outro experimento. Parecia uma descoberta.
@@ -1359,20 +1392,20 @@ AUC):
 - **Exemplo:** jogar moeda 10 vezes e dar 8 caras não prova que a moeda é
   viciada. Jogue 1.000 vezes e vai dar perto de 500.
 
-### 12.3 E o que realmente funcionou: mais dados
+### 12.3 E o volume de dados? (refeito pelo parecer)
 
-A AUC do XGBoost subiu só por aumentar o número de partidas:
+**Versão antiga (não use):** "a AUC subiu de 0,8214 para 0,8393 e 0,8490
+só por aumentar as partidas". Essa sequência registra as **rodadas de
+coleta**: mudavam ao mesmo tempo o treino, o teste e a mistura de regiões.
 
-| Partidas | AUC (15 min) |
-|---|---|
-| 10.295 | 0,8214 |
-| 23.133 | 0,8393 |
-| 40.816 | 0,8490 |
+**A medida certa (Quadro 16):** teste fixo de 8.156 partidas e treino
+crescendo. AUC 0,8494 com 2.500, 0,8519 com 10.000 e **0,8527 com 32.622**.
+Acima de 10 mil partidas, mais volume quase não muda nada (+0,0008).
 
-Ganho total de **0,0276**: cerca de **3,5 vezes** o maior ganho de um
-experimento de variáveis (+0,0078, regressão logística) e muito acima dos
-demais (até +0,0006). Refeito em 6/11/2026 na base única; antes dizia 9 vezes
-com a base antiga.
+**E as variáveis novas (12 a 19)?** Dentro do mesmo classificador: a
+regressão logística ganha **+0,0073** aos 15 minutos com as 64 variáveis, o
+XGBoost **+0,0044**. O "+0,0081" do Apêndice K mistura variáveis e troca de
+classificador.
 
 ### 12.4 Por que resultados negativos são bons para a tese
 
@@ -1421,25 +1454,29 @@ real. Na KR, 50% está **dentro**, então pode ser só acaso.
 **Wilson** é um jeito específico e mais confiável de calcular essa margem
 para proporções (porcentagens).
 
-### 13.3 O viés é constante ao longo da partida
+### 13.3 Taxas próximas nos quatro cortes (formulação do parecer)
 
-**Uma versão antiga do texto dizia que o viés tinha um "pico" no meio do
-jogo e enfraquecia no fim. Com mais dados, isso foi REFUTADO.**
+**Não diga "o viés é constante/estável ao longo da partida".** O orientador
+pediu a formulação restrita ao que foi medido.
 
-Entre partidas **genuinamente empatadas** (diferença de ouro menor que
-500), o azul venceu:
+Entre partidas com diferença de ouro **menor que 500**, o azul venceu:
 
 | Corte | Vitória do azul | Partidas |
 |---|---|---|
-| 10 min | 46,4% | 7.349 |
-| 15 min | 47,9% | 3.970 |
-| 20 min | 46,7% | 2.423 |
-| 25 min | 47,1% | 1.430 |
+| 10 min | 46,5% | 7.639 |
+| 15 min | 47,8% | 4.126 |
+| 20 min | 46,9% | 2.500 |
+| 25 min | 47,4% | 1.474 |
 
-Variação de só 1,4 ponto. **Nenhuma diferença entre os cortes sobrevive
-à correção de Holm** (menor valor-p corrigido: 0,83). Ou seja: o viés
-**existe e é constante**; o que sumiu foi a **"evolução"** que tinham
-visto antes.
+**Como foi testado:** a mesma partida pode estar empatada em mais de um
+corte (2.766 das 12.615), então os grupos não são independentes. O teste
+usa a **partida como unidade** (*bootstrap*: sorteia partidas inteiras,
+2.000 vezes) e depois a correção de Holm. **Nenhuma diferença foi
+detectada** (menor valor-p corrigido: 0,65).
+
+**Frase para decorar:** "as taxas foram próximas nos quatro cortes e os
+testes não detectaram diferença entre eles; isso não demonstra que o viés
+seja igual em toda a partida."
 
 ### 13.4 O que é a correção de Holm
 
@@ -1460,15 +1497,15 @@ Todo padrão encontrado passou por 4 testes **antes** de ser aceito:
    ponto, todas abaixo de 50%). Então não é "partidas longas são outro
    tipo de jogo". ✔
 3. **Intervalo de Wilson:** nenhum dos 4 cortes inclui 50%. ✔
-4. **Pares com correção de Holm:** sustenta a constância. ✔
+4. **Pares com correção de Holm, partida como unidade:** impede ler a dispersão entre cortes como tendência. ✔
 
 ### 13.6 A inversão no cenário profissional
 
 No Oracle's Elixir (99.259 jogos), é o **azul** que vence: **53,2%**.
-Estável de 2016 a 2026 (entre 52,5% e 55,0%). 2014 (58,2%) e 2015 (55,3%)
-destoam, mas com poucos jogos (814 e 1.702).
+Estável de 2015 a 2026 (entre 52,5% e 55,0%). Só 2014 (58,2%) destoa, com
+poucos jogos (814).
 
-**Hipótese de explicação (é hipótese, não prova):**
+**Hipótese de explicação (não testada; os dados não têm a ordem do *draft*):**
 - No *draft*, o time **vermelho escolhe por último** e garante o
   ***counter-pick***.
 - No *solo queue*, sem coordenação entre 5 desconhecidos, esse
@@ -1484,25 +1521,26 @@ exigiria a ordem do *draft*, que a API pública não expõe."
 
 Com **+2.000 a +4.000 de ouro aos 15 minutos**, o azul venceu:
 - **81,5%** no profissional (3.294 jogos)
-- **74,1%** no *solo queue* (5.368 partidas)
+- **74,1%** no *solo queue* (5.366 partidas)
 
-Diferença de **7,4 pontos**, estatisticamente muito significativa (z =
-8,0; p < 0,001).
+Diferença de **7,5 pontos**, estatisticamente significativa (teste z de
+duas proporções, grupos independentes; z = 8,0; p < 0,001).
 
-**Leitura:** a **mesma vantagem** vale mais nas mãos de um time
-coordenado. Os profissionais "convertem" melhor a vantagem em vitória.
+**Leitura (parecer):** é uma **diferença observada** entre os dois recortes.
+**Não atribua à coordenação das equipes**: os recortes diferem também no
+nível dos jogadores, na versão do jogo e na época.
 
 **Detalhe honesto:** a faixa de +4.000 a +6.000 no profissional tem só 72
-jogos, então é indicativa. E uma versão antiga do texto falava em 16
-pontos de diferença; com mais dados caiu para 7,8.
+jogos, então é indicativa.
 
 ### 13.8 Por que isso importa para o modelo
 
 O viés de lado é um **fator de confusão** que qualquer modelo de *solo
 queue* precisa controlar: o lado carrega informação sobre o resultado sem
-refletir o estado da partida (Seção 6, conclusão). É também o que a
-limitação da taxa-base mostra: no empate total, o modelo dá 49-51% ao azul,
-mas os dados dizem 46-48% (Parte 10.7).
+refletir o estado da partida (Seção 6, conclusão). No modelo, ele entra
+na **referência** do SHAP (a previsão média, 46,7% para o azul aos 15
+minutos), e nas partidas empatadas a previsão acompanha a taxa observada
+(Parte 10.7).
 
 **Cuidado:** uma versão antiga falava em "atalho" e dizia que o lado
 distingue os times "sem nenhuma propriedade do jogo". O texto final não
@@ -1708,11 +1746,12 @@ minuto 15, com 15 minutos de jogo ainda pela frente. E a AUC de 0,85
 mostra que ele separa bem vitórias e derrotas."
 
 **3. "Daria para chegar a 90%?"**
-"Não com os dados atuais. Testei 11 formas de enriquecer as *features* e
-nenhuma melhorou. O que melhorou foi volume de dados. O próximo ganho
-exigiria a ordem do *draft* e o estado das ondas, que a API pública não
-fornece. Aos 25 minutos a AUC já chega a 0,909, mas aí a previsão é
-menos útil, porque o jogo está quase decidido."
+"Não com os dados atuais. Dez formas de enriquecer as *features* não
+passaram de +0,0006, e mais volume quase não muda acima de 10 mil partidas
+(teste fixo). Variáveis mais ricas dão até +0,0073. O próximo ganho exigiria
+a ordem do *draft* e o estado das ondas, que a API pública não fornece. Aos
+25 minutos a AUC chega a 0,890, mas aí a previsão é menos útil, porque o
+jogo está mais decidido."
 
 **4. "O que é vazamento de dados e como vocês evitaram?"**
 "É o modelo usar informação que ele não teria no momento da previsão,
@@ -1730,12 +1769,12 @@ números por partida. O XGBoost também se integra com o SHAP de árvore,
 que dá explicações exatas."
 
 **6. "O MLP ajustado ficou à frente. Por que não usaram ele?"**
-"Na configuração de produção, o MLP não ganha em nenhum corte. Só com a busca em grade nos três ele fica 0,0009 acima aos 15 minutos, diferença irrelevante. O XGBoost vinha do TCC I e já sustentava a interface, com o SHAP de árvore."
+"Depois do ajuste, os quatro modelos (com a logística) ficam a 0,0015 de AUC uns dos outros. Mantive o XGBoost pela proximidade dos resultados e porque o SHAP de árvore, exato, já estava integrado à interface, não por ser melhor."
 
 **7. "Os hiperparâmetros estão bem ajustados?"**
-"Sim. Uma busca em grade com 27 combinações e validação cruzada achou a
-melhor com AUC 0,8491; a de produção tem 0,8490, terceiro lugar, com a
-mesma profundidade. Diferença de 0,0001."
+"Sim. Uma busca em grade com 27 combinações, refeita na base final,
+escolheu a própria configuração de produção. Repetida de forma aninhada,
+com a escolha só no treino de cada dobra, a AUC muda no máximo 0,0002."
 
 **8. "O que é a validação cruzada que vocês usaram?"**
 "Cinco *folds* estratificados com semente fixa 42. Divido as partidas em
@@ -1743,7 +1782,7 @@ cinco pilhas com a mesma proporção de vitórias, treino com quatro e testo
 na quinta, cinco vezes. Toda partida é testada sem ter sido vista no
 treino, e qualquer um reproduz os números." Se perguntarem por que não 10
 (o Kohavi recomenda 10): custo da busca em grade, e cada dobra de teste
-ainda tem cerca de 7.800 partidas (Parte 9.6).
+ainda tem cerca de 8.150 partidas (Parte 9.6).
 
 **9. "Por que o vermelho vence mais no *solo queue*?"**
 "O trabalho mede isso com firmeza, mas a causa é hipótese: o vermelho
@@ -1758,14 +1797,13 @@ ordem do *draft*, que a API não expõe."
 intervalo inclui 50%, e o texto diz isso explicitamente."
 
 **11. "O texto dizia que o viés tinha um pico. Mudou?"**
-"Sim, e isso está registrado no texto. Com a amostra ampliada e a
-correção de Holm para comparações múltiplas, as quatro taxas ficaram
-indistinguíveis. O viés existe e é constante; o pico era efeito de
-amostra pequena. Preferi reportar o resultado negativo a manter a versão
-antiga."
+"Sim. Com a amostra ampliada, as taxas ficaram próximas nos quatro cortes
+e o teste, com a partida como unidade e correção de Holm, não detectou
+diferença. Não afirmo que o viés seja igual em toda a partida; afirmo que
+o pico não se sustentou."
 
-**12. "Por que há dois números de partidas (41.063 e 40.816)?"**
-"Há uma base só, de 41.063 partidas. As 40.816 são as que chegam ao corte de 15 minutos com linha do tempo; as demais acabaram antes ou não têm timeline. O número varia por corte (40.942, 40.816, 35.637 e 27.761) e está no Quadro 4."
+**12. "Por que há dois números de partidas (41.063 e 40.778)?"**
+"Há uma base só, de 41.063 partidas. As 40.778 são as que ainda estão em andamento no minuto 15 e têm linha do tempo; as demais acabaram antes ou não têm timeline. O número varia por corte (40.919, 40.778, 34.505 e 25.098) e está no Quadro 4."
 
 **13. "O que é SHAP e por que não LIME?"**
 "SHAP vem do valor de Shapley, da teoria dos jogos: divide de forma justa
@@ -1804,9 +1842,10 @@ na Seção 6.1."
 "As 22 falhas foram de nome de entidade, eliminações lidas como kills mais
 assistências e roteamento. O mais grave seria devolver um número plausível e
 errado quando o dado não existe; para isso há uma recusa determinística, e 15
-das 16 recusas esperadas saíram certas. O validador garante a segurança da
-consulta, não o sentido; verificar o resultado depois da execução é trabalho
-futuro."
+das 16 recusas esperadas saíram certas. Os controles (um SELECT, palavras
+bloqueadas, lista de tabelas, transação somente leitura, 10 segundos)
+impedem escrita, mas não verificam se a consulta responde à pergunta;
+verificar o resultado depois da execução é trabalho futuro."
 
 **16d. "Quem escreveu e quem conferiu as respostas?"**
 "A SQL de referência é minha; a comparação é por código, com regras no módulo
@@ -1814,10 +1853,11 @@ futuro."
 referência; está declarado como limitação."
 
 **16e. "O que foi corrigido depois da medida?"**
-"Duas coisas: o sistema passou a resolver no banco o nome exato de campeões,
-ligas, equipes e jogadores, e a refazer a consulta quando 'eliminações' vira
-kills mais assistências. Estão implementadas e testadas por testes unitários,
-mas não foram medidas de ponta a ponta, e o texto diz isso."
+"Três coisas: resolver no banco o nome exato de campeões, ligas, equipes e
+jogadores; mandar direto ao competitivo pergunta com liga, equipe ou
+jogador profissional; e refazer a consulta quando 'eliminações' vira kills
+mais assistências. Estão testadas por testes unitários, mas não foram
+medidas de ponta a ponta. A versão medida está na tag `gabarito-203`."
 
 **17. "Qual a contribuição científica?"**
 "Três: a integração completa numa plataforma, que nenhum trabalho
@@ -1832,8 +1872,8 @@ arquitetura é reaproveitável, mas os números não se estendem."
 
 **19. "Por que só 5 *features*?"**
 "Porque são o estado agregado de cada time no minuto do corte, que é o
-que a *timeline* oferece com confiabilidade. Testei 11 acréscimos e
-nenhum ajudou; adicionar variáveis que não ajudam só deixa o modelo mais
+que a *timeline* oferece com confiabilidade. Testei 10 acréscimos sobre a
+linha do tempo e nenhum passou de +0,0006; adicionar variáveis que não ajudam só deixa o modelo mais
 complicado."
 
 **20. "Por que referências tão antigas, como 1982 e 2001?"**
@@ -1851,8 +1891,9 @@ estado de jogo. A barreira é o acesso a dados ao vivo, não o modelo.
 Está em trabalhos futuros."
 
 **23. "O que acontece com uma partida que acabou antes do corte?"**
-"Ela não entra naquele corte. Por isso aos 25 minutos há 27.761
-partidas, contra 40.816 aos 15."
+"Ela não entra naquele corte. Por isso aos 25 minutos há 25.098
+partidas, contra 40.778 aos 15. E um cuidado: a linha do tempo termina com
+um quadro no fim do jogo; esse quadro nunca entra como estado do corte."
 
 **24. "Por que o EUN1 tem só 20 partidas?"**
 "Nunca foi região-alvo; o escopo sempre foi BR1, EUW1, KR e NA1. As 20
@@ -1992,7 +2033,7 @@ causa de conhecimento mais completo e consultas mais uniformes."
 
 **48. "Uma regressão logística não faz o mesmo? Por que XGBoost?"** (medido em
 2026-11-03, `src/models/baseline_e_diferencas.py`, Apêndice C)
-"Porque o limite está nas cinco variáveis, não no modelo: uma regressão logística, medida como baseline em 2026-11-03, chega a 0,7631 de acurácia e 0,8483 de AUC aos 15 minutos. O XGBoost ficou 0,0010 abaixo em AUC, com intervalo que exclui zero aos 10, 15 e 20 minutos, mas é uma diferença de milésimos, e o texto diz que a logística fica à frente. A comparação com árvores e rede neural era o objetivo e do TCC I, e o XGBoost foi escolhido antes desse baseline ser medido. Não digam que ele captura interações caso as variáveis cresçam: com as 59 variáveis novas a logística ganhou mais que ele (+0,0080 contra +0,0044, Apêndice K). O que o XGBoost oferece hoje é o SHAP exato de árvore e a integração já validada; trocar de modelo não mudaria o resultado prático."
+"Porque o limite está nas cinco variáveis, não no modelo: a regressão logística chega a 0,7648 de acurácia e 0,8495 de AUC aos 15 minutos, 0,0008 acima do XGBoost, com intervalo que exclui zero aos 10, 15 e 20 minutos. É diferença de milésimos, e o texto diz que a logística fica à frente. Não digam que o XGBoost captura interações caso as variáveis cresçam: com as 59 variáveis novas a logística ganhou mais que ele (+0,0073 contra +0,0044, cada um contra si mesmo, Apêndice K). O que o XGBoost oferece é o SHAP exato de árvore e a integração já validada; trocar de modelo não mudaria o resultado prático."
 
 **46. "O que a literatura diz sobre os três modelos empatarem?"** "Do et al.
 (2021) testaram cinco algoritmos e ficaram entre 72,7% e 75,4%, com o
@@ -2074,8 +2115,8 @@ aba Estado (5.5); Figura 5 consulta em linguagem natural (5.6).
 | Verificação | O que faz | Resultado |
 |---|---|---|
 | `tests/smoke_test.py` | Roda o pipeline inteiro com dados sintéticos, sem tocar nos dados reais | funcional |
-| `tests/validate_predictions.py` | Bateria de comportamento do modelo: vantagem real aumenta a chance? casos extremos dão probabilidade alta? o viés é constante? torres crescem aos 25? | **Aprovado com ressalvas** |
-| `docs/verifica_tcc.py` | **20 checagens** que comparam os números do texto do TCC com os artefatos reais | **20/20, consistente** |
+| `tests/validate_predictions.py` | Bateria de comportamento do modelo: vantagem real aumenta a chance? casos extremos dão probabilidade alta? as taxas do viés ficam próximas entre os cortes? torres crescem aos 25? | **Aprovado com ressalvas** |
+| `docs/verifica_tcc.py` | **22 checagens** que comparam os números do texto do TCC com os artefatos reais | **22/22, consistente** |
 | `docs/confere_docx.py` | Confere a formatação do `.docx` (títulos, referências, legendas) | conforme |
 | Frontend | 31 testes automáticos + verificação de código | ok |
 
@@ -2110,7 +2151,7 @@ os limites do próprio trabalho.
    evidência (KR inclui 50%).
 5. **Um *patch* concentra a maioria das partidas** (16.13), o que limita
    generalizar para outras versões do jogo.
-6. **Teto de desempenho das *features*** (11 experimentos negativos).
+6. **Teto de desempenho das *features*** (10 experimentos negativos; o 11º à parte).
 7. **Sem dados de micro-posicionamento** (ondas de minion): nenhuma API
    pública da Riot oferece. Alternativas (replays `.rofl`, visão
    computacional no minimapa) foram consideradas, não implementadas.
@@ -2153,7 +2194,7 @@ guardado, bastou reprocessar.
 **2. A AUC estava sendo calculada errado.** A primeira versão do script
 do Apêndice C calculava a AUC com a **classe prevista** (0 ou 1) em vez
 da **probabilidade**. Isso dava 0,7596 aos 15 minutos, quando o correto
-era **0,8473** (na base da época; hoje, 0,8490). A AUC precisa da probabilidade, porque mede a qualidade da
+era **0,8473** (na base da época; hoje, 0,8487). A AUC precisa da probabilidade, porque mede a qualidade da
 ordenação.
 
 **3. A IA inventava itens.** A orientação estratégica e a consulta em
@@ -2207,39 +2248,48 @@ para isso que este guia existe.
 
 **Dados**
 - 41.063 partidas *solo queue* (BR1 11.936; EUW1 11.744; KR 10.204; NA1
-  7.159; EUN1 20), todas usadas; 40.942, 40.816, 35.637 e 27.761 chegam aos
-  cortes de 10, 15, 20 e 25 min
+  7.159; EUN1 20), todas usadas; 40.919, 40.778, 34.505 e 25.098 estão em
+  andamento nos cortes de 10, 15, 20 e 25 min
 - 99.259 jogos profissionais (2014-2026)
-- Fila 420; elos Desafiante e Grão-Mestre
+- Fila 420; elos Desafiante a Mestre
+- Base congelada: última partida em 4/10/2026; profissional de 4/7/2026
 - Limite da API: 20 pedidos/s e 100 a cada 2 min; chave expira em 24 h
 
 **Modelo (XGBoost, 15 min)**
-- Acurácia 0,7636 | Precisão 0,7577 | Recall 0,7259 | F1 0,7415 |
-  AUC 0,8490
+- Acurácia 0,7641 | Precisão 0,7576 | Recall 0,7278 | F1 0,7424 |
+  AUC 0,8487
 - Hiperparâmetros: 500 árvores, taxa 0,01, profundidade 3
 - Validação: 5 *folds* estratificados, semente 42
-- AUC por corte: 0,775 / 0,849 / 0,877 / 0,909
+- AUC por corte: 0,775 / 0,849 / 0,869 / 0,890; nas mesmas 25.098
+  partidas: 0,644 / 0,713 / 0,787 / 0,890
 - Taxa de vitória do azul na amostra: 46,7%
-- Busca em grade: 27 combinações, produção em 3º lugar (0,8490 x 0,8491)
-- Com os três ajustados (15 min): XGBoost 0,7636 / 0,8490; MLP 0,7645 /
-  0,8494; *Random Forest* 0,7625 / 0,8484 (diferenças de milésimos)
+- Busca em grade: 27 combinações, a produção foi a escolhida (1º lugar);
+  aninhada muda no máximo 0,0002
+- Ajustados (15 min): logística 0,7648 / 0,8495; MLP 0,7638 / 0,8491;
+  XGBoost 0,7641 / 0,8487; *Random Forest* 0,7628 / 0,8480
+- Calibração: nas empatadas, previsão a menos de 0,4 pp do observado;
+  maior desvio entre decis aos 15 min, 1,19 pp
 
 **Explicabilidade**
-- Ouro e XP dominam; torres saltam de ~0,006 para 0,0928 aos 25 min
-  (~11x)
+- SHAP em log-odds; Figura 4: −0,132 + 1,038 = 0,906 → 71,2%
+- Ouro e XP dominam; torres sobem de 0,0076 (15 min) para 0,0429 aos
+  25 min (~6x)
 
 **Experimentos**
-- 11 tentativas, nenhuma melhorou
-- Volume: 0,8214 → 0,8393 → 0,8490 (ganho de 0,0276, ~3,5x o melhor
-  experimento)
+- 10 tentativas sobre a linha do tempo, máximo +0,0006; a 11ª à parte
+- Variáveis ricas no mesmo classificador: logística +0,0073, XGBoost
+  +0,0044 (15 min)
+- Volume com teste fixo: 0,8494 (2.500) → 0,8519 (10.000) → 0,8527
+  (32.622)
 
 **Viés de lado**
 - Vermelho vence: BR1 56,3%; EUW1 53,4%; NA1 52,2%; KR 50,4% (KR inclui
   50%)
-- Empatadas: azul 46,4% / 47,9% / 46,7% / 47,1%; Holm p mín. 0,83
+- Empatadas: azul 46,5% / 47,8% / 46,9% / 47,4%; partida como unidade,
+  Holm p mín. 0,65; "taxas próximas, nenhuma diferença detectada"
 - Profissional: azul 53,2%
-- Conversão (+2k a +4k aos 15): pro 81,5% x *solo queue* 74,1%; 7,4 pp;
-  z = 8,0
+- Conversão (+2k a +4k aos 15): pro 81,5% x *solo queue* 74,1%; 7,5 pp;
+  z = 8,0; diferença observada, sem causa atribuída
 
 **Linguagem natural**
 - 23/26 = 88%; 22 *solo queue* + 4 profissional; falhas: perguntas 5,
@@ -2247,11 +2297,13 @@ para isso que este guia existe.
 - *temperature* 0; *max_tokens* 1.200; tempo máximo 10 s
 
 **Documento**
-- 29 páginas do Resumo ao fim das Referências (limite 30, uma linha de folga)
-- 31 referências; 11 Figuras (5 no corpo, 6 telas inteiras no Apêndice E);
-  30 Quadros (6 no corpo, 24 nos apêndices); Apêndices A-K (G fundamentos dos métodos, H procedência dos dados e chaves da Riot, I objetivos e evidências, J SHAP por corte, K experimentos de precisão, 1 a 19); Anexo A (documentação da Riot)
+- 30 páginas do Resumo ao fim das Referências (no limite, sem folga); sem
+  Abstract (opcional no modelo)
+- 31 referências; 12 Figuras (5 no corpo, 6 telas inteiras no Apêndice E e
+  a curva de calibração no F); 32 Quadros (5 no corpo, 27 nos apêndices);
+  Apêndices A-K; sem Anexo (a documentação da Riot é citada na 4.3 e 5.1)
 - limitações: Seção 6.1, com o detalhe no Apêndice F
-- `verifica_tcc.py`: 20/20
+- `verifica_tcc.py`: 22/22
 
 ---
 
@@ -2331,10 +2383,10 @@ Detalhes e páginas em `docs/conferencia_referencias.md`.
 ## Perguntas novas depois dos experimentos de precisão (2026-11-03)
 
 **"Vocês tentaram variáveis mais ricas para subir a acurácia?"**
-Sim (Apêndice K). Além dos onze experimentos do Quadro 5, testamos mais oito conjuntos: trajetória, diferença por função, objetivos, campeões de cada time e histórico do jogador. O maior ganho, com 64 variáveis e regressão logística, foi +0,0080 de AUC-ROC aos 15 minutos (0,8483 para 0,8555) e +0,0074 aos 25, e se manteve treinando no passado e testando no futuro (+0,0069 a +0,0089). Está abaixo de +0,01. O que mais ajudou foi a diferença por função (+0,0027).
+Sim (Apêndice K). Além dos dez experimentos do Quadro 5, testamos mais oito conjuntos: trajetória, diferença por função, objetivos, campeões de cada time e histórico do jogador. Com as 64 variáveis, a regressão logística ganha +0,0073 de AUC-ROC aos 15 minutos e +0,0090 aos 25 contra ela mesma com cinco variáveis; o XGBoost, +0,0044 e +0,0051. O "+0,0081" do quadro compara a logística rica com o XGBoost de cinco e mistura variáveis e classificador. O que mais ajudou foi a diferença por função (+0,0029).
 
 **"Por que não adotaram o modelo novo, se melhorou?"**
-Por duas razões, uma de produto e uma de custo. **Produto:** o Simulador, o modo "e se", a composição 5×5 e o coach recebem só as cinco diferenças (ouro, experiência, abates, torres e dragões), que qualquer pessoa pode digitar. As 59 variáveis novas (ouro, nível e dano por função, atributos do time, trajetória dos minutos anteriores) não existem nessas telas; só a análise de partida, que lê a linha do tempo real, teria todas. Adotar o modelo rico no produto inteiro quebraria o Simulador, e usá-lo só na análise de partida deixaria dois modelos para explicar. **Custo:** o ganho é real mas pequeno (0,7 ponto de acurácia aos 15 minutos, de 0,7630 para 0,7699, cerca de 270 partidas em 39.188; AUC-ROC de 0,8476 para 0,8555), e trocar exigiria retreinar os quatro cortes, reexportar, trocar o SHAP de árvore pelo da logística e revalidar tudo. O que o resultado mostra é que o limite está na informação disponível, não no algoritmo: a regressão logística aproveita as variáveis novas mais que o XGBoost (+0,0080 contra +0,0044). Fica como trabalho futuro. **Evitem dizer "cerca de 1 ponto":** são 0,7.
+Por duas razões, uma de produto e uma de custo. **Produto:** o Simulador, o modo "e se", a composição 5×5 e o coach recebem só as cinco diferenças (ouro, experiência, abates, torres e dragões), que qualquer pessoa pode digitar. As 59 variáveis novas (ouro, nível e dano por função, atributos do time, trajetória dos minutos anteriores) não existem nessas telas; só a análise de partida, que lê a linha do tempo real, teria todas. Adotar o modelo rico no produto inteiro quebraria o Simulador, e usá-lo só na análise de partida deixaria dois modelos para explicar. **Custo:** o ganho é real mas pequeno (menos de 0,01 de AUC-ROC aos 15 minutos), e trocar exigiria retreinar os quatro cortes, reexportar, trocar o SHAP de árvore pelo da logística e revalidar tudo. O que o resultado mostra é que o limite está na informação disponível, não no algoritmo: a regressão logística aproveita as variáveis novas mais que o XGBoost (+0,0073 contra +0,0044). Fica como trabalho futuro.
 
 **"O histórico dos jogadores não ajudaria?"**
 Testamos (experimento 19), só com partidas anteriores. Mesmo em partidas com 5 ou mais jogadores com 3 ou mais partidas prévias (92% da base), o ganho sobre o estado de jogo foi de +0,0004 aos 15 minutos. A habilidade já aparece no ouro e na experiência. Atenção: numa versão anterior desta análise eu citei cobertura de 31%; era medida errada (diferença de contagem entre os times).
@@ -2343,7 +2395,36 @@ Testamos (experimento 19), só com partidas anteriores. Mesmo em partidas com 5 
 Não pela documentação: a chave de produção aumenta o limite de requisições (a partir de 500 por 10 segundos e 30.000 por 10 minutos) e libera a API de torneios; as APIs padrão são as mesmas. O que a API pública não expõe (ondas de *minions*, ordem de escolha de campeões) continua fora. A aprovação depende da Riot, que avalia se o produto ajuda jogadores de forma mensurável.
 
 **"Por que 0,90 de acurácia aos 15 minutos não é viável?"**
-A literatura que consultei reporta 73% a 82% em partida em andamento, e resultados muito acima disso sem discussão de vazamento são suspeitos. Aos 25 minutos já temos AUC-ROC de 0,909.
+A literatura que consultei reporta 73% a 82% em partida em andamento, e resultados muito acima disso sem discussão de vazamento são suspeitos. Aos 25 minutos temos AUC-ROC de 0,890 (era 0,909 antes de corrigir o vazamento do quadro final, Parte 22).
 
 **"E os 2.543 jogos profissionais que faltavam?"**
 Erro do carregador (apagava por ano do arquivo, não por jogo), corrigido. O total passou de 96.716 para 99.259; a taxa do azul no total continua 53,2% (Apêndice H).
+
+---
+
+## 22. O que mudou em 8 de novembro de 2026 (parecer e revisão final)
+
+**Parecer do orientador, aplicado:** introdução sem subseções e sem
+Abstract; viés de lado com "taxas próximas, nenhuma diferença detectada"
+(teste com a partida como unidade); Quadro 3 com a comparação após o ajuste
+e a logística; XGBoost justificado pela proximidade e pelo SHAP; calibração
+medida nas empatadas reais (a limitação de taxa-base caiu); SHAP em
+log-odds na tela e no coach; experimento 11 à parte; ganho das variáveis no
+mesmo classificador; versão do Claude, base congelada e regra do comparador
+documentadas; controles da SQL no lugar de "garante a segurança"; hífen nos
+títulos, chamadas dos quadros, siglas.
+
+**Vazamento encontrado na revisão final (e corrigido).** A linha do tempo
+termina com um quadro no instante do fim do jogo. A regra antiga deixava
+uma partida de 24:16 entrar no corte de 25 minutos com esse quadro final
+(o fim do jogo). Eram 2.642 partidas aos 25 minutos e 1.120 aos 20; nelas
+a AUC era 1,0. Corrigido com `corte_disponivel` e um teste automatizado;
+todo o pipeline foi refeito. Aos 15 minutos quase nada mudou (0,8490 →
+0,8487); aos 25, 0,9092 → 0,8899.
+
+**Resposta pronta se a banca perguntar sobre isso:** "Na revisão final
+encontrei que partidas encerradas antes do corte entravam com o quadro
+final da linha do tempo. Corrigi a regra, criei um teste que impede a
+volta do erro e refiz todo o pipeline. O resultado principal, aos 15
+minutos, praticamente não mudou; os cortes tardios ficaram menores e
+corretos. Está no diário de execução."
