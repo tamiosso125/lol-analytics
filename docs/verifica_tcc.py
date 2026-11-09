@@ -1,6 +1,6 @@
 """Verificacao de consistencia do texto do TCC II.
 
-22 checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e que
+23 checagens que o AGENTS.md exige antes de dar um trabalho por pronto, e que
 antes eram feitas a mao (e por isso falhavam). Exit code 0 = tudo consistente.
 
 TEXTO E FORMATACAO
@@ -37,6 +37,12 @@ PROCESSO
  19. a accuracy do Apêndice B: ou `reports/nlq_benchmark.json` existe e o
      número do texto é o do artefato, ou o texto declara que o número não tem
      artefato. Numbero publicado sem artefato e sem aviso reprova.
+ 23. nenhuma figura do texto é mais velha que o código ou o artefato que ela
+     mostra (exceção explícita e justificada em FIGURAS_EXCECOES).
+
+Fora daqui: `confere_docx.py` (estrutura do .docx), `confere_paginas.ps1`
+(páginas do corpo pelo Word) e `confere_materiais.py` (guia, pptx, site,
+README e handoff contra os valores substituídos desta suíte).
 
 Uso:
     .venv\\Scripts\\python.exe docs\\verifica_tcc.py
@@ -353,6 +359,39 @@ VALORES_SUBSTITUIDOS: list[tuple[str, str]] = [
     ("15.122", "contagem da faixa 0-25 min antes da rodada final"),
     ("47,2%", "taxa maxima da faixa 25-30 min antes da rodada final"),
 ]
+
+# Valores de ANTES da correcao do vazamento do quadro final (2026-11-08): a
+# timeline da Riot termina com um quadro extra no fim do jogo, e partidas que
+# acabaram antes do corte usavam o estado final como "estado no corte". O
+# texto foi todo refeito, mas esta lista nao ganhou nenhum desses numeros, e
+# a revisao seguinte achou 0,7636/0,8490/40.816 vivos no README, no handoff e
+# no guia da banca. Lista separada porque `confere_materiais.py` a reaproveita
+# para os materiais da defesa, onde a citacao HISTORICA ("antes eram
+# 0,0927") e legitima; no texto do TCC nao ha citacao historica, e a regra
+# continua literal.
+VALORES_PRE_VAZAMENTO: list[tuple[str, str]] = [
+    ("0,7636", "acuracia do XGBoost aos 15 min antes da correcao do vazamento (hoje 0,7641)"),
+    ("0,8490", "AUC-ROC do XGBoost aos 15 min antes da correcao do vazamento (hoje 0,8487)"),
+    ("0,8772", "AUC-ROC aos 20 min antes da correcao do vazamento (hoje 0,8690)"),
+    ("0,9092", "AUC-ROC aos 25 min antes da correcao do vazamento (hoje 0,8899)"),
+    ("0,7924", "acuracia aos 20 min antes da correcao do vazamento (hoje 0,7856)"),
+    ("0,8261", "acuracia aos 25 min antes da correcao do vazamento (hoje 0,8068)"),
+    ("0,0927", "|SHAP| das torres aos 25 min antes da correcao do vazamento (hoje 0,0429)"),
+    ("11 vezes", "razao torres 25/15 min antes da correcao do vazamento (hoje cerca de 6)"),
+    ("11×", "razao torres 25/15 min antes da correcao do vazamento (hoje ~6×)"),
+    ("40.942", "partidas aos 10 min antes da correcao do vazamento (hoje 40.919)"),
+    ("40.816", "partidas aos 15 min antes da correcao do vazamento (hoje 40.778)"),
+    ("35.637", "partidas aos 20 min antes da correcao do vazamento (hoje 34.505)"),
+    ("27.761", "partidas aos 25 min antes da correcao do vazamento (hoje 25.098)"),
+    ("32.652", "treino maximo da curva de aprendizado antes da correcao (hoje 32.622)"),
+    ("0,8466", "1o ponto da curva de aprendizado antes da correcao (hoje 0,8494)"),
+    ("0,6653", "AUC-ROC aos 10 min nas mesmas partidas antes da correcao (hoje 0,6444)"),
+    ("0,8135", "AUC-ROC aos 20 min nas mesmas partidas antes da correcao (hoje 0,7870)"),
+    ("12.621", "partidas empatadas distintas antes da correcao (hoje 12.615)"),
+    ("Holm 0,64", "menor p de Holm antes da correcao (hoje 0,65)"),
+    ("0,8573", "AUC-ROC do holdout cronologico aos 15 min antes da correcao (hoje 0,8570)"),
+    ("0,8503", "AUC-ROC da divisao aleatoria aos 15 min antes da correcao (hoje 0,8415)"),
+]
 # NAO entra em VALORES_SUBSTITUIDOS: 0,8319 e 0,8295 sao o experimento 9 do
 # Apendice D, medido legitimamente sobre a base de 23.133. O que o texto
 # precisa e da anotacao de base ao lado, para o leitor poder julgar — nao da
@@ -366,6 +405,10 @@ PADROES_REFUTADOS: list[tuple[str, str]] = [
     (r"n[ãa]o\s+[ée]\s+constante\s+ao\s+longo", "forma refutada do vies"),
     (r"weakens\s+over\s+the\s+course", "forma refutada do vies (abstract)"),
     (r"weakens\s+over", "forma refutada do vies (abstract)"),
+    # 2026-11-08: sem o vazamento, a divisao cronologica fica 0,0026 abaixo
+    # da aleatoria aos 10 min (intervalos sobrepostos); "nunca fica abaixo"
+    # sobreviveu no guia da banca depois da correcao
+    (r"nunca\s+fica\s+abaixo", "holdout: a cronologica fica abaixo aos 10 min desde a correcao do vazamento"),
 ]
 
 
@@ -382,7 +425,7 @@ def check_residuos(t: str) -> None:
     i0 = t.find("Quadro — Treino no passado e teste no futuro")
     j0 = t.find("\n\n", t.find("|---", i0)) if i0 >= 0 else -1
     isentas = range(t[:i0].count("\n") + 1, t[:j0].count("\n") + 2) if i0 >= 0 else range(0)
-    for valor, porque in VALORES_SUBSTITUIDOS:
+    for valor, porque in VALORES_SUBSTITUIDOS + VALORES_PRE_VAZAMENTO:
         for m in _re.finditer(_re.escape(valor), t):
             linha = t[: m.start()].count("\n") + 1
             if linha in isentas:
@@ -421,7 +464,7 @@ def check_residuos(t: str) -> None:
     _pre = t[_ini:t.find("\n---", _ini)] if _ini >= 0 else ""
     if m is None and not _re.search(r"(?i)\babstract\b", _pre):
         if not any("valor substituido" in f or "forma refutada" in f for f in FALHAS):
-            print(f"  [OK] nenhum dos {len(VALORES_SUBSTITUIDOS)} valores "
+            print(f"  [OK] nenhum dos {len(VALORES_SUBSTITUIDOS) + len(VALORES_PRE_VAZAMENTO)} valores "
                   "substituidos e nenhum dos padroes refutados (sem Abstract: retirado, opcional no modelo)")
         return
     if m is None:
@@ -483,7 +526,7 @@ def check_residuos(t: str) -> None:
     if not _re.search(_auc, abstrato):
         falha(f"ABSTRACT nao menciona o AUC atual do relatorio ({_auc})")
     if not any("falha" in f.lower() for f in FALHAS):
-        print(f"  [OK] nenhum dos {len(VALORES_SUBSTITUIDOS)} valores "
+        print(f"  [OK] nenhum dos {len(VALORES_SUBSTITUIDOS) + len(VALORES_PRE_VAZAMENTO)} valores "
               "substituidos e nenhum dos padroes refutados")
 
 
@@ -863,6 +906,8 @@ def check_scripts_documentados() -> None:
         ("src/models/tune_models_full.py", "tune_models_full"),
         ("docs/verifica_tcc.py", "verifica_tcc"),
         ("docs/confere_docx.py", "confere_docx"),
+        ("docs/confere_materiais.py", "confere_materiais"),
+        ("docs/confere_paginas.ps1", "confere_paginas"),
         ("docs/recapturar_anexo_a.py", "recapturar_anexo_a"),
         ("docs/taxa_base_por_corte.py", "taxa_base_por_corte"),
         ("docs/testa_diferenca_taxas.py", "testa_diferenca_taxas"),
@@ -1662,6 +1707,107 @@ def check_coach(t: str) -> None:
         print(f"  coach: quadro de {len(esperado)} linhas, {len(revis)} sinalizados revisados, {inventadas} invencoes")
 
 
+# Figura -> o que ela mostra. Uma captura mais velha que qualquer dependência
+# mostra um estado que o sistema já não tem: depois da correção do vazamento
+# (2026-11-08) o modelo, a API e cinco páginas mudaram, e só a revisão manual
+# lembrou de recapturar. A Figura 5 ficou para trás e nada avisava.
+FIGURAS_DEPENDENCIAS: dict[str, list[str]] = {
+    "reports/figuras_texto/fig_competitivo.png": [
+        "frontend/src/pages/Competitivo.tsx", "src/api/main.py"],
+    "reports/figuras_texto/fig_shap_fases.png": [
+        "frontend/src/pages/Explain.tsx", "src/api/main.py",
+        "reports/shap_importance_phases.json", "data/models_phases.joblib"],
+    "reports/figuras_texto/fig_partida.png": [
+        "frontend/src/pages/MatchDetail.tsx", "src/api/main.py"],
+    "reports/figuras_texto/fig_simulador_estado.png": [
+        "frontend/src/pages/Predict.tsx", "frontend/src/pages/Simulador.tsx",
+        "src/api/main.py", "data/model.joblib", "data/models_phases.joblib"],
+    "reports/figuras_texto/fig_nlq.png": [
+        "frontend/src/pages/Nlq.tsx", "src/nlq/nl_to_sql.py", "src/api/main.py"],
+    "reports/figuras_texto/fig_calibracao.png": [
+        "docs/calibracao_empate_real.py", "reports/calibracao_empate_real.json",
+        "data/features_phases.csv"],
+    "reports/anexo_a/01_inicio.png": [
+        "frontend/src/pages/Home.tsx", "src/api/main.py"],
+    "reports/anexo_a/02_dashboard.png": [
+        "frontend/src/pages/Dashboard.tsx", "src/api/main.py"],
+    "reports/anexo_a/03_campeoes.png": [
+        "frontend/src/pages/Champions.tsx", "src/api/main.py"],
+    "reports/anexo_a/04_partida_detalhe.png": [
+        "frontend/src/pages/MatchDetail.tsx", "src/api/main.py"],
+    "reports/anexo_a/05_competitivo.png": [
+        "frontend/src/pages/Competitivo.tsx", "src/api/main.py"],
+    "reports/anexo_a/06_simulador.png": [
+        "frontend/src/pages/Predict.tsx", "frontend/src/pages/Simulador.tsx",
+        "src/api/main.py", "data/model.joblib", "data/models_phases.joblib"],
+}
+# Defasagem conhecida e aceita: vira aviso, não falha. Cada entrada diz por
+# que não foi recapturada; quando a figura for refeita, a checagem pede para
+# tirar a exceção.
+FIGURAS_EXCECOES: dict[str, str] = {
+    "reports/figuras_texto/fig_nlq.png":
+        "recaptura exige crédito da API da Anthropic (2026-11-08); a consulta "
+        "não usa o modelo e o vazamento não a afeta",
+}
+# Script que grava o JSON e a figura na mesma execução deixa os dois no
+# mesmo segundo, em qualquer ordem.
+_FOLGA_SEGUNDOS = 5
+
+
+def check_frescor_figuras(t: str) -> None:
+    """Toda figura do TCC é mais nova que o código e os artefatos que ela mostra.
+
+    LIMITE CONHECIDO: compara data de modificação. Num clone novo todos os
+    arquivos nascem com a mesma data e a checagem passa sem dizer nada; os
+    `data/*.joblib` não vão para o git e, ausentes, viram aviso. Componentes
+    compartilhados (`frontend/src/components/`) não entram: listaria quase
+    tudo em toda figura e a checagem viraria ruído.
+    """
+    import re as _re
+    from datetime import datetime as _dt
+
+    corpo = t.split("## Pendências finais")[0]
+    citadas = set(_re.findall(r"reports/[\w/]+\.png", corpo))
+    sem_mapa = sorted(citadas - set(FIGURAS_DEPENDENCIAS))
+    for f in sem_mapa:
+        falha(f"frescor: {f} está no texto mas não em FIGURAS_DEPENDENCIAS — "
+              "diga do que ela depende")
+    for f in sorted(set(FIGURAS_DEPENDENCIAS) - citadas):
+        aviso(f"frescor: {f} está em FIGURAS_DEPENDENCIAS mas não no texto")
+
+    def _quando(p: Path) -> str:
+        return _dt.fromtimestamp(p.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+
+    defasadas = 0
+    for fig, deps in FIGURAS_DEPENDENCIAS.items():
+        pf = RAIZ / fig
+        if not pf.exists():
+            falha(f"frescor: {fig} não existe")
+            continue
+        novas = []
+        for d in deps:
+            pd = RAIZ / d
+            if not pd.exists():
+                aviso(f"frescor: dependência ausente {d} (de {Path(fig).name}); não conferida")
+                continue
+            if pd.stat().st_mtime > pf.stat().st_mtime + _FOLGA_SEGUNDOS:
+                novas.append(f"{d} ({_quando(pd)})")
+        if fig in FIGURAS_EXCECOES:
+            if novas:
+                aviso(f"frescor: {Path(fig).name} ({_quando(pf)}) defasada, exceção aceita: "
+                      f"{FIGURAS_EXCECOES[fig]}")
+            else:
+                aviso(f"frescor: {Path(fig).name} está em dia; tire-a de FIGURAS_EXCECOES")
+            continue
+        if novas:
+            defasadas += 1
+            falha(f"frescor: {Path(fig).name} ({_quando(pf)}) é mais velha que "
+                  + ", ".join(novas) + " — recapture")
+    if not sem_mapa and not defasadas:
+        print(f"  [OK] {len(FIGURAS_DEPENDENCIAS)} figuras, nenhuma mais velha que o que mostra "
+              f"(exceções aceitas: {len(FIGURAS_EXCECOES)})")
+
+
 def check_contagem_de_checagens() -> None:
     """O numero de checagens que os documentos afirmam tem que ser o real.
 
@@ -1786,6 +1932,8 @@ def main() -> None:
     check_coach(t)
     print("22. A contagem de checagens que os docs affirmam e a real")
     check_contagem_de_checagens()
+    print("23. Frescor das figuras x codigo e artefatos que elas mostram")
+    check_frescor_figuras(t)
 
     print()
     print("=" * 66)

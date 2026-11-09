@@ -18,8 +18,9 @@ Legends com DOIS datasets complementares:
 1. **Solo queue** (Riot API): partidas ranqueadas de elo alto (Challenger/GM/Master)
    multi-região (BR1/EUW1/KR/NA1, mais um resíduo EUN1, fila 420) —
    **41.063 partidas** no banco (BR1 11.936, EUW1 11.744, KR 10.204,
-   NA1 7.159, EUN1 20) e **40.816 linhas** na base do modelo preditivo
-   (corte de 15 min; o número varia por corte, 40.942/40.816/35.637/27.761). A coleta foi retomável ao
+   NA1 7.159, EUN1 20) e **40.778 linhas** na base do modelo preditivo
+   (corte de 15 min; o número varia por corte, 40.919/40.778/34.505/25.098,
+   só partidas ainda em andamento no corte desde 2026-11-08). A coleta foi retomável ao
    longo de todo o projeto: 10.295 em julho, 23.133 em 2026-07-06,
    24.154 em 2026-09-28, 33.713 em 2026-10-03 e 39.426 em 2026-10-04,
    quando a NA1 foi de 1.446 para 7.159, fechando em 41.063 com a
@@ -86,7 +87,8 @@ tal na UI.
   10/15/20/25), `src/models/` (train_baseline, tune_models,
   tune_models_full, export_model, explain_shap). Produção:
   XGBoost n=500/lr=0.01/depth=3 por fase em `data/models_phases.joblib`,
-  retreinado em **40.816 linhas** (corte de 15 min, 2026-11-06) — ver
+  retreinado em **40.778 linhas** (corte de 15 min, 2026-11-08, depois
+  da correção do vazamento do quadro final) — ver
   números abaixo.
 - **API**: `src/api/main.py` — todos os endpoints (stats solo queue,
   `/stats/pro/*` com `?year=` padrão mais-recente, análise de partida
@@ -133,12 +135,11 @@ tal na UI.
 
 ## Números que importam (para o texto do TCC)
 
-Modelo em produção, solo queue **40.816 partidas** no corte de 15 min
-(retreino de 2026-11-06 — números do CV 5-fold com semente 42 e
-hiperparâmetros de produção 500/0,01/3; o `GridSearchCV` sobre as 41 mil
-linhas devolveu ajuste equivalente, 200 árvores a taxa 0,05, o que
-confirma que a limitação de taxa-base registrada na Seção 6.1 e no Apêndice F do TCC não
-é subajuste):
+Modelo em produção, solo queue **40.778 partidas** no corte de 15 min
+(retreino de 2026-11-08 — números do CV 5-fold com semente 42 e
+hiperparâmetros de produção 500/0,01/3; o `GridSearchCV` refeito sobre a
+mesma base escolheu a própria configuração de produção, 1º lugar entre 27,
+em `reports/tune_models_39k.json`):
 
 | Modelo (15 min) | Acurácia | AUC-ROC | AUC-ROC com seleção aninhada |
 |---|---|---|---|
@@ -191,7 +192,7 @@ transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
 - **Formulação atual (parecer de 2026-11-08):** entre partidas com diferença
   de ouro < 500, as taxas são PRÓXIMAS nos quatro cortes (46,5/47,8/46,9/47,4%)
   e o teste com a partida como unidade (bootstrap) não detecta diferença
-  (menor p de Holm 0,64). NÃO escrever "estável/constante ao longo da
+  (menor p de Holm 0,65). NÃO escrever "estável/constante ao longo da
   partida". Histórico abaixo.
 - **E O VIÉS É CONSTANTE POR FASE** — resultado de 2026-10-04, que
   substitui e refuta o achado de 2026-07-08. Entre partidas genuinamente
@@ -225,9 +226,9 @@ transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
 - **Parecer de 2026-11-08:** o experimento 11 ficou À PARTE no Apêndice K
   (atributo consultado 0 a 16 dias depois das partidas; não prova
   disponibilidade). No corpo, são dez. A curva de aprendizado com teste fixo é
-  plana acima de 10 mil partidas (0,8484 → 0,8495): "limitado pelo volume"
-  saiu do texto. A calibração foi medida nas empatadas reais (−0,18 a +0,41
-  pp): a "discrepância de taxa-base" era artefato do estado todo-zero e saiu
+  plana acima de 10 mil partidas (0,8519 aos 10 mil, 0,8527 com 32.622):
+  "limitado pelo volume" saiu do texto. A calibração foi medida nas
+  empatadas reais (−0,19 a +0,38 pp): a "discrepância de taxa-base" era artefato do estado todo-zero e saiu
   das limitações.
 - **11 experimentos de melhoria do modelo, todos ≈zero** (barão/arauto,
   dispersão de time, tuning por fase, calibração extra, ouro em itens,
@@ -306,8 +307,9 @@ foi fundido no de precisão; E = telas inteiras, F = limitações em detalhe), A
 O Apêndice D recebeu as notas de proveniência da Seção 5.3, movidas do
 corpo em 2026-10-20 para abrir espaço às citações novas). Suíte completa verde:
 `tests/smoke_test.py`, `tests/validate_predictions.py` (aprovado com
-ressalvas), `docs/verifica_tcc.py` (22 checagens, consistente),
-`docs/confere_docx.py` (conforme), `frontend` lint + 31/31 testes.
+ressalvas), `docs/verifica_tcc.py` (23 checagens, consistente),
+`docs/confere_docx.py` (conforme), `docs/confere_paginas.ps1` (corpo 30/30,
+no teto), `docs/confere_materiais.py` (guia, pptx, README sem resíduo), `frontend` lint + 31/31 testes.
 Nenhuma pendência de texto em aberto — ver a seção "Pendências finais
 antes da entrega" no fim de `docs/tcc2_texto.md` para o histórico
 completo das decisões (título acadêmico, posição de "Trabalhos

@@ -744,9 +744,10 @@ a bateria inútil como portão):
    inteiros, dentro do percentil observado) move a probabilidade na
    direção certa? Ver "reformulação de 2026-10-03" abaixo.
 2. Casos extremos (liderança/déficit total, simetria).
-3. Taxa-base por fase (viés de lado com tudo empatado) — dentro da
-   faixa que o TCC 4.3 documenta, e o corte mais vermelho é o de 15min
-   (não o de 25min: é isso que "enfraquece ao longo da partida" quer dizer).
+3. Estado todo-zero por fase — dentro de uma faixa plausível e sem pico
+   inventado entre cortes (dispersão ≤ 4 pp). Teste de comportamento: esse
+   estado não ocorre em partida empatada real e não mede calibração (desde
+   o parecer de 2026-11-08, medida por `docs/calibracao_empate_real.py`).
 4. Evolução da importância SHAP entre fases.
 5. Checagem retrospectiva rodando o pipeline completo (timeline real →
    features → modelo por fase) em **150 partidas reais com `setseed`
@@ -868,9 +869,9 @@ $env:TCC1_REFERENCE_DOCX = 'C:\...\TCC_Final.docx'   # só estilo, não conteúd
 ### `docs/finalize-fields.ps1`
 
 Campos do Word (`SEQ`, `PAGE`) nascem vazios — só o Word os preenche. Este
-script abre o `.docx`, atualiza os campos, repagina, salva e mede o corpo:
-do Resumo à página anterior ao primeiro APÊNDICE ou ANEXO, com o número
-impresso da última página das Referências.
+script abre o `.docx`, atualiza os campos, repagina e salva. No fim chama
+`confere_paginas.ps1` e sai com o código dele (desde 2026-11-08; antes ele só
+imprimia o tamanho do corpo e saía com 0 mesmo fora da faixa).
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File docs\finalize-fields.ps1
@@ -955,12 +956,12 @@ Grava `reports/holdout_temporal.json` (Apêndice C do TCC; a checagem 20 de `ver
 
 `tune_models.py` — o script original — não servia: ele imprime o resultado e não guarda nada, e foi rodado sobre a base de 10 mil. A afirmação da antiga Seção 5.8 (hoje 6.1 e Apêndice F) ficou semanas sem artefato por causa disso.
 
-Resultado refeito em 2026-11-06, sobre as 40.816 linhas do corte de 15 min (base única; em 2026-10-04, sobre 39.188, a produção ficou em 2º, AUC 0,8473 contra 0,8475):
+Resultado refeito em 2026-11-08, sobre as 40.778 linhas do corte de 15 min, depois da correção do vazamento do quadro final (antes: em 2026-11-06 a produção ficou em 3º de 27; em 2026-10-04, sobre 39.188, em 2º):
 
 | | |
 |---|---|
-| Produção (500 / 0,01 / 3) | AUC **0,8490** — 3º lugar de 27 |
-| Vencedora da grade (200 / 0,05 / 3) | AUC 0,8491 |
+| Produção (500 / 0,01 / 3) | AUC **0,8487** — 1º lugar de 27 |
+| Vencedora da grade | a própria produção (500 / 0,01 / 3), AUC 0,8488 sem arredondar o refit |
 | Profundidade | **a mesma: 3** |
 | Delta | **+0,0001** |
 
@@ -971,13 +972,13 @@ também é medida como no Quadro 3 (`cross_val_predict`, probabilidades
 agregadas), porque o `best_score_` da grade é a média por *fold* e não é
 diretamente comparável:
 
-| 15 min, 40.816 linhas | melhor combinação | acurácia | AUC-ROC |
+| 15 min, 40.778 linhas (2026-11-08) | melhor combinação | acurácia | AUC-ROC |
 |---|---|---:|---:|
-| XGBoost (produção) | 500 / 0,01 / 3 | 0,7636 | 0,8490 |
-| MLP | `(32,)`, `alpha=0.001` | 0,7645 | 0,8494 |
-| *Random Forest* | 300 árvores, `max_depth=6`, `min_samples_leaf=2` | 0,7625 | 0,8484 |
+| XGBoost (produção) | 500 / 0,01 / 3 | 0,7641 | 0,8487 |
+| MLP | `(32,)`, `alpha=0.001` | 0,7638 | 0,8491 |
+| *Random Forest* | 200 árvores, `max_depth=6`, `min_samples_leaf=5` | 0,7628 | 0,8480 |
 
-Diferenças de milésimos, com o MLP ajustado ligeiramente à frente (+0,0009 de acurácia); o XGBoost é mantido pela escolha anterior, pela liderança na configuração de produção e pelo SHAP exato. Antes disso, a 5.4 dizia
+Diferenças de milésimos (o MLP fica 0,0004 à frente na AUC-ROC e 0,0003 atrás na acurácia); o XGBoost é mantido pela proximidade e pelo SHAP exato, nunca por superioridade de desempenho. Antes disso, a 5.4 dizia
 que o Quadro 3 comparava os três ajustados, mas *Random Forest* e MLP
 estavam na configuração de referência.
 
@@ -994,9 +995,43 @@ de `build_tcc_docx.py` + `finalize-fields.ps1`.
 .venv\Scripts\python.exe docs\confere_docx.py   # exit 0 = conforme
 ```
 
-Verifica: contagem de títulos de seção e se algum está em negrito (a regra da
-instituição é maiúscula **sem** negrito); entradas de `REFERÊNCIAS`; legendas
-de Figura e de Quadro; fontes de ilustração; tabelas; imagens.
+Verifica: contagem de títulos de seção e se algum está **sem** negrito (o
+modelo oficial do orientador pede negrito e caixa alta); entradas de
+`REFERÊNCIAS`; legendas de Figura e de Quadro; fontes de ilustração; tabelas;
+imagens.
+
+### `docs/confere_paginas.ps1`
+
+Mede pelo Word, abrindo o `.docx` só para leitura, o corpo do TCC (da página
+do Resumo à anterior ao primeiro APÊNDICE ou ANEXO; as Referências contam) e
+quantas páginas tem cada apêndice. Sai com 1 se o corpo ficar fora de 25-30.
+Avisa quando o corpo está no teto (30, a situação atual). Entrou em
+2026-11-08: o corpo está sem folga, e a medida antiga só imprimia o número.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File docs\confere_paginas.ps1
+powershell -ExecutionPolicy Bypass -File docs\confere_paginas.ps1 -Maximo 29   # teste do sentido da falha
+```
+
+### `docs/confere_materiais.py`
+
+O `verifica_tcc.py` só lê o texto do TCC. Este script confere os materiais
+derivados (guia da banca, pptx da defesa, README, handoff, scripts.md,
+comandos.md, telas em `frontend/src/pages/`) e, se passados como argumento,
+o site de estudo e o deck, que são artefatos publicados fora do repositório.
+Reprova (1) qualquer valor de `VALORES_SUBSTITUIDOS` e `VALORES_PRE_VAZAMENTO`,
+ou forma de `PADROES_REFUTADOS`, importados do `verifica_tcc` (fonte única),
+salvo citação histórica (marcador de passado a até 120 caracteres, literal
+entre crases ou exceção explícita com motivo); (2) a ausência dos números
+principais de hoje no material que deve citá-los. Entrou em 2026-11-08, quando
+a primeira execução achou 0,7636/0,8490/40.816 no README e no handoff, o
+holdout antigo ("nunca fica abaixo") no guia e a tabela de ajuste pré-vazamento
+neste arquivo.
+
+```powershell
+.venv\Scripts\python.exe docs\confere_materiais.py
+.venv\Scripts\python.exe docs\confere_materiais.py <estudo.html> <pasta-do-deck>
+```
 
 Existe porque o checklist de entrega citava "41 títulos" e "12 referências",
 escritos à mão. O documento ganhou 6.1, 6.2 e seis referências de método, e
@@ -1066,7 +1101,8 @@ hiperparâmetros não cobre — ela variou só `n_estimators`,
 taxa-base.
 
 ```powershell
-# LENTO: ~40 min, validação cruzada aninhada sobre 40.816 linhas
+# LENTO: ~40 min. O artefato atual é de 2026-11-06, antes da correção do
+# vazamento (40.816 linhas); substituído no TCC por calibracao_empate_real.py
 .venv\Scripts\python.exe docs\experimento_calibracao.py
 
 # Reavalia o veredito a partir do JSON, sem reexecutar (1s)
@@ -1146,8 +1182,8 @@ texto afirmava que o viés de lado *enfraquecia* ao longo da partida, com
 pico aos 15 minutos; ao triplicar a amostra isso se desfez.
 
 **2026-11-08 (parecer do orientador).** O teste era o z de duas proporções
-com variância combinada, que supõe grupos independentes; não são (2.767 das
-12.621 partidas empatadas estão em dois ou mais cortes, e os pares dividem
+com variância combinada, que supõe grupos independentes; não são (2.766 das
+12.615 partidas empatadas estão em dois ou mais cortes, e os pares dividem
 15% a 34% do grupo menor). Agora o teste usa a **partida como unidade**:
 *bootstrap* das partidas (2.000 reamostragens, semente 42), IC por percentis,
 p bilateral pela reamostra centrada e Holm nos seis pares. Menor p de Holm:
@@ -1196,31 +1232,31 @@ desvio médio; Brier. Aos 15 e 25 min, sigmoide e isotônica com
 protocolo só, no lugar das duas execuções antigas com 5 e 3 dobras internas).
 Grava `reports/calibracao_empate_real.json` e
 `reports/figuras_texto/fig_calibracao.png` (Figura 12). Resultado: diferença
-de −0,18 a +0,41 pp nas empatadas; maior desvio entre decis 1,25 pp aos 15 min;
+de −0,19 a +0,38 pp nas empatadas; maior desvio entre decis 1,19 pp aos 15 min;
 a calibração adicional não traz ganho.
 
 ### `src/models/tune_models_aninhado.py`
 
 Busca em grade aninhada (5 dobras externas da semente 42, 3 internas) para
 XGBoost, Random Forest e MLP com as grades de `tune_models_full`. Resultado:
-0,8491 / 0,8483 / 0,8494 de AUC-ROC, a no máximo 0,0001 do não aninhado.
+0,8485 / 0,8480 / 0,8491 de AUC-ROC, a no máximo 0,0002 do não aninhado.
 Grava `reports/tune_models_aninhado.json` e `.log` (~20 min).
 
 ### `src/models/curva_aprendizado.py`
 
-(1) Curva de aprendizado aos 15 min com teste fixo de 8.164 partidas e treino
-de 2.500 a 32.652 (5 sorteios): 0,8466 → 0,8495; o volume não explica a
-sequência 0,8214/0,8393/0,8490 das rodadas de coleta. (2) Os quatro cortes nas
-mesmas 27.761 partidas que chegam aos 25 min: 0,6653 / 0,7378 / 0,8135 /
-0,9092. Grava `reports/curva_aprendizado.json`.
+(1) Curva de aprendizado aos 15 min com teste fixo de 8.156 partidas e treino
+de 2.500 a 32.622 (5 sorteios): 0,8494 → 0,8527; o volume não explica a
+sequência de AUC-ROC das rodadas de coleta. (2) Os quatro cortes nas
+mesmas 25.098 partidas que chegam aos 25 min: 0,6444 / 0,7126 / 0,7870 /
+0,8899. Grava `reports/curva_aprendizado.json`.
 
 ### `src/models/ganho_variaveis_logit.py`
 
 Ganho dos conjuntos 15 e 18 contra o MESMO classificador com as cinco
 variáveis (logística contra logística, XGBoost contra XGBoost), com o
-bootstrap pareado de `experiment_precisao`. O "+0,0078" do Apêndice K mistura
-variáveis e classificador; isolado, o ganho é +0,0070 aos 15 min e +0,0074
-aos 25 na logística, +0,0040 no XGBoost. Grava `reports/ganho_variaveis_logit.json`.
+bootstrap pareado de `experiment_precisao`. O "+0,0081" do Apêndice K mistura
+variáveis e classificador; isolado, o ganho é +0,0073 aos 15 min e +0,0090
+aos 25 na logística, +0,0044 e +0,0051 no XGBoost. Grava `reports/ganho_variaveis_logit.json`.
 
 ### `src/nlq/confere_comparador.py`
 

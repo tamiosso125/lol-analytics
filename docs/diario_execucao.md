@@ -5142,3 +5142,18 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 **Telas.** Textos de "Leitura" que contrariavam o parecer ou o próprio TCC foram corrigidos (Competitivo, Dashboard, Início, Simulador, Explicabilidade) e todas as figuras foram recapturadas, exceto a da consulta (crédito de API). A API devolve a taxa por região com 6 casas (0,5335 virava "53.3%").
 
 **Texto.** `regenera_quadros.py` reescrito para a estrutura atual; texto corrido atualizado; mais 18 ajustes da revisão (série anual só 2014 diverge, limite de Holm, "(referência)" nos Quadros 13 e 14, impessoal, etapa de explicação, auditoria do coach anterior à mudança do prompt, fonte dos 54%/60%, data de acesso da Riot, ortografia e itálicos). `verifica_tcc` CONSISTENTE, `confere_docx` conforme, corpo em 30 páginas.
+
+## 2026-11-08 (madrugada) — Conferentes dos materiais, das páginas e das figuras
+
+**Por quê.** A correção do vazamento passou no `verifica_tcc`, mas ele só lê o texto do TCC. O pptx foi conferido por um grep feito à mão, e o corpo em 30 páginas (o teto) só era medido por um script que imprimia o número e saía com 0. A Figura 5 ficou mais velha que a tela que mostra sem que nada avisasse.
+
+**O que entrou.**
+- `docs/confere_materiais.py`: guia, pptx, README, handoff, scripts.md, comandos.md e telas do frontend (mais site e deck, passados como argumento) contra os valores substituídos do `verifica_tcc` e a presença dos números de hoje. Citação histórica é aceita quando há marcador de passado perto ou exceção explícita com motivo.
+- `docs/confere_paginas.ps1`: corpo e páginas por apêndice medidos pelo Word; sai com 1 fora de 25-30. O `finalize-fields.ps1` passou a chamá-lo e devolver o código dele (uma régua só).
+- `verifica_tcc.py`: `VALORES_PRE_VAZAMENTO` (21 valores de antes da correção) na checagem 8, que não tinha nenhum; "nunca fica abaixo" entre os padrões refutados; checagem 23, frescor das figuras (data de cada figura contra o código e os artefatos que ela mostra; a Figura 5 é exceção declarada). Agora são 23 checagens.
+
+**O que a primeira execução achou** (corrigido, número por número conferido em `reports/`): README e handoff com 0,7636 / 0,8490 / 40.816; handoff com a grade antiga (200 árvores a 0,05) e a "limitação de taxa-base" que o parecer tirou; guia com o holdout antigo (0,8573 / 0,8569 / 0,8503, "nunca fica abaixo") e a comparação de Grinsztajn com 0,8483 / 0,8473; scripts.md com a tabela de ajuste, a curva, a calibração, a busca aninhada, o ganho isolado e as contagens de empatadas da primeira rodada do parecer, todos pré-vazamento. O `validate_predictions.py` ainda chamava o viés de "constante" e o estado todo-zero de discrepância de calibração; os rótulos foram alinhados ao parecer (a lógica do teste não mudou).
+
+**Testados nos dois sentidos.** `confere_materiais` reprova número velho solto e material sem os números de hoje, e aceita "antes eram 0,7636"; `confere_paginas -Maximo 29` reprova os 30 atuais; a checagem 23 reprova um print quando a página dele fica mais nova (data restaurada depois).
+
+**Estado.** `verifica_tcc` 23 checagens; `confere_paginas` corpo 30 (físicas 3 a 32, no teto); `confere_materiais` sem resíduo, inclusive site v17 e deck v25.

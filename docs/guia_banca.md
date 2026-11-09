@@ -575,7 +575,7 @@ ou a mais aceita da técnica, mesmo que antiga.
 | Breiman (2001) | Artigo original da *Random Forest* |
 | Chen e Guestrin (2016) | Artigo original do XGBoost |
 | Hornik, Stinchcombe e White (1989) | Prova da aproximação universal, que justifica testar uma rede neural |
-| Grinsztajn, Oyallon e Varoquaux (2022) | Comparação ampla e recente de árvores contra redes em dados tabulares (45 bases, treino truncado em 10 mil). Conferido no texto: com treino de 50 mil, a diferença tende a diminuir (indício, sem estudo rigoroso). As nossas 39 mil ficam entre os dois regimes, e o empate do MLP é coerente com isso. **Critério de seleção que importa à defesa (seção 3.1 do artigo):** eles removem bases "fáceis demais", isto é, aquelas em que a regressão logística fica a menos de 5% (relativo) de **ambos** o ResNet e o HistGradientBoosting. Nossa regressão logística (AUC 0,8483 contra 0,8473 do XGBoost) cairia nesse critério: a base não discrimina famílias de modelo, o que explica o empate e fica fora do regime em que o resultado deles é informativo. Também removem séries temporais e alvos determinísticos |
+| Grinsztajn, Oyallon e Varoquaux (2022) | Comparação ampla e recente de árvores contra redes em dados tabulares (45 bases, treino truncado em 10 mil). Conferido no texto: com treino de 50 mil, a diferença tende a diminuir (indício, sem estudo rigoroso). As nossas 39 mil ficam entre os dois regimes, e o empate do MLP é coerente com isso. **Critério de seleção que importa à defesa (seção 3.1 do artigo):** eles removem bases "fáceis demais", isto é, aquelas em que a regressão logística fica a menos de 5% (relativo) de **ambos** o ResNet e o HistGradientBoosting. Nossa regressão logística (AUC-ROC 0,8495 contra 0,8487 do XGBoost, aos 15 min) cairia nesse critério: a base não discrimina famílias de modelo, o que explica o empate e fica fora do regime em que o resultado deles é informativo. Também removem séries temporais e alvos determinísticos |
 | Lundberg e Lee (2017) | Artigo original do SHAP, com a prova das propriedades que o justificam |
 | Ribeiro, Singh e Guestrin (2016) | Artigo original do LIME, a alternativa considerada |
 | Hanley e McNeil (1982) | Interpretação clássica da AUC como probabilidade de ordenar certo um par |
@@ -2116,8 +2116,10 @@ aba Estado (5.5); Figura 5 consulta em linguagem natural (5.6).
 |---|---|---|
 | `tests/smoke_test.py` | Roda o pipeline inteiro com dados sintéticos, sem tocar nos dados reais | funcional |
 | `tests/validate_predictions.py` | Bateria de comportamento do modelo: vantagem real aumenta a chance? casos extremos dão probabilidade alta? as taxas do viés ficam próximas entre os cortes? torres crescem aos 25? | **Aprovado com ressalvas** |
-| `docs/verifica_tcc.py` | **22 checagens** que comparam os números do texto do TCC com os artefatos reais | **22/22, consistente** |
+| `docs/verifica_tcc.py` | **23 checagens** que comparam os números do texto do TCC com os artefatos reais (inclui: nenhuma figura mais velha que o que ela mostra) | **23/23, consistente** |
 | `docs/confere_docx.py` | Confere a formatação do `.docx` (títulos, referências, legendas) | conforme |
+| `docs/confere_paginas.ps1` | Mede pelo Word o corpo (25-30 páginas) e cada apêndice | 30 páginas, no teto |
+| `docs/confere_materiais.py` | Confere este guia, o pptx, o site e o README contra os números substituídos | sem resíduo |
 | Frontend | 31 testes automáticos + verificação de código | ok |
 
 **A checagem retrospectiva** (dentro da bateria): rodando o modelo
@@ -2352,9 +2354,9 @@ Detalhes e páginas em `docs/conferencia_referencias.md`.
   Medido em `holdout_temporal.py` (Apêndice C): treinar nas 80% partidas mais
   antigas e testar nas 20% mais recentes, ou treinar nos *patches* 16.10 a
   16.13 e testar nos 16.14 a 16.19, **não reduz a AUC-ROC**. Aos 15 min:
-  0,8573 (cronológica) e 0,8569 (por *patch*) contra 0,8503 da divisão
-  aleatória de mesmo tamanho; a divisão temporal nunca fica abaixo (menor diferença +0,0012, 25 min, por
-  *patch*). **Ressalva:** o tempo se mistura com a região (o teste cronológico
+  0,8570 (cronológica) e 0,8567 (por *patch*) contra 0,8415 da divisão
+  aleatória de mesmo tamanho. A única queda é a cronológica aos 10 min,
+  0,0026 abaixo da aleatória, com os intervalos sobrepostos. **Ressalva:** o tempo se mistura com a região (o teste cronológico
   aos 15 min tem 44,3% de NA1 e nenhuma BR1), então o teste não separa os dois
   efeitos; ele só mostra que o modelo generaliza para uma época e uma mistura
   regional diferentes das do treino.

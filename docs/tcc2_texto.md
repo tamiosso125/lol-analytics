@@ -1667,7 +1667,7 @@ acima e não se repetem aqui.
 
 Antes de entregar, a suíte completa passa:
 `tests/smoke_test.py` (exit 0), `tests/validate_predictions.py`
-(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (22 checagens de
+(APROVADO COM RESSALVAS), `docs/verifica_tcc.py` (23 checagens de
 consistência do texto contra o banco e os artefatos, exit 0),
 `docs/confere_docx.py` (conformidade formal do `.docx`, exit 0), e
 `cd frontend; npm run lint; npm run test` (31/31).

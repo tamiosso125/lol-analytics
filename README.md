@@ -152,10 +152,11 @@ portal da Riot (limites maiores, sem expiração diária).
       `reports/tune_models_39k.json`
 - [x] Rodar tudo com dados reais (**41.063 partidas** de *solo queue* em
       cinco regiões + **99.259 jogos** profissionais). Análise e
-      modelos usam a mesma base (refeitos em 2026-11-06 sobre as 41.063; o
-      número de partidas varia por corte). Métricas do modelo de produção
-      (XGBoost, corte de 15 min, 40.816 linhas): acurácia **0,7636**,
-      AUC-ROC **0,8490** — em `docs/diario_execucao.md` e `reports/metricas_corte.json`,
+      modelos usam a mesma base (refeitos em 2026-11-06 sobre as 41.063 e
+      de novo em 2026-11-08, depois da correção do vazamento do quadro final;
+      o número de partidas varia por corte). Métricas do modelo de produção
+      (XGBoost, corte de 15 min, 40.778 linhas): acurácia **0,7641**,
+      AUC-ROC **0,8487** — em `docs/diario_execucao.md` e `reports/metricas_corte.json`,
       e reproduzível com `python -m src.models.multi_cutoff_metrics`
 - [x] (f) Front end React como interface principal — `frontend/`
 - [ ] Escrever os capítulos do TCC II a partir de `docs/diario_execucao.md`

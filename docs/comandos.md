@@ -229,7 +229,9 @@ git show gabarito-203:src/nlq/nl_to_sql.py
 ```powershell
 # Teste D1: calibração e regularização alternativa contra a discrepância de
 # taxa-base da Seção 6.1 e do Apêndice F. LENTO (~40 min): cada variante roda validação
-# cruzada aninhada sobre 40.816 linhas. Grava
+# cruzada aninhada. HISTÓRICO: o artefato é de 2026-11-06, antes da correção do
+# vazamento (40.816 linhas); desde o parecer, a calibração do TCC vem de
+# docs/calibracao_empate_real.py. Grava
 # reports/experimento_calibracao.json, e o veredito sai de
 # reports/experimento_calibracao_veredito.json:
 .venv\Scripts\python.exe docs\experimento_calibracao.py
@@ -280,12 +282,12 @@ git show gabarito-203:src/nlq/nl_to_sql.py
 
 ### 5c. Conferir o texto e o entregável
 
-Antes de fechar o TCC, duas checagens automáticas. Ambas saem com exit 1
-quando algo diverge, e ambas devem passar.
+Antes de fechar o TCC, quatro checagens automáticas. Todas saem com exit 1
+quando algo diverge, e todas devem passar.
 
 ```powershell
-# 22 checagens de consistência do texto contra o banco e os artefatos.
-# A lista completa e o docstring de docs/verifica_tcc.py; a checagem 20
+# 23 checagens de consistência do texto contra o banco e os artefatos.
+# A lista completa e o docstring de docs/verifica_tcc.py; a checagem 22
 # confere que o numero aqui afirmado bate com o que a suite imprime, entao
 # este comentario nao pode divergir sem reprovar.
 #   1-5   texto e formatacao (CJK, referencias cruzadas, tabelas, ABNT,
@@ -299,13 +301,27 @@ quando algo diverge, e ambas devem passar.
 #   18    as DUAS bases declaradas onde cada numero aparece
 #   19    accuracy do NLQ: artefato, ou declaracao de lacuna com a chave
 #         comprovadamente ausente
-#   20    o numero de checagens que os docs afirmam e o real
+#   20    treino no passado e teste no futuro (holdout) x artefato
+#   21    Apendice M (experimentos 12 a 19) e coach x artefatos
+#   22    o numero de checagens que os docs afirmam e o real
+#   23    nenhuma figura mais velha que o codigo ou artefato que ela mostra
+#         (excecao declarada: Figura 5, sem credito de API para recapturar)
 .venv\Scripts\python.exe docs\verifica_tcc.py
 
 # Conformidade formal do .docx gerado: títulos em negrito, contagem de
 # títulos e de referências, legendas, fontes, tabelas, imagens.
 # Rode DEPOIS de build + finalize-fields:
 .venv\Scripts\python.exe docs\confere_docx.py
+
+# Paginas do corpo (25-30) e de cada apendice, medidas pelo Word, so leitura.
+# O finalize-fields.ps1 ja chama no fim e sai com o codigo dele (~20 s):
+powershell -ExecutionPolicy Bypass -File docs\confere_paginas.ps1
+
+# Materiais da defesa (guia, pptx, README, handoff, scripts.md, telas) contra
+# os valores substituidos do verifica_tcc; site e deck sao artefatos
+# publicados, passe as copias locais (sem argumento, ficam de fora):
+.venv\Scripts\python.exe docs\confere_materiais.py
+.venv\Scripts\python.exe docs\confere_materiais.py <estudo.html> <pasta-do-deck>
 ```
 
 ### 5d. Regerar as figuras (recortes da Seção 5 e telas do Apêndice E)
@@ -476,10 +492,11 @@ texto existam de verdade. Ver **5b**, **5c** e **5d**.
 ```
 15. python -m src.models.multi_cutoff_metrics  # Apêndice C + metricas_corte.json
 16. python -m src.models.tune_models_full --completo  # lastro da 5.4, 6.1 e Apêndice F
-17. python docs/verifica_tcc.py               # 22 checagens, exit 0
+17. python docs/verifica_tcc.py               # 23 checagens, exit 0
 18. python docs/build_tcc_docx.py             # gera o .docx
-19. powershell -File docs/finalize-fields.ps1  # Word preenche os campos
+19. powershell -File docs/finalize-fields.ps1  # campos + confere_paginas (corpo 25-30), exit 0
 20. python docs/confere_docx.py               # conformidade formal, exit 0
+21. python docs/confere_materiais.py          # guia, pptx, README sem numero velho, exit 0
 ```
 
 ## Experimentos de precisão (2026-11-03, exploratório, não altera o modelo de produção)

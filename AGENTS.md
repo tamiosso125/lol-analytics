@@ -161,6 +161,12 @@ Referência completa em `docs/comandos.md`.
 .venv\Scripts\python.exe tests\smoke_test.py
 .venv\Scripts\python.exe tests\validate_predictions.py   # precisa do modelo exportado
 
+# Texto do TCC e entregáveis (exit 0 = ok)
+.venv\Scripts\python.exe docs\verifica_tcc.py        # texto x artefatos
+.venv\Scripts\python.exe docs\confere_docx.py        # estrutura do .docx
+powershell -File docs\confere_paginas.ps1             # corpo 25-30 páginas
+.venv\Scripts\python.exe docs\confere_materiais.py   # guia/pptx/README sem número velho
+
 # Frontend
 cd frontend; npm run lint; npm run test; npm run build; cd ..
 

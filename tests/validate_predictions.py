@@ -291,18 +291,21 @@ def section3_base_rate(models: dict) -> None:
     O TCC (Seção 5.3) NÃO afirma "vermelho < 50% em todos os cortes" e também
     NÃO afirma que o viés enfraquece ao longo da partida. A versão anterior
     deste texto afirmava, e esta checagem exigia que o ponto mais vermelho
-    fosse o de 15 min. A medição sobre a base ampliada (39.426 partidas)
-    desfez essa forma: entre partidas genuinamente empatadas a taxa bruta do
-    azul é 46,4% / 47,9% / 46,7% / 47,1%, e NENHUMA diferença entre pares
-    sobrevive ao ajuste de Holm (menor p corrigido = 0,83). O achado atual é
-    que o viés é CONSTANTE, e não que ele oscila — resultado medido por
-    `docs/testa_diferenca_taxas.py`.
+    fosse o de 15 min. A medição sobre a base ampliada desfez essa forma.
+    Desde o parecer de 2026-11-08 (e sem o vazamento do quadro final), entre
+    partidas com diferença de ouro < 500 a taxa bruta do azul é 46,5% / 47,8%
+    / 46,9% / 47,4% e o teste com a partida como unidade não detecta
+    diferença (menor p de Holm 0,65, `reports/vies_cortes_por_partida.json`).
+    O TCC diz "taxas próximas", NÃO "constante" nem "estável": não detectar
+    diferença não prova igualdade.
 
-    O que esta seção verifica agora:
-      1. todo corte dentro da faixa que o texto documenta;
-      2. que a série seja PLANA, isto é, que a dispersão entre cortes fique
-         dentro do que o próprio texto reporta. É isso que "constante"
-         significa operacionalmente, e é testável.
+    O estado todo-zero usado aqui (48,5% a 51,5%, `reports/taxa_base_por_corte.json`)
+    não ocorre em nenhuma partida empatada real, então NÃO mede calibração
+    (essa é medida nas empatadas reais por `docs/calibracao_empate_real.py`).
+    É teste de comportamento:
+      1. todo corte dentro de uma faixa plausível;
+      2. a dispersão entre cortes pequena — o modelo não inventa um pico que
+         os dados não mostram.
 
     Medir o texto em vez de medir a memória é o motivo da mudança: a bateria
     reprovava porque o enunciado dela defendia uma forma que os dados não
@@ -316,8 +319,8 @@ def section3_base_rate(models: dict) -> None:
         check(
             f"corte {cutoff}min, taxa-base dentro da faixa documentada",
             0.455 <= base <= 0.556,
-            f"prob = {base:.3f} (TCC 5.3: série plana, 49,0%-51,4%; "
-            "dado bruto 46,4%-47,9% — o modelo subestima o viés em ~3pp)",
+            f"prob = {base:.3f} (estado todo-zero, 48,5%-51,5% no artefato; "
+            "não é partida real, não mede calibração)",
         )
     # "Constante" operacional: a dispersão entre cortes não pode passar da
     # dispersão que o próprio texto reporta entre cortes (1,4 pp), com folga
@@ -325,7 +328,7 @@ def section3_base_rate(models: dict) -> None:
     vals = list(bases.values())
     dispersao = (max(vals) - min(vals)) * 100
     check(
-        "viés constante: dispersão entre cortes <= 4 pp",
+        "sem pico inventado: dispersão entre cortes <= 4 pp",
         dispersao <= 4.0,
         f"dispersão = {dispersao:.2f} pp "
         f"({' -> '.join(f'{c}min {bases[c]:.3f}' for c in CUTOFFS)}); "
