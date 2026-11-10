@@ -1054,8 +1054,14 @@ def ajustar_tabela(tabela, larguras_cm: list[float], esquerda: bool = False) -> 
     # terminava com "que a correção de Bonferroni" sozinho na página seguinte
     for linha in tabela.rows:
         linha._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
+    # A ÚLTIMA linha também leva keep_with_next, para a linha "Fonte" não ficar
+    # sozinha no topo da página seguinte (2026-11-10: Quadro 4 no corpo e
+    # Quadro 31 no Apêndice K saíam assim; só a renderização mostrou). Quadro
+    # longo (mais de 12 linhas) pode atravessar páginas, então só as duas
+    # últimas linhas se prendem à Fonte.
+    n_linhas = len(tabela.rows)
     for i_linha, linha in enumerate(tabela.rows):
-        if inteiro and i_linha < len(tabela.rows) - 1:
+        if inteiro or i_linha >= n_linhas - 2:
             for celula in linha.cells:
                 for p in celula.paragraphs:
                     p.paragraph_format.keep_with_next = True
@@ -1107,7 +1113,7 @@ LARGURAS_QUADROS = {
     "Esquema relacional do banco de dados": [3.0, 9.5, 3.5],
     "Benchmark de 26 perguntas de referência da consulta em linguagem natural": [0.8, 4.4, 7.4, 3.4],
     "Métricas completas por corte temporal, comparação entre os três modelos":
-        [1.4, 1.5, 1.45, 2.85, 1.95, 1.8, 1.6, 1.6, 1.75],
+        [1.6, 1.6, 1.6, 2.2, 1.95, 2.1, 1.6, 1.6, 1.75],  # 2026-11-10: "Precisão" e "10 min" quebravam; valor de 6 caracteres precisa de 1,6 cm (1,2 + margens de célula 0,38); "Random Forest" quebra em 2 linhas
     # apêndices reescritos em quadros (2026-11-03)
     "Execuções do benchmark de linguagem natural": [4.0, 2.4, 2.2, 7.4],
     "Tipos de falha do conjunto cego": [7.0, 3.0, 6.0],
@@ -1140,7 +1146,7 @@ LARGURAS_QUADROS = {
     # fundido no de precisão no mesmo dia; as letras E a L viraram D a K)
     "Fundamentos dos métodos usados e o limite de cada um": [3.2, 3.0, 5.6, 4.2],
     "Composição das bases de dados": [4.6, 5.2, 6.2],
-    "Tipos de chave da Riot Games API": [3.0, 3.4, 3.8, 3.0, 2.8],
+    "Tipos de chave da Riot Games API": [3.4, 3.2, 3.6, 2.9, 2.9],  # 2026-11-10: "Desenvolvimento" quebrava
     "Objetivos específicos, onde são tratados e a evidência de cada um": [1.8, 3.2, 11.0],
     "Importância média das variáveis (valor absoluto do SHAP) por corte": [4.8, 2.8, 2.8, 2.8, 2.8],
     "Experimentos 1 a 10: ganho de AUC-ROC contra as cinco variáveis originais": [1.6, 6.2, 4.1, 4.1],

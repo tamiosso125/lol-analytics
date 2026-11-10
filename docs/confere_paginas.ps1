@@ -51,7 +51,22 @@ try {
       $apendices += [pscustomobject]@{ Titulo = $t; Pagina = $p.Range.Information(3) }
     }
   }
+  # Linha "Fonte:" solta no topo de uma página, separada da tabela que ela
+  # fecha (2026-11-10: Quadro 4 no corpo e Quadro 31 no Apêndice K saíam
+  # assim; só renderizar o documento mostrou). A última linha de cada tabela
+  # leva keep_with_next em build_tcc_docx.py; este teste prova que funcionou.
+  $soltas = @()
+  $ant = $null
+  foreach ($p in $doc.Paragraphs) {
+    if ($null -ne $ant -and $p.Range.Text.Trim().StartsWith('Fonte:') -and $ant.Range.Information(12)) {
+      $pgFonte = $p.Range.Information(3)
+      $pgTabela = $ant.Range.Information(3)
+      if ($pgFonte -ne $pgTabela) { $soltas += "pagina fisica $pgFonte" }
+    }
+    $ant = $p
+  }
   $doc.Close($false)
+  foreach ($x in $soltas) { $falhas += "linha Fonte separada da tabela: $x" }
 
   if ($null -eq $pgInicio) { $falhas += 'paragrafo "Resumo:" nao encontrado: inicio do corpo desconhecido' }
   if ($apendices.Count -eq 0) { $falhas += 'nenhum titulo de 1o nivel APENDICE/ANEXO: fim do corpo desconhecido' }

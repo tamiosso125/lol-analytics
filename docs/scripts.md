@@ -1292,6 +1292,11 @@ anotada `gabarito-203` (b83e53c + esse arquivo). Os quatro hashes gravados no
 resultado conferem com a tag. A main acrescenta depois a resolução de nomes,
 a checagem de eliminações e o roteamento por entidade, não medidos.
 
+A tag foi enviada ao GitHub em 2026-11-10 (`git push origin gabarito-203`), e o
+Apêndice B do TCC cita o endereço do repositório. O repositório é público: o
+push publicou os 141 commits que ainda não estavam lá, mas só a tag; o `main`
+local segue à frente do remoto.
+
 ### Outras mudanças do mesmo dia
 
 - `/predict` devolve também `shap_base_value` (referência em log-odds) e

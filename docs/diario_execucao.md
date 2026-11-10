@@ -5182,3 +5182,13 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 **Imagens.** 11 das 12 vistas (todas menos a 9, tela inteira da partida da Figura 3); os números batem com o texto, o banco e os quadros. A Figura 5 segue a captura antiga, e a SQL dela, rodada de novo no banco congelado, dá os mesmos resultados.
 
 **Fora do alcance do script.** Quadros de texto (1, 19, 22, 25, 27, 28), o 7 (execuções históricas do *benchmark*), a primeira medição do Quadro 18 e os valores externos do Quadro 27 (limites das chaves da Riot, do portal consultado em 3 de novembro).
+
+## 2026-11-10 (noite) — Pendentes: tag, 7,45 no deck e olhada visual no Word
+
+**Tag.** `gabarito-203` enviada ao GitHub (`git push origin gabarito-203`; só a tag, o `main` local segue 176 commits à frente). O repositório é público: antes do push conferi que o histórico não tem chave Riot/Anthropic nem `.env`, e que os logs, o `.api.pid` e o `settings.local.json` já estavam publicados de antes (foram removidos depois). O push publicou 141 commits novos, entre eles o `modelo_elvandi.docx`. O Apêndice B do TCC passou a citar o endereço do repositório, porque a tag sem endereço não era localizável.
+
+**7,45 pp.** Corrigido no deck (versão 27 do artefato) e na nota do slide 17 do pptx, reconstruído com PowerPoint (18 slides, 304 efeitos; só essa nota mudou).
+
+**Olhada no Word.** O `.docx` foi exportado para PDF pelo Word e as 62 páginas foram vistas como imagem. Defeitos que nenhum script pegava, corrigidos em `build_tcc_docx.py`: (1) a linha "Fonte" ficava sozinha no topo da página seguinte (Quadro 4 no corpo, Quadro 31 no Apêndice K): a última linha de cada quadro agora leva keep_with_next; (2) Quadro 11 com "Precisã/o" e "10 / min" quebrados e (3) Quadro 27 com "Desenvolviment/o": larguras refeitas (uma primeira tentativa estreitou demais "n" e "F1" e quebrou os números; corrigida na hora). `confere_paginas.ps1` ganhou a detecção de "Fonte" solta e foi testado nos dois sentidos (reprova o `.docx` anterior nas páginas 21 e 62).
+
+**Estado.** Corpo 30 páginas (físicas 3 a 32); o Apêndice K passou de 3 para 4 páginas (o Quadro 31 agora fica inteiro numa página). Todos os conferentes passam.
