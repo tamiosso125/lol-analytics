@@ -1060,21 +1060,21 @@ Quadro — Benchmark de 26 perguntas de referência da consulta em linguagem nat
 | 5 | Quais os 5 campeões com maior win rate com pelo menos 50 jogos? | `SELECT champion_name, AVG(win::int) AS wr FROM participants GROUP BY champion_name HAVING COUNT(*) >= 50 ORDER BY wr DESC LIMIT 5` | **FALHA** (formatação — limiar de jogos) |
 | 6 | Quantos jogadores estão cadastrados na tabela de jogadores? | `SELECT COUNT(*) FROM players` | OK |
 | 7 | Quantas partidas o time vermelho venceu? | `SELECT COUNT(*) FROM teams WHERE team_id = 200 AND win = true` | OK |
-| 8 | Qual a média de ouro dos jogadores na posição JUNGLE? | `SELECT AVG(gold_earned) FROM participants WHERE team_position = 'JUNGLE'` | OK |
+| 8 | Qual a média de ouro (gold_earned) dos jogadores na posição JUNGLE? | `SELECT AVG(gold_earned) FROM participants WHERE team_position = 'JUNGLE'` | OK |
 | 9 | Quais os 5 campeões mais jogados na posição MIDDLE? | `SELECT champion_name, COUNT(*) AS n FROM participants WHERE team_position = 'MIDDLE' GROUP BY champion_name ORDER BY n DESC LIMIT 5` | OK |
 | 10 | Qual o win rate por posição? | `SELECT team_position, AVG(win::int) AS wr FROM participants GROUP BY team_position ORDER BY wr DESC` | OK |
 | 11 | Qual a média de barões derrubados pelo time vencedor por partida? | `SELECT AVG(barons) FROM teams WHERE win = true` | OK |
-| 12 | Qual o campeão com maior win rate em UTILITY, com pelo menos 20 partidas? | `SELECT champion_name, AVG(win::int) AS wr FROM participants WHERE team_position = 'UTILITY' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY wr DESC LIMIT 1` | **FALHA** (formatação — limiar de jogos) |
+| 12 | Qual o campeão com maior win rate jogando na posição UTILITY, com pelo menos 20 partidas? | `SELECT champion_name, AVG(win::int) AS wr FROM participants WHERE team_position = 'UTILITY' GROUP BY champion_name HAVING COUNT(*) >= 20 ORDER BY wr DESC LIMIT 1` | **FALHA** (formatação — limiar de jogos) |
 | 13 | Quantas partidas duraram mais de 30 minutos? | `SELECT COUNT(*) FROM matches WHERE game_duration_s > 1800` | OK |
-| 14 | Qual a média de dano a campeões dos jogadores do time azul? | `SELECT AVG(dmg_to_champions) FROM participants WHERE team_id = 100` | OK |
+| 14 | Qual a média de dano causado a campeões pelos jogadores do time azul? | `SELECT AVG(dmg_to_champions) FROM participants WHERE team_id = 100` | OK |
 | 15 | Quantos jogadores estão no tier Challenger? | `SELECT COUNT(*) FROM players WHERE tier = 'CHALLENGER'` | OK |
 | 16 | Qual time, azul ou vermelho, derruba mais torres em média? | `SELECT team_id, AVG(towers) AS avg_towers FROM teams GROUP BY team_id ORDER BY avg_towers DESC LIMIT 1` | OK |
 | 17 | Quantas partidas existem por versão do jogo, da mais para a menos frequente? | `SELECT game_version, COUNT(*) AS n FROM matches GROUP BY game_version ORDER BY n DESC` | OK |
-| 18 | Qual o CS médio dos jogadores na posição TOP? | `SELECT AVG(cs_total) FROM participants WHERE team_position = 'TOP'` | OK |
+| 18 | Qual o CS (farm) médio dos jogadores na posição TOP? | `SELECT AVG(cs_total) FROM participants WHERE team_position = 'TOP'` | OK |
 | 19 | Quais os 5 campeões com maior média de assistências? | `SELECT champion_name, AVG(assists) AS avg_assists FROM participants GROUP BY champion_name ORDER BY avg_assists DESC LIMIT 5` | OK |
-| 20 | Em quantas partidas o time com pelo menos 1 arauto também venceu? | `SELECT COUNT(*) FROM teams WHERE heralds > 0 AND win = true` | OK |
+| 20 | Em quantas partidas o time que conquistou pelo menos um arauto também venceu? | `SELECT COUNT(*) FROM teams WHERE heralds > 0 AND win = true` | OK |
 | 21 | Quantas partidas têm participantes que também estão na tabela de jogadores? | `SELECT COUNT(DISTINCT pt.match_id) FROM participants pt JOIN players p ON p.puuid = pt.puuid` | OK |
-| 22 | Campeão com maior win rate entre jogadores Grandmaster, com pelo menos 10 partidas? | `SELECT pt.champion_name, AVG(pt.win::int) AS wr FROM participants pt JOIN players p ON p.puuid = pt.puuid WHERE p.tier = 'GRANDMASTER' GROUP BY pt.champion_name HAVING COUNT(*) >= 10 ORDER BY wr DESC LIMIT 1` | **FALHA** (formatação — limiar de jogos) |
+| 22 | Qual o campeão com maior win rate entre os jogadores do tier Grandmaster, com pelo menos 10 partidas? | `SELECT pt.champion_name, AVG(pt.win::int) AS wr FROM participants pt JOIN players p ON p.puuid = pt.puuid WHERE p.tier = 'GRANDMASTER' GROUP BY pt.champion_name HAVING COUNT(*) >= 10 ORDER BY wr DESC LIMIT 1` | **FALHA** (formatação — limiar de jogos) |
 | 23 | Quantos jogos profissionais de 2026 existem no banco? | `SELECT COUNT(DISTINCT game_id) FROM pro_games WHERE year = 2026` | OK |
 | 24 | Qual o win rate do lado azul no competitivo em 2026? | `SELECT AVG(win::int) FROM pro_games WHERE side = 'Blue' AND year = 2026` | OK |
 | 25 | Quais os 5 campeões mais jogados no competitivo em 2026? | `SELECT pp.champion, COUNT(*) AS jogos FROM pro_players pp JOIN pro_games pg ON pg.game_id = pp.game_id AND pg.side = pp.side WHERE pg.year = 2026 GROUP BY pp.champion ORDER BY jogos DESC LIMIT 5` | OK |

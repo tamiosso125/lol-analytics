@@ -911,6 +911,7 @@ def check_scripts_documentados() -> None:
         ("docs/verifica_tcc.py", "verifica_tcc"),
         ("docs/confere_docx.py", "confere_docx"),
         ("docs/confere_materiais.py", "confere_materiais"),
+        ("docs/confere_quadros.py", "confere_quadros"),
         ("docs/confere_paginas.ps1", "confere_paginas"),
         ("docs/recapturar_anexo_a.py", "recapturar_anexo_a"),
         ("docs/taxa_base_por_corte.py", "taxa_base_por_corte"),

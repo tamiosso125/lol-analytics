@@ -5170,3 +5170,15 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 5. Apêndice E: "inteiras" e "sem captura de página inteira" se contradiziam; agora "com toda a altura do conteúdo" e "altura ajustada ao conteúdo da página" (`FONTE_IMAGENS`).
 
 **Estado.** Diff de texto antes/depois: 13 linhas, todas as esperadas. Corpo 30 páginas (físicas 3 a 32), apêndices com o mesmo tamanho; `verifica_tcc` CONSISTENTE, `confere_docx` conforme, `confere_materiais` sem resíduo. Não lidas nesta passagem: Figuras 3 e 5 a 11 (Figura 5 segue a captura antiga).
+
+## 2026-11-10 (tarde) — Conferência célula a célula dos quadros
+
+**Pedido.** Revisar todos os quadros, imagens e valores. Em vez de amostrar, `docs/confere_quadros.py` lê os 32 quadros do `tcc2_final.docx` e compara cada célula numérica com o JSON de `reports/` ou com o banco: 629 células em 25 quadros (2 a 6, 8 a 18, 20, 21, 23, 24, 26, 29 a 32). Testado nos dois sentidos (uma célula adulterada do Quadro 3 reprovou).
+
+**Achado real.** O Quadro 8 trazia 6 perguntas (8, 12, 14, 18, 20, 22) enxugadas em relação ao texto que `src/nlq/evaluate_nlq.py` envia ao sistema, e algumas versões enviadas citam nomes de coluna ("gold_earned", "CS (farm)"). Agora o quadro mostra o texto literal, tirado de `reports/nlq_benchmark.json`. As 26 SQLs de referência já batiam.
+
+**Suspeitas descartadas.** (1) Apêndice K cita a base do XGBoost como 0,8487 e o JSON dos experimentos tem 0,8488: os experimentos reportam a média das AUC-ROC por dobra (0,84881), e o Quadro 4 a AUC-ROC das previsões agrupadas fora da dobra (0,84872); os ganhos vêm do bootstrap sobre as previsões agrupadas, então 0,8487 é a referência certa (confirmado: a mesma configuração dá 0,84872 nas duas matrizes). (2) KR com 50,4% no Quadro 2: 50,44% pela vitória do vermelho, 50,46% pelas derrotas do azul, por 2 partidas com os dois times sem vitória.
+
+**Imagens.** 11 das 12 vistas (todas menos a 9, tela inteira da partida da Figura 3); os números batem com o texto, o banco e os quadros. A Figura 5 segue a captura antiga, e a SQL dela, rodada de novo no banco congelado, dá os mesmos resultados.
+
+**Fora do alcance do script.** Quadros de texto (1, 19, 22, 25, 27, 28), o 7 (execuções históricas do *benchmark*), a primeira medição do Quadro 18 e os valores externos do Quadro 27 (limites das chaves da Riot, do portal consultado em 3 de novembro).

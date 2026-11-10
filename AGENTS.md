@@ -164,6 +164,7 @@ Referência completa em `docs/comandos.md`.
 # Texto do TCC e entregáveis (exit 0 = ok)
 .venv\Scripts\python.exe docs\verifica_tcc.py        # texto x artefatos
 .venv\Scripts\python.exe docs\confere_docx.py        # estrutura do .docx
+.venv\Scripts\python.exe docs\confere_quadros.py      # cada célula dos quadros x artefato
 powershell -File docs\confere_paginas.ps1             # corpo 25-30 páginas
 .venv\Scripts\python.exe docs\confere_materiais.py   # guia/pptx/README sem número velho
 

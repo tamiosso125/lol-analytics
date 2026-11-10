@@ -1013,6 +1013,23 @@ powershell -ExecutionPolicy Bypass -File docs\confere_paginas.ps1
 powershell -ExecutionPolicy Bypass -File docs\confere_paginas.ps1 -Maximo 29   # teste do sentido da falha
 ```
 
+### `docs/confere_quadros.py`
+
+Lê os 32 quadros do `docs/tcc2_final.docx` (o que vai ao professor) e compara
+cada célula numérica com o artefato de origem: os JSON de `reports/` ou uma
+consulta ao banco. Cobre 22 quadros (cerca de 630 células): 2 a 6, 8 a 18 (menos
+o 7, 19 e 22), 20, 21, 23, 24, 26, 29 a 32. Ficam de fora os quadros de texto
+(1, 19, 22, 25, 27, 28), o 7 (execuções históricas do *benchmark*, sem artefato
+por execução) e a primeira medição do Quadro 18. O critério é o número impresso
+igual ao artefato arredondado às mesmas casas; 0,8487 contra 0,8488 reprova.
+`QUADROS_DOCX` aponta outro `.docx`, só para testar a reprovação. Entrou em
+2026-11-10: achou o Quadro 8 com 6 perguntas enxugadas em relação ao texto que
+o sistema recebeu.
+
+```powershell
+.venv\Scripts\python.exe docs\confere_quadros.py   # exit 0 = nenhuma divergência
+```
+
 ### `docs/confere_materiais.py`
 
 O `verifica_tcc.py` só lê o texto do TCC. Este script confere os materiais

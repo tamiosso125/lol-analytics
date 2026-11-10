@@ -313,6 +313,11 @@ quando algo diverge, e todas devem passar.
 # Rode DEPOIS de build + finalize-fields:
 .venv\Scripts\python.exe docs\confere_docx.py
 
+# Cada celula numerica dos quadros do .docx contra o JSON de reports/ ou o
+# banco que a originou (~630 celulas; os quadros de texto ficam de fora).
+# Rode DEPOIS de build + finalize-fields:
+.venv\Scripts\python.exe docs\confere_quadros.py
+
 # Paginas do corpo (25-30) e de cada apendice, medidas pelo Word, so leitura.
 # O finalize-fields.ps1 ja chama no fim e sai com o codigo dele (~20 s):
 powershell -ExecutionPolicy Bypass -File docs\confere_paginas.ps1
@@ -497,6 +502,7 @@ texto existam de verdade. Ver **5b**, **5c** e **5d**.
 19. powershell -File docs/finalize-fields.ps1  # campos + confere_paginas (corpo 25-30), exit 0
 20. python docs/confere_docx.py               # conformidade formal, exit 0
 21. python docs/confere_materiais.py          # guia, pptx, README sem numero velho, exit 0
+22. python docs/confere_quadros.py            # cada celula dos quadros x artefato, exit 0
 ```
 
 ## Experimentos de precisão (2026-11-03, exploratório, não altera o modelo de produção)
