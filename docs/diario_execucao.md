@@ -5157,3 +5157,16 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 **Testados nos dois sentidos.** `confere_materiais` reprova número velho solto e material sem os números de hoje, e aceita "antes eram 0,7636"; `confere_paginas -Maximo 29` reprova os 30 atuais; a checagem 23 reprova um print quando a página dele fica mais nova (data restaurada depois).
 
 **Estado.** `verifica_tcc` 23 checagens; `confere_paginas` corpo 30 (físicas 3 a 32, no teto); `confere_materiais` sem resíduo, inclusive site v17 e deck v25.
+
+## 2026-11-10 — Leitura completa do .docx e cinco correções
+
+**Por quê.** A validação contra o parecer tinha sido por busca de trechos. Pedida a leitura completa do `tcc2_final.docx` (649 linhas, 32 quadros, 44 legendas, 31 referências e 4 figuras com números), com cada número conferido contra `reports/`, o banco e conta à mão. Nenhum erro de número nem contradição de conclusão; cinco achados de forma.
+
+**Corrigido.**
+1. Referências de Jiang e Wallner saíam com espaço depois do hífen ("LLM- powered", "spatio- temporal"): a quebra de linha depois do hífen no `.md` vira espaço no `.docx`. Guarda nova em `verifica_tcc.py` (`PADROES_REFUTADOS`).
+2. Diferença de conversão escrita como 7,5 pp com taxas de 81,5% e 74,1% (que dão 7,4): o valor sem arredondar é 7,45 (`confere_conversao_advantagem.py`). Agora "7,45 pontos percentuais" no TCC, no guia, no handoff e no site (versão 18). O slide de conclusão do deck ainda diz 7,5.
+3. Apêndice B: "23 de 26 em todas as execuções" contradizia a linha de 22/26 do Quadro 7; agora "sem escrita concorrente".
+4. Quadro 28, objetivo e: descrevia os Quadros 3 e 4 como "três modelos em quatro cortes"; agora quatro modelos aos 15 minutos (Quadro 3), XGBoost nos quatro cortes (Quadro 4) e três modelos nos quatro cortes (Quadro 11).
+5. Apêndice E: "inteiras" e "sem captura de página inteira" se contradiziam; agora "com toda a altura do conteúdo" e "altura ajustada ao conteúdo da página" (`FONTE_IMAGENS`).
+
+**Estado.** Diff de texto antes/depois: 13 linhas, todas as esperadas. Corpo 30 páginas (físicas 3 a 32), apêndices com o mesmo tamanho; `verifica_tcc` CONSISTENTE, `confere_docx` conforme, `confere_materiais` sem resíduo. Não lidas nesta passagem: Figuras 3 e 5 a 11 (Figura 5 segue a captura antiga).

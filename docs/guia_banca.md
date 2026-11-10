@@ -1523,7 +1523,7 @@ Com **+2.000 a +4.000 de ouro aos 15 minutos**, o azul venceu:
 - **81,5%** no profissional (3.294 jogos)
 - **74,1%** no *solo queue* (5.366 partidas)
 
-Diferença de **7,5 pontos**, estatisticamente significativa (teste z de
+Diferença de **7,45 pontos**, estatisticamente significativa (teste z de
 duas proporções, grupos independentes; z = 8,0; p < 0,001).
 
 **Leitura (parecer):** é uma **diferença observada** entre os dois recortes.
@@ -2290,7 +2290,7 @@ para isso que este guia existe.
 - Empatadas: azul 46,5% / 47,8% / 46,9% / 47,4%; partida como unidade,
   Holm p mín. 0,65; "taxas próximas, nenhuma diferença detectada"
 - Profissional: azul 53,2%
-- Conversão (+2k a +4k aos 15): pro 81,5% x *solo queue* 74,1%; 7,5 pp;
+- Conversão (+2k a +4k aos 15): pro 81,5% x *solo queue* 74,1%; 7,45 pp;
   z = 8,0; diferença observada, sem causa atribuída
 
 **Linguagem natural**

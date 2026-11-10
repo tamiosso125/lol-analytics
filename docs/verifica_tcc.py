@@ -409,6 +409,10 @@ PADROES_REFUTADOS: list[tuple[str, str]] = [
     # da aleatoria aos 10 min (intervalos sobrepostos); "nunca fica abaixo"
     # sobreviveu no guia da banca depois da correcao
     (r"nunca\s+fica\s+abaixo", "holdout: a cronologica fica abaixo aos 10 min desde a correcao do vazamento"),
+    # 2026-11-08: "LLM-" no fim da linha do .md e "powered" na seguinte viraram
+    # "LLM- powered" no .docx (o pandoc junta as linhas com espaço). Saiu em
+    # duas referencias (Jiang, Wallner) e so a leitura do .docx achou.
+    (r"[A-Za-z]-\n[a-z]", "hifen no fim da linha do .md: vira 'palavra- palavra' no .docx; quebre antes do hifen"),
 ]
 
 

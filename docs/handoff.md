@@ -214,7 +214,7 @@ transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
   prioridade de primeiro pick (pro).
 - Conversão de vantagem: com +2k a +4k de ouro aos 15, o azul vence
   81,5% no pro (n=3.294) contra 74,1% no solo queue (n=5.368) — "macro
-  ganha jogo", quantificado. Diferença de 7,4 pp, z = 8,0. A faixa
+  ganha jogo", quantificado. Diferença de 7,45 pp, z = 8,0. A faixa
   +4k a +6k no pro apoia-se em só 72 jogos e é indicativa. O valor
   antigo (84,0% vs ~68%, medido sobre ~12k partidas) era o dobro do
   efeito real. Mede com `python docs/confere_conversao_advantagem.py`.

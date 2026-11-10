@@ -126,9 +126,9 @@ FIGURAS = [
 ]
 FONTE_IMAGENS = (
     "Fonte: Elaborado pelo autor (2026). Capturas de tela geradas via Playwright "
-    "(Chromium, largura de 1440 px, altura ajustada à página, sem captura de "
-    "página inteira, tema escuro, de maior contraste contra o fundo branco da "
-    "página impressa) contra a API e o frontend locais."
+    "(Chromium, largura de 1440 px, altura ajustada ao conteúdo da página, "
+    "tema escuro, de maior contraste contra o fundo branco da página "
+    "impressa) contra a API e o frontend locais."
 )
 FONTE_QUADROS = "Fonte: Elaborado pelo autor (2026)."
 

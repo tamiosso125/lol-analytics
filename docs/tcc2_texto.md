@@ -586,7 +586,7 @@ própria em Guan e Tung (2026), mas isso não comprova a hipótese.
 15 minutos, o azul venceu 81,5% das partidas no profissional (n = 3.294)
 contra 74,1% no *solo queue* (n = 5.366); entre +4.000 e +6.000, 91,7%
 (n = 72) contra 86,3% (n = 3.497). A diferença observada entre os dois
-recortes na faixa com amostra suficiente, de 7,5 pontos percentuais, é
+recortes na faixa com amostra suficiente, de 7,45 pontos percentuais, é
 pequena em termos absolutos, mas significativa (teste z de duas proporções,
 com grupos independentes; z = 8,0, p < 0,001). Atribuí-la à coordenação
 das equipes exigiria evidência que este trabalho não tem: os recortes
@@ -941,8 +941,8 @@ International Publishing, 2022. p. 138-152. DOI: 10.1007/978-3-030-95531-1_10.
 
 JIANG, Jie; XIE, Haining; SHEN, Siqi; SHEN, Yu; ZHANG, Zihan; LEI, Meng;
 ZHENG, Yifeng; LI, Yang; LI, Chunyou; HUANG, Danqing; WU, Yinjun; ZHANG,
-Wentao; YANG, Xiaofeng; CUI, Bin; CHEN, Peng. SiriusBI: a comprehensive LLM-
-powered solution for data analytics in business intelligence. **Proceedings of the
+Wentao; YANG, Xiaofeng; CUI, Bin; CHEN, Peng. SiriusBI: a comprehensive
+LLM-powered solution for data analytics in business intelligence. **Proceedings of the
 VLDB Endowment**, [S. l.], v. 18, n. 12, p. 4860-4873, 2025. DOI:
 10.14778/3750601.3750610.
 
@@ -984,8 +984,8 @@ RIBEIRO, Marco Tulio; SINGH, Sameer; GUESTRIN, Carlos. "Why should I trust you?"
 RIOT GAMES. **APIs**. [S. l.], [s. d.]. Disponível em:
 https://developer.riotgames.com/apis. Acesso em: 3 nov. 2026.
 
-WALLNER, Günter; WANG, Letian; DORMANN, Claire. Visualizing the spatio-
-temporal evolution of gameplay using storyline visualization: a study with League of
+WALLNER, Günter; WANG, Letian; DORMANN, Claire. Visualizing the
+spatio-temporal evolution of gameplay using storyline visualization: a study with League of
 Legends. **Proceedings of the ACM on Human-Computer Interaction**, New York, v.
 7, n. CHI PLAY, art. 412, p. 1002-1024, 2023. DOI: 10.1145/3611058.
 
@@ -1033,7 +1033,7 @@ mais filtradas (campeão, jogador, versão do jogo e liga).
 ## APÊNDICE B - Avaliação da interface em linguagem natural e auditoria do coach
 
 Medição de 5 de novembro de 2026 sobre a base de produção de **41.063
-partidas**: **26/26 = 100% de acurácia de execução**, com o registro da acurácia, da base, do modelo e do desfecho de cada pergunta. Esse resultado **não é independente**: é o obtido depois de ajustes orientados pelas três falhas conhecidas, com as regras do esquema escritas depois de conhecê-las. Até 3 de novembro, antes dos ajustes, o resultado era 23 de 26 (88%) em todas as execuções (Quadro 7). A medida principal, em um conjunto separado, é o gabarito automático, descrito mais adiante.
+partidas**: **26/26 = 100% de acurácia de execução**, com o registro da acurácia, da base, do modelo e do desfecho de cada pergunta. Esse resultado **não é independente**: é o obtido depois de ajustes orientados pelas três falhas conhecidas, com as regras do esquema escritas depois de conhecê-las. Até 3 de novembro, antes dos ajustes, o resultado era 23 de 26 (88%) em todas as execuções sem escrita concorrente (Quadro 7). A medida principal, em um conjunto separado, é o gabarito automático, descrito mais adiante.
 
 Quadro — Execuções do benchmark de linguagem natural
 
@@ -1343,7 +1343,7 @@ diferença é atribuída a esse volume menor, não a uma mudança no padrão.
 
 ## APÊNDICE E - Telas completas da plataforma
 
-As Figuras 6 a 11 mostram as seis telas da plataforma, inteiras, das quais a Seção 5 mostra recortes.
+As Figuras 6 a 11 mostram as seis telas da plataforma, com toda a altura do conteúdo, das quais a Seção 5 mostra recortes.
 Foram capturadas com a API e a interface rodando localmente sobre as 41.063
 partidas do Quadro 2, em tema escuro, com 1440 px de largura e altura
 ajustada à página.
@@ -1490,7 +1490,7 @@ Quadro — Objetivos específicos, onde são tratados e a evidência de cada um
 | b | 5.2 e Apêndice A | Quadro 1: onze tabelas relacionais para partidas, jogadores, estatísticas, itens e jogos profissionais |
 | c | 4.3 e 5.2 | 41.063 partidas de *solo queue* e 99.259 jogos profissionais; coleta e carga re-executáveis |
 | d | 5.3 e Apêndice D | Quadro 2 e viés de lado com quatro testes de robustez; inversão no profissional; conversão de vantagem |
-| e | 5.4 e Apêndice C | Quadros 3 e 4: três modelos comparados em quatro cortes; XGBoost em produção |
+| e | 5.4 e Apêndice C | Quadro 3: quatro modelos comparados após o ajuste aos 15 minutos; Quadro 4: XGBoost, em produção, nos quatro cortes; Quadro 11: três modelos nos quatro cortes |
 | f | 5.5 e Apêndice E | Seis páginas de visualização; Figuras 3 e 4 no texto |
 | g | 5.6 e Apêndice B | 181 de 203 perguntas certas (89,2%) no gabarito gerado por modelos de pergunta: 166 de 187 respondíveis e 15 de 16 recusas esperadas |
 
