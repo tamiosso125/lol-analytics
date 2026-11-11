@@ -5234,3 +5234,18 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 **Roteiro.** Ano exigido passou a ser o da própria obra: "Wallner, Wang e Dormann (2023)" contava como Wang (2020).
 
 **Também.** Os relatórios do ChatGPT (abril de 2026) foram registrados em `docs/registro_uso_ia.md` para a declaração de uso de IA.
+
+## 2026-11-11 (noite) — Reexecução completa, do banco ao TCC, numa cópia isolada
+
+**Pedido.** Refazer todos os testes e scripts para validar o TCC. Para não tocar no entregável, a reexecução rodou num *worktree* do commit 880efba, com as credenciais do banco passadas por ambiente (sem copiar o `.env`).
+
+**O que rodou** (97 min, 29 passos): `build_features`, `export_model`, métricas por corte, busca em grade completa e aninhada, ajustados, logística, 5×10 dobras, holdout, SHAP, taxa-base, viés por partida, faixa de duração, calibração, curva de aprendizado, variáveis v2 e antigas, os três testes de vazamento, experimentos 12 a 19 e 1 a 10, `validate_predictions` e `smoke_test`. Fora dele: os 16 scripts de `tests/` e o frontend (lint, 38 testes, build), todos verdes. Não rodou o que gasta crédito da API (gabarito de 203, benchmark de 26, auditoria do coach) nem o experimento 11 (depende da chave da Riot).
+
+**Resultado.**
+- Variáveis reconstruídas do banco **idênticas** às atuais nas quatro matrizes (diferença máxima 0).
+- Modelos reexportados com previsões **idênticas** (141.300 previsões, diferença 0).
+- 14 JSON de `reports/` reescritos com conteúdo numérico **idêntico** (só datas e tempos mudaram); os demais saíram iguais byte a byte.
+- `confere_quadros` do `.docx` entregue contra os artefatos refeitos: 629 células, 0 divergências. `verifica_tcc` com o texto atual: tudo consistente exceto a checagem 23, porque no *worktree* todas as datas de arquivo são novas (limite já documentado da checagem; os modelos idênticos confirmam).
+- Duas falhas do roteiro, ambas da montagem: `confere_conversao_advantagem` sem os CSVs profissionais na cópia (rodado no repositório principal: 81,5% x 74,1%, 7,45 pp, z = 7,99) e `confere_comparador` chamado como arquivo em vez de `-m` (146 acertos escalares, 0 com duas colunas numéricas).
+
+**Conclusão.** Todos os números do TCC se reproduzem a partir do banco congelado.
