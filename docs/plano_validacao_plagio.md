@@ -29,14 +29,14 @@ faz. A coluna **Situação** é atualizada à medida que o plano anda.
 
 | # | Prioridade | Tópico | Onde no TCC | Como validar | Quem | Situação |
 |---|---|---|---|---|---|---|
-| 1 | Alta | Paráfrase próxima e plágio por tradução (fontes em inglês, texto em português; detectores comuns não pegam) | Seções 2, 3, 5.7 e onde há citação autor-data | Roteiro de frases que citam autores (`docs/roteiro_citacoes.md`) comparadas ao trecho da fonte; opcional: similaridade multilíngue local (exige baixar modelo) | Claude (roteiro) + autor (leitura) | Roteiro gerado: 52 frases e 15 linhas de quadro, cobrindo as 31 obras; leitura lado a lado pendente |
-| 2 | Alta | Afirmação atribuída à fonte certa; nenhuma obra citada sem ter sido lida (cartilha, item d) | As 31 referências | Tabela afirmação → página/seção da fonte; exige os PDFs (vários pagos: ACM, IEEE, Springer) | Autor (acesso) + Claude (conferência) | Pendente: PDFs |
+| 1 | Alta | Paráfrase próxima e plágio por tradução (fontes em inglês, texto em português; detectores comuns não pegam) | Seções 2, 3, 5.7 e onde há citação autor-data | Roteiro de frases que citam autores (`docs/roteiro_citacoes.md`) comparadas ao trecho da fonte; opcional: similaridade multilíngue local (exige baixar modelo) | Claude (roteiro) + autor (leitura) | **Feito (2026-11-11):** retrotradução das 50 frases com fonte disponível contra o texto das 24 obras: nenhuma é tradução literal; os 5 sinais são títulos/nomes de método (4) e um termo técnico do Breiman. Trechos idênticos de 8+ palavras contra TCC I, 10 TCCs II, relatórios do ChatGPT e obras lidas e não citadas: só texto institucional da capa (colegas), 2 expressões curtas (ChatGPT) e o reaproveitamento do TCC I (item 8) |
+| 2 | Alta | Afirmação atribuída à fonte certa; nenhuma obra citada sem ter sido lida (cartilha, item d) | As 31 referências | Tabela afirmação → página/seção da fonte; exige os PDFs (vários pagos: ACM, IEEE, Springer) | Autor (acesso) + Claude (conferência) | **Feito (2026-11-11):** 43 das 52 frases estão como na conferência de 2-3/11 (`docs/conferencia_referencias.md`); as 9 alteradas depois foram conferidas no texto completo: 8 conferem, 1 corrigida (Zhong em Trabalhos Futuros: a citação cobria "modelo aberto local", que o artigo não trata). Texto completo de 24 das 31 obras; Brown pelo resumo; livros (Gil, Prodanov, Creswell) sem acesso |
 | 3 | Alta | Autoria e uso de IA (CONSUN 35/2025) | Trabalho inteiro | `docs/registro_uso_ia.md` + conversa com o orientador + Declaração de Autoria | Autor | Pendente: orientador |
 | 4 | Alta | Similaridade com textos em português na web | `.docx` inteiro | Verificador (ferramenta da Unisinos, se houver; CopySpider é gratuito). O índice mede semelhança, não plágio; referências e quadros o inflam. **Não usar serviço que guarde o texto** | Autor | Pendente |
 | 5 | Média | Tradução sem "tradução nossa" e sem original em nota | Apêndice H (aviso da Riot) | Corrigir; varrer outras traduções literais | Claude | Corrigido (ver abaixo) |
 | 6 | Média | Fontes alternativas não citadas (páginas da web, documentação, dados) | Quadro 27 (portal da Riot); Riot, Oracle's Elixir, Data Dragon, Community Dragon | Fonte de cada quadro/afirmação que vem de página da web | Claude | Quadro 27 corrigido |
 | 7 | Média | Quadros e figuras com conteúdo de terceiros | Figuras 3, 6, 8-10 (arte da Riot); Quadros 25, 27 | Linha "Fonte" coerente com a origem | Claude | Figuras já atribuídas; Quadro 27 corrigido |
-| 8 | Média | Autoplágio em relação ao TCC I | Introdução, metodologia | Confirmar com o orientador se o TCC I foi publicado; se sim, citá-lo | Autor | Pendente |
+| 8 | Média | Autoplágio em relação ao TCC I | Introdução, metodologia | Confirmar com o orientador se o TCC I foi publicado; se sim, citá-lo | Autor | Medido: 4% a 4,8% do texto em trechos de 8+ palavras iguais ao TCC I (capa, objetivos geral e específicos, questão de pesquisa, abertura da introdução, objetivo geral repetido na conclusão). Pendente: confirmar com o orientador se o TCC I foi publicado |
 | 9 | Baixa | Código do repositório público: trechos copiados, licenças, código gerado por IA | `src/`, `frontend/`, `docs/*.py` | Varredura de comentários e URLs; licenças das dependências | Claude | Feito: nenhum comentário indicando código copiado; licenças das dependências permissivas (MIT, BSD, Apache, ISC, PSF; psycopg2 LGPL com exceções); repositório sem arquivo LICENSE (todos os direitos reservados por padrão) |
 | 10 | Baixa | Citação ↔ referência; "apud" de obra não lida | Referências | `verifica_tcc.py` (checagem 4) + busca por "apud" | Claude | Verificado (sem "apud") |
 | 11 | Baixa | Ideias do orientador | — | Cartilha: não é obrigatório citar; reconhecer informalmente | — | Nada a fazer |
@@ -61,3 +61,12 @@ faz. A coluna **Situação** é atualizada à medida que o plano anda.
   fonte e para "redação própria?"). Contagem por obra conferida contra uma busca
   independente no `.docx`.
 - 2026-11-11, item 10: nenhum "apud" nem "citado por" no texto.
+- 2026-11-11, itens 1 e 2: fontes localizadas (`Downloads/TCC`, `Downloads/ref`,
+  `docs/artigos`, PDFs baixados nas sessões anteriores); o "não estão no
+  computador" do primeiro rascunho deste plano estava errado. Correção:
+  Trabalhos Futuros, citação de Zhong, Yu e Klein (2020) movida para "avaliação
+  sobre vários bancos de teste", que é o que o artigo propõe.
+- 2026-11-11: três relatórios em `Downloads/TCC` foram gerados pelo ChatGPT
+  ("criador: ChatGPT" nos metadados; 13 a 15 abr. 2026). Nenhum trecho deles
+  passou para o TCC (só duas expressões curtas coincidem). Registrado também
+  em `docs/registro_uso_ia.md`, para a declaração de uso de IA.
