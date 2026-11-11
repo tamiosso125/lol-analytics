@@ -1030,6 +1030,20 @@ o sistema recebeu.
 .venv\Scripts\python.exe docs\confere_quadros.py   # exit 0 = nenhuma divergência
 ```
 
+### `docs/gera_roteiro_citacoes.py`
+
+Gera `docs/roteiro_citacoes.md` a partir do `.docx` entregue: cada frase (e cada
+linha de quadro) que cita uma das obras da lista de referências, com página,
+seção e obra, e duas colunas em branco para a validação de plágio (trecho da
+fonte que sustenta a frase; redação própria ou próxima demais do original). A
+página vem de um PDF exportado pelo Word, passado como argumento. Não julga
+nada; é o roteiro dos itens 1 e 2 de `docs/plano_validacao_plagio.md`. As
+contagens por obra foram conferidas contra uma busca independente.
+
+```powershell
+.venv\Scripts\python.exe docs\gera_roteiro_citacoes.py caminho\para\tcc2_final.pdf
+```
+
 ### `docs/confere_materiais.py`
 
 O `verifica_tcc.py` só lê o texto do TCC. Este script confere os materiais

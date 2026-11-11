@@ -408,6 +408,9 @@ PADROES_REFUTADOS: list[tuple[str, str]] = [
     # 2026-11-08: sem o vazamento, a divisao cronologica fica 0,0026 abaixo
     # da aleatoria aos 10 min (intervalos sobrepostos); "nunca fica abaixo"
     # sobreviveu no guia da banca depois da correcao
+    # 2026-11-11: Cartilha de plagio da Unisinos — citacao traduzida pelo autor
+    # leva "(traducao nossa)" e, na graduacao, o original em nota de rodape
+    (r"tradu[cç][aã]o do autor", "citacao traduzida: use '(traducao nossa)' com o original em nota (Cartilha de plagio Unisinos)"),
     (r"nunca\s+fica\s+abaixo", "holdout: a cronologica fica abaixo aos 10 min desde a correcao do vazamento"),
     # 2026-11-08: "LLM-" no fim da linha do .md e "powered" na seguinte viraram
     # "LLM- powered" no .docx (o pandoc junta as linhas com espaço). Saiu em

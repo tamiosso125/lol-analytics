@@ -2120,7 +2120,7 @@ aba Estado (5.5); Figura 5 consulta em linguagem natural (5.6).
 | `docs/confere_docx.py` | Confere a formatação do `.docx` (títulos, referências, legendas) | conforme |
 | `docs/confere_paginas.ps1` | Mede pelo Word o corpo (25-30 páginas) e cada apêndice | 30 páginas, no teto |
 | `docs/confere_materiais.py` | Confere este guia, o pptx, o site e o README contra os números substituídos | sem resíduo |
-| Frontend | 31 testes automáticos + verificação de código | ok |
+| Frontend | 38 testes automáticos + verificação de código | ok |
 
 **A checagem retrospectiva** (dentro da bateria): rodando o modelo
 minuto a minuto em 150 partidas reais, a previsão dos últimos minutos

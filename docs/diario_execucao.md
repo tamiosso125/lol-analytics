@@ -5206,3 +5206,19 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 **O que mudou.** `build_tcc_docx.py`: `ATRIBUICAO_RIOT` nas fontes das Figuras 3 (corpo) e 6, 8, 9 e 10 (Apêndice E). `tcc2_texto.md`: parágrafo no Apêndice H com a origem das imagens, o Community Dragon e o aviso da política de API em português (tradução do autor), com os dois endereços citados no texto (não entraram na lista de Referências, para não mudar as 31 nem o corpo). `verifica_tcc.py` (checagem 10): reprova se a atribuição, as quatro capturas ou o parágrafo do Apêndice H sumirem; testado nos dois sentidos. Também corrigida a linha "[OK]" dessa checagem, que aparecia mesmo com falha.
 
 **Estado.** Corpo em 30 páginas (físicas 3 a 32); Figura 6 continua na página da abertura do Apêndice E; o Apêndice H passou de 1 para 2 páginas (o Quadro 27 vai inteiro para a segunda), sem efeito no limite. Todos os conferentes passam.
+
+## 2026-11-11 — Plano de validação de plágio e primeiras correções
+
+**Plano.** `docs/plano_validacao_plagio.md`, a partir da Cartilha sobre Plágio Acadêmico da Unisinos (NITT), da Resolução CONSUN 35/2025 e de pesquisa sobre plágio por tradução. Onze tópicos por prioridade; o mais provável e menos detectado é a paráfrase próxima de fonte em inglês, que os detectores comuns não pegam.
+
+**Corrigido.**
+- A cartilha pede, para citação traduzida pelo autor, "(tradução nossa)" e, na graduação, o original em nota de rodapé. O aviso da Riot no Apêndice H dizia "(tradução do autor)", sem aspas e sem nota. Agora está entre aspas, com "(tradução nossa)" e a nota 1 com o original. O conversor ganhou nota numerada (o mecanismo de notas com `*`/`**` da primeira página foi estendido; a nota nativa do pandoc colidiria com os ids dessas notas) e marcador `{{NOTA_ORIGINAL_RIOT}}` no markdown, que o conversor recusa se sobrar fora do fim do parágrafo. `verifica_tcc` reprova "tradução do autor".
+- Quadro 27 (tipos de chave da API) vinha do portal de desenvolvedores da Riot com fonte "Elaborado pelo autor". A fonte agora cita developer.riotgames.com/docs/portal, conferida em 11 nov. 2026 (mesmos limites e validades).
+
+**Roteiro.** `docs/gera_roteiro_citacoes.py` gera `docs/roteiro_citacoes.md`: 52 frases e 15 linhas de quadro que citam as 31 obras, com página e seção, e colunas para a leitura lado a lado. Quatro erros do próprio script foram achados ao conferir a contagem por obra contra uma busca independente (ano pego da data de acesso; corte de frase depois de "et al."; "Do" casando com a preposição; capitalização de nomes com hífen e apóstrofo) e corrigidos.
+
+**Varredura do código.** Nenhum comentário indicando trecho copiado; licenças das dependências permissivas (MIT, BSD, Apache, ISC, PSF; psycopg2 LGPL com exceções). O repositório não tem arquivo LICENSE.
+
+**Também.** Contagem de testes do frontend no guia e no handoff: 31 → 38 (estado atual de `npm run test`).
+
+**Estado.** Corpo em 30 páginas; Apêndice H com 2 páginas; todos os conferentes passam. Pendentes do autor no plano: leitura do roteiro ao lado das fontes (exige os PDFs), verificador de similaridade, autoplágio do TCC I e uso de IA com o orientador.

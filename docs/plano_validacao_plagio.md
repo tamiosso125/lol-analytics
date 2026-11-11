@@ -1,0 +1,63 @@
+# Plano de validação de plágio do TCC II
+
+Criado em 2026-11-11. Cada item diz o que validar, onde no TCC, como e quem
+faz. A coluna **Situação** é atualizada à medida que o plano anda.
+
+## Base: o que a Unisinos considera plágio
+
+- **Cartilha sobre Plágio Acadêmico** (NITT/Unisinos,
+  https://www.unisinos.br/images/pesquisa-e-inovacao/nitt/cartilha-plagio.pdf):
+  cópia integral ou parcial; cópia "dissimulada ou disfarçada"; ausência de
+  citação da fonte; **citação de obra que não foi pesquisada nem utilizada**;
+  plágio de ideias; autoplágio; "fontes alternativas" não citadas (sites,
+  blogs, palestras); "colcha de retalhos" (trocar algumas palavras ou a ordem).
+  Citação traduzida pelo autor: "tradução nossa" entre parênteses e, **na
+  graduação, o texto original em nota de rodapé**. Fotos, tabelas, gráficos e
+  imagens de terceiros: indicar autor e fonte. Penalidade: falta grave,
+  reprovação, registro no histórico. "Todos os trabalhos produzidos nesta
+  universidade são objetos de rastreamento."
+- **Resolução CONSUN 35/2025:** texto atribuído ao estudante não pode ser
+  integralmente gerado por IA; uso de IA deve ser divulgado (ferramenta,
+  versão, data, seções, *prompts*, finalidade); Declaração de Autoria na
+  entrega.
+- **Orientadores pedagógicos Unisinos (2025):** detectores de IA não são
+  considerados eficientes e não devem determinar autoria.
+- Ferramenta de similaridade da Unisinos: **não identificada** — perguntar à
+  biblioteca.
+
+## Tópicos, por prioridade
+
+| # | Prioridade | Tópico | Onde no TCC | Como validar | Quem | Situação |
+|---|---|---|---|---|---|---|
+| 1 | Alta | Paráfrase próxima e plágio por tradução (fontes em inglês, texto em português; detectores comuns não pegam) | Seções 2, 3, 5.7 e onde há citação autor-data | Roteiro de frases que citam autores (`docs/roteiro_citacoes.md`) comparadas ao trecho da fonte; opcional: similaridade multilíngue local (exige baixar modelo) | Claude (roteiro) + autor (leitura) | Roteiro gerado: 52 frases e 15 linhas de quadro, cobrindo as 31 obras; leitura lado a lado pendente |
+| 2 | Alta | Afirmação atribuída à fonte certa; nenhuma obra citada sem ter sido lida (cartilha, item d) | As 31 referências | Tabela afirmação → página/seção da fonte; exige os PDFs (vários pagos: ACM, IEEE, Springer) | Autor (acesso) + Claude (conferência) | Pendente: PDFs |
+| 3 | Alta | Autoria e uso de IA (CONSUN 35/2025) | Trabalho inteiro | `docs/registro_uso_ia.md` + conversa com o orientador + Declaração de Autoria | Autor | Pendente: orientador |
+| 4 | Alta | Similaridade com textos em português na web | `.docx` inteiro | Verificador (ferramenta da Unisinos, se houver; CopySpider é gratuito). O índice mede semelhança, não plágio; referências e quadros o inflam. **Não usar serviço que guarde o texto** | Autor | Pendente |
+| 5 | Média | Tradução sem "tradução nossa" e sem original em nota | Apêndice H (aviso da Riot) | Corrigir; varrer outras traduções literais | Claude | Corrigido (ver abaixo) |
+| 6 | Média | Fontes alternativas não citadas (páginas da web, documentação, dados) | Quadro 27 (portal da Riot); Riot, Oracle's Elixir, Data Dragon, Community Dragon | Fonte de cada quadro/afirmação que vem de página da web | Claude | Quadro 27 corrigido |
+| 7 | Média | Quadros e figuras com conteúdo de terceiros | Figuras 3, 6, 8-10 (arte da Riot); Quadros 25, 27 | Linha "Fonte" coerente com a origem | Claude | Figuras já atribuídas; Quadro 27 corrigido |
+| 8 | Média | Autoplágio em relação ao TCC I | Introdução, metodologia | Confirmar com o orientador se o TCC I foi publicado; se sim, citá-lo | Autor | Pendente |
+| 9 | Baixa | Código do repositório público: trechos copiados, licenças, código gerado por IA | `src/`, `frontend/`, `docs/*.py` | Varredura de comentários e URLs; licenças das dependências | Claude | Feito: nenhum comentário indicando código copiado; licenças das dependências permissivas (MIT, BSD, Apache, ISC, PSF; psycopg2 LGPL com exceções); repositório sem arquivo LICENSE (todos os direitos reservados por padrão) |
+| 10 | Baixa | Citação ↔ referência; "apud" de obra não lida | Referências | `verifica_tcc.py` (checagem 4) + busca por "apud" | Claude | Verificado (sem "apud") |
+| 11 | Baixa | Ideias do orientador | — | Cartilha: não é obrigatório citar; reconhecer informalmente | — | Nada a fazer |
+
+## Ferramentas e cuidados
+
+- Detecção entre idiomas é limitada e não estima intenção (Ferrero e Schwab,
+  https://arxiv.org/pdf/1705.08828); a leitura humana do roteiro é o que vale.
+- Serviços que guardam o documento enviado podem fazer o próprio TCC aparecer
+  como "cópia" numa verificação posterior da universidade.
+- Termos de uso do Oracle's Elixir: não encontrados na página de downloads.
+
+## Registro das correções
+
+- 2026-11-11, item 5: aviso da Riot no Apêndice H passou a "(tradução nossa)"
+  com o original em inglês em nota de rodapé numerada.
+- 2026-11-11, itens 6 e 7: fonte do Quadro 27 passou a citar a página do
+  portal de desenvolvedores da Riot de onde vêm os dados
+  (https://developer.riotgames.com/docs/portal), conferida em 11 nov. 2026.
+- 2026-11-11, item 1: `docs/gera_roteiro_citacoes.py` gera `docs/roteiro_citacoes.md`
+  (frase, página, seção e obra citada, com colunas em branco para o trecho da
+  fonte e para "redação própria?"). Contagem por obra conferida contra uma busca
+  independente no `.docx`.
+- 2026-11-11, item 10: nenhum "apud" nem "citado por" no texto.

@@ -318,6 +318,11 @@ quando algo diverge, e todas devem passar.
 # Rode DEPOIS de build + finalize-fields:
 .venv\Scripts\python.exe docs\confere_quadros.py
 
+# Roteiro para a validacao de plagio (docs/plano_validacao_plagio.md): cada
+# frase que cita uma obra, com pagina e secao; o PDF (exportado pelo Word) da a
+# pagina. Nao julga nada: e a lista para ler ao lado da fonte.
+.venv\Scripts\python.exe docs\gera_roteiro_citacoes.py caminho\para\tcc2_final.pdf
+
 # Paginas do corpo (25-30) e de cada apendice, medidas pelo Word, so leitura.
 # O finalize-fields.ps1 ja chama no fim e sai com o codigo dele (~20 s):
 powershell -ExecutionPolicy Bypass -File docs\confere_paginas.ps1

@@ -125,7 +125,7 @@ tal na UI.
 - **Testes**: `tests/smoke_test.py` (roda em tempdir — NÃO toca dados
   reais) e `tests/validate_predictions.py` (bateria comportamental do
   modelo de produção); front tem Vitest (`frontend/npm run test`,
-  31 testes) + ESLint.
+  38 testes) + ESLint.
 - **Docs**: `diario_execucao.md` (fonte primária para escrever o TCC),
   `scripts.md` (referência), `planejamento_v2.md` (plano de sprints —
   **todos os 6 sprints já entregues**, ver diário; mantido como
@@ -309,7 +309,7 @@ corpo em 2026-10-20 para abrir espaço às citações novas). Suíte completa ve
 `tests/smoke_test.py`, `tests/validate_predictions.py` (aprovado com
 ressalvas), `docs/verifica_tcc.py` (23 checagens, consistente),
 `docs/confere_docx.py` (conforme), `docs/confere_paginas.ps1` (corpo 30/30,
-no teto), `docs/confere_materiais.py` (guia, pptx, README sem resíduo), `frontend` lint + 31/31 testes.
+no teto), `docs/confere_materiais.py` (guia, pptx, README sem resíduo), `frontend` lint + 38/38 testes.
 Nenhuma pendência de texto em aberto — ver a seção "Pendências finais
 antes da entrega" no fim de `docs/tcc2_texto.md` para o histórico
 completo das decisões (título acadêmico, posição de "Trabalhos

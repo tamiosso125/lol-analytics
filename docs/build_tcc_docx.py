@@ -141,6 +141,26 @@ FONTE_IMAGENS = (
     "impressa) contra a API e o frontend locais."
 )
 FONTE_QUADROS = "Fonte: Elaborado pelo autor (2026)."
+# Quadro cujo conteúdo vem de página da web: a fonte diz de onde (Cartilha de
+# plágio da Unisinos, "fontes alternativas"; 2026-11-11). Conteúdo conferido
+# contra a página na data indicada.
+FONTES_QUADRO = {
+    "Tipos de chave da Riot Games API": (
+        "Fonte: Elaborado pelo autor (2026), com base no portal de "
+        "desenvolvedores da Riot Games (https://developer.riotgames.com/docs/portal, "
+        "acesso em 11 nov. 2026)."
+    ),
+}
+# Nota de rodapé com o texto original de uma citação traduzida pelo autor:
+# a Cartilha de plágio da Unisinos pede "tradução nossa" e, na graduação, o
+# original em nota. O marcador no markdown é trocado pela chamada da nota.
+MARCADOR_NOTA_RIOT = "{{NOTA_ORIGINAL_RIOT}}"
+NOTA_ORIGINAL_RIOT = (
+    "No original: “Bellestraiko isn't endorsed by Riot Games and doesn't reflect "
+    "the views or opinions of Riot Games or anyone officially involved in producing "
+    "or managing Riot Games properties. Riot Games, and all associated properties "
+    "are trademarks or registered trademarks of Riot Games, Inc.”"
+)
 
 # Secoes internas do rascunho que nao entram no documento final.
 _RE_TITULO_TRABALHO = re.compile(r"^# TCC II.*$", re.M)
@@ -235,10 +255,16 @@ def _p(doc, texto="", *, bold=False, align=None, size=12, space_after=None):
     return p
 
 
+# Notas que não são do autor/orientador levam número arábico, como as notas
+# explicativas da ABNT (2026-11-11: a nota com o original do aviso da Riot).
+_MARCAS_NUMERADAS = {3: "1"}
+
+
 def _marca_rodape(footnote_id: int) -> str:
     """'*' para o aluno, '**' para o orientador, como no modelo oficial e nos
-    aprovados (2026-10-23: até aqui saíam '1' e '2', numeração automática)."""
-    return "*" * footnote_id
+    aprovados (2026-10-23: até aqui saíam '1' e '2', numeração automática).
+    Notas seguintes usam número (`_MARCAS_NUMERADAS`)."""
+    return _MARCAS_NUMERADAS.get(footnote_id, "*" * footnote_id)
 
 
 def _ref_rodape(paragrafo, footnote_id: int) -> None:
@@ -296,6 +322,24 @@ def _adicionar_rodapes(doc, notas: dict[int, str]) -> None:
         t.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
         t.text = " " + texto
     part._blob = etree.tostring(raiz, xml_declaration=True, encoding="UTF-8", standalone=True)
+
+
+def _inserir_nota_no_marcador(doc, marcador: str, footnote_id: int) -> bool:
+    """Troca `marcador` (no FIM de um parágrafo do markdown) pela chamada da
+    nota `footnote_id`. Sai com erro se o marcador sobrar no meio do texto:
+    um "{{...}}" impresso no entregável é pior que nota nenhuma."""
+    achou = False
+    for p in doc.paragraphs:
+        if marcador not in p.text:
+            continue
+        if not p.text.rstrip().endswith(marcador):
+            sys.exit(f"marcador {marcador} fora do fim do parágrafo: {p.text[:60]!r}")
+        for r in p.runs:
+            if marcador in r.text:
+                r.text = r.text.replace(marcador, "").rstrip()
+        _ref_rodape(p, footnote_id)
+        achou = True
+    return achou
 
 
 def _campo(paragrafo, instrucao: str) -> None:
@@ -700,7 +744,7 @@ def numerar_quadros(doc) -> int:
         if larguras is None:
             sys.exit(f"sem larguras declaradas para o quadro {titulo!r} em LARGURAS_QUADROS")
         ajustar_tabela(Table(tb, doc), larguras, esquerda=titulo in QUADROS_ESQUERDA)
-        fonte = _fonte(doc, FONTE_QUADROS)
+        fonte = _fonte(doc, FONTES_QUADRO.get(titulo, FONTE_QUADROS))
         tb.addnext(fonte._p)
         n += 1
     return n
@@ -1224,7 +1268,10 @@ def main() -> None:
     n_tipografia = ajustar_tipografia(doc)
     n_titulos = aplicar_negrito_titulos(doc)
     montar_pre_textual(doc, resumo, palavras, abstract, kwords)
-    _adicionar_rodapes(doc, {1: NOTA_ALUNO, 2: NOTA_ORIENTADOR})
+    notas = {1: NOTA_ALUNO, 2: NOTA_ORIENTADOR}
+    if _inserir_nota_no_marcador(doc, MARCADOR_NOTA_RIOT, 3):
+        notas[3] = NOTA_ORIGINAL_RIOT
+    _adicionar_rodapes(doc, notas)
     n_q = numerar_quadros(doc)
     n_ft = inserir_figuras_texto(doc)
     n_f = n_ft + inserir_figuras(doc)
