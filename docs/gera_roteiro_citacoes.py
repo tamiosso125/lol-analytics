@@ -81,9 +81,11 @@ def main() -> None:
                         # sem re.I; sobrenome curto ("Do", "Gil") só conta com o ano colado
                         # ("Do et al. (2021)", "(Gil, 2002)"): "Do" casava com a preposição
                         # "do" e inflava a contagem
+                        # o ano exigido é o da própria obra: com qualquer ano, "Wallner, Wang
+                        # e Dormann (2023)" contava como Wang (2020)
                         re.compile(rf"\b(?:{alt}|{re.escape(sobrenome)})\b"
-                                   + (rf"(?:\s+et\s+al\.)?\s*[,(]\s*(?:{ANO})" if len(nome) <= 3
-                                      else rf"(?=.{{0,80}}?(?:{ANO}))"))))
+                                   + (rf"(?:\s+et\s+al\.)?\s*[,(]\s*{re.escape(ano)}" if len(nome) <= 3
+                                      else rf"(?=[^()]{{0,80}}?\(?[^()]{{0,40}}?{re.escape(ano)})"))))
 
     pdf_paginas: list[str] = []
     if len(sys.argv) > 1 and Path(sys.argv[1]).exists():

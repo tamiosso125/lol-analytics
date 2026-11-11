@@ -5222,3 +5222,15 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 **Também.** Contagem de testes do frontend no guia e no handoff: 31 → 38 (estado atual de `npm run test`).
 
 **Estado.** Corpo em 30 páginas; Apêndice H com 2 páginas; todos os conferentes passam. Pendentes do autor no plano: leitura do roteiro ao lado das fontes (exige os PDFs), verificador de similaridade, autoplágio do TCC I e uso de IA com o orientador.
+
+## 2026-11-11 (tarde) — Validação de plágio, itens 1, 2 e 8
+
+**Fontes.** O primeiro rascunho do plano dizia que os PDFs das referências não estavam no computador; estavam (`Downloads/TCC`, `Downloads/ref`, `docs/artigos` e PDFs baixados nas sessões anteriores), e o registro `docs/conferencia_referencias.md` já dizia isso. Texto completo de 24 das 31 obras; Brown pelo resumo; os três livros sem acesso.
+
+**Item 1 (paráfrase próxima e tradução).** Teste de retrotradução: as 50 frases que citam obra com texto disponível foram traduzidas literalmente para o inglês e comparadas com o texto da fonte (sem a lista de referências). Nenhuma é tradução literal. Os cinco sinais acima do limiar (6+ palavras seguidas ou 3+ quadrigramas) são títulos ou nomes de método (Talk2Data, "spatio-temporal evolution of gameplay", "multi-objective multi-instance", o resultado "67% of 306 games") e a definição da Random Forest ("random selection of features at each node"), termo técnico citado. Trechos idênticos de 8+ palavras contra os 10 TCCs II aprovados (só a capa institucional), relatórios do ChatGPT (duas expressões curtas), obras lidas e não citadas (nada) e o TCC I (4% a 4,8%).
+
+**Item 2 (atribuição).** 43 das 52 frases estão como na conferência de 2-3/11. As 9 alteradas depois foram conferidas no texto completo: Jiang, Ribeiro (o "pouco fiel se muito não linear" está literalmente no artigo), Zhong (seção 4.7), Niculescu-Mizil, Holm e Brown conferem. **Corrigido:** em Trabalhos Futuros a citação de Zhong, Yu e Klein (2020) fechava "um modelo aberto local para comparar com a API", que o artigo não trata (zero ocorrências de open/local/API); agora acompanha "avaliação sobre vários bancos de teste", que é a proposta do artigo e a lacuna que a 4.7 já admite. Corpo continua em 30 páginas.
+
+**Roteiro.** Ano exigido passou a ser o da própria obra: "Wallner, Wang e Dormann (2023)" contava como Wang (2020).
+
+**Também.** Os relatórios do ChatGPT (abril de 2026) foram registrados em `docs/registro_uso_ia.md` para a declaração de uso de IA.

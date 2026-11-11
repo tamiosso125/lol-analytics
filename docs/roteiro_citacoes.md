@@ -2,7 +2,7 @@
 
 Gerado por `docs/gera_roteiro_citacoes.py` a partir de `docs/tcc2_final.docx`. Serve para os itens 1 e 2 do `docs/plano_validacao_plagio.md`: ler cada frase ao lado do trecho da fonte e anotar (a) a página ou seção da fonte que a sustenta e (b) se a redação está próxima demais do original (paráfrase de tradução).
 
-**52 frases no texto e 15 linhas de quadro citam 31 das 31 obras da lista de referências.**
+**52 frases no texto e 14 linhas de quadro citam 31 das 31 obras da lista de referências.**
 
 ## Frases do texto
 
@@ -23,7 +23,7 @@ Gerado por `docs/gera_roteiro_citacoes.py` a partir de `docs/tcc2_final.docx`. S
 | 13 | 7 | 2.3 EXPLICABILIDADE E AVALIAÇÃO DE MODELOS PREDITIVOS | HANLEY (1982) | Hanley e McNeil (1982) mostram que ela equivale à probabilidade de um caso positivo receber pontuação maior que um negativo. |  |  |
 | 14 | 7 | 2.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTIC | GUO (2024); JIANG (2025) | Jiang et al. (2025) observam que soluções de Business Intelligence apoiadas por modelos de linguagem, com diálogo em várias rodadas, favorecem a exploração de dados estruturados, e Guo et al. (2024), que a decomposição de perguntas e a análise visual tornam essa exploração mais intuitiva. |  |  |
 | 15 | 8 | 2.4 INTERFACES EM LINGUAGEM NATURAL PARA EXPLORAÇÃO ANALÍTIC | WANG (2020) | Wang et al. (2020) tratam este segundo caso e mostram que representar o esquema com os relacionamentos entre tabelas, além dos nomes das colunas, melhora a precisão da conversão. |  |  |
-| 16 | 8 | 2.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPOR | WALLNER (2023); WANG (2020) | Wallner, Wang e Dormann (2023) mostram que visualizações espaço-temporais, sobretudo as que integram tempo e localização em uma única representação, ajudam a interpretar o comportamento em jogo na revisão pós-partida. |  |  |
+| 16 | 8 | 2.5 VISUALIZAÇÃO ANALÍTICA E DADOS ESPAÇO-TEMPORAIS EM ESPOR | WALLNER (2023) | Wallner, Wang e Dormann (2023) mostram que visualizações espaço-temporais, sobretudo as que integram tempo e localização em uma única representação, ajudam a interpretar o comportamento em jogo na revisão pós-partida. |  |  |
 | 17 | 8 | 3 TRABALHOS RELACIONADOS | BREIMAN (2001); CHEN (2016); HANLEY (1982); LUNDBERG (2017); RIBEIRO (2016); WANG (2020) | As principais obras de método (Breiman, 2001; Chen; Guestrin, 2016; Hanley; McNeil, 1982; Lundberg; Lee, 2017; Ribeiro; Singh; Guestrin, 2016; Wang et al., 2020) estão na Seção 2, no ponto em que o método que elas fundamentam é introduzido. |  |  |
 | 18 | 9 | 3.1 PREDIÇÃO DE VITÓRIA EM DOTA 2 | HODGE (2021) | Hodge et al. (2021) tratam da predição de vitória em partidas profissionais de Dota 2, em tempo real. |  |  |
 | 19 | 9 | 3.2 ESTUDOS DE PREDIÇÃO EM LEAGUE OF LEGENDS | BIRANT (2023) | Birant e Birant (2023) apresentam uma abordagem de aprendizado multi-objetivo e multi-instância (Multi-Objective Multi-Instance Learning) aplicada a esports e destacam a modelagem centrada no time, em vez do jogador isolado. |  |  |
@@ -34,13 +34,13 @@ Gerado por `docs/gera_roteiro_citacoes.py` a partir de `docs/tcc2_final.docx`. S
 | 24 | 9 | 3.2 ESTUDOS DE PREDIÇÃO EM LEAGUE OF LEGENDS | GUAN (2026) | Guan e Tung (2026), em um preprint ainda sem revisão por pares, fazem previsão pré-jogo no cenário profissional e tratam o lado do mapa e a prioridade de escolha como covariáveis do modelo. |  |  |
 | 25 | 10 | 3.3 PREDIÇÃO COM INTERPRETAÇÃO EM COUNTER-STRIKE | GARCÍA-MÉNDEZ (2025) | García-Méndez e Arriba-Pérez (2025) combinam classificação por machine learning com mecanismos de interpretação na predição de vitória em partidas profissionais de Counter-Strike, em fluxo contínuo (streaming). |  |  |
 | 26 | 10 | 3.4 SISTEMAS DE CONSULTA EM LINGUAGEM NATURAL SOBRE DADOS | GUO (2024); JIANG (2025) | Jiang et al. (2025) apresentam o SiriusBI, solução de Business Intelligence apoiada por modelos de linguagem para análise de dados em contextos corporativos, e Guo et al. (2024), o Talk2Data, interface em linguagem natural para análise visual exploratória baseada em decomposição de perguntas. |  |  |
-| 27 | 10 | 3.5 VISUALIZAÇÃO ESPAÇO-TEMPORAL DE PARTIDAS | WALLNER (2023); WANG (2020) | Wallner, Wang e Dormann (2023) estudam a evolução espaço-temporal do gameplay em League of Legends com a técnica de storyline visualization e mostram que integrar tempo e localização numa só vista é viável para a interpretação pós-jogo. |  |  |
-| 28 | 10 | 3.6 SÍNTESE E POSIÇÃO DESTE TRABALHO | GARCÍA-MÉNDEZ (2025); GUO (2024); JIANG (2025); WALLNER (2023); WANG (2020) | Os estudos revisados cobrem frentes isoladas: predição de resultados, interpretabilidade da predição (García-Méndez; Arriba-Pérez, 2025), interação em linguagem natural (Jiang et al., 2025; Guo et al., 2024) e visualização espaço-temporal (Wallner; Wang; Dormann, 2023). |  |  |
+| 27 | 10 | 3.5 VISUALIZAÇÃO ESPAÇO-TEMPORAL DE PARTIDAS | WALLNER (2023) | Wallner, Wang e Dormann (2023) estudam a evolução espaço-temporal do gameplay em League of Legends com a técnica de storyline visualization e mostram que integrar tempo e localização numa só vista é viável para a interpretação pós-jogo. |  |  |
+| 28 | 10 | 3.6 SÍNTESE E POSIÇÃO DESTE TRABALHO | GARCÍA-MÉNDEZ (2025); GUO (2024); JIANG (2025); WALLNER (2023) | Os estudos revisados cobrem frentes isoladas: predição de resultados, interpretabilidade da predição (García-Méndez; Arriba-Pérez, 2025), interação em linguagem natural (Jiang et al., 2025; Guo et al., 2024) e visualização espaço-temporal (Wallner; Wang; Dormann, 2023). |  |  |
 | 29 | 11 | 3.6 SÍNTESE E POSIÇÃO DESTE TRABALHO | DO (2021); MAYMIN (2021) | A maior parte dos estudos de predição atua sobre o cenário profissional, e os que usam partidas ranqueadas (Do et al., 2021; Maymin, 2021) não as comparam com ele. |  |  |
 | 30 | 11 | 4.1 NATUREZA E ABORDAGEM DA PESQUISA | PRODANOV (2013) | Quanto à natureza, trata-se de pesquisa aplicada, que busca conhecimento voltado à solução de um problema específico e de uso prático (Prodanov; Freitas, 2013): aqui, uma plataforma para coletar, organizar e analisar dados competitivos de League of Legends. |  |  |
 | 31 | 11 | 4.1 NATUREZA E ABORDAGEM DA PESQUISA | GIL (2002) | Quanto aos objetivos, a pesquisa é exploratória, na investigação da Riot Games API e das possibilidades de modelagem, e descritiva, na caracterização dos dados, dos padrões e dos modelos comparados (Gil, 2002). |  |  |
 | 32 | 11 | 4.1 NATUREZA E ABORDAGEM DA PESQUISA | CRESWELL (2023) | A abordagem é predominantemente quantitativa (Creswell; Creswell, 2023): a coleta, a análise exploratória e a comparação entre os modelos de aprendizado de máquina trabalham com dados numéricos, e a revisão bibliográfica e a interpretação dos achados dão o contexto. |  |  |
-| 33 | 12 | 4.2 ESTRATÉGIAS DE PESQUISA | GIL (2002); PRODANOV (2013); RIOT GAMES ([s.d.]) | O trabalho foi desenvolvido por meio de pesquisa bibliográfica (Gil, 2002) e de pesquisa documental sobre a documentação oficial da Riot Games API (Prodanov; Freitas, 2013), com aplicação delimitada ao domínio de League of Legends. |  |  |
+| 33 | 12 | 4.2 ESTRATÉGIAS DE PESQUISA | GIL (2002); PRODANOV (2013) | O trabalho foi desenvolvido por meio de pesquisa bibliográfica (Gil, 2002) e de pesquisa documental sobre a documentação oficial da Riot Games API (Prodanov; Freitas, 2013), com aplicação delimitada ao domínio de League of Legends. |  |  |
 | 34 | 12 | 4.3 COLETA DE DADOS | RIOT GAMES ([s.d.]) | Os endpoints seguem a documentação oficial (Riot Games, [s.d.]). |  |  |
 | 35 | 12 | 4.3 COLETA DE DADOS | ORACLE’S ELIXIR ([s.d.]) | Foram incorporados 99.259 jogos profissionais de 2014 a 2026, de 122 ligas, da elite às de desenvolvimento, a partir dos arquivos anuais em valores separados por vírgula (CSV) que o site publica (Oracle’s Elixir, [s.d.]; arquivos de 4 jul. 2026; Apêndice H), para comparar o solo queue de elo alto com o cenário profissional. |  |  |
 | 36 | 13 | 4.5 ANÁLISE EXPLORATÓRIA DE DADOS | BROWN (2001); HOLM (1979) | Nenhum padrão foi aceito como resultado sem passar por quatro testes de robustez: (i) replicação restrita a uma região, contra o efeito de mistura regional; (ii) comparação por duração total da partida, contra a confusão com “jogos longos”; (iii) intervalo de confiança de Wilson sobre a proporção (Brown; Cai; DasGupta, 2001), para a significância em amostras menores; e (iv) comparação de pares com correção de Holm (Holm, 1979), que corrige a multiplicidade quando várias diferenças são testadas na mesma base, com a partida como unidade quando ela aparece em mais de um grupo. |  |  |
@@ -58,8 +58,8 @@ Gerado por `docs/gera_roteiro_citacoes.py` a partir de `docs/tcc2_final.docx`. S
 | 48 | 26 | 5.7 Os resultados frente à literatura | BAHROLOLLOOMI (2022) | A granularidade por jogador de Bahrololloomi et al. (2022) entrou apenas nos perfis de jogador, fora da modelagem de vitória. |  |  |
 | 49 | ? | 5.7 Os resultados frente à literatura | GARCÍA-MÉNDEZ (2025) | A limitação que García-Méndez e Arriba-Pérez (2025) apontam nos trabalhos anteriores, a falta de interpretação das previsões, foi enfrentada com o SHAP na interface e com um módulo de orientação que separa o dado real do conhecimento geral. |  |  |
 | 50 | 26 | 5.7 Os resultados frente à literatura | GUO (2024); JIANG (2025) | Jiang et al. (2025) e Guo et al. (2024) motivam a consulta a dados estruturados por modelos de linguagem. |  |  |
-| 51 | 26 | 5.7 Os resultados frente à literatura | MAYMIN (2021); WALLNER (2023); WANG (2020) | O mapa de calor aplica, de forma mais simples, a integração de tempo e posição de Wallner, Wang e Dormann (2023), sem a técnica de storyline, e o mapa de calor de posição de Maymin (2021), que parte de rastreamento a cada segundo, ao contrário do minuto da timeline. |  |  |
-| 52 | 29 | 6.2 TRABALHOS FUTUROS | ZHONG (2020) | O terceiro é a melhoria da consulta em linguagem natural: verificação do resultado depois da execução, um gabarito maior com perguntas escritas à mão e um modelo aberto local para comparar com a API (Zhong; Yu; Klein, 2020). |  |  |
+| 51 | 26 | 5.7 Os resultados frente à literatura | MAYMIN (2021); WALLNER (2023) | O mapa de calor aplica, de forma mais simples, a integração de tempo e posição de Wallner, Wang e Dormann (2023), sem a técnica de storyline, e o mapa de calor de posição de Maymin (2021), que parte de rastreamento a cada segundo, ao contrário do minuto da timeline. |  |  |
+| 52 | 29 | 6.2 TRABALHOS FUTUROS | ZHONG (2020) | O terceiro é a melhoria da consulta em linguagem natural: verificação do resultado depois da execução, um gabarito maior com perguntas escritas à mão, avaliação sobre vários bancos de teste (Zhong; Yu; Klein, 2020) e um modelo aberto local para comparar com a API. |  |  |
 
 ## Linhas de quadro
 
@@ -79,7 +79,6 @@ Gerado por `docs/gera_roteiro_citacoes.py` a partir de `docs/tcc2_final.docx`. S
 | HOLM (1979) | Correção de Holm (Holm, 1979) / Comparação de pares de cortes / Controla o erro do conjunto de testes, com menos perda de poder que a correção de Bonferroni / Não trata a dependência entre os testes; aqui ela foi tratada com a partida como unidade (Seção 5.3) |
 | WANG (2020) | Esquema no text-to-SQL (Wang et al., 2020) / Contexto da consulta gerada / Representar o esquema com os relacionamentos entre tabelas melhora a precisão da conversão / Consulta correta na forma pode responder à pergunta errada |
 | ZHONG (2020) | Acurácia de execução (Zhong; Yu; Klein, 2020) / Métrica do benchmark de linguagem natural / Compara o resultado da consulta gerada com o da consulta de referência / Propõem avaliar sobre vários bancos de teste, o que o benchmark feito sobre uma base não faz |
-| ORACLE’S ELIXIR ([s.d.]) | Jogos profissionais nos arquivos / 99.259 jogos únicos, de 122 ligas / Arquivos do Oracle’s Elixir de 4 de julho de 2026 |
 
 ## Chamadas por obra
 
@@ -108,11 +107,11 @@ Gerado por `docs/gera_roteiro_citacoes.py` a partir de `docs/tcc2_final.docx`. S
 | LUNDBERG (2017) | 3 |
 | MAYMIN (2021) | 4 |
 | NICULESCU-MIZIL (2005) | 2 |
-| ORACLE’S ELIXIR ([s.d.]) | 2 |
+| ORACLE’S ELIXIR ([s.d.]) | 1 |
 | PEDREGOSA (2011) | 1 |
 | PRODANOV (2013) | 2 |
 | RIBEIRO (2016) | 3 |
-| RIOT GAMES ([s.d.]) | 3 |
+| RIOT GAMES ([s.d.]) | 2 |
 | WALLNER (2023) | 4 |
-| WANG (2020) | 7 |
+| WANG (2020) | 3 |
 | ZHONG (2020) | 3 |

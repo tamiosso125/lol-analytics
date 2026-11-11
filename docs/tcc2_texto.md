@@ -856,7 +856,7 @@ direção à média.
 
 ### 6.2 TRABALHOS FUTUROS
 
-Ficam registrados três caminhos. O primeiro é a extensão da predição para partidas ao vivo, prevista na arquitetura mas não implementada: a barreira é de dados em tempo real, não de modelo. O segundo é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O terceiro é a melhoria da consulta em linguagem natural: verificação do resultado depois da execução, um gabarito maior com perguntas escritas à mão e um modelo aberto local para comparar com a API (Zhong; Yu; Klein, 2020).
+Ficam registrados três caminhos. O primeiro é a extensão da predição para partidas ao vivo, prevista na arquitetura mas não implementada: a barreira é de dados em tempo real, não de modelo. O segundo é a extensão do recorte de validade externa, com outras filas e, eventualmente, outro jogo, para testar se o viés de lado descreve o jogo ou o modo de jogar de uma população específica. O terceiro é a melhoria da consulta em linguagem natural: verificação do resultado depois da execução, um gabarito maior com perguntas escritas à mão, avaliação sobre vários bancos de teste (Zhong; Yu; Klein, 2020) e um modelo aberto local para comparar com a API.
 
 ---
 
