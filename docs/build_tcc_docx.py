@@ -106,9 +106,19 @@ FONTE_FIGURAS_TEXTO = (
     "Fonte: Elaborado pelo autor (2026), recorte de tela da plataforma "
     "(Playwright, tema escuro)."
 )
+# Atribuição da arte da Riot (2026-11-11). Só 5 figuras mostram ativos do jogo
+# (3, 6, 8, 9 e 10: ícones de campeões e itens, mapa, ilustração de fundo); as
+# demais são gráficos e controles. Ícones de item vêm do Data Dragon (Riot);
+# ícones e arte de campeões e o mapa, do Community Dragon (projeto da
+# comunidade que extrai os arquivos do cliente). O aviso da política de API da
+# Riot e a explicação da origem estão no Apêndice H.
+ATRIBUICAO_RIOT = "Ícones, mapa e ilustrações: propriedade da Riot Games (Data Dragon e Community Dragon)."
+# capturas do Apêndice E que mostram arte da Riot
+IMAGENS_COM_ARTE_RIOT = ("01_inicio.png", "03_campeoes.png", "04_partida_detalhe.png", "05_competitivo.png")
 # figuras do texto que NÃO são recorte de tela (a curva de calibração é um
 # gráfico gerado por docs/calibracao_empate_real.py)
 FONTES_FIGURA = {
+    "fig_partida.png": FONTE_FIGURAS_TEXTO + " " + ATRIBUICAO_RIOT,
     "fig_calibracao.png": "Fonte: Elaborado pelo autor (2026), a partir das "
                           "probabilidades fora da dobra da validação cruzada.",
 }
@@ -805,7 +815,7 @@ def inserir_figuras(doc) -> int:
             os.path.join(pasta, arquivo), width=largura, height=altura
         )
         alvo.addprevious(p_img._p)
-        fonte = _fonte(doc, FONTE_IMAGENS)
+        fonte = _fonte(doc, FONTE_IMAGENS + (" " + ATRIBUICAO_RIOT if arquivo in IMAGENS_COM_ARTE_RIOT else ""))
         alvo.addprevious(fonte._p)
         n += 1
     corpo.remove(alvo)

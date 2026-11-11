@@ -1454,6 +1454,8 @@ Quadro — Fundamentos dos métodos usados e o limite de cada um
 
 O Quadro 26 reúne medições sobre a composição das duas bases, feitas em 3 de novembro de 2026, sobre as 41.063 partidas e os 99.259 jogos descritos na Seção 4.3. O Quadro 27 resume os tipos de chave da Riot Games API, conforme o portal de desenvolvedores consultado na mesma data.
 
+As imagens das telas (Figuras 3, 6, 8, 9 e 10) mostram ícones, mapa e ilustrações do jogo, que são propriedade da Riot Games. Os ícones de itens vêm do Data Dragon, da própria Riot; os ícones e a arte dos campeões e o mapa vêm do Community Dragon, projeto da comunidade que extrai os arquivos do cliente do jogo e declara ter sido criado sob a política "Legal Jibber Jabber" da Riot (https://github.com/communitydragon/docs). A política da Riot para quem usa a sua API (https://developer.riotgames.com/policies/general, acesso em 11 nov. 2026) pede este aviso: o Bellestraiko não é endossado pela Riot Games e não reflete as visões ou opiniões da Riot Games nem de ninguém oficialmente envolvido na produção ou na gestão das propriedades da Riot Games; Riot Games e todas as propriedades associadas são marcas ou marcas registradas da Riot Games, Inc. (tradução do autor).
+
 Quadro — Composição das bases de dados
 
 | Aspecto | Medida | Observação |

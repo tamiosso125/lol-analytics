@@ -575,6 +575,7 @@ def check_fonte_figuras(t: str) -> None:
     """
     import re as _re
 
+    n_falhas_antes = len(FALHAS)  # o OK final compara contagens: as mensagens nao levam a palavra "falha"
     caminho = RAIZ / "docs" / "build_tcc_docx.py"
     if not caminho.exists():
         aviso("build_tcc_docx.py nao encontrado: fonte de figura nao conferida")
@@ -592,8 +593,24 @@ def check_fonte_figuras(t: str) -> None:
     # A fonte nao pode declarar viewport fixa, que e o que a capture refaz.
     if _re.search(r"1440\s*[x×]\s*\d+", fonte):
         falha(f"FONTE_IMAGENS declara viewport fixa, que o Anexo A nega: {fonte[:70]!r}")
-    if not any("falha" in f.lower() for f in FALHAS):
-        print("  [OK] FONTE_IMAGENS nao contradiz o Anexo A")
+    # Atribuicao da arte da Riot (2026-11-11): as figuras 3, 6, 8, 9 e 10 mostram
+    # icones, mapa e ilustracoes do jogo, e a fonte impressa tem de dizer de quem
+    # sao. O aviso da politica de API e a origem das imagens ficam no Apendice H.
+    if "ATRIBUICAO_RIOT" not in fonte_py or "fig_partida.png" not in fonte_py:
+        falha("build_tcc_docx.py sem a atribuicao da arte da Riot (ATRIBUICAO_RIOT / fig_partida.png)")
+    mi = _re.search(r"IMAGENS_COM_ARTE_RIOT\s*=\s*\((.*?)\)", fonte_py, _re.S)
+    arquivos = set(_re.findall(r'"([\w]+\.png)"', mi.group(1))) if mi else set()
+    esperado = {"01_inicio.png", "03_campeoes.png", "04_partida_detalhe.png", "05_competitivo.png"}
+    if arquivos != esperado:
+        falha(f"capturas do Apendice E com atribuicao da Riot: {sorted(arquivos)}, esperado {sorted(esperado)}")
+    h = t.split("## APÊNDICE H")[1].split("## APÊNDICE I")[0] if "## APÊNDICE H" in t else ""
+    for termo in ("Community Dragon", "Data Dragon", "isn't endorsed", "não é endossado"):
+        if termo == "isn't endorsed":
+            continue  # a traducao e o que vai impresso; o original esta no endereco citado
+        if termo not in h:
+            falha(f"Apendice H nao menciona {termo!r}: origem das imagens ou aviso da Riot ausente")
+    if len(FALHAS) == n_falhas_antes:
+        print("  [OK] FONTE_IMAGENS nao contradiz o Anexo A; atribuicao da Riot nas 5 figuras e aviso no Apendice H")
 
 
 # Anglicismos de prosa. Termo tecnico legitimamente ingles (machine

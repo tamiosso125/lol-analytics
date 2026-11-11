@@ -5192,3 +5192,17 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 **Olhada no Word.** O `.docx` foi exportado para PDF pelo Word e as 62 páginas foram vistas como imagem. Defeitos que nenhum script pegava, corrigidos em `build_tcc_docx.py`: (1) a linha "Fonte" ficava sozinha no topo da página seguinte (Quadro 4 no corpo, Quadro 31 no Apêndice K): a última linha de cada quadro agora leva keep_with_next; (2) Quadro 11 com "Precisã/o" e "10 / min" quebrados e (3) Quadro 27 com "Desenvolviment/o": larguras refeitas (uma primeira tentativa estreitou demais "n" e "F1" e quebrou os números; corrigida na hora). `confere_paginas.ps1` ganhou a detecção de "Fonte" solta e foi testado nos dois sentidos (reprova o `.docx` anterior nas páginas 21 e 62).
 
 **Estado.** Corpo 30 páginas (físicas 3 a 32); o Apêndice K passou de 3 para 4 páginas (o Quadro 31 agora fica inteiro numa página). Todos os conferentes passam.
+
+## 2026-11-11 — Atribuição da arte da Riot nas figuras e aviso da política de API
+
+**Por quê.** Os termos pós-banca da Unisinos pedem, para imagens que não são do autor, indicar pelo menos a fonte. As telas da plataforma mostram ícones, mapa e ilustrações do jogo, e as legendas diziam só "Elaborado pelo autor".
+
+**O que se apurou (fontes primárias).**
+- Só as Figuras 3, 6, 8, 9 e 10 têm arte da Riot; as demais (1, 2, 4, 5, 7, 11, 12) são gráficos, controles e tabelas.
+- Ícones de itens vêm do Data Dragon (Riot, versão fixa 16.13.1). Ícones e arte de campeões (`cdn.communitydragon.org`) e o mapa (`raw.communitydragon.org`) vêm do Community Dragon, projeto da comunidade sem operador identificado, que se declara criado sob a política "Legal Jibber Jabber", diz funcionar numa "gray area" e "on good faith" e avisa que "CDN will be deprecated in the future". Ele afirma não endossar o uso dos ativos da Riot, ou seja, não dá licença.
+- A política de desenvolvedor da API (developer.riotgames.com/policies/general) lista como fontes de imagem permitidas Data Dragon, Press Kit e ativos de TFT e LoR, e exige um aviso de não endosso "readily visible to players". O texto literal está lá; a política de fãs (riotgames.com/en/legal) tem um aviso diferente.
+- Trocar a plataforma para o Data Dragon foi avaliado e adiado: cerca de 41 pontos de código em 12 arquivos, sem tabela local de id numérico para nome, mapa com arte antiga e 5 figuras a recapturar, com o corpo do TCC em 30 de 30 páginas. Reavaliar se a plataforma for publicada ou se o CDN sair do ar antes da defesa.
+
+**O que mudou.** `build_tcc_docx.py`: `ATRIBUICAO_RIOT` nas fontes das Figuras 3 (corpo) e 6, 8, 9 e 10 (Apêndice E). `tcc2_texto.md`: parágrafo no Apêndice H com a origem das imagens, o Community Dragon e o aviso da política de API em português (tradução do autor), com os dois endereços citados no texto (não entraram na lista de Referências, para não mudar as 31 nem o corpo). `verifica_tcc.py` (checagem 10): reprova se a atribuição, as quatro capturas ou o parágrafo do Apêndice H sumirem; testado nos dois sentidos. Também corrigida a linha "[OK]" dessa checagem, que aparecia mesmo com falha.
+
+**Estado.** Corpo em 30 páginas (físicas 3 a 32); Figura 6 continua na página da abertura do Apêndice E; o Apêndice H passou de 1 para 2 páginas (o Quadro 27 vai inteiro para a segunda), sem efeito no limite. Todos os conferentes passam.
