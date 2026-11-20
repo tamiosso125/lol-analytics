@@ -5249,3 +5249,15 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 - Duas falhas do roteiro, ambas da montagem: `confere_conversao_advantagem` sem os CSVs profissionais na cópia (rodado no repositório principal: 81,5% x 74,1%, 7,45 pp, z = 7,99) e `confere_comparador` chamado como arquivo em vez de `-m` (146 acertos escalares, 0 com duas colunas numéricas).
 
 **Conclusão.** Todos os números do TCC se reproduzem a partir do banco congelado.
+
+## 2026-11-17 — Conversão de vantagem do profissional: erro de definição achado e corrigido
+
+**Como apareceu.** Ao conferir os números do site de preparação para a banca contra `reports/`, o banco e os dados brutos (346 conferências em `reports/`, todas conferiram; consultas ao banco também), um único número não bateu: a conversão de vantagem do profissional. Uma consulta direta a `pro_games` (linha do time) deu 83,6% (n = 14.617) na faixa de +2.000 a +4.000, e o texto dizia 81,5% (n = 3.294).
+
+**Causa.** `docs/confere_conversao_advantagem.py` lia, por jogo, a primeira linha do lado Blue do CSV do Oracle's Elixir. Cada jogo tem 12 linhas (10 de jogador e 2 de time, com `position == "team"`) e a primeira Blue é a do jogador do topo em 88.474 dos 88.593 jogos. `golddiffat15` ali é a vantagem de ouro do topo contra o topo adversário, e o solo queue usa a diferença do time. As duas pontas da comparação mediam coisas diferentes. A suíte (`verifica_tcc.py`) não pegou porque usa a mesma definição. A API (`/stats/pro/gold15`) e a tela Competitivo já usavam a linha do time.
+
+**Evidência de que o erro era do script.** O docstring original do script falava em 84,0% no profissional (+2k a +4k) e ~95% (+4k a +6k), coerente com a linha do time. A nota de `handoff.md` e de `scripts.md` ("o efeito real tem metade do tamanho") nasceu da leitura errada: o que mudou com a base nova foi o solo queue (de ~68% para 74,1%), não o profissional.
+
+**Números corretos** (linha do time, `docs/confere_conversao_advantagem.py` corrigido): +2.000 a +4.000, profissional 83,6% (n = 14.617) contra solo queue 74,1% (n = 5.366), 9,5 pp, z = 15,2; +4.000 a +6.000, 94,0% (n = 5.842) contra 86,3% (n = 3.497), 7,7 pp, z = 12,7. A conclusão qualitativa se mantém (o profissional converte mais a vantagem), e a faixa de +4.000 a +6.000 deixa de ser "apenas indicativa".
+
+**O que mudou.** Script (linha do time e aviso de n pequeno só quando houver); `docs/tcc2_texto.md` (Seção 5.3 e linha do Quadro 19 do Apêndice D); `docs/handoff.md`, `docs/scripts.md`, `docs/inventario_figuras.md`, `docs/guia_banca.md`. O `.docx` precisa ser regenerado para refletir o texto.

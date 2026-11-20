@@ -23,7 +23,7 @@ sobre o banco restaurado às 41.063 partidas.
 | Azul no agregado | 46,7% | 46,6% na base de 39.188 | sim, bases diferentes |
 | Jogos profissionais 2026 | 6.274, azul 53,1% (`/stats/pro/overview`) | 53,1% | sim |
 | Jogos por ano (`/stats/pro/years`) | 814, 1.806, 4.081, … 6.274 | Apêndice E | sim |
-| Conversão, +2k a +4k, profissional | 81,5% (n = 3.294), pelo script `confere_conversao_advantagem.py` | 81,5% (n = 3.294) | sim |
+| Conversão, +2k a +4k, profissional | 83,6% (n = 14.617), pelo script `confere_conversao_advantagem.py` (linha do time; corrigido em 2026-11-17, antes lia a linha do jogador do topo e dava 81,5%, n = 3.294) | 83,6% (n = 14.617) | sim |
 | Conversão, +2k a +4k, solo | 73,7% (n = 5.165 na API, 5.166 no script) | 73,7% (n = 5.166) | sim; 1 partida de diferença entre as duas consultas |
 
 ## 1.3 O que mudou e o que foi feito

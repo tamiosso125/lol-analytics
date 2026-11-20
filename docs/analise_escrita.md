@@ -69,7 +69,7 @@ necessárias (marcam uma delimitação real); a maioria pode virar afirmação
 direta.
 
 **2. Parênteses demais (187).** Por conteúdo: 83 com número ou estatística
-("(n = 3.294)", "([55,4%, 57,2%])"), 38 com explicação, 26 com termo ou
+("(n = 14.617)", "([55,4%, 57,2%])"), 38 com explicação, 26 com termo ou
 glosa, 20 com citação e 20 com remissão. Os colegas põem número em quadro e
 explicação em frase própria. O nosso empilha as duas coisas dentro da
 frase, o que alonga a leitura.

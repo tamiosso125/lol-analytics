@@ -1239,13 +1239,16 @@ jogo profissional, nos dois lados, com a mesma definição de faixa.
 ```
 
 O TCC afirmava 84,0% contra ~68% na faixa de +2.000 a +4.000, medido sobre
-~12 mil partidas. Na base atual são 81,5% (profissional, n = 3.294) contra
-74,1% (*solo queue*, n = 5.368; base única de 2026-11-06, z = 8,0) — o efeito é real mas tem cerca de
-metade do tamanho antes declarado.
+~12 mil partidas. Na base atual são 83,6% (profissional, n = 14.617) contra
+74,1% (*solo queue*, n = 5.366; z = 15,2), e na faixa de +4.000 a +6.000, 94,0%
+(n = 5.842) contra 86,3% (n = 3.497; z = 12,7).
 
-A coluna de ouro do Oracle's Elixir é `golddiffat15`, não `gold_diff`, e há
-cinco linhas de lado azul por jogo: sem deduplicar por `gameid` o script
-conta cinco vezes.
+A coluna de ouro do Oracle's Elixir é `golddiffat15`, não `gold_diff`. Cada
+jogo tem 12 linhas: 10 de jogador e 2 de time (`position == "team"`). O
+script usa a linha do time azul, uma por jogo. **Correção de 2026-11-17:** antes
+dela, o script dava 81,5% (n = 3.294) e 91,7% (n = 72), porque lia a primeira
+linha Blue de cada jogo, que é a do jogador do topo (88.474 dos 88.593 jogos),
+e a vantagem de ouro dela é a do topo contra o topo adversário, não a do time.
 
 ### `src/features/build_features_v2.py`, `src/models/experiment_precisao.py`, `src/models/holdout_precisao.py`, `src/models/experiment_historico.py`
 

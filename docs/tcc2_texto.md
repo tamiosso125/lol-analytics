@@ -583,15 +583,14 @@ profissionais de 2020, e a prioridade de escolha entra como covariável
 própria em Guan e Tung (2026), mas isso não comprova a hipótese.
 
 **Conversão de vantagem.** Com vantagem de ouro entre +2.000 e +4.000 aos
-15 minutos, o azul venceu 81,5% das partidas no profissional (n = 3.294)
-contra 74,1% no *solo queue* (n = 5.366); entre +4.000 e +6.000, 91,7%
-(n = 72) contra 86,3% (n = 3.497). A diferença observada entre os dois
-recortes na faixa com amostra suficiente, de 7,45 pontos percentuais, é
-pequena em termos absolutos, mas significativa (teste z de duas proporções,
-com grupos independentes; z = 8,0, p < 0,001). Atribuí-la à coordenação
+15 minutos, o azul venceu 83,6% das partidas no profissional (n = 14.617)
+contra 74,1% no *solo queue* (n = 5.366); entre +4.000 e +6.000, 94,0%
+(n = 5.842) contra 86,3% (n = 3.497). A diferença observada entre os dois
+recortes é de 9,5 pontos percentuais na primeira faixa e de 7,7 na segunda,
+e é significativa nas duas (teste z de duas proporções, com grupos
+independentes; z = 15,2 e z = 12,7, p < 0,001). Atribuí-la à coordenação
 das equipes exigiria evidência que este trabalho não tem: os recortes
-diferem também no nível dos jogadores, na versão do jogo e na época. A faixa de +4.000 a +6.000 do
-profissional, com 72 jogos, é apenas indicativa. A origem das taxas está no
+diferem também no nível dos jogadores, na versão do jogo e na época. A origem das taxas está no
 Apêndice D. A Figura 1 mostra as duas comparações na tela Competitivo,
 com o cenário profissional restrito a 2026. Por isso o azul aparece com
 53,1%, diferente dos 53,2% do acervo completo.
@@ -1308,7 +1307,7 @@ Quadro — Origem dos números da Seção 5.3
 | Vitória do azul em partidas empatadas, por corte, sobre as variáveis congeladas (40.919 aos 10 minutos) | cálculo da taxa de vitória do azul em cada corte |
 | Comparação de pares com correção de Holm, sobre as variáveis congeladas | *bootstrap* com a partida como unidade (2.000 reamostragens) para as seis diferenças entre cortes, com correção de Holm |
 | Vitória do azul por faixa de duração, sobre 41.063 partidas | cálculo por faixa de duração total da partida |
-| Conversão de vantagem de ouro, sobre as variáveis congeladas (40.778 aos 15 minutos) | cálculo sobre as variáveis de cada partida no corte de 15 minutos; teste z de duas proporções entre os recortes, que são grupos independentes |
+| Conversão de vantagem de ouro, no *solo queue* sobre as variáveis congeladas (40.778 aos 15 minutos) e no profissional sobre os 99.259 jogos | cálculo sobre a diferença de ouro do time aos 15 minutos (no profissional, a linha do time do Oracle's Elixir); teste z de duas proporções entre os recortes, que são grupos independentes |
 | Série anual do cenário profissional, sobre 99.259 jogos | consulta SQL na tabela de jogos profissionais |
 
 Quadro — Vitória do azul por faixa de duração total da partida

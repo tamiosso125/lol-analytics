@@ -1520,18 +1520,21 @@ exigiria a ordem do *draft*, que a API pública não expõe."
 ### 13.7 Conversão de vantagem ("macro ganha jogo")
 
 Com **+2.000 a +4.000 de ouro aos 15 minutos**, o azul venceu:
-- **81,5%** no profissional (3.294 jogos)
+- **83,6%** no profissional (14.617 jogos)
 - **74,1%** no *solo queue* (5.366 partidas)
 
-Diferença de **7,45 pontos**, estatisticamente significativa (teste z de
-duas proporções, grupos independentes; z = 8,0; p < 0,001).
+Diferença de **9,5 pontos**, estatisticamente significativa (teste z de
+duas proporções, grupos independentes; z = 15,2; p < 0,001). Com **+4.000 a
++6.000**: 94,0% (5.842 jogos) contra 86,3% (3.497), 7,7 pontos, z = 12,7.
 
 **Leitura (parecer):** é uma **diferença observada** entre os dois recortes.
 **Não atribua à coordenação das equipes**: os recortes diferem também no
 nível dos jogadores, na versão do jogo e na época.
 
-**Detalhe honesto:** a faixa de +4.000 a +6.000 no profissional tem só 72
-jogos, então é indicativa.
+**Detalhe honesto (corrigido em 2026-11-17):** antes da correção, o guia trazia
+81,5% (3.294 jogos) e 91,7% (72 jogos, "indicativa"). Esses números vinham de
+um erro no script de conferência, que lia a vantagem de ouro do jogador do
+topo em vez da do time. Pela linha do time, as duas faixas têm n grande.
 
 ### 13.8 Por que isso importa para o modelo
 
@@ -2290,8 +2293,8 @@ para isso que este guia existe.
 - Empatadas: azul 46,5% / 47,8% / 46,9% / 47,4%; partida como unidade,
   Holm p mín. 0,65; "taxas próximas, nenhuma diferença detectada"
 - Profissional: azul 53,2%
-- Conversão (+2k a +4k aos 15): pro 81,5% x *solo queue* 74,1%; 7,45 pp;
-  z = 8,0; diferença observada, sem causa atribuída
+- Conversão (+2k a +4k aos 15): pro 83,6% x *solo queue* 74,1%; 9,5 pp;
+  z = 15,2; diferença observada, sem causa atribuída
 
 **Linguagem natural**
 - 23/26 = 88%; 22 *solo queue* + 4 profissional; falhas: perguntas 5,

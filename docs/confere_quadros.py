@@ -56,7 +56,11 @@ def ler_quadros() -> dict[int, tuple[str, list[list[str]]]]:
     quadros, ultimo = {}, None
     for el in d.element.body.iterchildren():
         if el.tag.endswith("}p"):
-            t = Paragraph(el, d).text.strip()
+            # Todo w:t do paragrafo, inclusive o resultado de campo SEQ gravado
+            # como w:fldSimple (o Word grava assim as vezes; Paragraph.text
+            # ignora o texto dentro de fldSimple e a legenda ficava "Quadro  -").
+            ns_t = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t"
+            t = "".join(x.text or "" for x in el.iter(ns_t)).strip()
             m = re.match(r"^Quadro (\d+) - (.*)$", t)
             if m:
                 ultimo = (int(m[1]), m[2])

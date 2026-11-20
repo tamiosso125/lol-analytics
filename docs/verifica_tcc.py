@@ -348,6 +348,10 @@ VALORES_SUBSTITUIDOS: list[tuple[str, str]] = [
     ("0,8219", "AUC do Random Forest antes do retreino"),
     ("46,3%", "taxa do azul aos 15 min, do periodo em que se acreditava no pico"),
     ("84,0%", "conversao de vantagem no profissional, antes da remedicao"),
+    # 2026-11-17: o script lia a linha do jogador do topo, nao a do time
+    ("81,5%", "conversao de vantagem no profissional medida na linha do jogador do topo (erro; o certo, pela linha do time, e 83,6%)"),
+    ("3.294", "n da conversao de vantagem no profissional na linha do jogador do topo (erro; o certo e 14.617)"),
+    ("91,7%", "conversao +4.000 a +6.000 no profissional na linha do jogador do topo (erro; o certo e 94,0%)"),
     ("33.713", "tamanho da base entre 2026-10-03 e 2026-10-04"),
     ("96.716", "contagem de jogos profissionais com o erro do load_pro.py (corrigido; o certo e 99.259)"),
     # a mesma contagem errada, arredondada: sobreviveu na Introdução até

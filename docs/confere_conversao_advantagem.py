@@ -7,6 +7,15 @@ triplicou a base e o retreino foi refeito — a única checagem honesta é remed
 O lado profissional (Oracle's Elixir) não mudou e é conferido no mesmo script
 para que a comparação continue sendo feita sobre a mesma definição de faixa.
 
+CORREÇÃO (2026-11-17): até esta data o lado profissional lia a PRIMEIRA linha
+do lado Blue de cada jogo. No CSV do Oracle's Elixir cada jogo tem 12 linhas
+(10 de jogador e 2 de time, estas com position == "team"), e a primeira linha
+Blue é a do jogador do TOPO (88.474 dos 88.593 jogos). `golddiffat15` nessa
+linha é a vantagem de ouro do topo contra o topo adversário, não a do time, e
+o solo queue usa a diferença de ouro do TIME. Resultado errado nas duas faixas
+(81,5%, n = 3.294; e 91,7%, n = 72). Agora usa a linha do time, que é também o
+que a tela Competitivo e a API (`/stats/pro/gold15`, tabela pro_games) usam.
+
 Uso:
     .venv\\Scripts\\python.exe docs\\confere_conversao_advantagem.py
 """
@@ -71,9 +80,13 @@ def profissional() -> None:
                 lados[lado] = lados.get(lado, 0) + 1
                 if lado.lower() != "blue":
                     continue
+                # Linha do TIME, nao a de jogador: a de jogador traz a vantagem
+                # de ouro daquele jogador contra o oponente da mesma funcao.
+                if str(row.get("position", "")).strip().lower() != "team":
+                    continue
                 gid = str(row.get("gameid", "")).strip()
                 if not gid or gid in vistos:
-                    continue  # 5 linhas BLUE por jogo: conta uma so
+                    continue  # 1 linha de time BLUE por jogo: conta uma so
                 try:
                     g = int(float(row["golddiffat15"]))
                 except (KeyError, ValueError, TypeError):
@@ -89,7 +102,7 @@ def profissional() -> None:
                         acc[nome][0] += venceu
                         acc[nome][1] += 1
     print(f"  valores de 'side' vistos: {lados}")
-    print(f"  jogos com lado azul e golddiffat15: {jogos}")
+    print(f"  jogos (linha do time azul) com golddiffat15: {jogos}")
     print(f"\n{'faixa':>16} {'vitorias':>9} {'n':>8} {'taxa azul':>11}")
     for nome, _c, _lo, _hi in FAIXAS:
         venc, n = acc[nome]
@@ -133,5 +146,8 @@ if __name__ == "__main__":
         print(f"{nome:>16} {pv/np_:>8.4f} {sv/ns:>8.4f} {dif*100:>9.2f} "
               f"{z:>7.2f}{aviso}")
     print()
-    print("O TCC apoia a conclusão na faixa de +2.000 a +4.000; a de")
-    print("+4.000 a +6.000 entra como indicativa por ter n pequeno.")
+    pequenas = [nome for nome, _c, _lo, _hi in FAIXAS if prof[nome][1] < 100]
+    if pequenas:
+        print("Faixas indicativas por n profissional pequeno: " + ", ".join(pequenas))
+    else:
+        print("As duas faixas têm n profissional suficiente (>= 100).")

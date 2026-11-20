@@ -213,11 +213,14 @@ transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
   Hipótese documentada: counter-pick garantido (solo queue) vs
   prioridade de primeiro pick (pro).
 - Conversão de vantagem: com +2k a +4k de ouro aos 15, o azul vence
-  81,5% no pro (n=3.294) contra 74,1% no solo queue (n=5.368) — "macro
-  ganha jogo", quantificado. Diferença de 7,45 pp, z = 8,0. A faixa
-  +4k a +6k no pro apoia-se em só 72 jogos e é indicativa. O valor
-  antigo (84,0% vs ~68%, medido sobre ~12k partidas) era o dobro do
-  efeito real. Mede com `python docs/confere_conversao_advantagem.py`.
+  83,6% no pro (n=14.617) contra 74,1% no solo queue (n=5.366) — "macro
+  ganha jogo", quantificado. Diferença de 9,5 pp, z = 15,2. Na faixa
+  +4k a +6k: 94,0% (n=5.842) contra 86,3% (n=3.497), 7,7 pp, z = 12,7.
+  **Corrigido em 2026-11-17:** antes disso o script dava 81,5% (n=3.294) e
+  91,7% (n=72), porque lia a primeira linha Blue de cada jogo do CSV, que é
+  a do jogador do topo. O pro sempre foi ~84%; o que mudou com a base nova
+  foi o solo queue (de ~68% para 74,1%). Mede com
+  `python docs/confere_conversao_advantagem.py` (linha do time).
 - SHAP por fase: torres ficam em ~0 nos três primeiros cortes (0,0044 /
   0,0060 / 0,0031) e saltam para 0,0928 aos 25 min — 15x entre 15 e 25.
   A série **não é monôtona** (20 min é menor que 10 e 15): é
