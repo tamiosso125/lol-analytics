@@ -111,12 +111,21 @@ FONTE_FIGURAS_TEXTO = (
 # demais são gráficos e controles. Ícones de item vêm do Data Dragon (Riot);
 # ícones e arte de campeões e o mapa, do Community Dragon (projeto da
 # comunidade que extrai os arquivos do cliente). O aviso da política de API da
-# Riot e a explicação da origem estão no Apêndice H.
+# Riot e a explicação da origem estão no Apêndice D (era H até 2026-11-23).
 ATRIBUICAO_RIOT = "Ícones, mapa e ilustrações: propriedade da Riot Games (Data Dragon e Community Dragon)."
 # capturas do Apêndice E que mostram arte da Riot
 IMAGENS_COM_ARTE_RIOT = ("01_inicio.png", "03_campeoes.png", "04_partida_detalhe.png", "05_competitivo.png")
 # figuras do texto que NÃO são recorte de tela (a curva de calibração é um
 # gráfico gerado por docs/calibracao_empate_real.py)
+# Texto alternativo (leitores de tela), 2026-11-23: o .docx saía sem descrição
+# nas cinco figuras. Chave = nome do arquivo da figura.
+DESCRICOES_FIGURA = {
+    "fig_competitivo.png": "Tela Competitivo da plataforma: barras com a taxa de vitória dos lados azul e vermelho no solo queue e no profissional de 2026, e colunas com a conversão de vantagem de ouro nos dois contextos.",
+    "fig_shap_fases.png": "Gráfico de linhas com a importância média (|SHAP|, em log-odds) das cinco variáveis nos cortes de 10, 15, 20 e 25 minutos; as diferenças de ouro e de experiência têm os maiores valores.",
+    "fig_partida.png": "Tela de análise de uma partida: mapa de calor do posicionamento dos jogadores no minuto escolhido, gráfico da diferença de ouro ao longo da partida e quadro dos objetivos de cada time.",
+    "fig_simulador_estado.png": "Tela do Simulador, aba Estado: controles das diferenças aos 15 minutos, probabilidade de vitória do time azul de 71,2% e barras com a contribuição SHAP de cada variável, em log-odds.",
+    "fig_calibracao.png": "Quatro curvas de calibração do XGBoost, uma por corte, comparando a probabilidade prevista com a taxa observada de vitória do azul por decil; as curvas ficam próximas da diagonal.",
+}
 FONTES_FIGURA = {
     "fig_partida.png": FONTE_FIGURAS_TEXTO + " " + ATRIBUICAO_RIOT,
     "fig_calibracao.png": "Fonte: Elaborado pelo autor (2026), a partir das "
@@ -281,8 +290,15 @@ def _ref_rodape(paragrafo, footnote_id: int) -> None:
     ref.set(qn("w:customMarkFollows"), "1")
     ref.set(qn("w:id"), str(footnote_id))
     r._r.append(ref)
-    marca = paragrafo.add_run(_marca_rodape(footnote_id))
-    marca.font.superscript = True
+    # 2026-11-23: a marca vai NO MESMO run da chamada, que é como o próprio Word
+    # grava uma nota de marca personalizada. Com a marca num run separado, o Word
+    # deslocava as chamadas 1 e 2 um parágrafo adiante e apagava a chamada 3 ao
+    # regravar o arquivo, e outros leitores mostravam "1*" (número automático mais
+    # o asterisco) e uma marca "1" sem nota no Apêndice D.
+    etree.SubElement(rpr, qn("w:vertAlign")).set(qn("w:val"), "superscript")
+    t = OxmlElement("w:t")
+    t.text = _marca_rodape(footnote_id)
+    r._r.append(t)
 
 
 def _adicionar_rodapes(doc, notas: dict[int, str]) -> None:
@@ -777,7 +793,12 @@ def inserir_figuras_texto(doc) -> int:
         p_img.paragraph_format.first_line_indent = Cm(0)
         p_img.paragraph_format.keep_with_next = True
         p_img.paragraph_format.line_spacing = 1.0
-        p_img.add_run().add_picture(caminho, width=largura, height=altura)
+        forma = p_img.add_run().add_picture(caminho, width=largura, height=altura)
+        desc = DESCRICOES_FIGURA.get(os.path.basename(rel))
+        if desc is None:
+            sys.exit(f"figura sem texto alternativo em DESCRICOES_FIGURA: {rel}")
+        forma._inline.docPr.set("descr", desc)
+        forma._inline.docPr.set("title", f"Figura: {titulo.replace('*', '')[:80]}")
         p._p.addprevious(p_img._p)
         fonte = _fonte(doc, FONTES_FIGURA.get(os.path.basename(rel), FONTE_FIGURAS_TEXTO))
         p._p.addprevious(fonte._p)
@@ -793,7 +814,7 @@ def inserir_figuras_texto(doc) -> int:
 # Bloco E, 2026-10-05): a Figura 1 forçava quebra no meio da imagem e sua
 # legenda ficava órfã na página anterior. 19cm de altura máxima deixa folga
 # para legenda+fonte (~1-1,5cm) dentro dos 24,7cm úteis.
-_FIGURA_LARGURA_MAX_CM = 15.0
+_FIGURA_LARGURA_MAX_CM = 15.0  # 2026-11-23: 13,5 encolhia demais o texto das capturas; 15,0 deixa a pág. 17 com meia página livre (a Figura 1 vai inteira para a seguinte)
 _FIGURA_ALTURA_MAX_CM = 19.0
 _FIGURA_ALTURA_PRIMEIRA_CM = 15.0
 
@@ -822,6 +843,11 @@ def inserir_figuras(doc) -> int:
     from docx.table import Table
     from docx.shared import Cm
 
+    # 2026-11-23: o apêndice de telas completas foi cortado na simplificação do
+    # TCC; sem a tabela 'Arquivo | Página' no markdown, não há capturas a inserir
+    # (e o resto do build segue). Se o apêndice voltar, a tabela volta a valer.
+    if _tabela_de_arquivos(doc.element.body, doc) is None:
+        return 0
     pasta = os.path.join(ROOT, "reports", "anexo_a")
     faltando = [f for f, _ in FIGURAS if not os.path.exists(os.path.join(pasta, f))]
     if faltando:

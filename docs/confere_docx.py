@@ -83,21 +83,50 @@ def main() -> None:
     problemas = []
     if sem_negrito:
         problemas.append(f"{len(sem_negrito)} título(s) de seção SEM negrito")
-    if len(titulos) < 40:
-        problemas.append(f"suspiciousamente poucos títulos ({len(titulos)})")
-    # 31 desde 2026-11-03: Yin (2018) saiu quando a leitura do livro mostrou
+    # 2026-11-23: o piso fixo de 40 títulos caiu junto com os 7 apêndices cortados na
+    # simplificação do TCC. O esperado agora vem do markdown (todo "##"/"###" antes das
+    # pendências, menos o RESUMO, que não é Heading no .docx) e a ESTRUTURA do modelo da
+    # banca é conferida pela ordem dos títulos de primeiro nível.
+    import re as _r0
+    _md0 = (Path(__file__).resolve().parent / "tcc2_texto.md").read_text(encoding="utf-8")
+    _md0 = _md0.split("## Pendências finais")[0]
+    _tit_md = [l for l in _md0.splitlines() if _r0.match(r"^#{2,3} ", l)]
+    _tit_md = [l for l in _tit_md if not l.startswith("## RESUMO")]
+    if len(titulos) != len(_tit_md):
+        problemas.append(f"títulos: o markdown tem {len(_tit_md)} e o .docx {len(titulos)}")
+    _ordem = ["INTRODUÇÃO", "FUNDAMENTAÇÃO TEÓRICA", "TRABALHOS RELACIONADOS", "METODOLOGIA",
+              "RESULTADOS E ANÁLISE", "CONCLUSÃO", "REFERÊNCIAS", "APÊNDICE"]
+    _h1 = [p.text.strip() for p in d.paragraphs
+           if (p.style.name or "").lower().startswith("heading 1") and p.text.strip()]
+    _vistos = []
+    for t in _h1:
+        for nome in _ordem:
+            if nome in t.upper():
+                _vistos.append(nome)
+                break
+    # sem repetição de apêndice na checagem de ordem: só o primeiro conta
+    _comp = []
+    for n in _vistos:
+        if not (_comp and _comp[-1] == n):
+            _comp.append(n)
+    if _comp != _ordem:
+        problemas.append(f"estrutura do modelo da banca fora de ordem: {_comp}")
+    else:
+        print("estrutura (modelo da banca) : " + " > ".join(_ordem))
+    # 30 desde 2026-11-23 (Hornik saiu na simplificação); 31 desde 2026-11-03: Yin (2018) saiu quando a leitura do livro mostrou
     # que o trabalho não é estudo de caso no sentido dele
-    if len(refs) != 31:
-        problemas.append(f"referências: esperado 31, achou {len(refs)}")
+    if len(refs) != 30:
+        problemas.append(f"referências: esperado 30, achou {len(refs)}")
     # Esperado vem do markdown, não de constante (2026-10-28): com quadros e
     # recortes entrando no corpo, o "6" fixo virou falso. Cada linha
     # "Quadro – Título" é um quadro; cada marcador "Figura – ... | x.png" é
-    # uma figura do corpo, e o Apêndice F traz mais 6 telas inteiras.
+    # uma figura do corpo, e, se existir o apêndice de telas completas, mais 6 telas inteiras.
     import re as _re
     md = (Path(__file__).resolve().parent / "tcc2_texto.md").read_text(encoding="utf-8")
     md = md.split("## Pendências finais")[0]  # log interno, não vai ao .docx
     exp_quad = len(_re.findall(r"(?m)^Quadro\s*[—–-]\s*\S", md))
-    exp_fig = len(_re.findall(r"(?m)^Figura\s*[—–-].*\|\s*\S+\.png\s*$", md)) + 6
+    exp_fig = len(_re.findall(r"(?m)^Figura\s*[—–-].*\|\s*\S+\.png\s*$", md)) + (
+        6 if "Telas completas da plataforma" in md else 0)  # 2026-11-23: Apêndice de telas cortado
     if len(leg_fig) != exp_fig:
         problemas.append(f"legendas de figura: esperado {exp_fig}, achou {len(leg_fig)}")
     if len(leg_quad) != exp_quad:
@@ -111,6 +140,37 @@ def main() -> None:
         problemas.append(f"tabelas: esperado {exp_quad}, achou {len(d.tables)}")
     if len(d.inline_shapes) != exp_fig:
         problemas.append(f"imagens: esperado {exp_fig}, achou {len(d.inline_shapes)}")
+
+    # 2026-11-23: as notas de rodapé 1 (aluno), 2 (orientador) e 3 (aviso da Riot) têm de
+    # estar nos parágrafos certos, cada chamada com sua nota e a marca no mesmo run da
+    # chamada (formato do próprio Word). Com a marca num run separado, o Word deslocava
+    # as chamadas 1 e 2 um parágrafo adiante e apagava a 3 ao regravar o arquivo, e outros
+    # leitores mostravam "1*" e uma marca "1" sem nota.
+    import re as _r1
+    import zipfile as _zf
+    _z = _zf.ZipFile(str(DOCX))
+    _fn = _z.read("word/footnotes.xml").decode("utf8")
+    _xml = _z.read("word/document.xml").decode("utf8")
+    _ids_nota = sorted(int(i) for i in _r1.findall(r'<w:footnote [^>]*w:id="(\d+)"', _fn) if int(i) > 0)
+    _ids_ref = sorted(int(i) for i in _r1.findall(r'<w:footnoteReference[^>]*w:id="(\d+)"', _xml))
+    if _ids_nota != _ids_ref:
+        problemas.append(f"notas de rodapé: chamadas {_ids_ref} e textos {_ids_nota} não casam")
+    _ancora = {}
+    for p in d.paragraphs:
+        for fid in _r1.findall(r'<w:footnoteReference[^>]*w:id="(\d+)"', p._p.xml):
+            _ancora[int(fid)] = p.text.strip()
+    if not _ancora.get(1, "").startswith("Guilherme") or not _ancora.get(2, "").startswith("Elvandi"):
+        problemas.append(f"notas de rodapé 1 e 2 fora dos nomes do aluno e do orientador: "
+                         f"{ {k: v[:25] for k, v in _ancora.items()} }")
+    _sem_marca_no_run = _r1.findall(r'<w:footnoteReference[^>]*/></w:r>', _xml)
+    if _sem_marca_no_run:
+        problemas.append(f"{len(_sem_marca_no_run)} chamada(s) de nota sem a marca no mesmo run")
+    if not problemas:
+        print(f"notas de rodapé              : chamadas {_ids_ref} ancoradas, cada uma com seu texto")
+    # texto alternativo nas figuras
+    _sem_alt = [i for i, s in enumerate(d.inline_shapes, 1) if not s._inline.docPr.get("descr")]
+    if _sem_alt:
+        problemas.append(f"figuras sem texto alternativo: {_sem_alt}")
 
     print()
     if problemas:

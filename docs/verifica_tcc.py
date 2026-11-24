@@ -555,7 +555,9 @@ def check_figuras_citadas(t: str) -> None:
     # + as 6 telas inteiras do Apêndice E (era Anexo A). O total vem do texto,
     # não de constante: um marcador novo entra na conta sozinho.
     n_texto = len(_re.findall(r"(?m)^Figura\s*[—–-].*\|\s*\S+\.png\s*$", t))
-    total = n_texto + 6
+    # 2026-11-23: o Apêndice de telas completas saiu na simplificação; as 6
+    # capturas só entram na conta se ele ainda existir no texto
+    total = n_texto + (6 if "Telas completas da plataforma" in t else 0)
     i = t.find("## REFERÊNCIAS")
     if i < 0:
         aviso("corpo nao localizado para conferir as figuras")
@@ -595,7 +597,8 @@ def check_fonte_figuras(t: str) -> None:
     fonte = " ".join(m.group(1).split())
 
     # O que o Anexo A afirma sobre a captura.
-    if not _re.search(r"altura\s*\n?\s*ajustada|altura ajustada", t):
+    tem_telas = "Telas completas da plataforma" in t
+    if tem_telas and not _re.search(r"altura\s*\n?\s*ajustada|altura ajustada", t):
         falha("Anexo A nao descreve a altura ajustada da captura")
     # A fonte nao pode declarar viewport fixa, que e o que a capture refaz.
     if _re.search(r"1440\s*[x×]\s*\d+", fonte):
@@ -608,16 +611,19 @@ def check_fonte_figuras(t: str) -> None:
     mi = _re.search(r"IMAGENS_COM_ARTE_RIOT\s*=\s*\((.*?)\)", fonte_py, _re.S)
     arquivos = set(_re.findall(r'"([\w]+\.png)"', mi.group(1))) if mi else set()
     esperado = {"01_inicio.png", "03_campeoes.png", "04_partida_detalhe.png", "05_competitivo.png"}
-    if arquivos != esperado:
+    if tem_telas and arquivos != esperado:
         falha(f"capturas do Apendice E com atribuicao da Riot: {sorted(arquivos)}, esperado {sorted(esperado)}")
-    h = t.split("## APÊNDICE H")[1].split("## APÊNDICE I")[0] if "## APÊNDICE H" in t else ""
+    # 2026-11-23: o aviso da Riot passou do Apêndice H para o Apêndice D
+    h = ""
+    if "## APÊNDICE D" in t:
+        h = t.split("## APÊNDICE D")[1].split("\n## ")[0]
     for termo in ("Community Dragon", "Data Dragon", "isn't endorsed", "não é endossado"):
         if termo == "isn't endorsed":
             continue  # a traducao e o que vai impresso; o original esta no endereco citado
         if termo not in h:
-            falha(f"Apendice H nao menciona {termo!r}: origem das imagens ou aviso da Riot ausente")
+            falha(f"Apendice D nao menciona {termo!r}: origem das imagens ou aviso da Riot ausente")
     if len(FALHAS) == n_falhas_antes:
-        print("  [OK] FONTE_IMAGENS nao contradiz o Anexo A; atribuicao da Riot nas 5 figuras e aviso no Apendice H")
+        print("  [OK] FONTE_IMAGENS nao contradiz o Anexo A; atribuicao da Riot e aviso no Apendice D")
 
 
 # Anglicismos de prosa. Termo tecnico legitimamente ingles (machine
@@ -788,10 +794,8 @@ def check_parecer(t: str) -> None:
         falha(f"vies: artefato ausente ou invalido: {exc}")
     try:
         cur = lê("curva_aprendizado.json")
-        for ponto in cur["curva_15min"]["pontos"]:
-            n_ = f"{ponto['treino']:,}".replace(",", ".")
-            if f"| {n_} | " + f"{ponto['auc_media']:.4f}".replace(".", ",") + " |" not in t:
-                falha(f"curva: a linha de {n_} partidas nao bate com o artefato")
+        # 2026-11-23: a tabela da curva de aprendizado saiu do Apêndice C (simplificação);
+        # a AUC nas mesmas partidas, que sustenta a ressalva da Seção 5.4, continua
         for c, r in cur["cortes"].items():
             if f"{r['mesmas_auc']:.4f}".replace(".", ",") not in t:
                 falha(f"curva: AUC nas mesmas partidas aos {c} min ausente do Apendice C")
@@ -1082,7 +1086,7 @@ def check_faixa_duracao(t: str) -> None:
     titulo_q = "Quadro \u2014 Vit\u00f3ria do azul por faixa de dura\u00e7\u00e3o total da partida"
     i_q = t.find(titulo_q)
     if i_q < 0:
-        falha("teste (ii): o quadro de detalhe das faixas nao foi encontrado")
+        pass  # 2026-11-23: o quadro de detalhe saiu do Apêndice D; a frase-síntese (b) basta
     else:
         pct_txt, n_txt = [], []
         fim_q = i_q
@@ -1314,8 +1318,10 @@ def check_benchmark_nlq(t: str) -> None:
     # servir de quitacao para o accuracy.
     cab = _re.search(r"(\d+)/(\d+)\s*=\s*(\d+)%", apendice)
     if not cab:
-        falha("Apêndice B: o texto não cita o accuracy no formato N/M = P% — "
-              "a checagem não tem contra o que conferir")
+        # 2026-11-23: o benchmark de 26 perguntas saiu do TCC (não é independente);
+        # a medida principal é o gabarito de 203, conferido por check_cego_nlq
+        print("  (benchmark de 26 perguntas fora do texto; gabarito de 203 conferido abaixo)")
+        check_cego_nlq(t)
         return
     acertos, total, pct = int(cab.group(1)), int(cab.group(2)), int(cab.group(3))
     # O bloco em que o numero esta. Pegar o primeiro bloco do apendice
@@ -1412,6 +1418,11 @@ def check_cego_nlq(t: str) -> None:
             return
     # o quadro por família soma o mesmo total do resumo
     linhas = [l for l in t.splitlines() if l.startswith("| ") and any(l.startswith(f"| {f} |") for f in g["por_familia"])]
+    if not linhas:
+        # 2026-11-23: o quadro por família saiu do Apêndice B (simplificação); o
+        # resumo (181/203, 166/187, 15/16) continua conferido contra o artefato
+        print(f"  [OK] gabarito automático: {g['certas']}/{g['executadas']}, respondíveis e recusas conferem com o artefato")
+        return
     soma = sum(int(l.split("|")[4]) for l in linhas)
     certas = sum(int(l.split("|")[3]) for l in linhas)
     if (soma, certas) != (g["executadas"], g["certas"]):
@@ -1508,122 +1519,59 @@ def check_precisao(t: str) -> None:
     def lê(nome):
         return _json.loads((RAIZ / "reports" / nome).read_text(encoding="utf-8"))
 
+    # 2026-11-23: os quadros dos experimentos (Apêndice K) e o Quadro 5 saíram do
+    # TCC na simplificação; os resultados completos ficam no repositório. O texto
+    # da Seção 5.4 cita três números, e cada um tem de sair do artefato: o maior
+    # ganho dos experimentos 1 a 10 e os ganhos de "tudo junto" (12 a 19) dentro
+    # do mesmo classificador.
     try:
-        # 2026-11-08 (parecer): ganho das variáveis dentro do mesmo classificador
         proprio = lê("ganho_variaveis_logit.json")["cortes"]
-        exp = lê("experimentos_precisao.json")
-        hist = lê("experimento_historico.json")
-        hold = lê("holdout_precisao.json")
+        ant = lê("experimentos_antigos.json")
     except Exception as exc:  # noqa: BLE001
         falha(f"precisao: artefato ausente ou invalido: {exc}")
         return
 
     def f(x, d=4, sinal=False):
-        s = f"{x:+.{d}f}" if sinal else f"{x:.{d}f}"
-        return s.replace("-", "−").replace(".", ",")
+        s_ = f"{x:+.{d}f}" if sinal else f"{x:.{d}f}"
+        return s_.replace("-", "−").replace(".", ",")
 
-    def ic(m, lo, hi):
-        return f"{f(m, 4, True)} ({f(lo, 4, True)} a {f(hi, 4, True)})"
+    def d_(corte, chave):
+        if chave == "tuning":
+            return ant[corte]["tuning_aninhado"]
+        if chave in ("sigmoide", "isotonica"):
+            return ant[corte]["calibracao"][chave]
+        return ant[corte][chave]["xgb_prod"]
 
-    i = t.find("Quadro — Experimentos 12 a 19")
-    j = t.find("Quadro — Variáveis novas em treino no passado")
-    if i < 0 or j < 0:
-        falha("precisao: os quadros do Apêndice J nao existem")
-        return
-    ganhos = [l for l in t[i:j].splitlines() if l.startswith("|") and "---" not in l][1:]
-    mapa = [("E12_trajetoria", "xgb_prod"), ("E13_funcao", "xgb_prod"), ("E14_objetivos", "xgb_prod"),
-            ("E15_rico", "xgb_prod"), ("E16_campeoes", "xgb_prod"), ("E17_jogadores", "xgb_prod"),
-            ("E18_tudo", "xgb_prod"), ("E18_tudo", "logit"), ("E18_tudo", "logit_proprio")]
-    if len(ganhos) != len(mapa) + 1:
-        falha(f"precisao: o quadro de ganhos tem {len(ganhos)} linhas e eram {len(mapa) + 1}")
-    for linha, (conj, mdl) in zip(ganhos, mapa):
-        c = [x.strip() for x in linha.strip("|").split("|")]
-        if mdl == "logit_proprio":
-            esp = [ic(proprio[corte]["logit"][conj]["ganho_auc"], proprio[corte]["logit"][conj]["ic_lo"],
-                      proprio[corte]["logit"][conj]["ic_hi"]) for corte in ("15", "25")]
-        else:
-            esp = [ic(exp[corte][conj][mdl]["delta_auc"], exp[corte][conj][mdl]["ic_lo"],
-                      exp[corte][conj][mdl]["ic_hi"]) for corte in ("15", "25")]
-        if c[2:4] != esp:
-            falha(f"precisao {conj}/{mdl}: quadro {c[2:4]} x artefato {esp}")
-    if len(ganhos) == len(mapa) + 1:
-        c = [x.strip() for x in ganhos[-1].strip("|").split("|")]
-        esp = [ic(*hist[corte]["5+"]["logit"]["dauc_ic"]) for corte in ("15", "25")]
-        if c[2:4] != esp:
-            falha(f"precisao experimento 19: quadro {c[2:4]} x artefato {esp}")
-
-    # experimentos 1 a 10, refeitos em 2026-11-04 (`experimentos_antigos.json`): o
-    # quadro do Apêndice J e o Quadro 5 do corpo saem do mesmo artefato
-    try:
-        ant = lê("experimentos_antigos.json")
-    except Exception as exc:  # noqa: BLE001
-        falha(f"precisao: experimentos_antigos.json ausente ou invalido: {exc}")
-        ant = None
-    ia = t.find("Quadro — Experimentos 1 a 10")
-    if ant is not None and (ia < 0 or ia > i):
-        falha("precisao: o quadro dos experimentos 1 a 10 nao existe antes do dos experimentos 12 a 19")
-    elif ant is not None:
-        def d_(corte, chave):
-            if chave == "tuning":
-                return ant[corte]["tuning_aninhado"]
-            if chave in ("sigmoide", "isotonica"):
-                return ant[corte]["calibracao"][chave]
-            return ant[corte][chave]["xgb_prod"]
-
-        chaves = ["A01_barao_arauto", "A02_dispersao", "tuning", "sigmoide", "isotonica", "A05_ouro_itens",
-                  "A06_ofensivas", "A06_defensivas", "A08_visao_ambas", "A09_dragoes_tipo", "A10_placas"]
-        linhas_a = [l for l in t[ia:i].splitlines() if l.startswith("|") and "---" not in l][1:]
-        # o experimento 11 saiu do quadro (2026-11-08, parecer): fica à parte no texto
-        if len(linhas_a) != len(chaves):
-            falha(f"precisao: o quadro dos experimentos 1 a 10 tem {len(linhas_a)} linhas e eram {len(chaves)}")
-        for linha, chave in zip(linhas_a, chaves):
-            c = [x.strip() for x in linha.strip("|").split("|")]
-            esp = [ic(d_(corte, chave)["delta_auc"], d_(corte, chave)["ic_lo"], d_(corte, chave)["ic_hi"])
-                   for corte in ("15", "25")]
-            if c[2:4] != esp:
-                falha(f"precisao antigos {chave}: quadro {c[2:4]} x artefato {esp}")
-        # Quadro 5 do corpo: o delta aos 15 e aos 25 minutos de cada linha
-        q5i = t.find("Quadro — Experimentos negativos de enriquecimento")
-        q5 = [l for l in t[q5i:q5i + 3000].splitlines() if l.startswith("|") and "---" not in l][1:11]
-        q5chaves = ["A01_barao_arauto", "A02_dispersao", "tuning", "sigmoide", "A05_ouro_itens", "A06_ofensivas",
-                    "A05_ouro_itens", "A08_visao_ambas", "A09_dragoes_tipo", "A10_placas"]
-        if len(q5) != 10:
-            falha(f"precisao: o Quadro 5 tem {len(q5)} linhas de experimento e eram 10")
-        for linha, chave in zip(q5, q5chaves):
-            c = [x.strip() for x in linha.strip("|").split("|")]
-            esp = f"{f(d_('15', chave)['delta_auc'], 4, True)} e {f(d_('25', chave)['delta_auc'], 4, True)}"
-            if c[2] != esp:
-                falha(f"precisao Quadro 5, experimento {c[0]}: {c[2]!r} x artefato {esp!r}")
-        maior_a = max(d_(c_, k)["delta_auc"] for c_ in ("15", "25") for k in chaves)
-        # a Seção 5.4 cita os dois ganhos máximos: o dos experimentos 1 a 10 e o de 12 a 19
-        pi = t.find("**Experimentos de enriquecimento.**")
-        par = t[pi:t.find("quase não muda o resultado.", pi)] if pi >= 0 else ""
-        if not par:
-            falha("precisao: o paragrafo 'Experimentos de enriquecimento' da Secao 5.4 nao existe")
-        else:
-            # 12 a 19: o ganho dentro do mesmo classificador (parecer, 2026-11-08)
-            for esperado, quem in ((f(maior_a, 4, True), "experimentos 1 a 10"),
-                                   (f(proprio["15"]["logit"]["E18_tudo"]["ganho_auc"], 4, True),
-                                    "experimentos 12 a 19, logistica contra ela mesma"),
-                                   (f(proprio["15"]["xgb_prod"]["E18_tudo"]["ganho_auc"], 4, True),
-                                    "experimentos 12 a 19, XGBoost contra ele mesmo")):
-                if esperado not in par:
-                    falha(f"precisao: a Secao 5.4 nao cita o maior ganho dos {quem} ({esperado})")
+    chaves = ["A01_barao_arauto", "A02_dispersao", "tuning", "sigmoide", "isotonica", "A05_ouro_itens",
+              "A06_ofensivas", "A06_defensivas", "A08_visao_ambas", "A09_dragoes_tipo", "A10_placas"]
+    maior_a = max(d_(c_, k)["delta_auc"] for c_ in ("15", "25") for k in chaves)
+    pi = t.find("**Experimentos de enriquecimento.**")
+    par = t[pi:t.find("\n\n", pi)] if pi >= 0 else ""
+    if not par:
+        falha("precisao: o paragrafo 'Experimentos de enriquecimento' da Secao 5.4 nao existe")
+    else:
+        for esperado, quem in ((f(maior_a, 4, True), "experimentos 1 a 10"),
+                               (f(proprio["15"]["logit"]["E18_tudo"]["ganho_auc"], 4, True),
+                                "experimentos 12 a 19, logistica contra ela mesma"),
+                               (f(proprio["15"]["xgb_prod"]["E18_tudo"]["ganho_auc"], 4, True),
+                                "experimentos 12 a 19, XGBoost contra ele mesmo")):
+            if esperado not in par:
+                falha(f"precisao: a Secao 5.4 nao cita o maior ganho dos {quem} ({esperado})")
+    # o texto tambem cita os mesmos ganhos na Secao 6.1 (validade de construto)
+    for esperado in (f(proprio["15"]["logit"]["E18_tudo"]["ganho_auc"], 4, True),
+                     f(proprio["15"]["xgb_prod"]["E18_tudo"]["ganho_auc"], 4, True)):
+        if esperado not in t.split("### 6.1")[1].split("### 6.2")[0]:
+            falha(f"precisao: a Secao 6.1 nao cita o ganho {esperado} do artefato")
 
     # Seção 5.4: a frase sobre a regressão logística sai de `baseline_e_diferencas.json`
-    # (logística à frente do XGBoost por milésimos; o intervalo exclui zero em alguns cortes)
     try:
         base = lê("baseline_e_diferencas.json")["resultados"]
         dif = "XGBoost - Regressão logística"
         d15 = base["15"]["diferencas"][dif]["auc"]
-        exclui = [c for c in ("10", "15", "20", "25")
-                  if base[c]["diferencas"][dif]["auc"][2] < 0 or base[c]["diferencas"][dif]["auc"][1] > 0]
-        lista = ", ".join(exclui[:-1]) + " e " + exclui[-1] if len(exclui) > 1 else "".join(exclui)
-        # 2026-11-08: a logística virou linha do Quadro 3 (comparação após o ajuste)
         esperado = [
             f"| Regressão logística (sem hiperparâmetro ajustado) | "
             f"{f(base['15']['modelos']['Regressão logística']['acuracia'])} |",
-            f"por {f(-d15[0])} de AUC-ROC aos 15 minutos (o intervalo exclui zero aos {lista};",
+            f"por {f(-d15[0])} de AUC-ROC aos 15 minutos",
         ]
         flat = " ".join(t.split())
         for e_ in esperado:
@@ -1632,32 +1580,8 @@ def check_precisao(t: str) -> None:
     except Exception as exc:  # noqa: BLE001
         falha(f"precisao: baseline_e_diferencas.json ausente ou invalido: {exc}")
 
-    rot = {"Cronológica 80/20": "cronologica", "Por *patch*": "por_patch", "Aleatória 80/20": "aleatoria"}
-    linhas = [l for l in t[j:j + 3000].splitlines() if l.startswith("|") and "---" not in l][1:]
-    if len(linhas) != 6:
-        falha(f"precisao: o quadro de treino no futuro tem {len(linhas)} linhas e eram 6")
-    for linha in linhas:
-        c = [x.strip() for x in linha.strip("|").split("|")]
-        corte, div = c[0].split()[0], rot.get(c[1])
-        if div is None:
-            falha(f"precisao: divisao desconhecida {c[1]!r}")
-            continue
-        d = hold["cortes"][corte][div]
-        esp = [f(d["base"]["xgb_prod"]["auc"]), f(d["E18_tudo"]["logit"]["auc"]),
-               ic(*d["E18_tudo"]["logit"]["dauc_vs_base_xgb"])]
-        if c[2:] != esp:
-            falha(f"precisao {corte} min {c[1]}: quadro {c[2:]} x artefato {esp}")
-
-    # o texto do apêndice cita o maior ganho: não pode ser maior que o medido
-    maior = max(r["delta_auc"] for c in ("15", "25") for s in exp[c].values() for r in s.values()
-                if "delta_auc" in r and r["n_vars"] > 5 and s is not exp[c].get("pre_jogo"))
-    cita15 = f(exp["15"]["E18_tudo"]["logit"]["delta_auc"], 4, True)
-    if cita15 not in t[i: i + 6000]:
-        falha(f"precisao: o maior ganho aos 15 min e {cita15} e o texto nao o cita")
-    if "+0,008" in t and maior < 0.0075:
-        falha(f"precisao: o texto cita +0,008 mas o maior ganho medido e {f(maior, 4, True)}")
     if not any(x.startswith("precisao") for x in FALHAS):
-        print(f"  precisao: {len(ganhos)} + {len(linhas)} + {len(chaves) if ant else 0} (experimentos 1 a 10) + 10 (Quadro 5) linhas conferem; maior ganho {f(maior, 4, True)}")
+        print(f"  precisao: ganhos citados na 5.4 e na 6.1 conferem (maior dos experimentos 1 a 10: {f(maior_a, 4, True)})")
 
 
 def check_coach(t: str) -> None:
@@ -1728,7 +1652,9 @@ def check_coach(t: str) -> None:
         if k in achado and achado[k] != v:
             falha(f"coach: '{k}': quadro {achado[k]!r} x artefato {v!r}")
     plano = " ".join(t.split())
-    if f"Em {r['casos']} respostas auditadas" not in plano:
+    # 2026-11-23: o resultado da auditoria saiu da 4.7 (Metodologia) e ficou no Apêndice B e na
+    # 5.7; a 4.7 só diz que a auditoria foi feita em N respostas, e N sai do artefato
+    if f"feita em {r['casos']} respostas" not in plano:
         falha(f"coach: a Secao 4.7 nao cita as {r['casos']} respostas auditadas")
     if inventadas and "nenhum número estatístico estava fora dos dados fornecidos" in plano:
         falha(f"coach: a Secao 4.7 diz que nenhum numero estava fora dos dados e a revisao tem {inventadas} invencoes")
@@ -1751,32 +1677,16 @@ FIGURAS_DEPENDENCIAS: dict[str, list[str]] = {
     "reports/figuras_texto/fig_simulador_estado.png": [
         "frontend/src/pages/Predict.tsx", "frontend/src/pages/Simulador.tsx",
         "src/api/main.py", "data/model.joblib", "data/models_phases.joblib"],
-    "reports/figuras_texto/fig_nlq.png": [
-        "frontend/src/pages/Nlq.tsx", "src/nlq/nl_to_sql.py", "src/api/main.py"],
     "reports/figuras_texto/fig_calibracao.png": [
         "docs/calibracao_empate_real.py", "reports/calibracao_empate_real.json",
         "data/features_phases.csv"],
-    "reports/anexo_a/01_inicio.png": [
-        "frontend/src/pages/Home.tsx", "src/api/main.py"],
-    "reports/anexo_a/02_dashboard.png": [
-        "frontend/src/pages/Dashboard.tsx", "src/api/main.py"],
-    "reports/anexo_a/03_campeoes.png": [
-        "frontend/src/pages/Champions.tsx", "src/api/main.py"],
-    "reports/anexo_a/04_partida_detalhe.png": [
-        "frontend/src/pages/MatchDetail.tsx", "src/api/main.py"],
-    "reports/anexo_a/05_competitivo.png": [
-        "frontend/src/pages/Competitivo.tsx", "src/api/main.py"],
-    "reports/anexo_a/06_simulador.png": [
-        "frontend/src/pages/Predict.tsx", "frontend/src/pages/Simulador.tsx",
-        "src/api/main.py", "data/model.joblib", "data/models_phases.joblib"],
+    # 2026-11-23: as 6 telas completas (reports/anexo_a) saíram do TCC na simplificação
 }
 # Defasagem conhecida e aceita: vira aviso, não falha. Cada entrada diz por
 # que não foi recapturada; quando a figura for refeita, a checagem pede para
 # tirar a exceção.
 FIGURAS_EXCECOES: dict[str, str] = {
-    "reports/figuras_texto/fig_nlq.png":
-        "recaptura exige crédito da API da Anthropic (2026-11-08); a consulta "
-        "não usa o modelo e o vazamento não a afeta",
+    # 2026-11-23: a única exceção (fig_nlq.png, defasada) saiu com a figura, cortada na simplificação
 }
 # Script que grava o JSON e a figura na mesma execução deixa os dois no
 # mesmo segundo, em qualquer ordem.

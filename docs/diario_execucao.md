@@ -5261,3 +5261,13 @@ Afirmações do TCC conferidas contra o código, o banco, os 13 CSVs de
 **Números corretos** (linha do time, `docs/confere_conversao_advantagem.py` corrigido): +2.000 a +4.000, profissional 83,6% (n = 14.617) contra solo queue 74,1% (n = 5.366), 9,5 pp, z = 15,2; +4.000 a +6.000, 94,0% (n = 5.842) contra 86,3% (n = 3.497), 7,7 pp, z = 12,7. A conclusão qualitativa se mantém (o profissional converte mais a vantagem), e a faixa de +4.000 a +6.000 deixa de ser "apenas indicativa".
 
 **O que mudou.** Script (linha do time e aviso de n pequeno só quando houver); `docs/tcc2_texto.md` (Seção 5.3 e linha do Quadro 19 do Apêndice D); `docs/handoff.md`, `docs/scripts.md`, `docs/inventario_figuras.md`, `docs/guia_banca.md`. O `.docx` precisa ser regenerado para refletir o texto.
+
+## 2026-11-23 — TCC simplificado (64 para 39 páginas) e validação do orientador
+
+**O que mudou.** Onze apêndices viraram quatro (A banco, B consulta em linguagem natural e coach, C métricas e calibração, D aviso da Riot); o benchmark de 26 perguntas, o Quadro 5 dos experimentos e o Apêndice K saíram do texto (os resultados continuam em `reports/` e `src/models/`); 19 experimentos aparecem em um parágrafo da Seção 5.4 (maior ganho +0,0044 no XGBoost e +0,0073 na regressão logística). A estrutura de seções do corpo ficou idêntica (34 títulos numerados de 1 a 6.2). Texto anterior: `git show f2ecb39:docs/tcc2_texto.md`.
+
+**Medidas.** Documento de 39 páginas; do Resumo ao fim das Referências, 28 (faixa 25 a 30); só o texto, da Introdução ao fim da 6.2, cerca de 24; apêndices, cerca de 9. Nos 10 TCC II aprovados, o mesmo intervalo (Resumo ao fim das Referências) fecha em 30 páginas em 7 casos, e só o texto varia de 22 a 28.
+
+**Auditoria externa e correções.** Referência errada na 5.4 ("Apêndice B" para os experimentos), guia da banca com 171 perguntas e não 172, notas de rodapé 1, 2 e 3 (a marca ficava num run separado da chamada e o Word deslocava as chamadas e apagava a 3; corrigido em `_ref_rodape`, `confere_docx.py` agora confere), texto alternativo nas 5 figuras, afirmações suavizadas (5.3, 5.4, 6.1, Apêndice C) e revisão de escrita (itens A1 a A25 e B1 a B7). `verifica_tcc.py`, `confere_docx.py`, `confere_quadros.py` e `build_tcc_docx.py` foram adaptados; nenhuma checagem de número foi removida.
+
+**Validação do orientador (23/11/2026).** Perguntado se as 25 a 30 páginas contam do Resumo ao fim das Referências ou só o texto, o orientador respondeu que o trabalho está correto como está (28 páginas do Resumo ao fim das Referências). Não é preciso acrescentar texto para alcançar 25 páginas só de texto.

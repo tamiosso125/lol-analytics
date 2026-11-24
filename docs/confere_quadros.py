@@ -39,6 +39,26 @@ for _s in (sys.stdout, sys.stderr):
         pass
 
 REP = RAIZ / "reports"
+
+# 2026-11-23: o TCC foi simplificado (apêndices D, E, G, I, J, K e parte de B, C, F, H
+# cortados) e os quadros foram renumerados. Os conferidores abaixo continuam
+# indexados pelo número da numeração ANTERIOR; este mapa liga o TÍTULO de cada quadro
+# que sobrou a esse número, para que a conferência não dependa da posição. O que
+# não está aqui não existe mais no TCC e não é conferido (os artefatos seguem em reports/).
+MAPA_ANTIGO: dict[str, int] = {
+    "Tabelas do banco de dados e o que cada uma guarda": 1,
+    "Vitória do time vermelho por região": 2,
+    "Comparação entre modelos após o ajuste (corte de 15 minutos)": 3,
+    "Desempenho do XGBoost por corte temporal": 4,
+    "Esquema relacional do banco de dados": 6,
+    "Auditoria de fundamentação do coach (36 respostas)": 10,
+    "Métricas completas por corte temporal, comparação entre os três modelos": 11,
+    "Configuração dos três modelos comparados": 12,
+    "Treino no passado e teste no futuro, XGBoost": 15,
+    "AUC-ROC do XGBoost por corte, nas partidas elegíveis e nas mesmas partidas": 17,
+    "Calibração do XGBoost nas partidas empatadas, com probabilidades fora da dobra": 23,
+}
+NOVO: dict[int, int] = {}  # número antigo -> número atual no docx
 MENOS = "−"
 
 
@@ -66,7 +86,12 @@ def ler_quadros() -> dict[int, tuple[str, list[list[str]]]]:
                 ultimo = (int(m[1]), m[2])
         elif el.tag.endswith("}tbl") and ultimo:
             linhas = [[c.text.strip() for c in r.cells] for r in Table(el, d).rows]
-            quadros[ultimo[0]] = (ultimo[1], linhas)
+            antigo = MAPA_ANTIGO.get(ultimo[1])
+            if antigo is None:
+                print(f"  AVISO: quadro '{ultimo[1][:60]}' (hoje Quadro {ultimo[0]}) sem conferidor no mapa")
+                antigo = 1000 + ultimo[0]
+            NOVO[antigo] = ultimo[0]
+            quadros[antigo] = (ultimo[1], linhas)
             ultimo = None
     return quadros
 
@@ -383,7 +408,9 @@ def q2_21_26(q):
             n, red = banco_reg[reg]
             cmp(2, f"{reg} n", r[1], milhar(n))
             cmp(2, f"{reg} vermelho", r[2].split()[0], f(float(red), 1) + "%")
-        # Quadro 21
+        # Quadro 21 (série anual do profissional: saiu do TCC em 2026-11-23)
+        if 21 not in q:
+            return
         cur.execute("""select year, count(distinct game_id), round(100.0*avg(win::int),1)
                        from pro_games where side='Blue' group by 1 order by 1""")
         anos = {int(a): (n, p) for a, n, p in cur.fetchall()}
@@ -531,25 +558,29 @@ def main() -> int:
     print(f"{len(q)} quadros lidos do docx")
     for n, fn in ((3, q3), (4, q4), (5, q5), (6, q6), (8, q8), (9, q9), (10, q10), (12, q12), (11, q11), (13, q13), (14, q14), (15, q15), (16, q16), (17, q17),
                   (20, q20), (23, q23), (24, q24), (29, q29), (30, q30), (31, q31), (32, q32)):
+        if n not in q:
+            continue  # quadro cortado na simplificação de 2026-11-23
         try:
             fn(q[n][1])
         except Exception as e:  # noqa: BLE001
             CONT.setdefault(n, [0, 0]); CONT[n][1] += 1
             RES.setdefault(n, []).append(f"erro ao conferir: {type(e).__name__}: {e}")
     try:
-        q18_26(q)
-        q2_21_26(q)
+        if 18 in q and 26 in q:
+            q18_26(q)
+        if 2 in q:
+            q2_21_26(q)
     except Exception as e:  # noqa: BLE001
         print("  banco: erro", type(e).__name__, e)
     print(f"\n{'Quadro':>7} {'células':>8} {'divergem':>9}  título")
-    for n in sorted(q):
+    for n in sorted(q, key=lambda k: NOVO.get(k, k)):
         c = CONT.get(n)
         t = q[n][0][:70]
-        print(f"{n:>7} {('—' if not c else c[0]):>8} {('—' if not c else c[1]):>9}  {t}")
+        print(f"{NOVO.get(n, n):>7} {('—' if not c else c[0]):>8} {('—' if not c else c[1]):>9}  {t}")
     falhas = sum(v[1] for v in CONT.values())
     print(f"\nTotal: {sum(v[0] for v in CONT.values())} células conferidas, {falhas} divergência(s)")
     for n in sorted(RES):
-        print(f"\nQuadro {n}:")
+        print(f"\nQuadro {NOVO.get(n, n)} (numeração anterior: {n}):")
         for m in RES[n][:15]:
             print("  -", m)
         if len(RES[n]) > 15:

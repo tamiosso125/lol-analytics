@@ -429,7 +429,7 @@ $env:TCC1_REFERENCE_DOCX = 'C:\Users\Home\Downloads\TCC\TCC_Final.docx'
 
 # 1. markdown -> .docx (pandoc gera o corpo; python-docx monta capa,
 #    folha de rosto, numeração de Quadros e Figuras, insere as 5 figuras
-#    do corpo e as 6 telas do Apêndice E)
+#    do corpo; o apêndice de telas completas saiu em 2026-11-23)
 .\.venv\Scripts\python.exe docs\build_tcc_docx.py
 
 # 2. o Word preenche a numeração dos campos SEQ e PAGE (não há sumário nem
