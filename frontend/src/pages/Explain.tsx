@@ -229,7 +229,7 @@ export function ExplainPanel() {
           </CardHeader>
           <CardContent>
             {/* 2026-11-08: a imagem antiga (calibration_curve.png, de 04/10) era da base
-                anterior e in-sample; esta é a Figura 12 do TCC, gerada por
+                anterior e in-sample; esta é a Figura 5 do TCC (antes Figura 12), gerada por
                 docs/calibracao_empate_real.py com as probabilidades fora da dobra */}
             <img
               src={api.reportImage("figuras_texto/fig_calibracao.png")}

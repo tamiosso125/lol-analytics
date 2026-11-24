@@ -15,9 +15,15 @@
     "recapturada_em": "2026-11-05T14:51:36",
     "observacao": "tela com roteamento por base (selo Solo queue); as outras figuras não foram recapturadas"
   },
-  "capturado_em": "2026-11-08T20:11:12",
+  "capturado_em": "2026-11-24T14:29:17",
   "base_partidas_fila_420": 41063,
   "recapturadas_em_2026-11-08": [
     "shap"
+  ],
+  "recapturadas_em_2026-11-24": [
+    "competitivo",
+    "partida",
+    "shap",
+    "simulador"
   ]
 }
