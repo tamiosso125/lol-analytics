@@ -74,6 +74,24 @@ ALVOS += [(str(p.relative_to(RAIZ)).replace("\\", "/"), ())
 PRINCIPAIS_EXTRA = ("0,7641", "0,8487", "0,0429")
 SUFIXOS_TEXTO = {".html", ".htm", ".md", ".js", ".jsx", ".ts", ".tsx", ".json", ".txt"}
 
+# ESTRUTURA do TCC final (2026-11-24): o TCC de 39 páginas tem apêndices A a D,
+# quadros 1 a 10 e figuras 1 a 5. Material que cita fora disso só passa se disser
+# que é o TCC antigo/fora do TCC. Não pega "Quadro 1 a 4" com o sentido antigo
+# (a numeração foi deslocada); isso só a leitura confere. O benchmark de 26
+# não entra aqui: continua no repositório (README, comandos) de propósito.
+ESTRUTURA_ANTIGA = [
+    (r"\bAp[êe]ndices? [E-K]\b", "apêndice E a K (o TCC final tem A a D)"),
+    (r"\bQuadros? (?:1[1-9]|[2-9]\d)\b", "quadro 11 ou maior (o TCC final tem 10)"),
+    (r"\bFiguras? (?:[6-9]|1\d)\b", "figura 6 ou maior (o TCC final tem 5)"),
+    (r"\bHornik\b", "Hornik (saiu das Referências)"),
+    (r"\b248 palavras", "Resumo de 248 palavras (hoje 238)"),
+]
+# scripts.md e comandos.md documentam cada script pelo apêndice ANTIGO que ele
+# alimentava (o código segue no repositório); citar "Apêndice K" ali é correto.
+SEM_ESTRUTURA = {"docs/scripts.md", "docs/comandos.md", "frontend/src/pages/Explain.tsx"}  # Explain: "Figura 12" é o nome do PNG gerado; trocar o texto exige recapturar fig_shap_fases.png (verifica_tcc, frescor)
+MARCADOR_FORA = re.compile(r"antig|fora d[oa]s? (?:TCC|Refer)|saiu|sa[íi]ram|n[ãa]o est[áa] no TCC|só no reposit[óo]rio|"
+                           r"cortad|histórico|TCC de 64|64 p[áa]g", re.I)
+
 FALHAS: list[str] = []
 
 
@@ -131,7 +149,14 @@ def conferir(rotulo: str, caminho: Path, principais: tuple[str, ...]) -> None:
                 linha = texto[: m.start()].count("\n") + 1
                 FALHAS.append(f"{rotulo} [{local}:{linha}] {porque}")
                 achados += 1
-    tudo = "\n".join(t for _, t in partes)
+        for padrao, porque in ([] if rotulo in SEM_ESTRUTURA else ESTRUTURA_ANTIGA):
+            for m in re.finditer(padrao, texto):
+                if MARCADOR_FORA.search(texto[max(0, m.start() - 45): m.end() + 90]):
+                    continue
+                linha = texto[: m.start()].count("\n") + 1
+                FALHAS.append(f"{rotulo} [{local}:{linha}] estrutura antiga: {porque}")
+                achados += 1
+    tudo ="\n".join(t for _, t in partes)
     faltam = [n for n in principais if n not in tudo]
     for n in faltam:
         FALHAS.append(f"{rotulo}: número principal de hoje ausente: {n}")

@@ -1,2435 +1,1463 @@
-﻿# Guia de estudo para a banca — Bellestraiko (TCC II)
+# Perguntas possíveis da banca, por seção do TCC (Bellestraiko)
 
-> Para que serve: entender o projeto inteiro, do porquê de cada decisão até
-> de onde veio cada número, para conseguir responder qualquer pergunta da
-> banca com segurança. Linguagem simples, exemplos reais do próprio projeto.
->
-> Regra de ouro deste guia: **todo número aqui vem do texto final do TCC
-> (`docs/tcc2_texto.md`) ou de um artefato real em `reports/`.** Se a banca
-> perguntar "de onde saiu isso?", sempre existe um arquivo que prova.
->
-> Como estudar: leia a Parte 1 primeiro (o projeto em 5 minutos). Depois vá
-> nas partes que você sente mais fraco. A Parte 15 (perguntas prováveis da
-> banca) é para treinar em voz alta.
+> Versão 2, gerada em 2026-11-23 após a simplificação do TCC (corpo de 28 páginas; 4 apêndices). Quadros e figuras seguem a **nova numeração**. Cada pergunta traz a **Resposta** (fiel ao texto do TCC), **Onde achar no TCC** e **Explicando fácil** (palavras simples e exemplos de jogos).
 
----
+Observações: onde o TCC não responde, a pergunta diz isso e a sugestão é leitura minha (inferência). Números conferidos contra docs/tcc2_texto.md e reports/. Objetivos a–g: a mapear a Riot API (5.1); b informações para base estruturada (5.2); c coleta, tratamento e organização (5.2); d técnicas de análise para padrões (5.3); e comparar XGBoost, Random Forest e redes neurais (5.4); f dashboards (5.5); g interface em linguagem natural (5.6).
 
-## Sumário
+## Índice
 
-1. O projeto em 5 minutos
-2. League of Legends para quem nunca jogou (você vai precisar explicar)
-3. O problema, a pergunta de pesquisa e os objetivos
-4. Metodologia de pesquisa e pesquisa bibliográfica
-5. Os trabalhos relacionados (os 11 estudos), como foram escolhidos, e as obras de método
-6. Os dados: de onde vieram e como foram coletados
-7. O banco de dados e o tratamento (ETL)
-8. As *features*: o que o modelo enxerga
-9. Os três modelos: Random Forest, XGBoost e MLP
-10. Como os modelos foram avaliados (métricas)
-11. Explicabilidade: SHAP
-12. Os experimentos que não funcionaram (e por que isso é bom)
-13. A análise exploratória: o viés de lado
-14. A interface em linguagem natural (text-to-SQL)
-15. Perguntas prováveis da banca, com respostas
-16. A plataforma (o sistema que foi entregue)
-17. Testes e verificações de qualidade
-18. Limitações e trabalhos futuros
-19. Histórias reais de erros encontrados e corrigidos
-20. Sobre o uso de IA no trabalho
-21. Folha de cola: os números para decorar
+1. Resumo (9)
+2. 1 Introdução (10)
+3. 2 Fundamentação teórica (14)
+4. 3 Trabalhos relacionados (11)
+5. 4.1 a 4.2 Natureza, abordagem e estratégias (6)
+6. 4.3 Coleta de dados (8)
+7. 4.4 Organização e tratamento (5)
+8. 4.5 Análise exploratória e testes de robustez (7)
+9. 4.6 Modelagem preditiva (15)
+10. 4.7 e 4.8 Interface, coach e materiais (10)
+11. 5.1 e 5.2 Mapeamento e base de dados (6)
+12. 5.3 Análise exploratória: resultados (11)
+13. 5.4 Modelagem: resultados (13)
+14. 5.5, 5.6 e 5.7 Dashboards, linguagem natural e literatura (11)
+15. 6 Conclusão, limitações e trabalhos futuros (11)
+16. Apêndices e itens cortados (10)
+17. Perguntas transversais (cruzam várias seções) (14)
 
 ---
 
-## 1. O projeto em 5 minutos
+## Resumo
 
-**O Resumo do TCC (versão de 2026-11-02) segue a ordem contexto,
-objetivo, metodologia, resultados e conclusão.** Use a mesma ordem no
-pitch: (1) esports geram muitos dados, mas explorar exige ferramentas
-fragmentadas e conhecimento técnico; (2) desenvolvi uma plataforma que
-junta coleta, predição, explicação, visualização e consulta em português;
-(3) pesquisa aplicada, mista, sobre 41.063 partidas e 99.259 jogos
-profissionais, com três modelos comparados por validação cruzada
-estratificada; (4) empate técnico entre os três, XGBoost adotado com 76% e
-AUC de 0,85 aos 15 minutos, viés do vermelho que se inverte no
-profissional, 89,2% de acerto (181 de 203) no gabarito automático da consulta em português; (5) dá para integrar tudo numa
-solução só.
+### 1. Em uma frase, o que o seu trabalho fez?
 
-**Em uma frase:** foi construída uma plataforma (chamada **Bellestraiko**)
-que coleta dados reais de partidas de *League of Legends*, organiza tudo
-num banco de dados, usa *machine learning* para estimar quem vai vencer uma
-partida olhando o estado do jogo num minuto específico, explica o porquê da
-previsão, e deixa o usuário fazer perguntas em português sobre os dados.
+**Resposta:** Desenvolveu uma plataforma que integra coleta de dados, modelos de previsão, explicação, visualização e consulta em português para League of Legends.
 
-**O problema:** existem muitos dados de partidas de esports, mas explorar
-esses dados normalmente exige saber programar, saber SQL, juntar
-ferramentas separadas. Quem não é técnico fica de fora.
+**Onde achar no TCC:** Resumo; Seção 1 (objetivo geral).
 
-**A solução:** uma plataforma só que junta seis coisas:
-coleta → organização → modelagem preditiva → explicabilidade →
-visualização (*dashboards*) → consulta em linguagem natural.
+**Explicando fácil:** Pense num ‘painel de treinador’ de LoL num lugar só. Antes, para saber quem estava ganhando, você precisava baixar dados, rodar scripts e escrever consultas técnicas. Aqui, uma única plataforma coleta as partidas, prevê quem vence, mostra por que previu, desenha gráficos e deixa você perguntar em português, como num chat. O trabalho prova que dá para juntar tudo isso, e mede o quanto cada parte funciona.
 
-**Os resultados principais (decore estes):**
+### 2. Por que essas 41.063 partidas e 99.259 jogos profissionais? Para que cada base serve?
 
-| O quê | Número |
-|---|---|
-| Partidas ranqueadas coletadas (solo queue) | **41.063** (5 regiões) |
-| Partidas profissionais incorporadas | **99.259** (2014-2026) |
-| Modelo adotado (os três ficaram a menos de 0,002) | **XGBoost** |
-| Acurácia aos 15 minutos | **0,7641** (≈ 76 de cada 100 partidas certas) |
-| AUC-ROC aos 15 minutos | **0,8487** |
-| Viés de lado no solo queue | vermelho vence mais (56,3% na BR1) |
-| Viés de lado no profissional | **inverte**: azul vence 53,2% |
-| Interface em linguagem natural | **89,2%** (181 de 203) no gabarito automático, comparado por código; 26 de 26 no *benchmark* de referência, que não é independente |
-| Páginas de visualização | 6 |
+**Resposta:** As 41.063 partidas ranqueadas de elo alto sustentam a modelagem; os 99.259 jogos profissionais servem para comparar os dois contextos.
 
-**O achado mais interessante** (e que não era o objetivo inicial): no
-*solo queue* de elo altíssimo, o time **vermelho** vence mais vezes que o
-azul. No cenário profissional acontece o **contrário**: o azul vence mais.
-A mesma métrica, em dois contextos, dá sinais opostos.
+**Onde achar no TCC:** Resumo; Seção 4.3; Seção 5.2.
 
----
+**Explicando fácil:** São duas fontes com funções diferentes, como treinar numa fila ranqueada e comparar com um campeonato mundial. As partidas ranqueadas (Desafiante a Mestre, vindas da API da Riot) têm a linha do tempo minuto a minuto, que é o que o modelo precisa para prever. Os jogos profissionais (arquivos do Oracle’s Elixir) não treinam o modelo: servem para perguntar ‘o que muda quando o jogo é profissional?’, por exemplo se o lado azul ganha mais ou menos.
 
-## 2. League of Legends para quem nunca jogou
+### 3. Por que a AUC-ROC foi apresentada junto com a acurácia?
 
-A banca pode não conhecer o jogo. Você precisa explicar o básico em
-poucas frases, sem jargão.
+**Resposta:** A acurácia depende de um limiar e da taxa-base; a AUC-ROC mede a discriminação em todos os limiares. As duas são reportadas juntas.
 
-**O jogo:** duas equipes de 5 jogadores (time **azul** e time
-**vermelho**) num mapa. Cada lado tem uma base. Ganha quem destruir a
-base do outro. Uma partida dura em média uns 26 minutos.
+**Onde achar no TCC:** Seção 2.3; Seção 5.4 (Quadro 2).
 
-**Termos que aparecem no TCC:**
+**Explicando fácil:** Se o azul perde 53% das partidas, um modelo que sempre diz ‘vermelho vence’ já acerta 53%, sem entender nada. Isso é como acertar um quiz chutando sempre a mesma letra. A AUC-ROC não cai nesse truque: ela pergunta ‘o modelo dá nota maior às partidas que o azul ganhou do que às que ele perdeu?’. 0,5 é chute, 1,0 é perfeito. Aqui, 0,8487 aos 15 minutos.
 
-| Termo | O que é, em palavras simples |
-|---|---|
-| **Campeão** | O personagem que cada jogador controla. Há mais de 160. |
-| **Ouro (*gold*)** | Dinheiro do jogo. Ganha matando inimigos e "minions". Compra itens que deixam o campeão mais forte. |
-| **Experiência (XP)** | Sobe o nível do campeão, deixando-o mais forte. |
-| **Abate (*kill*)** | Matar um campeão inimigo. Dá ouro. |
-| **Torre** | Estruturas de defesa no caminho até a base. Destruir torres abre o mapa. |
-| **Placa de torre** | "Pedaços" da torre que dão ouro extra. Caem (somem) aos 14 minutos. |
-| **Dragão / Barão / Arauto** | Monstros neutros que dão bônus a quem matar. |
-| **Minion / onda (*wave*)** | Soldadinhos que andam sozinhos pelas rotas. A posição das ondas importa muito para jogadores experientes, mas a Riot **não grava** isso. |
-| ***Solo queue*** | A fila ranqueada: jogadores entram sozinhos (ou em dupla) e o jogo monta times com desconhecidos. Fila 420 na API. |
-| **Elo** | O nível/ranking do jogador. Do mais baixo ao mais alto: Ferro... até Mestre, **Grão-Mestre** e **Desafiante** (os topos). |
-| **Elo alto** | Neste TCC: Desafiante e Grão-Mestre, o topo do topo de cada região. Escolhido **por escopo** (confirmado por você em 2026-11-02): ver Parte 6.1. |
-| ***Draft* / seleção de campeões** | A fase antes do jogo em que cada time escolhe e bane campeões, alternadamente. |
-| ***Counter-pick*** | Escolher um campeão que é forte contra o que o inimigo já escolheu. Quem escolhe por último tem essa vantagem. |
-| ***Patch*** | Atualização do jogo que muda o balanceamento (ex.: 16.13). |
-| **Região** | Servidor: BR1 (Brasil), EUW1 (Europa Oeste), KR (Coreia), NA1 (América do Norte), EUN1 (Europa Nórdica e Leste). |
+### 4. Os modelos empataram. Isso não invalida a comparação?
 
-**Exemplo para explicar a predição:** "Imagine que você está assistindo
-um jogo de futebol aos 60 minutos e o placar está 2 a 0. Você não sabe
-quem vai ganhar, mas consegue chutar com boa chance. O nosso modelo faz
-isso com *League of Legends*: olha o 'placar' aos 15 minutos (ouro,
-experiência, abates, torres, dragões) e estima a chance de cada time
-vencer."
+**Resposta:** Não. Após o ajuste, os quatro ficam a 0,0015 de AUC-ROC uns dos outros: os resultados sugerem que, com as cinco variáveis e o protocolo usados, maior complexidade do classificador não trouxe ganho relevante.
+
+**Onde achar no TCC:** Resumo; Seção 5.4.
+
+**Explicando fácil:** É um resultado, e não uma falha. Imagine dar a três chefs diferentes os mesmos 5 ingredientes: se o prato sai igual, é um indício de que o limite está nos ingredientes, e não na técnica. Aqui os ‘ingredientes’ são 5 números (ouro, XP, abates, torres, dragões). Um modelo simples e um complexo extraem praticamente a mesma coisa deles. Por isso o trabalho lê o gargalo como a informação disponível, sem afirmar que outra arquitetura jamais ganharia.
+
+### 5. Por que o XGBoost foi mantido se a regressão logística foi um pouco melhor?
+
+**Resposta:** Pela proximidade dos resultados e porque a integração com o SHAP de árvores já estava pronta na interface. A escolha não se apoia em superioridade de desempenho.
+
+**Onde achar no TCC:** Resumo; Seção 5.4.
+
+**Explicando fácil:** A diferença é 0,0008 de AUC, menos de um milésimo. Como a plataforma já explicava as previsões com SHAP em árvores (exato e rápido), trocar de modelo daria trabalho sem mudar o resultado prático. É como manter o controle do console que você já conhece quando o outro é só 1% melhor. O TCC é aberto nisso: diz que a escolha não é por superioridade.
+
+### 6. O que significa o ‘viés favorável ao vermelho’ no solo queue?
+
+**Resposta:** No agregado, o time vermelho venceu mais que o azul (56,3% na BR1, a região de maior amostra), com intensidade diferente por região.
+
+**Onde achar no TCC:** Resumo; Seção 5.3 (Quadro 1).
+
+**Explicando fácil:** Em LoL, as partidas ranqueadas têm dois lados do mapa. Se os dois fossem iguais, cada lado ganharia cerca de 50%. Mas os dados mostram o vermelho acima: 56,3% na BR1. É como descobrir que, em Mario Kart, quem larga numa certa pista ganha mais. O trabalho mede isso e testa se não é acaso ou mistura de regiões.
+
+### 7. Por que o viés se inverte no profissional (53,2% para o azul)?
+
+**Resposta:** O TCC não sabe: apresenta uma hipótese (prioridade de escolha no pro, counter-pick garantido do vermelho no solo queue) e diz que os dados não registram a ordem de escolha.
+
+**Onde achar no TCC:** Seção 5.3; Seção 6.
+
+**Explicando fácil:** Hipótese em jogo: no solo queue o time vermelho escolhe o campeão por último e pode ‘counterar’ (escolher alguém forte contra o do adversário). No profissional, o azul tem a prioridade de primeira escolha, que pesa mais com times coordenados. O TCC não consegue testar isso porque a API não guarda a ordem em que cada campeão foi escolhido. Então é hipótese, e é assim que deve ser dita.
+
+### 8. 181 de 203 é 89,2%. Isso garante que a interface acerta 89% de qualquer pergunta?
+
+**Resposta:** Não. É o resultado em perguntas geradas por modelos de pergunta; em versões antigas, perguntas livres escritas à mão acertaram 54% e 60%.
+
+**Onde achar no TCC:** Seção 5.6; Seção 6.1; Apêndice B.
+
+**Explicando fácil:** As 203 perguntas foram montadas por moldes (‘Qual a taxa de vitória do campeão X?’), com a resposta certa calculada antes. É como treinar para uma prova usando as questões do próprio professor: você vai bem, mas uma pergunta inesperada pode ser mais difícil. Por isso o TCC avisa que o número pode superestimar o desempenho em perguntas livres.
+
+### 9. O que são as ‘seis páginas de visualização’?
+
+**Resposta:** Início, Dashboard, Campeões, Partidas, Competitivo e Simulador; a consulta em linguagem natural tem página própria.
+
+**Onde achar no TCC:** Resumo; Seção 5.5 (Figuras 3 e 4); as telas completas saíram do TCC (capturas em `reports/anexo_a/`).
+
+**Explicando fácil:** São as telas da plataforma, como as abas de um jogo: Início (busca), Dashboard (números gerais), Campeões (estatísticas por campeão), Partidas (análise minuto a minuto de uma partida), Competitivo (profissional contra solo queue) e Simulador (prever e explicar um estado de jogo). A consulta em português é uma sétima tela, tratada à parte.
 
 ---
 
-## 3. O problema, a pergunta de pesquisa e os objetivos
+## 1 Introdução
 
-### A pergunta de pesquisa (Seção 1.3)
+### 10. Qual é a questão de pesquisa?
 
-> Como desenvolver uma plataforma inteligente para análise de dados de
-> *League of Legends* que integre coleta, organização, modelagem
-> preditiva, visualização e consulta em linguagem natural para apoiar a
-> interpretação de informações competitivas?
+**Resposta:** Como desenvolver uma plataforma inteligente para análise de dados de League of Legends que integre coleta, organização, modelagem preditiva, visualização e consulta em linguagem natural para apoiar a interpretação de informações competitivas?
 
-### Objetivo geral
+**Onde achar no TCC:** Seção 1, parágrafo do tema.
 
-Desenvolver essa plataforma.
+**Explicando fácil:** A questão de pesquisa é a pergunta que o trabalho tenta responder. Aqui ela é de ‘como fazer’: como montar uma plataforma que junte as etapas. A resposta do TCC é a própria plataforma, mais as medidas de quanto cada etapa funciona. Pense num projeto de montar uma ‘central de análise’ de um jogo e mostrar que dá certo.
 
-### Objetivos específicos (a até g) e onde cada um foi cumprido
+### 11. Qual o objetivo geral e quais os objetivos específicos?
 
-Decore esta tabela. A banca adora perguntar "o objetivo X foi
-cumprido? onde?".
+**Resposta:** Geral: desenvolver a plataforma. Específicos a a g: mapear a API; identificar informações para uma base estruturada; estruturar coleta e tratamento; avaliar técnicas de análise para padrões; comparar XGBoost, Random Forest e redes neurais; propor dashboards; propor interface em linguagem natural.
 
-| Objetivo | O que pede | Onde está o resultado | Resposta curta |
-|---|---|---|---|
-| **a** | Mapear dados e recursos da Riot API | Seção 5.1 | Usados 4 endpoints: league-v4, account-v1, match-v5 (partida e linha do tempo) |
-| **b** | Identificar quais informações organizar | Seção 5.2 | Quadro 1 (tabelas do banco) e esquema completo no Apêndice A |
-| **c** | Estruturar coleta e tratamento | Seção 5.2 | Coletor resumível, 41.063 partidas |
-| **d** | Avaliar análise de dados para achar padrões | Seção 5.3 | Viés de lado, conversão de vantagem |
-| **e** | Comparar XGBoost, Random Forest e redes neurais | Seção 5.4 | Diferenças de milésimos; XGBoost adotado: 0,7641 / 0,8487 |
-| **f** | Propor *dashboards* | Seção 5.5 | 6 páginas de visualização |
-| **g** | Propor interface em linguagem natural | Seção 5.6 | 181 de 203 (89,2%) no gabarito automático; 26/26 no *benchmark* ajustado |
+**Onde achar no TCC:** Seção 1; Seção 6 (cada objetivo retomado); Seção 6 (itens a a g).
 
-**De onde vieram esses objetivos:** foram definidos no **TCC I**. O TCC II
-executou o que o TCC I prometeu, e foi além (adicionou os dados
-profissionais do Oracle's Elixir, que não estavam no plano original).
+**Explicando fácil:** O objetivo geral é o destino; os específicos são as fases, como as missões de um jogo: (a) descobrir o que a API da Riot oferece, (b) decidir o que guardar, (c) montar a coleta, (d) achar padrões, (e) comparar modelos, (f) fazer gráficos, (g) deixar perguntar em português. A Seção 5 mostra uma evidência para cada letra, e a Seção 6 retoma cada objetivo com a evidência.
 
-### Delimitação (o que o trabalho NÃO faz)
+### 12. Por que League of Legends e não outro jogo?
 
-- Só *League of Legends* (não outros jogos).
-- Predição só com informação **até o minuto do corte** (nada do futuro).
-- Não cobre todas as técnicas de IA possíveis, só as três comparadas.
+**Resposta:** O recorte é League of Legends, com duas fontes de dados; outros jogos ficam fora do escopo. Estender a outro jogo está nos trabalhos futuros.
 
----
+**Onde achar no TCC:** Seção 1; Seção 6.2.
 
-## 4. Metodologia de pesquisa e pesquisa bibliográfica
+**Explicando fácil:** O TCC não compara jogos; escolheu um e foi fundo. Um bom motivo prático, e uma leitura minha: a Riot oferece uma API pública com linha do tempo minuto a minuto, o que permite prever em fases. O TCC declara apenas que outros jogos estão fora do escopo e que testar outro jogo é trabalho futuro.
 
-Esta parte é a que alunos de computação costumam saber menos. A banca
-pode perguntar "que tipo de pesquisa é a sua?". Aqui está tudo.
+### 13. O que é a plataforma Bellestraiko?
 
-### 4.1 Classificações da pesquisa (Seção 4.1)
+**Resposta:** É o nome do produto desenvolvido: a plataforma integrada de coleta, modelagem, explicação, visualização e consulta em linguagem natural.
 
-Toda pesquisa acadêmica é classificada em algumas "caixinhas". O TCC
-classificou assim:
+**Onde achar no TCC:** Seção 1.
 
-**Quanto à natureza: pesquisa aplicada** (Prodanov e Freitas, 2013)
-- **O que é:** pesquisa que busca resolver um problema prático e
-  específico, gerando algo que pode ser usado. O oposto é a "pesquisa
-  básica", que busca conhecimento puro sem aplicação imediata.
-- **Por que é a sua:** você construiu uma plataforma funcionando, que
-  resolve o problema de explorar dados de esports.
-- **Exemplo simples:** estudar "como neurônios aprendem" é básica;
-  construir um app que prevê vitória é aplicada.
+**Explicando fácil:** Bellestraiko é o ‘nome do jogo’ do produto. O título acadêmico do TCC não usa esse nome (decisão registrada), mas o texto chama a plataforma assim. Ela é composta de um coletor, um banco, modelos, uma API, telas em React e uma interface de perguntas em português.
 
-**Quanto aos objetivos: exploratória e descritiva** (Gil, 2002)
-- **Exploratória:** quando você investiga algo pouco conhecido para se
-  familiarizar. No seu caso: investigar o que a Riot API oferece e quais
-  modelos faziam sentido.
-- **Descritiva:** quando você descreve características de algo. No seu
-  caso: descrever os dados coletados, os padrões encontrados (viés de
-  lado) e o desempenho dos modelos.
+### 14. A pesquisa é aplicada e quantitativa. O que isso significa?
 
-**Quanto à abordagem: quantitativa** (Creswell e Creswell, 2023)
-- **Quantitativa:** trabalha com números e estatística. Aqui: coleta,
-  análise exploratória, métricas e comparação dos modelos.
-- **Mista** (o que o TCC dizia até 2026-11-03): o livro define como coletar
-  E integrar dados quantitativos e qualitativos, em um desenho específico.
-  O TCC não coleta dado qualitativo (sem entrevistas, questionários ou
-  documentos analisados como dado); a revisão bibliográfica e a
-  interpretação dos achados dão contexto, mas não são coleta. Por isso o
-  texto passou a dizer "predominantemente quantitativa".
-- **Se a banca perguntar "por que não mista, como no TCC I?":** "o rótulo
-  foi revisto contra a definição de Creswell e Creswell (2023), cap. 1; sem
-  coleta qualitativa, o trabalho é quantitativo."
+**Resposta:** Aplicada: busca solucionar um problema prático (uma plataforma). Quantitativa: trabalha com dados numéricos (partidas, métricas, testes).
 
-### 4.2 Estratégias de pesquisa (Seção 4.2)
+**Onde achar no TCC:** Seção 4.1; Resumo.
 
-São os "procedimentos" usados:
+**Explicando fácil:** Aplicada é como fazer um mod para o jogo que resolve um problema real, em vez de só estudar teoria. Quantitativa é medir com números (taxas, AUC, intervalos) em vez de entrevistar pessoas. A revisão bibliográfica e a interpretação dão contexto, mas o centro são números.
 
-| Estratégia | O que é | Como apareceu no TCC | Referência |
-|---|---|---|---|
-| **Pesquisa bibliográfica** | Estudar o que já foi publicado (artigos, livros) | Os 11 estudos de domínio e as 15 obras de método | Gil (2002) |
-| **Pesquisa documental** | Estudar documentos que não são artigos científicos (manuais, documentação técnica) | A documentação oficial da Riot Games API (Anexo A) | Prodanov e Freitas (2013) |
-| **Aplicação delimitada a um domínio** | Não é estratégia nomeada por Yin: o estudo se restringe ao domínio de *League of Legends* | A plataforma e os modelos valem para esse jogo | (sem citação) |
+### 15. Qual a justificativa acadêmica e a prática?
 
-**Diferença entre bibliográfica e documental (pergunta clássica):**
-bibliográfica usa material que já passou por análise de outros autores
-(artigos, livros). Documental usa material "bruto", que ainda não foi
-analisado academicamente (a documentação da API da Riot é um documento
-técnico, não um artigo).
+**Resposta:** Acadêmica: articula análise de dados, IA, machine learning, sistemas de informação e IHC sobre um campo em crescimento. Prática: reúne etapas em uma plataforma, reduz a dependência de ferramentas fragmentadas e serve à interpretação de desempenho e tendências.
 
-**Por que Yin (2018) saiu:** a definição dele de estudo de caso exige
-muito mais variáveis do que pontos de dados, proposições teóricas prévias
-e fontes de evidência que convergem. O TCC tem dezenas de milhares de
-partidas e cinco variáveis, e as duas fontes são complementares, não
-convergentes. A referência foi removida (agora 31).
+**Onde achar no TCC:** Seção 1, parágrafo da justificativa.
 
-### 4.3 Como a pesquisa bibliográfica foi feita (de verdade)
+**Explicando fácil:** Acadêmica é ‘por que isso é ciência da computação’: o trabalho junta várias áreas. Prática é ‘para que serve’: quem analisa partidas deixa de depender de vários programas e de conhecimento técnico alto. Como a ferramenta de edição de vídeo que junta cortar, legendar e exportar num app só.
 
-**Isto você precisa saber contar com suas palavras.**
+### 16. O que significa ‘predições restritas ao estado do jogo até o momento da predição’?
 
-No TCC I, foi feito um levantamento de artigos em quatro áreas
-(está registrado em `Downloads/TCC/Pesquisa artigos TCC.pdf`):
+**Resposta:** O modelo só pode usar informação que existia até o minuto do corte (10, 15, 20 ou 25), sem nada posterior.
 
-1. Esports / *Game Analytics*
-2. *Machine Learning* aplicado
-3. Interfaces em linguagem natural e LLMs
-4. Sistemas e plataformas de dados
+**Onde achar no TCC:** Seção 1; Seção 4.6.
 
-Os artigos (publicados principalmente entre 2018 e 2025) foram
-**triados pelo título e pelo resumo**, avaliando a afinidade com o
-projeto. Desse levantamento, **5 dos 7 estudos de domínio originais do
-TCC vieram de lá** (os outros 4 estudos de LoL e as 14 referências novas
-foram acrescentados em 2026-10-20, por pesquisa na web; ver Parte 5.1):
+**Explicando fácil:** É a regra do jogo de adivinhação justo: se você vai prever aos 15 minutos, só pode olhar o placar até os 15 minutos. Usar o placar final (por exemplo, o total de abates da partida inteira) seria olhar o resultado. Isso se chama vazamento de dados e invalidaria tudo. O TCC garante que cada modelo vê só o estado do seu corte.
 
-| Estudo no TCC | Estava no levantamento inicial? |
-|---|---|
-| García-Méndez e Arriba-Pérez (2025) | Sim |
-| Hodge et al. (2021) | Sim |
-| Bahrololloomi et al. (2022) | Sim |
-| Guo et al. (2024) — Talk2Data | Sim |
-| Jiang et al. (2025) — SiriusBI | Sim |
-| Birant e Birant (2023) | Não aparece nesse PDF |
-| Wallner, Wang e Dormann (2023) | Não aparece nesse PDF |
+### 17. Por que ‘elo alto’ (Desafiante a Mestre)?
 
-Alguns artigos do levantamento **ficaram de fora** do TCC final
-(rastreamento óptico de 2018, tese de Aalto sobre *win probability*,
-Honor of Kings, player2vec, Chat2Data). Motivo razoável para dizer à
-banca: ou eram de outro jogo, ou tratavam de técnicas que o projeto não
-usou (deep learning temporal, RAG), ou eram de 2018 e fugiam da regra de
-recência.
+**Resposta:** É um recorte de escopo: uma população fechada, que a API lista por inteiro e que cabe no limite de requisições da chave de desenvolvedor.
 
-**Atenção, seja honesto:** esse PDF de levantamento foi gerado com
-ajuda do ChatGPT (aparece no cabeçalho do arquivo). Ver a Parte 20.
-Confira também nas suas anotações de onde vieram Birant e Birant e
-Wallner et al., para responder com segurança se perguntarem.
+**Onde achar no TCC:** Seção 4.3.
 
-### 4.4 A regra dos "5 anos"
+**Explicando fácil:** Em vez de tentar coletar milhões de jogadores de todos os elos, o trabalho pega os jogadores de topo, uma lista que a API entrega completa. É como estudar só o servidor competitivo. A consequência é que os resultados valem para esse recorte, e o TCC diz que não dá para estender a outros elos.
 
-O modelo do professor pede **referências até 5 anos antes do TCC**
-(ou seja, de 2021 em diante). Os 11 estudos de domínio são todos de
-2021 a 2026. ✔
+### 18. Por que a introdução cita Birant, García-Méndez e Jiang?
 
-**Mas há referências antigas** (Breiman 2001, Hanley e McNeil 1982,
-Chen e Guestrin 2016...). **Por quê?** Porque são as **obras originais
-das técnicas**. Se você usa Random Forest, a regra acadêmica é citar
-quem inventou o Random Forest, que é Breiman em 2001. Não existe
-"versão de 2024" do artigo original. A regra dos 5 anos vale para o
-estado da arte do **tema** (esports, LoL), não para a origem de um
-método clássico.
+**Resposta:** Birant e Birant: modelos de ML para análise e predição em LoL. García-Méndez e Arriba-Pérez: não basta prever, é preciso apresentar de forma interpretável. Jiang et al.: modelos de linguagem reduzem a barreira técnica em BI.
 
-**Resposta pronta:** "As referências antigas são as obras originais
-dos métodos utilizados, citadas pela propriedade técnica. Os estudos de
-domínio, que representam o estado da arte do tema, são todos de 2021 a
-2026."
+**Onde achar no TCC:** Seção 1, 2º parágrafo.
+
+**Explicando fácil:** Cada um sustenta uma parte do problema: (1) dá para prever com ML; (2) prever sem explicar não ajuda o usuário; (3) dá para conversar com os dados em linguagem natural. Os três juntos justificam uma plataforma que prevê, explica e responde em português.
+
+### 19. O que fica fora do escopo?
+
+**Resposta:** Outros jogos e outras abordagens de inteligência artificial; previsão ao vivo; outras filas, elos e versões não têm base para extensão.
+
+**Onde achar no TCC:** Seção 1; Seção 6.1 e 6.2.
+
+**Explicando fácil:** Fora do escopo é a lista de ‘isso não foi feito’. Previsão ao vivo (durante a partida em tempo real) não está implementada: a barreira é de dados em tempo real, não de modelo. Outros jogos ou outras filas ficam como trabalho futuro. Dizer isso na banca mostra que você conhece os limites do que entregou.
 
 ---
 
-## 5. Os trabalhos relacionados (os 11 estudos), como foram escolhidos, e as obras de método
+## 2 Fundamentação teórica
 
-O TCC separa duas coisas (Seção 3, início):
+### 20. Por que comparar três famílias de modelos (Random Forest, XGBoost, MLP)?
 
-- **Estudos de domínio** (11): artigos sobre esports/LoL/interfaces.
-  Ficam na Seção 3 (Trabalhos Relacionados).
-- **Obras de método** (15): artigos que criaram as técnicas usadas.
-  Ficam nas Seções 2 e 4.
+**Resposta:** Porque os estudos delimitam o espaço de escolha mas não decidem qual família é adequada: o trabalho comparou por medição.
 
-### 5.1 Os 11 estudos de domínio
+**Onde achar no TCC:** Seção 2.2; Seção 5.4.
 
-Para cada um: o que fizeram, e o que você pegou deles.
+**Explicando fácil:** É como testar três estilos de jogar a mesma fase em vez de escolher um por opinião. Random Forest é uma votação de muitas árvores; XGBoost são árvores em sequência, cada uma corrigindo a anterior; MLP é uma rede de neurônios. Medir os três evita escolher por moda.
 
-**1. Hodge et al. (2021) — "Win prediction in multi-player e-sports: live
-professional match prediction"** (IEEE Transactions on Games)
-- **O que fizeram:** previram vencedores de partidas **profissionais de
-  Dota 2**, **ao vivo**, com *machine learning* padrão, engenharia de
-  atributos e otimização.
-- **O que você usou:** a ideia de prever vitória a partir do **estado da
-  partida** (a "opção B" escrita no topo do `build_features.py`). Mostra
-  que o problema é tratável por modelagem estatística.
-- **Como você se diferencia:** eles são profissionais e ao vivo; você
-  usa *solo queue* de elo alto e um **corte de tempo fixo** (10/15/20/25
-  min), o que deixa a pergunta mensurável e comparável entre cortes.
-- **Número verificado no resumo do artigo (2026-10-20):** chegam a "até 85%
-  de acurácia após 5 minutos de jogo", em **Dota 2**, não em LoL. O TCC
-  agora diz isso explicitamente (Seções 3.1 e 5.7). Se a banca perguntar
-  "por que o seu é 76% e o dele 85%?": outro jogo, outro nível (profissional)
-  e outro momento (5 minutos de uma partida de Dota 2); não são comparáveis
-  diretamente.
+### 21. O que é a Random Forest e o que são bagging e bootstrap?
 
-**2. Birant e Birant (2023) — "Multi-Objective Multi-Instance Learning:
-a new approach to machine learning for eSports"** (Entropy)
-- **O que fizeram:** propuseram uma técnica de aprendizado e destacaram
-  a **modelagem centrada no time** (e não no jogador isolado).
-- **O que você usou:** foi **exatamente** a escolha das suas *features*:
-  todas são **diferenças entre os dois times** (ouro do azul menos ouro
-  do vermelho etc.), não estatísticas de um jogador.
+**Resposta:** Combina bagging (cada árvore treina numa amostra bootstrap) com seleção aleatória de variáveis em cada nó, reduzindo a correlação entre as árvores.
 
-**3. Bahrololloomi et al. (2022) — análise de desempenho de jogadores de
-LoL por função (*role*)** (VISIGRAPP 2022)
-- **O que fizeram:** caminho oposto: previram vitória a partir das
-  **funções e métricas individuais dos jogadores**.
-- **O que você usou:** delimita o "outro lado" da escolha. Você usou o
-  nível de **time** na predição, e uma noção de nível de **jogador** só na
-  camada de perfis de jogador (Seção 5.7).
+**Onde achar no TCC:** Seção 2.2.
 
-**4. García-Méndez e Arriba-Pérez (2025) — "Explainable e-sports win
-prediction through machine learning classification in streaming"**
-(Entertainment Computing)
-- **O que fizeram:** predição de vitória **com explicabilidade**, em
-  cenário de transmissão.
-- **O que você usou:** o argumento de que **uma previsão só é útil se vier
-  com explicação**. Isso justificou a camada de SHAP na plataforma.
+**Explicando fácil:** Imagine 200 jogadores avaliando a mesma partida, cada um vendo só um pedaço sorteado das informações. Cada um erra de um jeito, mas a média dos palpites é mais estável. Bootstrap é sortear partidas com reposição (pode repetir); bagging é treinar cada árvore numa dessas amostras; e o sorteio de variáveis a cada divisão impede as árvores de serem cópias.
 
-**5. Jiang et al. (2025) — SiriusBI** (Proceedings of the VLDB Endowment)
-- **O que fizeram:** solução de *Business Intelligence* com modelos de
-  linguagem (LLM) para analisar dados de empresas.
-- **O que você usou:** fundamento para usar LLM como camada de conversa
-  sobre dados estruturados (o seu *text-to-SQL*).
+### 22. O que é gradient boosting e como o XGBoost funciona?
 
-**6. Guo et al. (2024) — Talk2Data** (ACM Transactions on Interactive
-Intelligent Systems)
-- **O que fizeram:** interface em linguagem natural para análise visual,
-  que **decompõe perguntas complexas** em perguntas simples.
-- **O que você usou:** mesmo fundamento do SiriusBI, para a interface de
-  perguntas em português.
+**Resposta:** Constrói árvores em sequência, cada uma ajustada ao resíduo das anteriores, com otimização de segunda ordem e regularização.
 
-**7. Wallner, Wang e Dormann (2023) — visualização espaço-temporal com
-*storyline visualization*, estudo com LoL** (ACM PACM HCI / CHI PLAY)
-- **O que fizeram:** visualizações que juntam **tempo e posição** no
-  mapa para analisar partidas depois que acabam.
-- **O que você usou:** referência para o **mapa de calor de
-  posicionamento** minuto a minuto da análise de partida.
-- **Limitação admitida:** o seu mapa é mais simples (posição agregada por
-  minuto), sem a técnica de *storyline* deles.
+**Onde achar no TCC:** Seção 2.2.
 
-**Os 4 estudos acrescentados em 2026-10-20 (todos de LoL, Seção 3.2):**
+**Explicando fácil:** Na floresta as árvores votam sozinhas; no boosting elas se ajudam. A primeira faz um palpite; mede-se o erro; a segunda é treinada para consertar esse erro; a terceira conserta o que sobrou. Como num boss fight em que você corrige a estratégia a cada tentativa. O resultado é a soma das correções. ‘Segunda ordem’ e ‘regularização’ são refinamentos que deixam o treino mais preciso e evitam decorar.
 
-**8. Jadowski e Cunningham (2022)** (ArtsIT, Springer): ajustaram
-classificadores estatísticos a métricas das ligas profissionais de 2020 e
-acertaram **67% dos 306 jogos da etapa seguinte** (é o que a Seção 3.2 diz).
-DOI 10.1007/978-3-030-95531-1_10.
+### 23. O que é uma rede MLP e por que ela exige mais dados?
 
-*Lido por inteiro em 2026-10-20.* Treinam com a etapa de primavera de 2020
-(882 jogos) e testam na de verão (306), então é previsão **pré-jogo com
-divisão no tempo**, em ligas regionais (LEC, LCS, LCK, CBLOL, PCS, TCL), com
-regressão logística sobre notas de jogadores: 67,3%. Dados do Oracle's Elixir,
-a mesma fonte do TCC. **Três usos para a banca:** (1) mediram vitória do azul de
-**54,08% em 882 jogos profissionais** (qui-quadrado p = 0,015), o que apoia o
-nosso 53,2%, e citam que em 2017 o azul chegou a 64%; (2) escrevem que
-abordagens assim "dificilmente chegam a 90% de acurácia, pela inevitabilidade
-de zebras, e que mesmo no fim de uma partida o resultado pode ser muito volátil",
-exatamente a resposta à pergunta "por que não 90%?"; (3) usam o Hodge como
-exemplo de 85% em **outro MOBA profissional**, o mesmo que o TCC diz.
+**Resposta:** Rede neural feedforward (perceptron multicamadas) com aproximação universal; captura interações sem especificá-las, mas exige mais dados e cuidado com escala e regularização.
 
-**9. Do et al. (2021)** (FDG 2021): preveem o resultado da partida
-ranqueada **antes de ela começar**, pela experiência de cada jogador com o
-campeão, com **75,1%** de acurácia (rede neural profunda). Autores: Do, Wang,
-Yu, McMillian e McMahan.
+**Onde achar no TCC:** Seção 2.2.
 
-**10. Maymin (2021)** (*Journal of Quantitative Analysis in Sports*):
-calibra um modelo de probabilidade de vitória com dados de partidas
-ranqueadas e avalia cada ação individual pelo efeito que tem nessa
-probabilidade (é o que a Seção 3.2 diz, a partir do resumo, que fala em
-milhões de partidas).
+**Explicando fácil:** Uma MLP é uma pilha de camadas de ‘neurônios’ que somam as entradas com pesos e decidem quanto passar adiante. Treinar é ajustar os pesos aos poucos. Ela é flexível, mas como uma build com muitos itens: precisa de muita prática (dados) para saber usar, e sem cuidado ela decora. Com dezenas de milhares de partidas (e não milhões), isso é uma restrição.
 
-*Lido por inteiro em 2026-10-20.* O modelo de probabilidade de vitória dele é
-uma regressão logística com minuto, abates, torres e monstros grandes, e
-**exclui o ouro de propósito** (diz que a diferença de ouro engana conforme o
-jogo avança); o nosso usa ouro e experiência, e o SHAP mostra o ouro como fator
-dominante. **Conferido no texto completo em 2026-11-02** (o artigo é de
-acesso aberto, CC BY 4.0): o modelo de probabilidade em jogo usa **milhões
-de partidas**, com um minuto sorteado de cada partida ("milhões de linhas
-independentes"), então o TCC está certo. Os **~150 mil** são outra coisa:
-as partidas do último *patch* usadas na análise de desempenho individual
-(percentis e a regressão sobre os "pacotes" de estatísticas), das quais
-metade é Bronze e menos de 1% é Mestre ou Desafiante, bem diferente do nosso
-elo alto. A nota anterior deste guia misturava os dois números.
+### 24. O que dizem Grinsztajn et al. sobre dados tabulares?
 
-**Três pontos do Maymin que ajudam na banca:**
-1. Ele cita o Hodge e diz que o Hodge treina **um modelo por minuto**,
-   enquanto ele preferiu **um modelo único** para todos os minutos. O seu
-   trabalho fica no meio: um modelo por **fase** (quatro cortes), e o SHAP
-   das torres mostra por que separar fases faz diferença.
-2. Ele escreve que, em trabalho exploratório, **acrescentar variáveis não
-   melhorou** o modelo de probabilidade. É o mesmo que os seus 11
-   experimentos negativos mostraram.
-3. Ele sorteia **um minuto por partida** porque linhas seguidas da mesma
-   partida são muito correlacionadas. No seu desenho, cada modelo tem uma
-   linha por partida (o estado naquele corte), então o problema não aparece
-   dentro de um mesmo modelo.
+**Resposta:** Em dados tabulares, métodos de árvores seguem competitivos frente a redes neurais em amostras de cerca de 10 mil exemplos, com indício de que a diferença diminui em amostras maiores.
 
-Os
-80% de acerto do artigo vêm de uma árvore que prevê o resultado do time pelo
-desempenho individual no fim da partida; não é previsão em tempo de jogo e não
-é comparável à nossa acurácia.
+**Onde achar no TCC:** Seção 2.2.
 
-**11. Guan e Tung (2026)** (*preprint* arXiv:2609.08060, **sem revisão por
-pares**, publicado em setembro de 2026): previsão **pré-jogo** no
-profissional, que trata o lado do mapa e a prioridade de escolha (*first
-pick*) como covariáveis do modelo. Eles não reportam taxa de vitória por
-lado (por isso o TCC cita esse artigo só como apoio à hipótese, não como
-fonte do 53,2%). Curiosidade útil para a banca: o próprio artigo declara
-uso do Claude no código e na revisão do texto.
+**Explicando fácil:** Dados tabulares são como uma planilha: colunas de números por partida. Para esse tipo, árvores costumam ir muito bem mesmo com poucos dados. É um motivo para comparar árvores e redes aqui, e para não se surpreender com o empate.
 
-**Como usar isso numa resposta:** "Comparado com outros trabalhos de LoL
-(67% em Jadowski e Cunningham, 75,1% em Do et al.), meus 70% a 82% ficam
-na mesma ordem de grandeza. A comparação é indicativa, porque muda o
-nível dos jogadores, o momento da previsão e a informação usada."
+### 25. O que é o SHAP, de onde vem o valor de Shapley e o que o TCC adotou?
 
-### 5.2 A lacuna que o TCC ocupa (Seção 3.6)
+**Resposta:** O SHAP usa o valor de Shapley da teoria dos jogos: a importância de uma variável é sua contribuição média para a previsão sobre todas as combinações das demais. Foi o método adotado.
 
-Cada estudo cobre **uma frente isolada**:
-- predição (Hodge, Birant, Bahrololloomi)
-- explicabilidade (García-Méndez)
-- linguagem natural (Jiang, Guo)
-- visualização (Wallner)
+**Onde achar no TCC:** Seção 2.3.
 
-**Nenhum** entrega tudo junto numa plataforma só, sobre a mesma base de
-dados. **Essa é a lacuna.** O texto final (Seção 3.6) aponta também **três
-decisões de projeto** (decore os nomes):
+**Explicando fácil:** Imagine um time que ganhou um prêmio e você quer repartir o mérito entre os jogadores. Valor de Shapley é a contribuição média de cada um, olhando todas as ordens possíveis de entrada. SHAP faz isso com as variáveis do modelo (ouro, XP, abates...), que são os ‘jogadores’, e o ‘prêmio’ é a previsão. Resultado: cada variável recebe uma contribuição, e referência mais contribuições dá a previsão.
 
-1. **Horizonte da predição:** em vez de um único momento, quatro cortes
-   (10, 15, 20, 25 min), com um modelo por corte. Isso torna o desempenho
-   comparável ao longo da partida e mostra a importância das variáveis
-   mudando de fase para fase.
-2. **Recorte de população:** a maior parte dos estudos de predição atua
-   sobre o profissional, e os que usam ranqueadas (Do et al.; Maymin) não
-   comparam com ele. Você mede o mesmo indicador nos dois contextos e
-   mostra a inversão do viés de lado.
-3. **Consulta mensurável:** a interface em linguagem natural foi avaliada
-   no próprio domínio, com 26 perguntas de referência e um gabarito automático de
-   203, o que torna o erro mensurável, e não ilustrativo.
+### 26. Por que o SHAP e não o LIME?
 
-**Atenção:** versões antigas falavam em "quatro eixos", com "fonte de
-dados" (eles usam bases de terceiros) e "nenhum mede contra *benchmark*".
-Isso saiu do texto porque não estava conferido nos artigos, e porque Do et
-al. e Maymin também usam ranqueadas. Não use esses argumentos na banca.
+**Resposta:** O LIME aproxima por um modelo linear local, simples de ler, mas pouco fiel se o modelo for muito não linear ali. O SHAP é aditivo e com propriedades (consistência, importância nula para variável ausente).
 
-### 5.2.1 Como os trabalhos relacionados foram escolhidos (justificativa)
+**Onde achar no TCC:** Seção 2.3.
 
-A banca pode perguntar "por que esses trabalhos e não outros?". A
-resposta tem três partes: **de onde vieram**, **com que critério** e **o
-papel de cada um**.
+**Explicando fácil:** LIME é como explicar um mapa inteiro olhando só a rua à sua frente e desenhando uma reta: ajuda perto, mas pode enganar se o terreno for curvo. SHAP reparte exatamente a previsão entre as variáveis. No XGBoost, o explicador de árvores é exato e já estava na interface; por isso o TCC adotou o SHAP e deixou o LIME como alternativa não adotada.
 
-**De onde vieram (dois momentos):**
+### 27. O que significa ‘as contribuições SHAP estão em log-odds, não em pontos percentuais’?
 
-1. **TCC I:** levantamento nas quatro frentes do projeto (esports/*game
-   analytics*, *machine learning* aplicado, interfaces em linguagem natural
-   e LLMs, sistemas e plataformas de dados), com triagem por título e
-   resumo. Daí vieram 5 dos 7 estudos originais (Parte 4.3).
-2. **TCC II (2026-10-20):** numa revisão de afirmações sem fonte, as
-   lacunas foram fechadas por pesquisa na web (18 → 32 referências). Entre
-   elas, quatro estudos **de LoL** (Jadowski e Cunningham, Do et al.,
-   Maymin, Guan e Tung), conferidos contra o texto dos artigos. Até ali o
-   único estudo de predição com número era o Hodge, de Dota 2; com os
-   quatro, a Seção 5.7 passou a comparar a acurácia com trabalhos do mesmo
-   jogo (diário de 2026-10-20).
+**Resposta:** O explicador de árvores atribui a saída bruta do XGBoost (em log-odds); as contribuições somam-se ao valor de referência e a probabilidade é a transformação logística da soma.
 
-**Critérios de inclusão (diga assim):**
+**Onde achar no TCC:** Seção 2.3; Seção 5.5 (Figura 4).
 
-- **Cobrir as frentes da plataforma:** cada estudo sustenta uma camada:
-  predição, explicabilidade, linguagem natural ou visualização. É por isso
-  que a Seção 3 tem as subseções 3.1 a 3.5, uma por frente.
-- **Recência:** o modelo do professor pede referências de até cinco anos;
-  os onze são de 2021 a 2026.
-- **Afinidade com o problema:** preferência por *League of Legends*; quando
-  o estudo é de outro jogo (Hodge, Dota 2) ou de outro domínio (SiriusBI e
-  Talk2Data, *Business Intelligence*), ele entra pelo **método**, e o texto
-  diz isso.
-- **Fonte com revisão por pares,** com uma exceção declarada: Guan e Tung
-  (2026) é *preprint*, e por isso é citado só como apoio à hipótese, nunca
-  como fonte de número.
+**Explicando fácil:** Log-odds é uma escala em que o modelo soma: 0 é 50%, +1 é 73%, +2 é 88%. A escala não é linear em probabilidade: +0,5 vale 12 pontos a partir de 50%, mas só 4 a partir de 88% (como subir de nível: os primeiros níveis rendem mais). Por isso o TCC nunca converte SHAP em pontos percentuais.
 
-**O que ficou de fora:** do levantamento do TCC I não entraram, por
-exemplo, Honor of Kings (outro jogo, sem método aproveitado), player2vec e
-Chat2Data (técnicas que o projeto não usou: *deep learning* temporal, RAG)
-e o rastreamento óptico de 2018 (fora da janela de recência). Esses
-motivos são a leitura mais coerente com os critérios acima; não há
-registro escrito da exclusão de cada um, então fale em critérios, não em
-uma lista de rejeições.
+### 28. O que é a taxa-base e por que importa para a acurácia?
 
-**O papel de cada estudo (uma frase cada):**
+**Resposta:** Na amostra o azul vence 46,7%; um classificador que sempre dissesse vermelho acertaria 53,3% sem poder preditivo algum.
 
-| Estudo | Frente | Por que está no TCC |
-|---|---|---|
-| Hodge et al. (2021) | Predição | Mostra que prever pelo estado da partida é tratável; base da "opção B" |
-| Birant e Birant (2023) | Predição | Modelagem centrada no time; origem das *features* como diferenças |
-| Bahrololloomi et al. (2022) | Predição | O caminho oposto (por jogador); delimita a escolha e entra nos perfis |
-| Jadowski e Cunningham (2022) | Predição (LoL) | Comparação de acurácia (67%) e apoio ao 53,2% do azul (54,08%) |
-| Do et al. (2021) | Predição (LoL) | Comparação de acurácia pré-jogo (75,1%) em ranqueadas |
-| Maymin (2021) | Predição (LoL) | Modelo de probabilidade em ranqueadas; mostra que ninguém compara com o profissional |
-| Guan e Tung (2026) | Predição (LoL) | Lado e prioridade de escolha como covariáveis; apoio à hipótese do *draft* |
-| García-Méndez e Arriba-Pérez (2025) | Explicabilidade | "Previsão só é útil com explicação"; justifica o SHAP na tela |
-| Jiang et al. (2025) | Linguagem natural | LLM sobre dados estruturados (SiriusBI) |
-| Guo et al. (2024) | Linguagem natural | Interface NL com decomposição de perguntas (Talk2Data) |
-| Wallner, Wang e Dormann (2023) | Visualização | Tempo e posição juntos; referência do mapa de calor |
+**Onde achar no TCC:** Seção 2.3.
 
-### 5.2.2 O que cada estudo diz, conferido no próprio artigo (2026-11-02)
+**Explicando fácil:** Taxa-base é o placar que um chute fixo já faria. Se 53,3% das partidas são do vermelho, ‘sempre vermelho’ é um modelo de 53,3% de acurácia. Então 76% de acurácia só impressiona quando você compara com esse piso. É o ‘chute da moeda’ calibrado.
 
-Lidos o resumo e a conclusão dos PDFs em `Downloads/TCC/` e
-`docs/artigos/`, o texto completo do Maymin (acesso aberto) e o resumo do
-SiriusBI no arXiv. O Jadowski e Cunningham foi lido por inteiro em
-2026-10-20 (Parte 5.1). Para cada um: o que o artigo diz com as palavras
-dele, e por que isso justifica a escolha.
+### 29. O que é AUC-ROC segundo Hanley e McNeil?
 
-| Estudo | O que o artigo diz (conferido) | Por que justifica a escolha |
-|---|---|---|
-| **Hodge et al. (2021)** | Pesquisa anterior ficava na previsão **pré-jogo** e em dados **amadores**; eles fazem "o primeiro estudo de caso abrangente" de previsão **ao vivo** no profissional, em Dota 2, e chegam a **85% após 5 minutos**, medido nas previsões ao vivo de **28 jogos** do torneio ESL One Hamburg 2017 (treino com cerca de 5,7 mil partidas de habilidade mista). Na revisão, citam um trabalho que divide a partida em fases de 15 minutos. | É a referência de que prever pelo **estado da partida** funciona. O seu trabalho leva essa ideia a LoL, com cortes fixos |
-| **Birant e Birant (2023)** | "Pesquisas anteriores enfatizaram a previsão **centrada no jogador**", mas "é necessária uma classificação **centrada no time**, porque a cooperação é essencial". Base pública do Kaggle (ranqueadas de NA e EU) com abates, assistências, mortes, dano e ouro por jogador, que são **resumos do fim da partida**. Chegam a **até 95%**, que **não é comparável** com previsão em jogo. | Justifica as variáveis como **diferenças entre os times**. Você usa o princípio, não a técnica deles (MOMIL) |
-| **Bahrololloomi et al. (2022)** | Duas métricas de desempenho individual a partir de 2.901 partidas (29.010 linhas de jogador); um modelo de *gradient boosting* chega a 92,7%, mas isso é *100 − MAPE* numa regressão do XP por minuto, e **não** acurácia de classificação; o peso de cada função (*role*) é estimado por otimização linear e resulta quase igual entre as cinco (0,1% de diferença). Os 86% de "previsão de vitória" comparam a soma das notas dos dois times **na própria partida**: é medida de fim de partida, não previsão em jogo. | Mostra o caminho **oposto** (por jogador e por função), que delimita a sua escolha e aparece só nos perfis de jogador |
-| **Jadowski e Cunningham (2022)** | Treinam na primavera de 2020 (882 jogos profissionais) e testam nos 306 do verão: 67%. Medem 54,08% de vitória do azul. Escrevem que 90% é improvável pelas zebras. | Comparação de acurácia e apoio externo ao 53,2% do azul |
-| **Do et al. (2021)** | Rede neural profunda prevê ranqueadas **antes do jogo** pela experiência com o campeão: 75,1%. **os outros quatro algoritmos testados ficaram entre 72,7% e 75,4%** (*gradient boosting* 75,4%, acima da rede; *Random Forest* 74,7%; SVM 74,3%; kNN 72,7%), e eles leem isso como sinal de que a experiência com o campeão é um bom indicador independentemente do modelo. | Comparação em ranqueadas e um **paralelo direto** do seu empate entre modelos |
-| **Maymin (2021)** | Modelo de probabilidade em jogo, regressão logística com minuto, abates, torres e monstros grandes, calibrada em milhões de partidas; exclui o ouro de propósito; diz que acrescentar variáveis não melhorou; prefere um modelo único a um por minuto. | Ranqueadas sem comparação com o profissional (argumento da 3.6) e três pontos a seu favor (Parte 5.1) |
-| **Guan e Tung (2026)** | *Preprint*. Previsão pré-jogo no profissional com regressão logística, 5.135 jogos de 2024 a 2026, e o *first pick* como covariável. **As duas arquiteturas que comparam são estatisticamente indistinguíveis.** | Apoio à hipótese do *draft* e outro paralelo do empate entre modelos; não sustenta número |
-| **García-Méndez e Arriba-Pérez (2025)** | O esforço em previsão profissional ficou na classificação em lote, "deixando de lado a visualização"; a falta de interpretabilidade é "uma das limitações mais significativas" dos trabalhos anteriores. O sistema deles tem um **módulo de explicabilidade** e chega a 92,5% de acurácia em *streaming*, **em partidas profissionais de CS:GO** (base do Kaggle com dados da HLTV), e não em LoL. O sistema deles tem também descrições em linguagem natural e um painel visual, como a nossa plataforma. | Justifica o SHAP na tela: previsão sem explicação é a lacuna que eles apontam |
-| **Jiang et al. (2025), SiriusBI** | BI com LLM em produção na Tencent (finanças, publicidade, nuvem), diálogo de várias rodadas e mais de 93% de acerto na geração de SQL (97%, 93% e 96% nos três setores), com um estudo de 40 analistas, 20 com o sistema e 20 sem. | Mostra que LLM gerando SQL sobre dados estruturados funciona em escala; você leva a ideia ao domínio de LoL e mede no próprio domínio |
-| **Guo et al. (2024), Talk2Data** | Interface em linguagem natural que **decompõe** perguntas complexas em simples, com um modelo de *deep learning*; avaliada com estudo de ablação e estudo com 20 usuários. | Fundamento da consulta em linguagem natural. Cuidado: você não implementa decomposição |
-| **Wallner, Wang e Dormann (2023)** | *Storyline visualization* integra tempo e posição numa só vista para resumir partidas de LoL; estudo com 39 participantes respondeu bem a perguntas de local e evento, pior a perguntas de tempo. | Referência do mapa de calor de posicionamento por minuto |
+**Resposta:** Equivale à probabilidade de um caso positivo receber pontuação maior que um negativo.
 
-**Dois achados úteis para a banca:**
+**Onde achar no TCC:** Seção 2.3.
 
-1. **O empate entre modelos também aparece na literatura.** Do et al.
-   (2021) obtêm 73% a 75% com *Random Forest*, SVM e rede neural, e Guan e
-   Tung (2026) acham as duas arquiteturas indistinguíveis. Se a banca
-   perguntar "não é estranho os três modelos empatarem?": "Não. Do et al. e
-   Guan e Tung também acharam modelos diferentes empatados. Quando as
-   variáveis são poucas e agregadas, o limite está nos dados."
-2. **Fases de jogo têm precedente.** O Hodge et al. citam um trabalho que
-   divide a partida em fases de 15 minutos, e o Maymin cita o Hodge
-   treinando um modelo por minuto. O seu desenho, um modelo por fase, fica
-   entre os dois.
+**Explicando fácil:** Pegue uma partida que o azul ganhou e uma que perdeu, ao acaso. AUC é a chance de o modelo dar probabilidade maior à que o azul ganhou. 0,5 é sorte, 1,0 é perfeito. Não depende de limiar de 0,5 nem da proporção de vitórias.
 
-### 5.2.3 Por que cada obra de método está no TCC
+### 30. Qual o problema técnico central do text-to-SQL, segundo o TCC?
 
-As obras de método não são "trabalhos relacionados": cada uma justifica
-uma técnica no ponto em que ela é usada. A regra é citar a obra original
-ou a mais aceita da técnica, mesmo que antiga.
+**Resposta:** O modelo produz texto, e o banco exige SQL válido e correto sobre um esquema específico; uma consulta gramaticalmente correta pode citar tabela inexistente ou responder à pergunta errada.
 
-| Obra | Por que esta, e não outra |
-|---|---|
-| Breiman (2001) | Artigo original da *Random Forest* |
-| Chen e Guestrin (2016) | Artigo original do XGBoost |
-| Hornik, Stinchcombe e White (1989) | Prova da aproximação universal, que justifica testar uma rede neural |
-| Grinsztajn, Oyallon e Varoquaux (2022) | Comparação ampla e recente de árvores contra redes em dados tabulares (45 bases, treino truncado em 10 mil). Conferido no texto: com treino de 50 mil, a diferença tende a diminuir (indício, sem estudo rigoroso). As nossas 39 mil ficam entre os dois regimes, e o empate do MLP é coerente com isso. **Critério de seleção que importa à defesa (seção 3.1 do artigo):** eles removem bases "fáceis demais", isto é, aquelas em que a regressão logística fica a menos de 5% (relativo) de **ambos** o ResNet e o HistGradientBoosting. Nossa regressão logística (AUC-ROC 0,8495 contra 0,8487 do XGBoost, aos 15 min) cairia nesse critério: a base não discrimina famílias de modelo, o que explica o empate e fica fora do regime em que o resultado deles é informativo. Também removem séries temporais e alvos determinísticos |
-| Lundberg e Lee (2017) | Artigo original do SHAP, com a prova das propriedades que o justificam |
-| Ribeiro, Singh e Guestrin (2016) | Artigo original do LIME, a alternativa considerada |
-| Hanley e McNeil (1982) | Interpretação clássica da AUC como probabilidade de ordenar certo um par |
-| Niculescu-Mizil e Caruana (2005) | Estudo clássico de calibração, que mostra que *boosting* pode distorcer probabilidades |
-| Kohavi (1995) | Estudo de referência sobre validação cruzada estratificada |
-| Kaufman et al. (2012) | Definição formal de vazamento de dados e de como evitá-lo |
-| Pedregosa et al. (2011) | Citação oficial do scikit-learn (*GridSearchCV*, MLP, *Random Forest*) |
-| Brown, Cai e DasGupta (2001) | Comparação de intervalos para proporções que recomenda o de Wilson |
-| Holm (1979) | Artigo original da correção de Holm para comparações múltiplas |
-| Wang et al. (2020), RAT-SQL | Mostra que representar as relações do esquema melhora o *text-to-SQL* |
-| Zhong, Yu e Klein (2020) | Discute os limites da acurácia de execução, a métrica do *benchmark* |
-| Prodanov e Freitas (2013); Gil (2002); Creswell e Creswell (2023) | Manuais de metodologia usados na classificação da pesquisa, como no TCC I |
+**Onde achar no TCC:** Seção 2.4.
 
-**Resposta pronta:** "Os trabalhos foram escolhidos para cobrir cada
-camada da plataforma (predição, explicabilidade, linguagem natural e
-visualização), dentro da janela de cinco anos. O núcleo veio do
-levantamento do TCC I, triado por título e resumo; no TCC II acrescentei
-quatro estudos de *League of Legends* para ter com quem comparar a
-acurácia. Quando o estudo é de outro jogo ou outro domínio, ele entra pelo
-método, e o texto diz isso."
+**Explicando fácil:** Uma consulta pode estar ‘bem escrita’ e ainda assim errada, como obedecer a regra do jogo mas ir para o lugar errado do mapa. Dois riscos: (1) citar tabela que não existe e (2) responder outra coisa. Wang et al. mostram que descrever o esquema com os relacionamentos entre tabelas ajuda. O TCC valida a segurança antes de executar e mede a correção no gabarito.
 
-### 5.3 As 15 obras de método (Seções 2 e 4)
+### 31. Por que a segurança da consulta não é delegada ao modelo?
 
-| Obra | O que criou/mostrou | Por que está no TCC |
-|---|---|---|
-| Brown, Cai e DasGupta (2001) | Compara intervalos de confiança para proporções; recomenda Wilson ou Jeffreys para n ≤ 40 e, acima disso, diz que Wilson, Jeffreys e Agresti-Coull são muito parecidos (prefere Agresti-Coull pela simplicidade) | Justifica o intervalo de Wilson em vez do usual (Wald), que tem cobertura instável (Seção 4.5). Nossos n são de milhares |
-| Holm (1979) | Correção de Holm para comparações múltiplas | O teste que refutou o "pico" do viés (Seção 4.5) |
-| Kohavi (1995) | Estudo de validação cruzada e *bootstrap*; **recomenda validação cruzada estratificada de 10 dobras**, e diz que 5 dobras tem viés pessimista em bases pequenas | Justifica a validação cruzada estratificada (Seção 4.4). As 5 dobras são escolha de custo, e o Apêndice C mostra que 10 muda no máximo 0,0008 de acurácia |
-| Pedregosa et al. (2011) | A biblioteca scikit-learn: interface única de estimadores, validação cruzada e `GridSearchCV` (seção 4 do artigo). **Não descreve** Random Forest nem MLP (o `MLPClassifier` entrou na versão 0.18, de 2016) | Origem do `GridSearchCV` e da biblioteca usada (Seção 4.4). Os modelos RF e MLP vêm de Breiman (2001) e de Hornik et al. (1989) |
-| Kaufman et al. (2012) | Vazamento de dados: formulação e como evitar | Base da regra "nada do futuro entra" (Seção 4.6) |
-| Hornik, Stinchcombe e White (1989) | Redes com camada escondida aproximam qualquer função | Aproximação universal do MLP (Seção 2.2) |
-| Grinsztajn, Oyallon e Varoquaux (2022) | Em dados tabulares de porte médio, métodos de árvores seguem competitivos com redes neurais | Por que árvores fazem sentido aqui (Seção 2.2) |
-| Niculescu-Mizil e Caruana (2005) | Calibração de probabilidades; *boosting* pode distorcê-las | Contexto da curva de calibração (Seção 5.4) |
-| Zhong, Yu e Klein (2020) | Limites da acurácia de execução em *text-to-SQL*; propõe vários bancos de teste | Limitação do *benchmark* de 26 perguntas (Seção 4.7) |
-| Breiman (2001) | Random Forest | Um dos 3 modelos comparados |
-| Chen e Guestrin (2016) | XGBoost | O modelo adotado em produção |
-| Hanley e McNeil (1982) | O significado da AUC-ROC | Justifica a métrica principal |
-| Lundberg e Lee (2017) | SHAP | A técnica de explicação usada |
-| Ribeiro, Singh e Guestrin (2016) | LIME | A alternativa ao SHAP (comparada, não usada) |
-| Wang et al. (2020) | RAT-SQL (text-to-SQL ciente do esquema) | Fundamenta a conversão de pergunta em SQL |
+**Resposta:** Ela é validada antes de tocar o banco (um único SELECT ou WITH, palavras proibidas, lista de tabelas, execução somente leitura com tempo limite); a correção semântica é medida no benchmark e no gabarito.
 
-### 5.4 As outras 5 referências
+**Onde achar no TCC:** Seção 2.4; Seção 5.6.
 
-- **Prodanov e Freitas (2013), Gil (2002), Creswell e Creswell (2023):**
-  livros de metodologia científica (Parte 4). Yin (2018) foi removido em
-  2026-11-03 (ver 4.2).
-- **Riot Games (APIs):** a documentação oficial da API (Anexo A).
-- **Oracle's Elixir (Downloads):** fonte dos dados profissionais
-  (oracleselixir.com/tools/downloads, acesso em 4 jul. 2026; os arquivos
-  são baixados do Google Drive que o site aponta).
+**Explicando fácil:** Confiar no modelo para ser seguro é como confiar que o jogador nunca vai usar cheat. Melhor ter um anti-cheat no servidor. A validação é um programa fixo e testável que barra comandos de escrita (insert, delete, drop) e tabelas fora da lista, não importa o que o modelo escreva.
 
-**Total: 31 referências** = 11 de domínio + 15 de método + 3 de
-metodologia + 1 de documentação da API + 1 de fonte de dados.
+### 32. O que a Seção 2.5 diz sobre dados espaço-temporais?
+
+**Resposta:** Visualizações que integram tempo e localização numa só representação ajudam a interpretar o comportamento em jogo na revisão pós-partida (Wallner, Wang e Dormann, 2023); isso motivou o mapa de calor.
+
+**Onde achar no TCC:** Seção 2.5; Seção 5.5.
+
+**Explicando fácil:** Espaço é onde (posição no mapa), tempo é quando (minuto da partida). Ver os dois juntos é como ver o replay com o rastro dos jogadores. O mapa de calor da plataforma mostra, num minuto escolhido, onde estavam os 10 jogadores. A timeline pública tem uma amostra por minuto, então é uma aproximação.
+
+### 33. O que é a ‘linha do tempo’ da partida?
+
+**Resposta:** Um retrato por minuto da partida (ouro, experiência, posição) mais os eventos (abates, torres, dragões), com um quadro extra no instante em que o jogo acaba.
+
+**Onde achar no TCC:** Seção 4.3; Seção 4.6.
+
+**Explicando fácil:** É como o replay salvo de minuto em minuto: a cada 60 segundos fica registrado o ouro, a experiência e a posição de cada jogador, além dos eventos. O modelo usa o quadro do minuto do corte. O quadro extra do fim do jogo nunca pode servir de estado, porque já mostra o resultado.
 
 ---
 
-## 6. Os dados: de onde vieram e como foram coletados
+## 3 Trabalhos relacionados
 
-### 6.1 Fonte 1: Riot Games API (partidas ranqueadas)
+### 34. Como foram escolhidos os onze estudos? Foi uma revisão sistemática?
 
-**O que é uma API:** um "balcão de atendimento" de um sistema. Você faz
-um pedido no formato combinado e recebe uma resposta com dados. A Riot
-(dona do LoL) oferece uma API pública com dados das partidas.
+**Resposta:** Não. Os critérios foram recência (até cinco anos), cobrir cada frente da plataforma e, na predição, preferir estudos de League of Legends; lacunas foram fechadas por pesquisa complementar, com os artigos conferidos no texto completo.
 
-**Os 4 endpoints usados** (cada endpoint é um "tipo de pedido"):
+**Onde achar no TCC:** Seção 3 (abertura).
 
-| Endpoint | Para que serviu | Exemplo |
-|---|---|---|
-| **league-v4** | Listar os jogadores Desafiante e Grão-Mestre de cada região | "me dá a lista dos melhores da Coreia" |
-| **account-v1** | Descobrir o nome (Riot ID) de um jogador a partir do seu código | "quem é o jogador abc-123?" |
-| **match-v5** | Baixar o resumo de uma partida (quem ganhou, campeões, totais) | "me dá a partida BR1_123" |
-| **match-v5 /timeline** | Baixar a **linha do tempo** da partida, minuto a minuto | "como estava a partida no minuto 15?" |
+**Explicando fácil:** Não é uma revisão sistemática (com protocolo e bases de busca fixas). É uma seleção por critérios: artigos recentes, que cubram predição, explicabilidade, consulta em linguagem natural e visualização. Dizer isso com clareza é melhor que fingir um método que não houve. Conferir contra o texto completo foi necessário porque alguns resumos escondiam detalhes.
 
-**A *timeline* é o coração do projeto.** Ela tem uma "foto" (chamada
-*frame*) a cada minuto: quanto ouro e XP cada jogador tinha, onde ele
-estava no mapa, e todos os eventos (abates, torres, dragões) com o
-momento exato. É dela que saem as *features* e o mapa de calor.
+### 35. O que Hodge et al. (2021) fizeram e por que citá-los se é Dota 2?
 
-**Por que só Desafiante e Grão-Mestre? (confirmado por você em
-2026-11-02: questão de escopo).** O recorte delimita uma população finita e
-bem definida: a *league-v4* devolve a lista inteira desses elos por região,
-e o número de jogadores é pequeno o bastante para coletar com a chave de
-desenvolvedor (100 pedidos a cada 2 minutos). Cobrir todos os elos
-exigiria amostragem por faixa e muito mais tempo de coleta. O custo do
-recorte está declarado: os resultados não valem para outros elos (Seção
-6.1, validade externa). Desde 2026-11-02 o motivo está escrito no TCC, na
-Seção 4.3 a): "recorte de escopo: uma população fechada, que a API lista por
-inteiro e que cabe no limite de requisições da chave de desenvolvedor".
+**Resposta:** Preveem a vitória em partidas profissionais de Dota 2 em tempo real, com modelos padrão, engenharia de atributos e otimização, até 85% após 5 minutos (28 partidas de um torneio).
 
-**Resposta pronta:** "Foi uma decisão de escopo. O topo do ranking é uma
-população fechada, que a API entrega inteira e que dava para coletar com a
-chave de desenvolvedor. O preço é a validade externa: os números não se
-estendem a outros elos, e isso está nas limitações."
+**Onde achar no TCC:** Seção 3.1; Seção 5.7.
 
-**Fluxo da coleta (em 2 passos):**
-1. `seed_players` busca, pela league-v4, os jogadores de elo alto de
-   cada região e guarda na tabela `players`.
-2. `collect_matches` pega cada jogador, lista as últimas partidas dele na
-   **fila 420** (ranqueada solo/duo), e baixa a partida + a *timeline* das
-   que ainda **não** estão no banco.
+**Explicando fácil:** Citam-se porque mostram que prever o resultado a partir do estado da partida é um problema tratável. Mas é outro jogo e outra escala (28 partidas), então o TCC usa o estudo para sustentar a abordagem, e não para comparar números.
 
-**Três dificuldades reais da coleta e como foram resolvidas:**
+### 36. Por que o TCC adota a modelagem centrada no time (Birant e Birant) e não a do jogador?
 
-**a) Limite de pedidos (*rate limit*).** A chave de desenvolvedor só
-permite **20 pedidos por segundo e 100 a cada 2 minutos**. Se passar,
-a Riot responde com erro 429 ("calma aí"). Solução: o cliente
-(`src/riot/client.py`) controla uma "janela deslizante" e se segura em
-**95 pedidos a cada 2 minutos** (margem de segurança). Se mesmo assim
-tomar 429, ele espera o tempo que a Riot mandar (cabeçalho
-`Retry-After`).
-- **Exemplo:** é como uma fila de banco com senha: no máximo 100 senhas
-  a cada 2 minutos. O coletor conta as senhas e espera quando chega no
-  limite.
+**Resposta:** As variáveis são diferenças agregadas entre os dois times, seguindo Birant e Birant; Bahrololloomi et al. usam métricas individuais e concluem que o peso de cada função é desprezível.
 
-**b) A chave expira a cada 24 horas.** A chave de desenvolvedor da Riot
-vence todo dia. Solução: o coletor é **resumível**: ele pula partidas
-já salvas. Se a chave vence no meio, você gera outra e roda de novo, e
-ele continua de onde parou, sem duplicar nada.
+**Onde achar no TCC:** Seção 3.2; Seção 5.7.
 
-**c) Regiões diferentes têm endereços diferentes.** A lista de
-jogadores é por **plataforma** (br1, kr, euw1...), mas as partidas são
-por **região de roteamento** (americas, asia, europe). O cliente
-converte automaticamente (ex.: br1 e na1 → americas).
+**Explicando fácil:** Numa partida de LoL quem vence é o time, não um jogador isolado. É como prever o resultado de um jogo de futebol pelo placar do time, não pela estatística de um atacante. As métricas individuais entram só nos perfis de jogador da plataforma. Além disso, nos experimentos, variáveis por jogador renderam menos de um centésimo de AUC.
 
-**Quantas partidas, por região (base final, Quadro 2):**
+### 37. Por que o TCC não prevê antes da partida, como Do et al. (2021)?
 
-| Região | Partidas |
-|---|---|
-| BR1 (Brasil) | 11.936 |
-| EUW1 (Europa Oeste) | 11.744 |
-| KR (Coreia) | 10.204 |
-| NA1 (América do Norte) | 7.159 |
-| EUN1 | 20 (insuficiente, fora da análise) |
-| **Total** | **41.063** |
+**Resposta:** O TCC prevê durante a partida, a partir do estado em cortes de tempo. Em experimento, campeões e histórico do jogador, sem o estado, deram AUC-ROC de 0,56 aos 15 minutos.
 
-**A coleta foi crescendo aos poucos** (isso é importante para a Parte
-12): 10.295 → 23.133 → 24.154 → 33.713 → 39.426 → **41.063**. Todo o pipeline (*features*, modelos, SHAP, experimentos) foi refeito sobre as 41.063 em 6/11/2026; não há mais duas bases.
+**Onde achar no TCC:** Seção 3.2; Seção 5.7 (o experimento de pré-jogo: só no repositório).
 
-**Por que EUN1 tem só 20?** Nunca foi uma região-alvo. O escopo sempre
-foi BR1, EUW1, KR e NA1. As 20 partidas apareceram "de carona" e nunca
-cresceram. O texto declara que ela foi excluída da leitura por amostra
-insuficiente.
+**Explicando fácil:** Prever antes de o jogo começar é como adivinhar o campeão pela seleção de campeões: quase não há informação ainda. O experimento do TCC mostra isso: sem o estado da partida, a AUC fica em 0,56, perto do chute. Do et al. chegam a 75,1% de acurácia com uma rede profunda e a experiência de cada jogador com o campeão, o que é um problema diferente.
 
-### 6.2 Fonte 2: Oracle's Elixir (partidas profissionais)
+### 38. O que Maymin (2021) e Guan e Tung (2026) fazem, e por que ficam fora da comparação numérica?
 
-- **O que é:** um site que publica, de graça, planilhas (CSV) com
-  estatísticas de jogos profissionais de LoL, ano a ano.
-- **O que entrou:** **99.259 jogos** de 2014 a 2026, de 122 ligas, da elite às de desenvolvimento
-  (LCK da Coreia, LPL da China, LEC da Europa, LTA, CBLOL do Brasil e
-  outras).
-- **Por que foi adicionada:** **não estava no TCC I**. Entrou no TCC II
-  para comparar o padrão do *solo queue* com o do profissional. Foi essa
-  comparação que revelou a inversão do viés de lado.
+**Resposta:** Maymin calibra um modelo de probabilidade com milhões de partidas e avalia eventos individuais; Guan e Tung (preprint, pré-jogo profissional) avaliam o erro de probabilidade (Brier), não a acurácia.
 
-### 6.3 Ética e dados de pessoas
+**Onde achar no TCC:** Seção 3.2; Seção 5.7.
 
-Os dados são **públicos e secundários** (já existiam, você não coletou de
-pessoas diretamente). Não houve participação de sujeitos humanos. Isso
-está escrito no fim da Seção 4.3.
+**Explicando fácil:** Para comparar números você precisa da mesma medida. Se um trabalho mede Brier (erro de probabilidade) e outro mede acurácia, os números não se comparam, como comparar o dano por segundo com a vida total. Guan e Tung também é um preprint, ainda sem revisão por pares.
+
+### 39. Por que citar um preprint sem revisão por pares?
+
+**Resposta:** Guan e Tung (2026) é citado como evidência de que a prioridade de escolha entra como covariável própria; o texto declara que o estudo é um preprint e que a citação não comprova a hipótese.
+
+**Onde achar no TCC:** Seção 3.2; Seção 5.3.
+
+**Explicando fácil:** Preprint é um artigo ainda não revisado por especialistas. O TCC o usa só como indício, não como prova, e avisa isso no texto. É como citar um rumor de patch notes: serve para contextualizar, não para afirmar.
+
+### 40. O que García-Méndez e Arriba-Pérez fazem em Counter-Strike?
+
+**Resposta:** Combinam classificação por machine learning com interpretação na predição de vitória, em fluxo contínuo (streaming); apontam a falta de interpretabilidade como limitação dos trabalhos anteriores.
+
+**Onde achar no TCC:** Seção 3.3; Seção 5.7.
+
+**Explicando fácil:** Em CS, o modelo prevê o vencedor enquanto o jogo acontece e explica o motivo. O TCC aproveita a ideia de explicar (SHAP na interface), mas não a de streaming. É o que sustenta o princípio ‘previsão sem explicação não basta’.
+
+### 41. O que são SiriusBI e Talk2Data, e o que o TCC aproveita deles?
+
+**Resposta:** SiriusBI (Jiang et al.): BI apoiado por modelos de linguagem em contextos corporativos. Talk2Data (Guo et al.): interface em linguagem natural para análise visual com decomposição de perguntas. Os dois motivam o text-to-SQL do TCC.
+
+**Onde achar no TCC:** Seção 3.4; Seção 5.7.
+
+**Explicando fácil:** São exemplos de ‘conversar com os dados’: você pergunta em linguagem natural e o sistema consulta. O TCC aplica a ideia de perguntar a dados estruturados e acrescenta a validação da consulta antes de executar. Não aplica a decomposição de perguntas nem a geração automática de gráficos.
+
+### 42. O que é storyline visualization (Wallner, Wang e Dormann) e o TCC a usa?
+
+**Resposta:** É uma técnica de visualização espaço-temporal do gameplay. O TCC não a usa: aplica, de forma mais simples, a integração de tempo e posição com um mapa de calor minuto a minuto.
+
+**Onde achar no TCC:** Seção 3.5; Seção 5.7.
+
+**Explicando fácil:** A storyline é como um gráfico de linhas que mostra as ‘trajetórias’ dos jogadores ao longo da partida. O TCC escolheu algo mais simples: um mapa de calor no minuto selecionado. E a timeline pública tem uma amostra por minuto, bem menos detalhada que um rastreamento a cada segundo.
+
+### 43. Qual a lacuna que o TCC ocupa?
+
+**Resposta:** Nenhum estudo é entregue como plataforma que reúna coleta, tratamento, modelagem, explicabilidade, visualização e consulta em linguagem natural sobre a mesma base.
+
+**Onde achar no TCC:** Seção 3.6.
+
+**Explicando fácil:** Os estudos cobrem uma peça cada: prever, explicar, perguntar ou visualizar. O TCC junta todas numa única plataforma. É a diferença entre ter ótimos jogadores avulsos e montar o time completo. A contribuição, portanto, é de integração, e não de bater o recorde de um deles.
+
+### 44. Quais são as três decisões de projeto que distinguem o TCC?
+
+**Resposta:** Horizonte da predição (quatro cortes, um modelo por corte), recorte de população (mesmo indicador nos dois contextos, solo queue e profissional) e consulta mensurável (gabarito automático de 203 perguntas).
+
+**Onde achar no TCC:** Recorte de população: Seção 3.6. Horizonte: Seções 4.6 e 5.4. Consulta mensurável: Seção 5.6. (Na versão enxuta, a 3.6 manteve só o recorte.)
+
+**Explicando fácil:** (1) Em vez de prever uma vez, prevê aos 10, 15, 20 e 25 minutos, para ver como o jogo fica mais previsível. (2) Mede a mesma coisa nos dois contextos e mostra que o viés de lado se inverte. (3) A interface de perguntas é testada com um gabarito de 203 perguntas, e não só exemplos bonitos.
 
 ---
 
-## 7. O banco de dados e o tratamento (ETL)
+## 4.1 a 4.2 Natureza, abordagem e estratégias
 
-### 7.1 PostgreSQL e o esquema (Apêndice A)
+### 45. Que tipo de pesquisa é esta?
 
-**Banco relacional** = dados guardados em tabelas que se ligam entre si
-(como planilhas conectadas). Usado: **PostgreSQL**.
+**Resposta:** Aplicada quanto à natureza; exploratória e descritiva quanto aos objetivos; predominantemente quantitativa quanto à abordagem; com estratégias bibliográfica e documental.
 
-As **11 tabelas**:
+**Onde achar no TCC:** Seção 4.1 e 4.2.
 
-| Tabela | Guarda o quê |
-|---|---|
-| `players` | Jogadores semeados (código, nome, elo, região) |
-| `raw_matches` | O JSON **bruto** de cada partida, como veio da Riot |
-| `raw_timelines` | O JSON **bruto** de cada *timeline* |
-| `matches` | Dados normalizados da partida (região, versão, duração) |
-| `teams` | Uma linha por time por partida (venceu? torres, dragões...) |
-| `participants` | Uma linha por jogador por partida (campeão, KDA, ouro...) |
-| `bans` | Campeões banidos |
-| `item_events` | Compras e vendas de itens ao longo da partida |
-| `items` | Catálogo oficial de itens (nome, preço) |
-| `pro_games` | Jogos profissionais, uma linha por time |
-| `pro_players` | Jogadores profissionais, uma linha por jogador |
+**Explicando fácil:** São quatro rótulos que respondem a perguntas diferentes: natureza (para quê? aplicada, resolver um problema real), objetivos (o que faz? explorar e descrever), abordagem (como mede? números) e estratégia (de onde vêm as fontes? livros e artigos mais a documentação da API).
 
-### 7.2 Por que guardar o JSON bruto?
+### 46. Exploratória e descritiva não é contradição?
 
-**Exemplo:** é como guardar a **nota fiscal original** além da planilha
-de gastos. Se você descobrir um erro na planilha, refaz a partir das
-notas, sem ter que pedir tudo de novo à Riot (o que levaria dias, por
-causa do limite de pedidos). Isso salvou o projeto mais de uma vez
-(ver Parte 19, o bug das torres).
+**Resposta:** Não: exploratória na investigação da API e das possibilidades de modelagem; descritiva na caracterização dos dados, padrões e modelos comparados (Gil, 2002).
 
-### 7.3 ETL
+**Onde achar no TCC:** Seção 4.1.
 
-**ETL** = *Extract, Transform, Load* (extrair, transformar, carregar).
-É o processo de pegar o dado bruto e transformar em tabelas limpas.
+**Explicando fácil:** Explorar é ‘ver o que existe e o que dá para fazer’, como abrir o mapa pela primeira vez. Descrever é ‘medir e relatar como é’, como listar as estatísticas do mapa. O trabalho faz as duas coisas em momentos diferentes, então os dois rótulos convivem.
 
-Tratamentos importantes:
-- **Normalização** do JSON da partida em `matches`, `teams`,
-  `participants`.
-- **Eventos de item** com o "desfazer" (`ITEM_UNDO`) aplicado: se o
-  jogador comprou e desfez a compra, a compra não conta.
-- **Reconciliação de nomes de campeão** entre Riot e Oracle's Elixir
-  (cada fonte escreve alguns nomes de um jeito).
-- **Catálogo de itens** vindo do Data Dragon (arquivo oficial da Riot),
-  para o sistema mostrar nome e ícone do item **consultando o banco**, e
-  nunca confiando na memória de um modelo de linguagem.
+### 47. Qual a diferença entre pesquisa bibliográfica e documental?
 
-### 7.4 Idempotência (palavra difícil, ideia simples)
+**Resposta:** Bibliográfica usa artigos e livros já analisados por outros autores; documental usa documentos ainda não analisados academicamente, como a documentação da Riot Games API.
 
-**Idempotente** = rodar duas vezes dá o mesmo resultado que rodar uma
-vez. **Exemplo:** apertar o botão do elevador duas vezes não chama dois
-elevadores. O coletor e os ETLs foram feitos assim de propósito: rodar
-de novo **não duplica** linhas nem corrompe nada. Isso é o que permite
-retomar a coleta todo dia depois que a chave vence.
+**Onde achar no TCC:** Seção 4.2.
+
+**Explicando fácil:** Bibliográfica é ler o que outros pesquisadores já escreveram (artigos). Documental é ler uma fonte ‘crua’ que ninguém tratou como estudo, como o manual da API. O TCC usa as duas: artigos para a teoria, a documentação oficial para saber o que a Riot entrega.
+
+### 48. Por que ‘aplicação delimitada ao domínio de League of Legends’?
+
+**Resposta:** Porque a pesquisa e a plataforma ficam restritas a esse jogo; outros jogos e abordagens ficam fora.
+
+**Onde achar no TCC:** Seção 4.2; Seção 1.
+
+**Explicando fácil:** Delimitar é dizer ‘até onde vai o trabalho’. Evita prometer que funciona em qualquer jogo. Isso protege contra a pergunta ‘funciona em Valorant?’: a resposta honesta é que não foi testado.
+
+### 49. Por que predominantemente quantitativa e não mista?
+
+**Resposta:** A coleta, a análise exploratória e a comparação de modelos trabalham com dados numéricos; a revisão bibliográfica e a interpretação dão o contexto (Creswell e Creswell, 2023).
+
+**Onde achar no TCC:** Seção 4.1.
+
+**Explicando fácil:** O núcleo é número: taxas de vitória, AUC, intervalos, testes. Não houve entrevista nem questionário. A parte textual (revisão, interpretação) serve para dar sentido aos números, e por isso se diz ‘predominantemente’ quantitativa.
+
+### 50. Houve participação de pessoas, e isso exige comitê de ética?
+
+**Resposta:** Os dados são secundários e públicos, sem participação de sujeitos humanos como fonte em nenhuma etapa.
+
+**Onde achar no TCC:** Seção 4.3 (último parágrafo).
+
+**Explicando fácil:** Ninguém foi entrevistado nem observado. Os dados vêm da API pública da Riot e de arquivos públicos do Oracle’s Elixir. Por isso o TCC declara que não há sujeitos humanos como fonte. Os identificadores de jogadores vêm da própria API pública.
 
 ---
 
-## 8. As *features*: o que o modelo enxerga
+## 4.3 Coleta de dados
 
-### 8.1 O que é uma *feature*
+### 51. Como a coleta foi feita, passo a passo?
 
-*Feature* (ou variável preditora) é uma **informação de entrada** que o
-modelo usa para fazer a previsão. **Exemplo:** para prever se vai
-chover, as *features* seriam umidade, temperatura, nuvens.
+**Resposta:** Pela Riot API: league-v4 lista os jogadores de elo alto, account-v1 resolve o Riot ID e match-v5 traz cada partida e a linha do tempo, em cinco regiões na fila 420.
 
-### 8.2 As 5 *features* do projeto
+**Onde achar no TCC:** Seção 4.3; Seção 5.1.
 
-Todas são **diferenças: time azul menos time vermelho**, no minuto do
-corte:
+**Explicando fácil:** Primeiro lista-se quem são os jogadores de topo (league-v4); depois, para cada jogador, pega-se os ids das últimas partidas e baixa-se a partida e a linha do tempo (match-v5). Tudo é salvo em JSON bruto no banco. É como montar um álbum de figurinhas, pulando as que você já tem.
 
-| *Feature* | Significado | Exemplo |
-|---|---|---|
-| `gold_diff` | Diferença de ouro | +2.000 = azul tem 2 mil de ouro a mais |
-| `xp_diff` | Diferença de experiência | +500 = azul tem mais XP |
-| `kill_diff` | Diferença de abates | -3 = vermelho matou 3 a mais |
-| `tower_diff` | Diferença de torres destruídas | +1 = azul derrubou 1 torre a mais |
-| `dragon_diff` | Diferença de dragões | 0 = empate |
+### 52. O que é a fila 420 e por que ela?
 
-**E o "alvo"** (o que se quer prever): `blue_win` = 1 se o azul venceu,
-0 se perdeu. É uma **classificação binária** (duas respostas possíveis).
+**Resposta:** É a fila ranqueada solo/duo.
 
-**Por que diferenças e não valores absolutos?** Porque o que importa é
-quem está **na frente**, não quanto cada um tem. Um time com 30 mil de
-ouro pode estar perdendo se o outro tem 33 mil. Isso segue a ideia de
-**modelagem centrada no time** de Birant e Birant (2023).
+**Onde achar no TCC:** Seção 4.3.
 
-### 8.3 Os cortes de tempo: 10, 15, 20 e 25 minutos
+**Explicando fácil:** Fila 420 é a partida ranqueada em que o jogador entra sozinho ou em dupla. É o modo em que jogadores de elo alto se enfrentam por pontos de liga, então os dados são comparáveis entre si. Outras filas (normal, flex) têm outras regras e ficam fora.
 
-O modelo não olha a partida inteira. Ele olha uma **foto** num minuto
-específico. Foram escolhidos 4 cortes, cada um representando uma fase
-(está escrito no topo do `build_features.py`):
+### 53. Por que a EUN1 ficou fora da análise por região?
 
-| Corte | Fase do jogo |
-|---|---|
-| 10 min | Fase de rotas (cada um no seu caminho) |
-| **15 min** | **Fim das rotas** (as placas de torre caem aos 14) — **corte padrão** |
-| 20 min | Meio de jogo |
-| 25 min | Transição para o fim de jogo |
+**Resposta:** Teve só 20 partidas, amostra insuficiente.
 
-**Por que 15 minutos é o padrão?** Porque é o fim da fase de rotas: o
-jogo já mostrou quem está melhor, mas ainda não está decidido. Uma
-previsão aos 15 é útil (dá tempo de reagir) e informativa.
+**Onde achar no TCC:** Seção 4.3; Seção 5.3 (Quadro 1).
 
-**Por que um modelo para cada corte?** Porque a importância das coisas
-muda com o tempo. **Exemplo real:** torres quase não importam até os 20
-minutos e de repente importam muito aos 25 (Parte 11). Um modelo único
-misturaria essas fases e ficaria pior.
+**Explicando fácil:** Com 20 partidas a taxa de vitória oscila muito: pode virar 70% ou 30% só por sorte. Por isso a EUN1 aparece nos dados mas não entra na análise por região. É a mesma lógica de não julgar uma build por 3 partidas.
 
-**Se a partida acabou antes do corte** (ex.: alguém se rendeu aos 14
-minutos), ela não entra naquele corte. Por isso o número de partidas cai
-nos cortes tardios: 40.919 aos 10, 40.778 aos 15, 34.505 aos 20, 25.098
-aos 25. **Atenção (corrigido em 2026-11-08):** a linha do tempo termina com
-um quadro extra no instante em que o jogo acaba. Antes, uma partida de
-24:16 entrava no corte de 25 minutos com esse quadro final, que é o fim do
-jogo (vazamento). A regra `corte_disponivel` exige um quadro depois do
-quadro do corte, e um teste automatizado garante isso (Parte 22).
+### 54. O que são limite de taxa e o erro 429?
 
-### 8.4 Vazamento de dados (*data leakage*) — A REGRA MAIS IMPORTANTE
+**Resposta:** A API limita os pedidos por janela de tempo; o cliente do projeto se limita a 95 pedidos a cada 2 minutos (margem sob o limite de 100 que o próprio código atribui à chave de desenvolvimento). Se exceder, a API devolve 429 e o cliente espera o tempo do cabeçalho Retry-After.
 
-**É muito provável a banca perguntar isso.**
+**Onde achar no TCC:** Seção 5.1 (menciona os limites de taxa e a validade de 24 horas, sem os números); número exato: `src/riot/client.py`. O quadro com os tipos de chave saiu do TCC (`git show f2ecb39:docs/tcc2_texto.md`) e deve ser conferido no portal developer.riotgames.com, porque o limite varia conforme o tipo de chave.
 
-**O que é:** quando o modelo, sem querer, recebe uma informação que ele
-**não teria no momento real da previsão**, normalmente informação do
-futuro. Aí ele parece ótimo nos testes e é inútil na prática.
+**Explicando fácil:** Limite de taxa é a fila de senhas do banco: só atendem tantos por minuto. O cliente do TCC conta os pedidos e espera quando chega perto de 95. Se mesmo assim receber 429 (‘muitos pedidos’), dorme o tempo que a Riot manda. Assim a coleta roda por horas sem ser bloqueada.
 
-**Exemplo simples:** prever quem ganha um jogo de futebol olhando o
-**placar final**. Você vai acertar 100%, mas isso não é previsão, é
-"colar com o gabarito".
+### 55. Por que a chave expira a cada 24 horas e como isso afeta o trabalho?
 
-**No LoL:** se você usasse o **total de abates da partida inteira** ou o
-**ouro total no fim**, o modelo acertaria quase sempre, porque quem
-ganhou normalmente termina com mais. Seria trapaça.
+**Resposta:** A chave de desenvolvedor expira em 24 horas; o coletor é resumível e retoma de onde parou, pulando as partidas já salvas.
 
-**Como o projeto evita:** as *features* são calculadas **só com os
-frames até o minuto do corte** (`frames[: corte + 1]` no código). Nada
-depois do minuto 15 entra no modelo do minuto 15. Isso é um "invariante"
-do projeto: uma regra que nunca pode ser quebrada.
+**Onde achar no TCC:** Seção 4.3; Seção 5.1.
 
-**Onde cuidar mais:** o experimento 11 (percentis comportamentais) quase
-caiu nessa armadilha: a Riot devolve o comportamento **atual** do
-jogador, não o de quando a partida aconteceu. Usar isso em partidas
-antigas seria usar dado do futuro. A solução foi testar só em partidas
-**recentes** da Coreia, registrando o intervalo de dias (Parte 12).
+**Explicando fácil:** Chave de desenvolvedor é uma senha temporária. Se a coleta cair por expiração, basta gerar outra chave e rodar de novo: o coletor lê o que já está no banco e continua. Funciona como salvar o jogo: voltar não repete o que já foi feito (idempotência).
+
+### 56. De onde vêm os 99.259 jogos profissionais?
+
+**Resposta:** Do Oracle’s Elixir: arquivos anuais CSV de 2014 a 2026, de 122 ligas (arquivos de 4 de julho de 2026).
+
+**Onde achar no TCC:** Seção 4.3 (composição por liga: só no repositório, consulta a `pro_games`).
+
+**Explicando fácil:** É um site que publica, em planilhas CSV, os resultados de jogos profissionais de LoL. O TCC baixou os arquivos anuais e carregou em tabelas. Atenção: são 122 ligas, da elite às de desenvolvimento; 40% dos jogos estão em 22 ligas principais. A taxa de vitória do azul é parecida nos dois grupos (53,4% e 53,0%).
+
+### 57. O que é um dado secundário e por que isso importa?
+
+**Resposta:** Dado que já foi coletado por outra instituição (a Riot e o Oracle’s Elixir), e não por entrevistas ou experimentos do autor.
+
+**Onde achar no TCC:** Seção 4.3.
+
+**Explicando fácil:** Dados primários são os que você mesmo produz (uma pesquisa). Secundários já existem. A vantagem é ter volume (41 mil partidas); o cuidado é que você não controla como foram coletados, e por isso o TCC cita as ressalvas (viés de seleção, recortes).
+
+### 58. Os dados são representativos de todos os jogadores?
+
+**Resposta:** Não. São partidas ranqueadas de Desafiante a Mestre em cinco regiões; não há base para estender a outras filas, elos, versões ou jogos.
+
+**Onde achar no TCC:** Seção 6.1 (validade externa).
+
+**Explicando fácil:** Representar todos exigiria sortear de todos os elos. Aqui é só elo alto, o que é o recorte do estudo. A conclusão deve ser lida como ‘vale para elo alto’. E dentro disso há desequilíbrio: BR1 e EUW1 têm mais partidas, e o patch 16.13 concentra 40,4% da coleta.
 
 ---
 
-## 9. Os três modelos: Random Forest, XGBoost e MLP
+## 4.4 Organização e tratamento
 
-### 9.1 Por que comparar três modelos?
+### 59. Por que um banco relacional (PostgreSQL)?
 
-1. **O TCC I prometeu:** o objetivo específico **e** é "comparar o
-   desempenho de modelos de *machine learning*, com foco em XGBoost,
-   Random Forest e redes neurais". O TCC II cumpriu.
-2. **São três "famílias" diferentes** de modelo, cada uma com uma lógica.
-   Comparar mostra qual combina melhor com esse tipo de dado, por
-   **medição**, não por preferência. (A Seção 2.2 diz: "comparou três, por
-   medição, e não por preferência".)
-3. **Conversa com o orientador (confirmado por você em 2026-11-02):** além
-   do XGBoost, entraram *Random Forest* e redes neurais porque, numa
-   conversa com o orientador, ficou combinado que seria interessante ver
-   as diferenças de resultado entre as abordagens. O registro de
-   acompanhamento não detalha esse assunto (só "estrutura" e
-   "fundamentação"), então, se perguntarem onde está escrito, a
-   justificativa formal é a do TCC I, Seção 4.6: "analisar abordagens
-   distintas para dados competitivos, incluindo métodos amplamente
-   utilizados em dados tabulares e modelos neurais capazes de capturar
-   relações mais complexas entre variáveis".
+**Resposta:** Foi escolhido por atender o projeto, mas o TCC não compara alternativas.
 
-**Resposta pronta:** "O XGBoost era o candidato natural para dados em
-tabela. Conversando com o orientador, decidimos comparar com *Random
-Forest* e uma rede neural para ver as diferenças de resultado entre
-famílias de modelos: dois *ensembles* de árvores, um por *bagging* e outro
-por *boosting*, e uma rede neural. A comparação foi por medição, e os três
-ficaram próximos."
+**Onde achar no TCC:** Seção 4.4; Apêndice A.
 
-### 9.2 Primeiro: o que é uma árvore de decisão
+**Explicando fácil:** O TCC não justifica com comparação. O que atende ao projeto, como leitura minha: dados estruturados com chaves, SQL como base da interface em português, tipo JSONB para guardar o JSON bruto, gratuito e rodando local. Na banca, não afirme que foi comparado com outros bancos.
 
-Os dois primeiros modelos usam árvores de decisão. Uma árvore é uma
-sequência de perguntas de sim ou não. **Exemplo:**
+### 60. O que é ETL e que tratamentos foram feitos?
 
-```
-O azul tem mais de 2.000 de ouro a mais?
-├── Sim → Tem pelo menos 1 torre a mais?
-│         ├── Sim → "azul provavelmente vence"
-│         └── Não → ...
-└── Não → ...
-```
+**Resposta:** Extrair, transformar e carregar: normalização da partida bruta de cada fonte, extração das compras e vendas de itens da linha do tempo com os desfazimentos aplicados, e reconciliação dos nomes de campeão entre a Riot e o Oracle’s Elixir.
 
-Uma árvore sozinha erra muito. Os dois modelos juntam **centenas** de
-árvores, de jeitos diferentes.
+**Onde achar no TCC:** Seção 4.4.
 
-### 9.3 Random Forest (Breiman, 2001)
+**Explicando fácil:** ETL é a linha de montagem: tira o dado cru (JSON, CSV), arruma e coloca nas tabelas. Exemplo de arrumação: se o jogador compra um item e desfaz a compra, a compra não pode contar. E ‘Wukong’ na Riot é MonkeyKing no banco, com outros nomes nos arquivos profissionais; é preciso reconciliar.
 
-**Ideia:** um **comitê** de muitas árvores que votam. Cada árvore é
-treinada com uma **amostra sorteada** das partidas (isso se chama
-*bagging*) e, em cada pergunta, só pode escolher entre um **sorteio de
-*features***. Isso força as árvores a serem diferentes umas das outras.
-No fim, a maioria dos votos decide.
+### 61. Por que guardar o JSON bruto e também as tabelas?
 
-**Exemplo:** 500 pessoas tentando adivinhar o vencedor, cada uma viu
-partes diferentes dos jogos e prestou atenção em coisas diferentes. A
-média das opiniões costuma ser melhor que a opinião de qualquer uma.
+**Resposta:** Para reprocessar sem nova coleta quando a regra de extração mudar.
 
-**Por que faz sentido aqui:** as *features* do LoL andam juntas (quem
-tem mais ouro costuma ter mais abates e mais torres). O sorteio de
-*features* "descorrelaciona" as árvores, o que ajuda nesse tipo de dado.
+**Onde achar no TCC:** Seção 5.2; Apêndice A.
 
-**No projeto:** 500 árvores na comparação final.
+**Explicando fácil:** A API tem limite de pedidos: coletar tudo de novo levaria horas. Guardando o bruto, se você descobrir um bug (como o das torres no time errado), refaz as tabelas a partir do arquivo salvo. É como guardar o replay original além do resumo da partida.
 
-### 9.4 XGBoost (Chen e Guestrin, 2016), o modelo adotado
+### 62. O que o catálogo de itens resolve?
 
-**O nome:** *eXtreme Gradient Boosting*.
+**Resposta:** Permite resolver nome e ícone de item por consulta ao banco, sem depender da memória de um modelo de linguagem.
 
-**Ideia (*boosting*):** em vez de árvores independentes votando, as
-árvores são construídas **em sequência**, e **cada nova árvore tenta
-corrigir os erros das anteriores**.
+**Onde achar no TCC:** Seção 4.4.
 
-**Exemplo:** uma turma fazendo uma prova em fila. O primeiro aluno
-responde. O segundo olha **só onde o primeiro errou** e tenta corrigir.
-O terceiro olha o que ainda está errado... depois de 500 alunos, o
-resultado somado é muito bom.
+**Explicando fácil:** Se a interface perguntasse a um modelo ‘quanto custa o item 3153?’, ele poderia inventar. A tabela items (do Data Dragon da Riot) responde com o dado real. É o princípio do trabalho: fato do jogo sai de tabela, não da memória da IA.
 
-**O "gradiente":** é a forma matemática de medir "para que lado e quanto
-o erro precisa ser corrigido". O XGBoost usa também a "curvatura" do
-erro (otimização de segunda ordem), o que deixa a correção mais precisa.
+### 63. O que significa ‘desfazimentos de compra aplicados’?
 
-**A "regularização":** é um freio para o modelo não "decorar" os dados
-de treino (*overfitting*). **Exemplo:** um aluno que decora as respostas
-da prova antiga e vai mal numa prova nova. O freio impede isso.
+**Resposta:** Se o jogador desfaz a compra de um item, o evento de desfazer cancela a compra; a tabela de itens já vem com isso resolvido.
 
-**Configuração de produção (hiperparâmetros):**
+**Onde achar no TCC:** Seção 4.4; Apêndice A (Quadro 4).
 
-| Hiperparâmetro | Valor | Em palavras simples |
-|---|---|---|
-| `n_estimators` | **500** | 500 árvores em sequência |
-| `learning_rate` | **0,01** | Cada árvore corrige só **1%** do erro. Passos pequenos = aprende devagar, mas com cuidado |
-| `max_depth` | **3** | Cada árvore faz no máximo **3 perguntas** seguidas. Árvores rasas = modelo simples, difícil de decorar |
-
-**Por que "hiperparâmetro" e não "parâmetro":** parâmetros o modelo
-aprende sozinho dos dados. Hiperparâmetros são configurações que
-**você** escolhe antes de treinar.
-
-**Por que o XGBoost foi escolhido como modelo de produção (Seção 5.4):**
-- O Quadro 3 mostra a comparação **depois do ajuste**: regressão logística
-  0,7648 / 0,8495, MLP ajustado 0,7638 / 0,8491, XGBoost 0,7641 / 0,8487 e
-  *Random Forest* ajustada 0,7628 / 0,8480. Os quatro ficam a **0,0015 de
-  AUC** uns dos outros: **diferença de milésimos**, sem vencedor.
-- **A escolha não se apoia em superioridade de desempenho** (pedido do
-  orientador no parecer). O XGBoost foi mantido **pela proximidade dos
-  resultados e porque a integração com o SHAP de árvores, exato, já estava
-  implementada**.
-- **Resposta pronta se perguntarem "a logística ganhou, por que não ela?":**
-  "Por 0,0008 de AUC, uma diferença que não muda nada na prática; é o sinal
-  de que o limite está nas cinco variáveis, não no modelo. O XGBoost já
-  sustentava a interface com o SHAP de árvore (TreeExplainer), que dá
-  explicações exatas e rápidas."
-
-**De onde veio o conhecimento para usar o XGBoost:**
-1. **O artigo original** (Chen e Guestrin, 2016), citado na Seção 2.2,
-   que explica o método e por que ele costuma ser forte em **dados
-   tabulares** (dados em forma de tabela, como as suas *features*).
-2. **A exigência do TCC I** (objetivo e).
-3. **A documentação da biblioteca** `xgboost` em Python.
-4. **A medição:** a busca em grade (abaixo) confirmou a configuração.
-
-**Como os hiperparâmetros foram escolhidos (GridSearchCV):**
-- *Grid search* = **testar todas as combinações** de uma lista de
-  valores e ficar com a melhor. **Exemplo:** testar todas as combinações
-  de runas e itens para ver qual dá mais dano.
-- A grade do XGBoost tinha 3 valores para cada um dos 3 hiperparâmetros:
-  árvores (200, 300, 500), taxa (0,01; 0,05; 0,1) e profundidade (3, 4,
-  6) = **27 combinações**.
-- Sobre as 40.778 partidas do corte de 15 minutos, a busca refeita
-  escolheu **a própria configuração de produção** (500/0,01/3): **1º lugar
-  entre 27**.
-- **Seleção aninhada (parecer):** escolhendo os hiperparâmetros só no
-  treino de cada dobra, a AUC muda no máximo 0,0002 nos três modelos. O
-  otimismo da busca é desprezível.
-- **Conclusão importante:** o modelo de produção **não está mal
-  ajustado** (não é "subajuste").
-
-### 9.5 MLP — rede neural (perceptron multicamadas)
-
-**Ideia:** imitação simplificada de neurônios. Os dados entram, passam
-por **camadas** de "neurônios artificiais" que fazem contas e combinam
-as informações, e sai uma probabilidade.
-
-**No projeto:** duas camadas escondidas, com **64 e 32 neurônios**.
-Antes de entrar, os dados passam por um `StandardScaler`, que coloca
-todas as *features* na mesma escala (ouro está na casa dos milhares,
-torres na casa das unidades; sem isso a rede daria importância demais
-ao ouro só porque o número é maior).
-
-**Ponto forte:** consegue aprender combinações complexas sozinha.
-**Ponto fraco:** precisa de **muitos** dados e cuidado. O texto diz:
-"restrição relevante numa amostra de dezenas de milhares de partidas, e
-não de milhões".
-
-**Como foi implementada (conferido no código, 2026-11-02):**
-
-```python
-make_pipeline(StandardScaler(),
-              MLPClassifier(hidden_layer_sizes=(64, 32),
-                            max_iter=500, random_state=42))
-```
-
-- **Arquitetura:** 5 entradas → 64 → 32 → 1 saída. São **2.497 pesos**
-  aprendidos (5×64+64 = 384; 64×32+32 = 2.080; 32×1+1 = 33), pouco para 39
-  mil partidas.
-- **Padrões do scikit-learn 1.9 usados:** ativação **ReLU** nas camadas
-  escondidas; saída **logística** (probabilidade); perda logarítmica;
-  otimizador **Adam** com taxa 0,001; regularização `alpha` 0,0001; lotes de
-  200 partidas; para em 500 épocas ou após 10 épocas sem melhora.
-- **Treino, em uma frase:** pesos aleatórios (semente 42) → previsão → erro
-  pela perda logarítmica → retropropagação calcula a culpa de cada peso →
-  Adam corrige → repete lote a lote.
-- **Normalização dentro do pipeline:** sem vazamento (Parte 9.6).
-- **Convergência:** no piloto de 98 partidas não convergiu (aviso
-  registrado no diário de 2026-07-01); com milhares, convergiu.
-
-**Histórico de desempenho (AUC aos 15 min, MLP × XGBoost):** 7.353
-partidas sem ajuste 0,8050 × 0,8144; ajustada (32 neurônios, alpha 0,01)
-0,8278 × 0,8260; 10.295 partidas ajustada 0,8325 × 0,8319; base final
-(Quadro 3, configuração de referência 64/32) 0,8459 × 0,8487.
-
-**Por que não foi a de produção:** diferenças de milésimos (ajustado, o
-MLP fica 0,0004 acima do XGBoost em AUC e 0,0003 abaixo em acurácia), e a
-explicação: para árvores o SHAP usa o `TreeExplainer`, exato e rápido; para
-uma rede do scikit-learn usaria o `KernelExplainer`, aproximado e muito
-mais lento, ruim para a tela interativa.
-
-**A comparação do Quadro 3 (revista pelo parecer de 2026-11-08).** O
-Quadro 3 agora mostra os quatro modelos ajustados (a logística sem
-hiperparâmetro) e, embaixo, a *Random Forest* e o MLP na configuração de
-referência. A busca dos três rodou nas 40.778 partidas
-(`tune_models_full --completo`, `reports/tune_models_39k.json`; o nome do
-arquivo ficou do tempo da base menor) e foi repetida de forma aninhada
-(`tune_models_aninhado`):
-
-| 15 min | Acurácia | AUC | AUC aninhada |
-|---|---|---|---|
-| Regressão logística | 0,7648 | 0,8495 | — |
-| MLP ajustado: (32), alpha 0,001 | 0,7638 | 0,8491 | 0,8491 |
-| XGBoost (produção) | 0,7641 | 0,8487 | 0,8485 |
-| *Random Forest* ajustada: 200 árvores, profundidade 6, folha 5 | 0,7628 | 0,8480 | 0,8480 |
-
-**Resposta pronta:** "Ajustei os três por busca em grade e repeti a busca
-de forma aninhada. Com a regressão logística, os quatro ficam a 0,0015 de
-AUC uns dos outros. Mantive o XGBoost pela proximidade dos resultados e
-pela integração com o SHAP exato de árvores, não por ser melhor."
-
-### 9.6 Validação cruzada estratificada de 5 *folds* (semente 42)
-
-**O problema:** se você testar o modelo nas mesmas partidas em que ele
-treinou, ele parece ótimo (já viu as respostas). Precisa testar em
-partidas que ele **nunca viu**.
-
-**Validação cruzada de 5 *folds*:** divide as partidas em **5 pilhas**.
-Treina com 4 e testa na 5ª. Repete 5 vezes, cada vez testando numa pilha
-diferente. Faz a média. Assim **toda partida é testada uma vez** sem que
-o modelo a tenha visto no treino.
-
-**"Estratificada":** cada pilha mantém a **mesma proporção** de vitórias
-do azul do conjunto inteiro (46,7%). Evita uma pilha "azarada" só com
-vitórias do vermelho.
-
-**"Semente 42":** o sorteio das pilhas é aleatório. Fixar a semente
-(*seed*) faz o sorteio sair **igual toda vez**, então qualquer pessoa que
-rodar o script obtém exatamente os mesmos números. Isso é
-**reprodutibilidade**. (O número 42 é só uma convenção, poderia ser
-qualquer um.)
-
-**Por que validação cruzada e não só "80% treino, 20% teste"?** Porque
-com uma divisão só, o resultado depende da sorte daquela divisão. Com 5,
-a média é mais confiável.
-
-**Por que 5 e não 10 dobras? (pergunta provável, confirmado por você em
-2026-11-02).** O Kohavi (1995), que o TCC cita, recomenda validação cruzada
-estratificada com **10** dobras. O projeto usou 5 por custo: a busca em
-grade treina cada combinação uma vez por dobra (27 combinações no XGBoost,
-mais as grades da *Random Forest* e do MLP em `tune_models_full.py`), e 10
-dobras dobrariam o número de treinos. Com ~41 mil partidas, cada dobra de
-teste ainda tem perto de **8.150 partidas** (40.778 ÷ 5), amostra grande o
-bastante para a média ser estável. Do Kohavi, o projeto segue a parte
-central: validação cruzada **estratificada**. Um bônus: a mesma divisão
-(`StratifiedKFold(n_splits=5, random_state=42)`) é usada em todos os
-scripts (modelo de referência, busca em grade, os experimentos), então
-toda comparação do trabalho é feita sobre as mesmas dobras.
-
-**Resposta pronta:** "O Kohavi recomenda 10 dobras. Usei 5 por custo
-computacional, porque a busca em grade treina cada combinação uma vez por
-dobra, nos três modelos. Com quase 40 mil partidas, cada dobra de teste tem
-cerca de 8.150, o que deixa a estimativa estável. A parte da recomendação
-que mais importa, a estratificação, foi seguida, e a mesma divisão vale
-para todos os experimentos."
-
-**Medido em 2026-11-03 e refeito em 6/11 na base única:** rodando de novo com 10 dobras (`src/models/robustez_dobras.py`, Apêndice C), a diferença é de no máximo 0,0021 em acurácia e 0,0004 em AUC (na *Random Forest* aos 15 minutos; no XGBoost, no máximo 0,0006 e 0,0001). A resposta agora é "medi, e não muda".
-
-**Não exagere o custo.** A grade do XGBoost sobre as 40.778 partidas levou
-**16,7 segundos** (`reports/tune_models_39k.json`). Se a banca disser "então
-10 dobras custariam dois minutos", concorde: o custo pesava mais nas grades
-da *Random Forest* (500 árvores) e do MLP e na repetição dos
-experimentos, e o argumento principal é outro: com 8.150 partidas por dobra
-de teste, a diferença entre 5 e 10 dobras na estimativa é pequena, e manter
-a mesma divisão em todo o trabalho deixa os resultados comparáveis entre si.
-
-**Pergunta relacionada: "a busca em grade e a avaliação usaram as mesmas
-dobras? Isso não é otimista?"** Sim, as mesmas dobras, sem validação
-cruzada aninhada nem conjunto de teste separado. Em tese isso dá uma
-estimativa levemente otimista para a melhor combinação. Na prática, o
-efeito aqui é desprezível: a configuração de produção (500/0,01/3) foi
-escolhida pela busca em grade na base **antiga, de 10.295 partidas**
-(`reports/tune_models_10k.log`), e mantida; na base final a grade
-completa a pôs em 3º de 27, a 0,0001 da melhor. Resposta: "Não usei
-validação aninhada. Mas a configuração de produção veio da busca numa base
-anterior, de 10 mil partidas, e na base final ficou a 0,0001 da melhor
-combinação, então o viés de seleção não muda a conclusão."
-
-**E o `StandardScaler` do MLP, vaza?** Não: ele está dentro de um
-`make_pipeline` (`multi_cutoff_metrics.py`), então é ajustado só nas dobras
-de treino de cada rodada. Esse é um ponto que bancas de ML costumam
-perguntar (pré-processamento ajustado antes de dividir os dados).
-
-**Outra pergunta possível: "as dobras são independentes?"** Não
-totalmente, e o texto admite (Seção 6.1, validade interna): o mesmo
-jogador aparece em várias partidas, e o sorteio por partida pode pôr
-partidas dele no treino e no teste. Uma divisão por grupo (por jogador)
-seria mais rigorosa; fica como limitação declarada.
-
-### 9.7 Os resultados completos (Quadros 3 e 4, Apêndice C)
-
-**Corte de 15 minutos (Quadro 3, comparação após o ajuste):**
-
-| Modelo | Acurácia | Precisão | Recall | F1 | AUC-ROC | AUC aninhada |
-|---|---|---|---|---|---|---|
-| Regressão logística | 0,7648 | 0,7568 | 0,7317 | 0,7440 | 0,8495 | — |
-| MLP ajustado | 0,7638 | 0,7562 | 0,7296 | 0,7427 | 0,8491 | 0,8491 |
-| **XGBoost ajustado (produção)** | **0,7641** | 0,7576 | 0,7278 | 0,7424 | **0,8487** | 0,8485 |
-| *Random Forest* ajustada | 0,7628 | 0,7513 | 0,7356 | 0,7434 | 0,8480 | 0,8480 |
-| MLP (referência) | 0,7619 | 0,7488 | 0,7378 | 0,7433 | 0,8459 | — |
-| *Random Forest* (referência) | 0,7439 | 0,7312 | 0,7144 | 0,7227 | 0,8278 | — |
-
-**XGBoost em todos os cortes (Quadro 4), só com partidas em andamento no corte:**
-
-| Corte | Partidas | Acurácia | AUC-ROC |
-|---|---|---|---|
-| 10 min | 40.919 | 0,7020 | 0,775 |
-| 15 min | 40.778 | 0,7641 | 0,849 |
-| 20 min | 34.505 | 0,7856 | 0,869 |
-| 25 min | 25.098 | 0,8068 | 0,890 |
-
-**Leitura:** quanto mais tarde, mais o modelo acerta. **Faz sentido:**
-aos 25 minutos já aconteceu muito mais coisa. **Cuidado (parecer):** cada
-corte tem um conjunto diferente de partidas (as que ainda estão em
-andamento). Nas **mesmas 25.098 partidas** que chegam aos 25 minutos, a AUC
-vai de 0,644 (10 min) a 0,713, 0,787 e 0,890 (Quadro 17): o crescimento
-existe e é até maior, porque as partidas curtas, que só entram nos
-primeiros cortes, são mais fáceis de prever cedo. A previsão aos 25 também
-é **menos útil**, porque sobra menos tempo para mudar o rumo.
-
-**Tudo isso é reproduzível** com `python -m src.models.multi_cutoff_metrics`,
-que grava `reports/metricas_corte.json`.
+**Explicando fácil:** Na loja do LoL dá para desfazer uma compra e receber o ouro de volta. Se você só contasse as compras, contaria itens que o jogador nunca teve. O ETL aplica os desfazimentos para a tabela refletir o que o jogador realmente possuía.
 
 ---
 
-## 10. Como os modelos foram avaliados (métricas)
+## 4.5 Análise exploratória e testes de robustez
 
-**De onde vieram as 5 métricas:** da **ficha de avaliação do TCC I**
-(está escrito no topo do `train_baseline.py`).
+### 64. O que foi investigado na análise exploratória?
 
-Para explicar, imagine **1.000 partidas** no corte de 15 minutos. Em
-~467 o azul venceu (46,7%), em ~533 o vermelho venceu.
+**Resposta:** Distribuições e relações entre variáveis, com atenção à taxa de vitória por lado do mapa em três recortes: região, fase da partida e contexto (solo queue ou profissional).
 
-### 10.1 Acurácia — 0,7641
+**Onde achar no TCC:** Seção 4.5.
 
-**De todas as previsões, quantas acertaram?** ≈ 764 de 1.000.
+**Explicando fácil:** É perguntar ‘o azul ganha mais que o vermelho?’ de três ângulos: por região (BR, EUW, KR, NA), por fase do jogo (10, 15, 20, 25 minutos) e por contexto (ranqueada ou campeonato). A análise foi descritiva: mede o que acontece, sem afirmar a causa.
 
-**A armadilha:** como as classes não são 50/50, um "modelo burro" que
-**sempre** diz "vermelho vence" acerta 53,3% **sem entender nada**. Então
-76% não deve ser comparado com 50%, e sim com esse "chute" de ~53%.
-O ganho real é de uns 23 pontos percentuais acima do chute.
+### 65. Quais são os quatro testes de robustez e por que existem?
 
-### 10.2 Precisão — 0,7576
+**Resposta:** (i) replicação numa só região; (ii) comparação por duração total; (iii) intervalo de confiança de Wilson; (iv) comparação de pares com correção de Holm. Nenhum padrão foi aceito sem passar por eles.
 
-**Quando o modelo diz "azul vence", quantas vezes ele está certo?**
-De cada 100 vezes que ele aposta no azul, ~76 o azul vence mesmo.
+**Onde achar no TCC:** Seção 4.5; Seção 5.3.
 
-### 10.3 *Recall* (revocação) — 0,7278
+**Explicando fácil:** São quatro perguntas de ‘isso é real ou ilusão?’: (i) o padrão some se eu olhar uma região só? (ii) é porque partidas longas são diferentes? (iii) o intervalo de confiança exclui 50%? (iv) quando faço várias comparações, ainda sobra diferença depois de corrigir o acaso? É como checar se uma estratégia funciona em outro mapa, em outra duração e com margem de erro.
 
-**De todas as partidas que o azul realmente venceu, quantas o modelo
-pegou?** ~73 de cada 100.
+### 66. O que é o intervalo de Wilson?
 
-**Precisão x recall, exemplo de detector de incêndio:** precisão alta =
-quando apita, é incêndio mesmo. Recall alto = não deixa nenhum incêndio
-passar sem apitar. Normalmente melhorar um piora o outro.
+**Resposta:** Um intervalo de confiança de 95% para uma proporção que funciona melhor que o usual em amostras menores (Brown, Cai e DasGupta, 2001).
 
-### 10.4 F1 — 0,7424
+**Onde achar no TCC:** Seção 4.5.
 
-A **média harmônica** entre precisão e recall: um número só que só é
-alto se **os dois** forem altos.
+**Explicando fácil:** Se o azul venceu 47% em 1.000 partidas, a taxa verdadeira provavelmente está numa faixa em volta de 47%, por exemplo entre 44% e 50%. Essa faixa é o intervalo. Com mais partidas, a faixa estreita. O de Wilson é uma versão mais confiável quando a amostra não é enorme. Se a faixa não contém 50%, o desvio é provavelmente real.
 
-### 10.5 AUC-ROC — 0,8487 (a métrica principal)
+### 67. O que é a correção de Holm e por que ela foi decisiva?
 
-**A pergunta que ela responde:** pegue **uma partida que o azul venceu**
-e **uma que o azul perdeu**, ao acaso. O modelo dá uma probabilidade de
-vitória do azul para cada uma. Em quantos desses pares ele dá a
-probabilidade **maior** para a partida que o azul de fato venceu?
-Resposta: **84,87%** das vezes.
+**Resposta:** Corrige a multiplicidade quando várias diferenças são testadas na mesma base; sem ela, a dispersão entre cortes seria lida como tendência.
 
-Isso é exatamente o que Hanley e McNeil (1982) mostraram que a AUC
-significa: a probabilidade de um caso positivo receber nota maior que
-um negativo.
+**Onde achar no TCC:** Seção 4.5; Seção 5.3.
 
-- **AUC = 0,5:** igual a jogar moeda.
-- **AUC = 1,0:** perfeito.
-- **0,8487:** bom poder de separação.
+**Explicando fácil:** Se você joga 20 partidas de moeda e procura qualquer sequência esquisita, vai achar uma só por acaso. Com 6 comparações entre cortes, a chance de achar uma ‘diferença’ falsa sobe. Holm ajusta os valores-p para isso. Resultado do TCC: depois do ajuste nenhuma das seis diferenças foi detectada (menor valor-p corrigido 0,65).
 
-**Por que ela é a principal:** não depende do "corte de 50%" e não é
-enganada pela proporção desigual de vitórias. O texto reporta acurácia
-**e** AUC juntas justamente para mostrar essa diferença (Seção 2.3).
+### 68. Por que a partida foi usada como unidade no bootstrap?
 
-### 10.6 Calibração
+**Resposta:** Porque a mesma partida pode aparecer em mais de um corte; reamostrar partidas inteiras preserva essa dependência.
 
-**Pergunta:** quando o modelo diz "70% de chance de o azul vencer", o
-azul vence mesmo em ~70% dessas partidas?
+**Onde achar no TCC:** Seção 5.3.
 
-**Exemplo:** a previsão do tempo. Se em 100 dias a previsão disse "70%
-de chuva" e choveu em 70 deles, ela é **bem calibrada**.
+**Explicando fácil:** Uma partida empatada em ouro aos 10 e aos 15 minutos entra nos dois grupos, então os grupos não são independentes. Se você tratasse cada linha como independente, o erro seria subestimado. Reamostrando a partida inteira (bootstrap), o computador reproduz essa sobreposição e a margem de erro fica honesta.
 
-**Resultado (refeito pelo parecer):** a curva de calibração do XGBoost
-(Figura 12, Apêndice F) usa as probabilidades **fora da dobra**: cada
-partida é prevista por um modelo que não a viu. Entre os decis, o maior
-desvio aos 15 minutos é de 1,19 ponto percentual. Calibração extra
-(sigmoide ou isotônica) não traz ganho (Quadro 24).
+### 69. O que é o teste de duração e o que ele mostra?
 
-### 10.7 O "empate" e a taxa-base (Apêndice F) — a limitação que caiu
+**Resposta:** Compara a taxa de vitória do azul entre faixas de duração total da partida: 45,6% a 47,3%, amplitude de 1,7 ponto, todas abaixo de 50%; não houve diferença expressiva desse indicador entre partidas curtas e longas.
 
-**Versão antiga (refutada pelo parecer, não use):** "o modelo prevê 49-51%
-para o azul no empate total, e os dados dão 46-48%, uma discrepância de 2,4
-a 4,6 pontos".
+**Onde achar no TCC:** Seção 5.3 (frase do teste de duração); faixas por duração: só no repositório (`reports/faixa_duracao.json`).
 
-**O erro:** comparava a previsão para um **estado sintético** (as cinco
-diferenças iguais a zero) com **partidas reais** empatadas só no ouro.
-Nenhuma partida empatada real tem as cinco diferenças nulas.
+**Explicando fácil:** Alguém poderia dizer: ‘o viés só aparece em jogos longos’. O teste divide as partidas por duração e vê se o padrão se mantém em todas. Ele se mantém (azul sempre abaixo de 50%), então a duração, sozinha, não parece explicar o viés; isso não prova que partidas curtas e longas sejam iguais em tudo.
 
-**A medida certa (Quadro 23):** nas partidas empatadas reais (diferença de
-ouro menor que 500), a **média das probabilidades previstas** fica a menos
-de **0,4 ponto** da taxa observada em todos os cortes (−0,19 a +0,38 pp). O
-modelo está bem calibrado ali também, e a limitação saiu da Seção 6.1.
+### 70. Por que a análise exploratória é descritiva e não causal?
 
-**Resposta pronta:** "O orientador apontou que eu comparava um estado
-sintético com partidas reais. Medi do jeito certo, com as previsões fora da
-dobra nas próprias partidas empatadas, e a diferença some."
+**Resposta:** Mede o que ocorre e a robustez estatística, sem atribuir causa; as hipóteses (prioridade de escolha, counter-pick) são declaradas sem comprovar.
+
+**Onde achar no TCC:** Seção 5.3; Seção 6.
+
+**Explicando fácil:** Descrever é dizer ‘o vermelho vence 56,3% na BR1’. Causal seria dizer ‘por causa do counter-pick’. Para isso seria preciso testar com dados de ordem de escolha, que a API não dá. O TCC é cuidadoso: diz o que viu e a hipótese, sem confundir os dois.
 
 ---
 
-## 11. Explicabilidade: SHAP
+## 4.6 Modelagem preditiva
 
-### 11.1 Por que explicar?
+### 71. Quais são as variáveis do modelo?
 
-Por causa de García-Méndez e Arriba-Pérez (2025): **uma previsão sem
-explicação não ajuda o usuário**. Dizer "o azul tem 72% de chance" é
-menos útil que dizer "o azul tem 72% de chance **principalmente porque
-tem 2 mil de ouro a mais**".
+**Resposta:** Cinco diferenças, azul menos vermelho: ouro, experiência, abates, torres e dragões acumulados até o corte.
 
-O problema: o XGBoost soma 500 árvores. Ninguém consegue ler isso.
+**Onde achar no TCC:** Seção 4.6; Seção 5.4.
 
-### 11.2 As duas opções: LIME e SHAP
+**Explicando fácil:** O modelo vê só cinco números por partida, todos no nível do time: quanto o azul está à frente em ouro, experiência, abates, torres e dragões. Exemplo: +1.500 de ouro, +800 de XP, +3 abates, 1 torre a mais, 0 dragões. É o placar resumido de um instante.
 
-**LIME** (Ribeiro, Singh e Guestrin, 2016): "mexe um pouquinho" na
-entrada e vê como a saída muda, criando um modelo simples só na
-vizinhança daquela partida.
-- Vantagem: simples.
-- Problema: o resultado depende de como você define essa "vizinhança".
+### 72. Por que um modelo para cada corte (10, 15, 20, 25)?
 
-**SHAP** (Lundberg e Lee, 2017) — **o escolhido**: vem da **teoria dos
-jogos**, do **valor de Shapley**.
-- **Exemplo do valor de Shapley:** três amigos fazem um trabalho em grupo
-  e ganham 9 pontos. Quanto cada um merece? O valor de Shapley calcula a
-  contribuição média de cada um, testando todas as combinações possíveis
-  de quem participou. É a divisão **justa** do mérito.
-- No modelo: a "nota" é a probabilidade prevista, e os "amigos" são as 5
-  *features*. O SHAP diz quanto cada *feature* empurrou a previsão.
-- **Por que escolher o SHAP:** Lundberg e Lee mostraram que é a única
-  solução com propriedades desejáveis (**consistência** e não dar
-  importância a uma variável ausente). E as contribuições **somam**
-  exatamente a previsão, o que permite montar a explicação em texto a
-  partir de números **realmente calculados**.
+**Resposta:** Porque a importância das variáveis muda de fase: por exemplo, torres quase não pesam até os 20 minutos e sobem aos 25. Um modelo por fase é mais adequado que um genérico.
 
-### 11.3 O que o SHAP mostrou (Seção 5.4)
+**Onde achar no TCC:** Seção 4.6; Seção 5.4 (Figura 2).
 
-- **Unidade (parecer):** os valores estão em **log-odds**. O SHAP do
-  XGBoost decompõe a saída bruta do modelo: referência (a previsão média,
-  −0,132 = 46,7%) mais a soma das contribuições, e a transformação
-  logística dá a probabilidade. Na Figura 4: −0,132 + 1,038 = 0,906, que
-  vira **71,2%**. A tela do Simulador mostra essa conta.
-- **Ouro e experiência dominam** em todos os cortes. `gold_diff` vai de
-  0,65 (10 min) a 1,01 (20 min). `xp_diff` vai de 0,27 (10 min) a 0,70
-  (25 min).
-- **Torres têm um comportamento curioso:** quase zero nos três primeiros
-  cortes (0,0038 aos 10; 0,0076 aos 15; 0,0023 aos 20) e **sobem para
-  0,0429 aos 25**, cerca de **6 vezes** o valor dos 15 minutos. (Antes da
-  correção do vazamento eram 0,0927 e "11 vezes": as partidas que já tinham
-  acabado traziam as torres do fim do jogo.)
-- **Não é crescimento contínuo:** aos 20 minutos é menor que aos 10 e 15.
-  É uma **concentração tardia**.
-- **Por quê, no jogo:** as placas de torre caem aos 14 minutos, e antes
-  disso destruir uma torre inteira é raro. Depois, torres viram sinal de
-  quem domina o mapa.
-- **Importância para a tese:** essa é a **justificativa concreta** para
-  ter um modelo por fase. Um modelo único não capturaria essa mudança.
+**Explicando fácil:** Aos 10 minutos quase ninguém derrubou torre; aos 25 já é comum. Um modelo único teria que servir a todas as fases e misturaria as regras. Treinar um por fase é como ter um guia diferente para o early game e outro para o late game.
 
----
+### 73. O que é vazamento de dados e como o TCC o evita?
 
-## 12. Os experimentos que não funcionaram (e por que isso é bom)
+**Resposta:** É usar informação que não existiria na hora da previsão (Kaufman et al., 2012). No TCC, nenhuma informação posterior ao corte entra, e o quadro final da linha do tempo nunca é usado como estado do corte.
 
-### 12.1 O que foi tentado (Quadro 5, Seção 5.4; detalhe no Apêndice K)
+**Onde achar no TCC:** Seção 4.6; Seção 5.4.
 
-Para tentar melhorar o modelo, foram testadas 10 ideias sobre a linha do
-tempo, refeitas na base final. **Nenhuma** passou de +0,0006 de AUC. A 11ª
-fica à parte (abaixo):
+**Explicando fácil:** É estudar com a prova respondida. Exemplo no LoL: prever o vencedor aos 15 minutos usando o total de abates da partida inteira. O modelo ‘acerta’ porque olha o futuro. O TCC tem um caso real: numa partida de 24min16s o ‘estado aos 25 minutos’ era o quadro final, com o vencedor decidido; foi corrigido em 8/11.
 
-| # | Ideia | Resultado |
-|---|---|---|
-| 1 | Diferença de Barão/Arauto | ruído |
-| 2 | Dispersão espacial do time (quão espalhado no mapa) | ruído |
-| 3 | Ajuste de hiperparâmetros por fase | ruído |
-| 4 | Calibração extra | sem ganho (já era calibrado) |
-| 5 | Ouro convertido em itens | ruído |
-| 6 | Separar *features* de defesa e ataque | ruído |
-| 7 | `item_gold_diff` (segunda tentativa) | ruído |
-| 8 | Visão (sentinelas colocadas/destruídas) | ruído |
-| 9 | Tipo de dragão | **piorou** (0,8319 → 0,8295) |
-| 10 | Placas de torre | -0,0002 |
-| 11 | Percentis comportamentais do jogador (`lol-challenges-v1`) | à parte: −0,0031 / +0,0007, não comparável |
+### 74. Qual foi o erro do quadro final e quantas partidas afetou?
 
-### 12.2 A história do experimento 11 (ótima para contar)
+**Resposta:** O estado do corte era o quadro final do jogo em partidas que acabaram antes; afetou 22, 37, 1.120 e 2.642 partidas aos 10, 15, 20 e 25 minutos; a AUC-ROC nessas linhas era 1,0.
 
-**Por que está à parte (parecer):** o *endpoint* devolve o estado do
-jogador na data da consulta, feita de 0 a 16 dias depois das partidas. Um
-intervalo curto não prova que o atributo existia no momento da previsão,
-então o resultado não entra em nenhuma conclusão.
+**Onde achar no TCC:** Seção 4.6 (descreve a regra, sem as contagens). As contagens 22, 37, 1.120 e 2.642 estão só no diário de execução (8/11/2026) e no código, `src/features/build_features.py` (corte_disponivel).
 
+**Explicando fácil:** A linha do tempo tem um quadro por minuto mais um quadro extra no instante em que o jogo acaba. O código antigo só checava ‘tem quadros suficientes?’ e em partida curta o quadro ‘25’ era o do fim. A regra nova exige um quadro DEPOIS do quadro do corte, então o estado é sempre de um minuto com o jogo em andamento. Tudo foi refeito depois da correção.
 
-- Um **piloto pequeno** (199 partidas) mostrou um ganho de **+0,009**,
-  maior que qualquer outro experimento. Parecia uma descoberta.
-- Antes de acreditar, a amostra foi ampliada para **2.987 partidas**.
-- Resultado: **-0,0031**. O "ganho" sumiu.
-- **Explicação:** **regressão à média**. Com amostra pequena, o acaso
-  pode criar um efeito que parece real. O próprio modelo base já oscilava
-  1,8 ponto só pelo tamanho da amostra.
-- **Exemplo:** jogar moeda 10 vezes e dar 8 caras não prova que a moeda é
-  viciada. Jogue 1.000 vezes e vai dar perto de 500.
+### 75. O que é validação cruzada estratificada com 5 dobras?
 
-### 12.3 E o volume de dados? (refeito pelo parecer)
+**Resposta:** Divide as partidas em 5 grupos, treina em 4 e testa no quinto, 5 vezes; estratificada preserva a proporção de vitórias do azul e do vermelho em cada grupo (Kohavi, 1995).
 
-**Versão antiga (não use):** "a AUC subiu de 0,8214 para 0,8393 e 0,8490
-só por aumentar as partidas". Essa sequência registra as **rodadas de
-coleta**: mudavam ao mesmo tempo o treino, o teste e a mistura de regiões.
+**Onde achar no TCC:** Seção 4.6.
 
-**A medida certa (Quadro 16):** teste fixo de 8.156 partidas e treino
-crescendo. AUC 0,8494 com 2.500, 0,8519 com 10.000 e **0,8527 com 32.622**.
-Acima de 10 mil partidas, mais volume quase não muda nada (+0,0008).
+**Explicando fácil:** É como cinco rodadas de teste em que cada quinto das partidas é a ‘prova’ uma vez. A nota é a média. Estratificada garante que cada grupo tenha ~46,7% de vitórias do azul, como o total. Kohavi recomenda 10 dobras; a diferença para 5 é de no máximo 0,0004 de AUC no TCC.
 
-**E as variáveis novas (12 a 19)?** Dentro do mesmo classificador: a
-regressão logística ganha **+0,0073** aos 15 minutos com as 64 variáveis, o
-XGBoost **+0,0044**. O "+0,0081" do Apêndice K mistura variáveis e troca de
-classificador.
+### 76. Por que 5 dobras e não 10, como Kohavi recomenda?
 
-### 12.4 Por que resultados negativos são bons para a tese
+**Resposta:** A diferença para 10 dobras é de no máximo 0,0021 em acurácia e 0,0004 em AUC-ROC (Random Forest aos 15 min; no XGBoost, 0,0006 e 0,0001) e não altera nenhuma conclusão.
 
-1. **Honestidade científica:** mostra que você tentou melhorar e reporta
-   o que não deu certo, em vez de esconder.
-2. **É uma descoberta em si:** indica que, com essas *features* de estado,
-   o modelo está **perto do teto**. O próximo ganho exigiria dados que a
-   API pública **não oferece**: a **ordem do *draft*** e o **estado das
-   ondas de minion**.
-3. **Responde a pergunta "por que não chegaram em 90%?"** (Parte 15).
+**Onde achar no TCC:** Seção 4.6 (5 dobras); comparação 5 x 10 dobras: só no repositório (`src/models/robustez_dobras.py`).
 
----
+**Explicando fácil:** O TCC comparou: rodou com 5 e com 10 dobras e viu que o resultado praticamente não muda. Cinco dobras gastam menos tempo de máquina. Se perguntarem, a resposta é essa medida, e não uma opinião.
 
-## 13. A análise exploratória: o viés de lado
+### 77. O que é o GridSearchCV e o que ele otimizou?
 
-**Este é o achado que mais chama atenção. Estude bem.**
+**Resposta:** Busca em grade (scikit-learn) que testa combinações de hiperparâmetros otimizando a AUC-ROC; no XGBoost testou 27 combinações e escolheu 500 árvores, taxa de aprendizado 0,01 e profundidade 3.
 
-### 13.1 O achado
+**Onde achar no TCC:** Seção 4.6; Apêndice C (Quadro 7).
 
-No *solo queue* de elo alto, o **time vermelho vence mais** que o azul
-(Quadro 2, 41.063 partidas):
+**Explicando fácil:** Hiperparâmetros são os botões do modelo (número de árvores, profundidade, velocidade de aprendizado). A busca em grade é testar todas as combinações de uma lista, como regular resolução, sombras e DLSS num jogo para achar o melhor equilíbrio. Cada combinação é medida em cinco dobras, e vence a de maior AUC.
 
-| Região | Partidas | Vitória do vermelho | Intervalo de confiança 95% | Conclusão |
-|---|---|---|---|---|
-| BR1 | 11.936 | **56,3%** | [55,4%; 57,2%] | Firme |
-| EUW1 | 11.744 | 53,4% | [52,5%; 54,3%] | Firme |
-| NA1 | 7.159 | 52,2% | [51,1%; 53,4%] | Firme |
-| KR | 10.204 | 50,4% | [49,5%; 51,4%] | **Inclui 50%: não dá para afirmar** |
+### 78. A busca de hiperparâmetros foi feita nas mesmas partidas em que se mediu? Isso não é otimista?
 
-**Leitura correta (decore a frase):** "A direção é a mesma nas quatro
-regiões, mas a força não é igual: em **três das quatro** o intervalo
-exclui 50%. Na Coreia o viés não é estatisticamente distinguível de
-zero." Isso mostra que o padrão **não é só do Brasil**, é de elo
-altíssimo em geral, mas sem afirmar mais do que os dados sustentam.
+**Resposta:** Pode ser; por isso as três buscas foram repetidas de forma aninhada, com a escolha feita só no treino de cada dobra. A AUC-ROC muda no máximo 0,0002.
 
-### 13.2 O que é um intervalo de confiança (de Wilson)
+**Onde achar no TCC:** Seção 4.6; Seção 5.4; Apêndice C.
 
-**Exemplo:** pesquisa eleitoral. "O candidato tem 40%, com margem de
-erro de 2 pontos." Significa que o valor real provavelmente está entre
-38% e 42%.
+**Explicando fácil:** Se você escolhe a configuração olhando a prova, a nota fica otimista (a escolha ‘viu’ o teste). O desenho aninhado separa: dentro de cada dobra de treino, a grade roda numa validação interna de 3 dobras; só depois a combinação escolhida é testada na dobra externa, que a busca nunca viu. Resultado: o otimismo é desprezível.
 
-Aqui: na BR1, o vermelho venceu 56,3%, e o valor real provavelmente está
-entre 55,4% e 57,2%. Como **50% está fora** desse intervalo, o viés é
-real. Na KR, 50% está **dentro**, então pode ser só acaso.
+### 79. Por que a busca do XGBoost foi na primeira base de 10.295 partidas?
 
-**Wilson** é um jeito específico e mais confiável de calcular essa margem
-para proporções (porcentagens).
+**Resposta:** Foi feita na primeira base ampla, cujas partidas estão contidas nas 40.778 da avaliação final; repetida na base final, a busca escolheu a mesma configuração.
 
-### 13.3 Taxas próximas nos quatro cortes (formulação do parecer)
+**Onde achar no TCC:** Seção 4.6; Apêndice C.
 
-**Não diga "o viés é constante/estável ao longo da partida".** O orientador
-pediu a formulação restrita ao que foi medido.
+**Explicando fácil:** A busca em grade foi feita quando a base era menor; depois repetiu-se na base final e a escolha foi a mesma (500, 0,01, 3). Um ponto que a banca pode apontar: as 10.295 partidas aparecem nas dobras de avaliação. Por isso a seleção aninhada foi feita, que testa a escolha sem esse viés.
 
-Entre partidas com diferença de ouro **menor que 500**, o azul venceu:
+### 80. O que é o MLP de referência e o ajustado?
 
-| Corte | Vitória do azul | Partidas |
-|---|---|---|
-| 10 min | 46,5% | 7.639 |
-| 15 min | 47,8% | 4.126 |
-| 20 min | 46,9% | 2.500 |
-| 25 min | 47,4% | 1.474 |
+**Resposta:** Referência: camadas (64, 32) e 500 iterações. Ajustado pela grade: uma camada de 32 neurônios, regularização alpha 0,001.
 
-**Como foi testado:** a mesma partida pode estar empatada em mais de um
-corte (2.766 das 12.615), então os grupos não são independentes. O teste
-usa a **partida como unidade** (*bootstrap*: sorteia partidas inteiras,
-2.000 vezes) e depois a correção de Holm. **Nenhuma diferença foi
-detectada** (menor valor-p corrigido: 0,65).
+**Onde achar no TCC:** Seção 4.6; Apêndice C (Quadro 7).
 
-**Frase para decorar:** "as taxas foram próximas nos quatro cortes e os
-testes não detectaram diferença entre eles; isso não demonstra que o viés
-seja igual em toda a partida."
+**Explicando fácil:** Referência é a configuração de partida, sem busca. A grade testou 9 combinações de tamanho de camadas e regularização, e a vencedora foi a mais simples (32 neurônios). Em dados com 5 variáveis, uma rede pequena basta.
 
-### 13.4 O que é a correção de Holm
+### 81. Por que a regressão logística entrou como baseline?
 
-**Exemplo:** se você joga 20 moedas, uma delas pode dar 8 caras em 10
-só por sorte. Quanto **mais comparações** você faz, maior a chance de
-achar uma diferença "falsa". A correção de Holm **aperta a régua** quando
-você compara várias coisas ao mesmo tempo, para não ser enganado pelo
-acaso. Foi ela que mostrou que o "pico" era ruído.
+**Resposta:** Serve de baseline simples; ela chegou a AUC-ROC 0,8495, à frente do XGBoost por 0,0008.
 
-### 13.5 Os 4 testes de robustez (Seção 4.5)
+**Onde achar no TCC:** Seção 4.6; Seção 5.4 (Quadro 2).
 
-Todo padrão encontrado passou por 4 testes **antes** de ser aceito:
+**Explicando fácil:** Baseline é o ‘modelo ponto de partida’ que qualquer método complexo tem que bater. A logística é a mais simples: pesa cada variável e soma. Ela empatou com os complexos, o que é um achado: com 5 variáveis, simples basta.
 
-1. **Replicação regional:** testar só na BR1. Se o viés aparece numa
-   região sozinha, não é efeito de misturar regiões. ✔
-2. **Faixa de duração:** ver se o viés muda em partidas curtas e longas.
-   O azul ficou entre 45,6% e 47,3% em todas as faixas (amplitude de 1,7
-   ponto, todas abaixo de 50%). Então não é "partidas longas são outro
-   tipo de jogo". ✔
-3. **Intervalo de Wilson:** nenhum dos 4 cortes inclui 50%. ✔
-4. **Pares com correção de Holm, partida como unidade:** impede ler a dispersão entre cortes como tendência. ✔
+### 82. Como o modelo de produção foi calibrado e explicado?
 
-### 13.6 A inversão no cenário profissional
+**Resposta:** Recebeu curva de calibração sobre as probabilidades fora da dobra e explicações SHAP, globais e por predição.
 
-No Oracle's Elixir (99.259 jogos), é o **azul** que vence: **53,2%**.
-Estável de 2015 a 2026 (entre 52,5% e 55,0%). Só 2014 (58,2%) destoa, com
-poucos jogos (814).
+**Onde achar no TCC:** Seção 4.6; Seção 5.4; Apêndice C (calibração, Quadro 10 e Figura 5).
 
-**Hipótese de explicação (não testada; os dados não têm a ordem do *draft*):**
-- No *draft*, o time **vermelho escolhe por último** e garante o
-  ***counter-pick***.
-- No *solo queue*, sem coordenação entre 5 desconhecidos, esse
-  *counter-pick* garantido pesa mais.
-- No profissional, as equipes valorizam muito a **primeira escolha**
-  (que é do azul), e coordenam o *draft* inteiro.
+**Explicando fácil:** Calibrar é checar se ‘70%’ significa mesmo 70% de vitórias. SHAP é explicar quanto cada variável empurrou a previsão. As probabilidades ‘fora da dobra’ vêm de modelos que não viram aquela partida no treino.
 
-**Resposta pronta:** "O trabalho mede a inversão com firmeza estatística
-e propõe uma hipótese, mas delimita sem comprovar. Testar a hipótese
-exigiria a ordem do *draft*, que a API pública não expõe."
+### 83. O que são os dez experimentos de enriquecimento e o décimo primeiro?
 
-### 13.7 Conversão de vantagem ("macro ganha jogo")
+**Resposta:** Dez tentativas de acrescentar sinais da linha do tempo (barão/arauto, posição, tuning por fase, calibração, itens, atributos, visão, dragões por tipo, placas); o décimo primeiro usou um endpoint de progressão do jogador e fica à parte.
 
-Com **+2.000 a +4.000 de ouro aos 15 minutos**, o azul venceu:
-- **83,6%** no profissional (14.617 jogos)
-- **74,1%** no *solo queue* (5.366 partidas)
+**Onde achar no TCC:** Seção 4.6; Seção 5.4 (parágrafo de experimentos); detalhe e quadros: só no repositório (`reports/experimentos_antigos.json`, `reports/experimentos_precisao.json`).
 
-Diferença de **9,5 pontos**, estatisticamente significativa (teste z de
-duas proporções, grupos independentes; z = 15,2; p < 0,001). Com **+4.000 a
-+6.000**: 94,0% (5.842 jogos) contra 86,3% (3.497), 7,7 pontos, z = 12,7.
+**Explicando fácil:** Foi a pergunta ‘mais informação melhora a previsão?’. Para cada ideia, mediu-se o ganho de AUC contra o mesmo modelo de 5 variáveis. O máximo foi +0,0006. O décimo primeiro consultou um atributo depois das partidas e, por isso, não é comparável e não entra em nenhuma conclusão.
 
-**Leitura (parecer):** é uma **diferença observada** entre os dois recortes.
-**Não atribua à coordenação das equipes**: os recortes diferem também no
-nível dos jogadores, na versão do jogo e na época.
+### 84. Por que o experimento 11 fica à parte?
 
-**Detalhe honesto (corrigido em 2026-11-17):** antes da correção, o guia trazia
-81,5% (3.294 jogos) e 91,7% (72 jogos, "indicativa"). Esses números vinham de
-um erro no script de conferência, que lia a vantagem de ouro do jogador do
-topo em vez da do time. Pela linha do time, as duas faixas têm n grande.
+**Resposta:** O endpoint lol-challenges devolve o estado do jogador na data da consulta, de 0 a 16 dias depois das partidas; o valor pode refletir partidas posteriores. O resultado (−0,0031 e +0,0007) não entra em nenhuma conclusão.
 
-### 13.8 Por que isso importa para o modelo
+**Onde achar no TCC:** Experimento 11: só no repositório (`src/models/experiment_challenges_pilot.py`, `reports/`); o TCC cita só que ele fica à parte.
 
-O viés de lado é um **fator de confusão** que qualquer modelo de *solo
-queue* precisa controlar: o lado carrega informação sobre o resultado sem
-refletir o estado da partida (Seção 6, conclusão). No modelo, ele entra
-na **referência** do SHAP (a previsão média, 46,7% para o azul aos 15
-minutos), e nas partidas empatadas a previsão acompanha a taxa observada
-(Parte 10.7).
+**Explicando fácil:** É como prever quem ganha a partida de ontem olhando o perfil do jogador de hoje, que já inclui o jogo de ontem. Isso é vazamento potencial. Um piloto de 199 partidas deu +0,0090, mas com 2.987 deu −0,0031 (regressão à média em amostra pequena).
 
-**Cuidado:** uma versão antiga falava em "atalho" e dizia que o lado
-distingue os times "sem nenhuma propriedade do jogo". O texto final não
-usa essa formulação; use a frase acima.
+### 85. Por que a regressão logística aproveitou melhor as variáveis novas?
+
+**Resposta:** Aos 15 minutos o ganho foi +0,0073 na logística e +0,0044 no XGBoost, cada um contra si mesmo; o TCC lê isso como indício de que o limite está na informação, não no algoritmo.
+
+**Onde achar no TCC:** Seção 5.4 (ganhos máximos); Seção 6.1; detalhe por experimento: só no repositório (`reports/experimentos_precisao.json`).
+
+**Explicando fácil:** Se um modelo simples (logística) usa melhor as variáveis novas do que o complexo, o algoritmo não é o gargalo. É um indício que o TCC apresenta como interpretação, sem provar.
 
 ---
 
-## 14. A interface em linguagem natural (*text-to-SQL*)
+## 4.7 e 4.8 Interface, coach e materiais
 
-### 14.1 O que é
+### 86. Como é a arquitetura da plataforma?
 
-O usuário escreve uma pergunta em português, por exemplo: **"Quais os 5
-campeões mais jogados?"**. O sistema:
-1. **Roteia:** decide se a pergunta é sobre o *solo queue*, o competitivo
-   ou as duas bases (regras sobre o esquema; um modelo pequeno só no que
-   sobra). Se for ambígua, responde nas duas e mostra lado a lado.
-2. Manda a pergunta + a descrição do banco para um **modelo de
-   linguagem** (LLM: Claude Haiku, da Anthropic).
-3. O LLM devolve uma consulta **SQL** (a linguagem dos bancos de dados).
-4. O sistema **valida** essa SQL (4 camadas de segurança) e confere que
-   ela **não mistura** as duas bases.
-5. Executa no banco **real**, em transação **somente leitura**. Se o banco
-   recusar a SQL, refaz **uma** vez passando o erro ao modelo.
-6. Mostra o resultado e uma explicação em português.
+**Resposta:** Aplicação web em React com TypeScript que consome uma API própria em FastAPI; seis páginas de visualização; banco PostgreSQL.
 
-**Exemplo real do *benchmark* (pergunta 2):**
-- Pergunta: "Quais os 5 campeões mais jogados?"
-- SQL: `SELECT champion_name, COUNT(*) AS n FROM participants GROUP BY
-  champion_name ORDER BY n DESC LIMIT 5`
+**Onde achar no TCC:** Seção 4.7; Seção 4.8.
 
-### 14.2 As 4 camadas de segurança (decore)
+**Explicando fácil:** Três camadas: o banco guarda os dados; a API (FastAPI) responde a pedidos; a interface (React) desenha as telas e chama a API. É como o servidor, o cliente e o banco de um jogo online: a tela nunca fala direto com o banco.
 
-Deixar uma IA escrever SQL num banco é perigoso: ela poderia apagar
-dados. Por isso, **4 "seguranças na porta"**:
+### 87. Como a pergunta em português vira resposta?
 
-1. **Só um comando, e só de leitura:** tem que começar com `SELECT` (ou
-   `WITH ... SELECT`), e não pode ter `;` encadeando outro comando.
-2. **Palavras proibidas bloqueadas:** `insert`, `update`, `delete`,
-   `drop`, `alter`, `create`, `truncate`, `grant`, `revoke`, `copy`.
-3. **Lista fechada de tabelas:** só pode consultar as 9 tabelas
-   permitidas (não pode, por exemplo, ler as tabelas brutas).
-4. **Tempo máximo:** o banco cancela qualquer consulta que passe de **10
-   segundos** (`statement_timeout`).
+**Resposta:** Roteamento (solo, competitivo ou ambos), o modelo escreve a SQL, a validação confere, a execução é somente leitura com tempo limite de 10 s e o resultado vem do banco, nunca do conhecimento do modelo.
 
-Desde 2026-11-05 há uma **5ª proteção, no próprio banco**: a consulta roda
-em transação **somente leitura**. Se o validador falhasse, o banco ainda
-recusaria escrever (`tests/test_run_query_readonly.py`).
+**Onde achar no TCC:** Seção 4.7; Seção 5.6.
 
-**Por que isso também protege contra *SQL injection*:** a entrada do
-usuário nunca é colada direto na SQL; o que roda é só o que passou pelas
-4 camadas.
+**Explicando fácil:** Primeiro decide em qual base perguntar; depois o Claude traduz para SQL; um programa confere que é só leitura e só nas tabelas permitidas; o banco executa e a tela mostra o resultado. Uma nota ‘Leitura de jogo’ pode acrescentar conhecimento geral, rotulada como tal.
 
-### 14.3 Escolhas técnicas com motivo
+### 88. O que é a acurácia de execução?
 
-- **`temperature = 0`:** faz o LLM dar **sempre a mesma resposta** para a
-  mesma pergunta. Necessário para o *benchmark* ser reproduzível.
-- **`max_tokens = 1200`:** com 500, perguntas complexas tinham a SQL
-  **cortada no meio**, gerando erro. Calibrado com casos reais. E o
-  código **detecta** quando a resposta foi cortada e avisa o usuário, em
-  vez de executar SQL quebrada.
-- **Erro com a SQL junto:** se a consulta falha no banco, o erro mostra a
-  SQL e a causa, para dar para entender o que aconteceu.
+**Resposta:** Compara o resultado da consulta gerada com o da consulta de referência; Zhong, Yu e Klein discutem seus limites e propõem vários bancos de teste, o que o TCC não faz.
 
-### 14.4 O benchmark de 26 e o gabarito de 203 (Apêndice B)
+**Onde achar no TCC:** Seção 4.7.
 
-**1. *Benchmark* de referência (26 perguntas, 22 *solo queue* e 4 profissional).**
-- "Acurácia de execução" = o resultado da SQL gerada bate com o da SQL de
-  referência.
-- **23 de 26 (88%)** em todas as execuções até 3/11. As 3 falhas (5, 12 e
-  22) eram da mesma família: "com pelo menos N partidas", coluna a mais.
-- **Hoje dá 26 de 26, mas isso NÃO é uma medida independente**: as regras
-  novas do esquema (amostra mínima) foram escritas **conhecendo** essas 3
-  falhas. É a medida de regressão, não a nota.
-- Curiosidade: uma execução deu 22/26 porque rodou ao mesmo tempo que a
-  coleta escrevia no banco.
+**Explicando fácil:** Em vez de comparar o texto da SQL (duas SQLs diferentes podem dar a mesma resposta), compara-se o resultado que cada uma devolve. Se bate, acertou. O limite: uma consulta errada pode coincidir por acaso num banco só; por isso Zhong et al. propõem testar em vários bancos, e o TCC reconhece que não faz.
 
-**2. Gabarito automático (203 perguntas) = a nota que vale.**
-- Cada pergunta nasce com a **SQL de referência**, escrita **antes** de qualquer
-  execução do sistema, e um programa compara o resultado, **sem avaliador humano**.
-- **181 de 203 (89,2%)**, intervalo de 95% de 84,1% a 92,7%: 166 de 187
-  perguntas respondíveis e 15 de 16 recusas esperadas (o banco não tem o dado).
-- Das 22 falhas, todas do sistema (li uma a uma): nome de entidade que o modelo
-  escreveu de outro modo (MonkeyKing como "Monkey King", liga tratada como equipe),
-  eliminações lidas como kills+assists e roteamento para a base errada.
-- Duas correções (`entidades.py` e a checagem de eliminações) vieram **depois** da
-  medida e **não foram medidas de ponta a ponta**.
-- Para o que o banco não tem (primeira torre, primeiro sangue, série), uma recusa
-  determinística responde antes do modelo: em perguntas escritas à mão, versões
-  anteriores chegavam a inventar um substituto. O validador garante a
-  **segurança**, não o **sentido** da consulta.
-- Limites declarados (6.1): perguntas de **template**, escritas pelo autor a partir
-  de famílias de erro que já conhecia, e a SQL de referência é do próprio autor.
-  Perguntas escritas à mão acertaram **entre 54% e 60%** em versões anteriores do
-  sistema, então o resultado em perguntas livres pode ser menor.
+### 89. O que é o coach e o que ele pode e não pode dizer?
 
-### 14.5 Honestidade da IA: dado medido x conhecimento geral
+**Resposta:** É o módulo que traduz a probabilidade e as contribuições SHAP em recomendações em linguagem natural; separa o que vem dos dados do que é conhecimento geral do modelo, marcado como tal.
 
-**Regra do projeto:** a plataforma **separa** o que vem dos **dados** do
-que vem do **conhecimento geral** da IA.
-- Na consulta em linguagem natural, se a IA quiser comentar algo que os
-  números não mostram, ela precisa começar com **"Leitura de jogo:"**,
-  deixando claro que não veio dos dados.
-- Na orientação estratégica (*coach*), o que vem do histórico real
-  (*matchups*, sinergias, itens) é rotulado como dado; o resto é rotulado
-  como conhecimento geral.
-- **A IA nunca inventa estatística.** Se um número não foi calculado do
-  banco, ele não aparece como número. **Medido em 2026-11-04** (Apêndice B,
-  `src/coach/audit_grounding.py`): em 36 respostas do coach, 453 números, 0
-  estatísticas inventadas depois de revisar à mão os 13 que o detector não
-  achou nos dados (8 somas, complementos ou arredondamentos dos dados, 2 de
-  formato, 3 limiares de conhecimento geral); 167 de 167 porcentagens e 52 de
-  52 contagens de jogos batem com os dados; 87 de 87 itens sugeridos vêm da
-  lista real; todas terminam com a ressalva de limites. **Limite que vocês
-  devem dizer:** isso mede número, não afirmação qualitativa. No caso 5 a IA
-  disse que dois campeões estavam "muito atrasados em ouro e experiência",
-  mas nesse modo só há a diferença do time.
-- O modelo de ML **não vê** itens, posição nem ondas de minion; qualquer
-  orientação sobre isso é marcada como inferência.
+**Onde achar no TCC:** Seção 4.7; Seção 6.1; Apêndice B.
+
+**Explicando fácil:** O coach é um treinador virtual. Ele recebe o estado da partida, a probabilidade e o SHAP, e escreve orientações. A regra de honestidade: o que vem dos dados (confrontos, sinergias, itens do histórico) é rotulado; o que a IA sabe do jogo em geral (itens que recomenda, ondas de minions) é marcado como conhecimento geral. Nunca deve inventar estatística.
+
+### 90. O coach inventa números?
+
+**Resposta:** Em 36 respostas auditadas, 453 números; nenhuma estatística foi inventada após revisão (13 não achados: 8 derivados dos dados, 2 de formato, 3 limiares de conhecimento geral).
+
+**Onde achar no TCC:** Seção 4.7; Apêndice B (Quadro 5).
+
+**Explicando fácil:** A auditoria conferiu cada número do texto do coach contra os dados enviados à IA. Os 13 que o detector não achou foram revisados à mão. A ressalva importante: a auditoria confere números, não afirmações qualitativas. No caso 5, a resposta atribui atraso a dois campeões quando os dados só tinham o time inteiro.
+
+### 91. Por que o modelo preditivo não vê itens, posição nem ondas de minions?
+
+**Resposta:** Porque a linha do tempo do match-v5 não registra o estado das ondas nem a ordem de escolha, e o modelo usa só as cinco diferenças; orientação que dependa disso, além do que o coach recebe dos dados, é inferência.
+
+**Onde achar no TCC:** Seção 4.7; Seção 6.1.
+
+**Explicando fácil:** O modelo foi treinado só com 5 números. Itens e posição não são variáveis dele, e o estado das ondas de minions nem existe na API. O coach é outro módulo: pode receber dados reais (itens do catálogo, confrontos de rota, histórico) e acrescenta conhecimento geral da IA, que a interface rotula como inferência. O que o coach diz além do que recebeu dos dados é inferência, não saída do modelo.
+
+### 92. Que ferramentas foram usadas e por quê?
+
+**Resposta:** Python (pandas, NumPy, scikit-learn, XGBoost, SHAP), PostgreSQL, FastAPI, React com TypeScript e Recharts, e a API da Anthropic (Claude); testes de fumaça, validação comportamental e Vitest.
+
+**Onde achar no TCC:** Seção 4.8.
+
+**Explicando fácil:** Cada ferramenta tem um papel: Python para dados e modelos, PostgreSQL para guardar, FastAPI para a API, React para as telas, Recharts para gráficos, Claude para linguagem natural e coach. São ferramentas consolidadas; a API da Anthropic é cobrada por uso. O TCC não compara com alternativas.
+
+### 93. Onde foi desenvolvido e executado?
+
+**Resposta:** Localmente, em um computador com Windows 11, Intel Core i5-13400F e 32 GB de memória.
+
+**Onde achar no TCC:** Seção 4.8.
+
+**Explicando fácil:** Tudo roda numa máquina comum, sem servidor em nuvem. Isso ajuda a reprodutibilidade: o código, o banco congelado e os artefatos de `reports/` permitem refazer os números. Uma nova coleta, porém, pode gerar outra amostra, e as chamadas à Riot e à Anthropic exigem chaves próprias.
+
+### 94. Que testes automatizados existem?
+
+**Resposta:** Testes de fumaça e uma bateria de validação comportamental do modelo de produção no backend, e Vitest no frontend.
+
+**Onde achar no TCC:** Seção 4.8.
+
+**Explicando fácil:** Teste de fumaça é o ‘liga e vê se pega fogo’: verifica o essencial sem banco nem API. A validação comportamental checa, por exemplo, que o modelo dá mais chance ao time à frente em ouro. O Vitest testa os componentes das telas. São verificações de que nada quebrou, e não provas de acerto.
+
+### 95. Como a plataforma garante a reprodutibilidade?
+
+**Resposta:** Semente 42 nas validações, base congelada em 4/10/2026, versão do gabarito marcada no repositório e scripts que conferem o texto contra os artefatos.
+
+**Onde achar no TCC:** Seção 4.6; Apêndice B (versões e congelamento); scripts do projeto.
+
+**Explicando fácil:** Fixar a semente faz o sorteio das dobras ser sempre o mesmo. Congelar a base é como salvar o estado do jogo: os números não mudam porque entrou partida nova. E os scripts de verificação comparam o texto do TCC com os arquivos de resultado, para nenhum número ficar solto.
 
 ---
 
-## 15. Perguntas prováveis da banca, com respostas
+## 5.1 e 5.2 Mapeamento e base de dados
 
-### 15.0 Como uma banca de TCC costuma funcionar
+### 96. O que foi mapeado na Riot API (objetivo a)?
 
-Pesquisa na web em 2026-11-02. **Nenhum documento público da UNISINOS
-descreve o rito da banca de Ciência da Computação**; o próprio site manda
-consultar o Guia do Aluno de Graduação (portal Minha Unisinos) e a
-coordenação. O que segue é o padrão de regulamentos de outros cursos de
-computação no Brasil, para você saber o que esperar, **não a regra da
-UNISINOS**. Confirme com o orientador.
+**Resposta:** Os endpoints league-v4, account-v1 e match-v5 (partida e linha do tempo), além dos limites de taxa e do ciclo de expiração da chave de 24 horas.
 
-- **Formato comum:** apresentação oral de 15 a 30 minutos (20 é o mais
-  frequente), depois arguição de cada membro (até ~15 min cada), depois
-  deliberação a portas fechadas e resultado na hora.
-- **Composição comum:** o orientador preside e mais um ou dois
-  professores avaliam. Em geral o orientador não faz a arguição dura; quem
-  pergunta são os outros membros.
-- **Critérios comuns nas fichas:** clareza da apresentação, domínio do
-  tema, metodologia, relevância e coerência dos resultados com os
-  objetivos, qualidade do texto e da formatação, e **respeito ao tempo**.
-- **Regra prática de slides:** cerca de 1 minuto por slide (20 minutos →
-  até ~20 slides, o roteiro do site tem 14).
-- **O que as bancas perguntam (padrão):** justificativa das escolhas
-  metodológicas, limitações, implicações dos resultados, relação entre
-  teoria e dados e continuidade. A banca pergunta mais onde acha que
-  há ponto fraco, não onde você está seguro.
-- **Em trabalhos de ML, os temas típicos:** escolha do modelo frente a
-  alternativas mais simples, *baseline* (classe majoritária), métricas,
-  divisão treino/teste e número de dobras, vazamento de dados (inclusive
-  no pré-processamento), *overfitting* e generalização.
+**Onde achar no TCC:** Seção 5.1.
 
-**Como responder (pesquisa de 2026-11-02, fontes de preparação para
-defesa; são conselhos práticos, não norma):**
+**Explicando fácil:** Mapear é descobrir o que a API oferece e o que dá para usar. Resultado: três famílias de endpoints (listar jogadores, resolver nomes, baixar partidas e linhas do tempo) e as regras do jogo da API (limite de pedidos, chave que expira). Isso orientou o coletor resumível.
 
-- Ouça a pergunta inteira antes de começar. Se não entendeu, peça para
-  reformular; isso não é sinal de despreparo.
-- "Deixa eu pensar um instante" é uma resposta válida. A banca prefere
-  uma pausa a uma resposta apressada.
-- Se não souber, **não blefe**: muitas vezes o avaliador sabe a resposta e
-  está testando a honestidade. Diga "não medi isso neste trabalho", ofereça
-  o que o trabalho mostra de mais próximo e, se couber, diga que é um
-  desdobramento para trabalhos futuros.
-- Pergunta que aponta uma fraqueza: concorde com o que for verdade, diga
-  onde está declarado no texto e por que não invalida o achado. Não
-  responda na defensiva.
-- Treine **em voz alta**; pensar a resposta em silêncio não basta.
+### 97. Quantas partidas há e por que 40.778 e não 41.063?
 
-**Slides e demo:**
+**Resposta:** O banco tem 41.063 partidas; aos 15 minutos a base de modelagem tem 40.778, porque as demais acabaram antes desse minuto ou não têm linha do tempo; o número varia por corte.
 
-- 1 slide por minuto, no máximo; para 20 minutos, entre 12 e 20 slides. Uma
-  ideia por slide, fonte de 24 pt ou mais. O erro mais comum é tentar mostrar
-  tudo.
-- Ensaie com cronômetro pelo menos três vezes. Estourar o tempo costuma
-  contar contra.
-- Demo ao vivo convence mais que captura de tela, mas só com 3 a 5 coisas.
-  Deixe o ambiente pronto (API e *frontend* rodando) antes de a banca
-  entrar.
-- **Grave um vídeo da demo** funcionando, para o caso de algo falhar, e
-  leve os slides em PDF num pendrive. Abra a apresentação no equipamento
-  da sala antes, se puder: outro computador pode desmontar transições e
-  fontes.
+**Onde achar no TCC:** Seção 5.2; Apêndice A (Quadro 4).
 
-**O que confirmar com o orientador:** tempo de apresentação e de
-arguição, quem são os membros (e a área de cada um, para prever o tipo de
-pergunta), se haverá projetor e se a demo ao vivo é bem-vinda, e a política
-da UNISINOS sobre uso de IA (não há documento público achado).
+**Explicando fácil:** 41.063 é o total salvo. Para prever aos 15 minutos, a partida precisa ter chegado aos 15 minutos e ter linha do tempo; 285 não têm. Por isso cada corte tem um número diferente: 40.919, 40.778, 34.505 e 25.098.
 
-Treine em voz alta. As respostas são curtas de propósito; se pedirem
-mais, use as partes do guia.
+### 98. Como o volume cresceu e por que isso importa para a NA1?
 
-**1. "Explique o trabalho em poucas palavras."**
-"Construí uma plataforma que coleta partidas reais de *League of
-Legends*, prevê o vencedor a partir do estado do jogo num minuto
-específico, explica a previsão e deixa o usuário perguntar sobre os dados
-em português. Os três modelos comparados empataram, e o adotado, o
-XGBoost, acerta 76% aos 15 minutos, com AUC de 0,85."
+**Resposta:** 10.295 na primeira base ampla, 23.133 no retreino de julho e 41.063 ao fim da coleta de 4/10; a NA1 passou de 1.446 para 7.159 partidas.
 
-**2. "Por que 76% é um bom resultado?"**
-"Porque o chute mais simples, que é sempre apostar no vermelho, acerta
-53%. O modelo fica 23 pontos acima disso usando só 5 informações do
-minuto 15, com 15 minutos de jogo ainda pela frente. E a AUC de 0,85
-mostra que ele separa bem vitórias e derrotas."
+**Onde achar no TCC:** Seção 5.2 (41.063 partidas, 40.778 no corte de 15 min). O histórico de crescimento por região saiu do TCC: só no repositório (`diario_execucao.md`, `reports/stats_regions.txt`).
 
-**3. "Daria para chegar a 90%?"**
-"Não com os dados atuais. Dez formas de enriquecer as *features* não
-passaram de +0,0006, e mais volume quase não muda acima de 10 mil partidas
-(teste fixo). Variáveis mais ricas dão até +0,0073. O próximo ganho exigiria
-a ordem do *draft* e o estado das ondas, que a API pública não fornece. Aos
-25 minutos a AUC chega a 0,890, mas aí a previsão é menos útil, porque o
-jogo está mais decidido."
+**Explicando fácil:** A NA1 era a menor região com amostra relevante e a que mais limitava a generalização do achado de viés de lado. Com 7.159 partidas, deixou de ser limitação: a taxa do vermelho foi de 51,9% para 52,2% sem mudar a direção.
 
-**4. "O que é vazamento de dados e como vocês evitaram?"**
-"É o modelo usar informação que ele não teria no momento da previsão,
-normalmente do futuro. Evitei usando só os frames da *timeline* até o
-minuto do corte. Usar o total de abates da partida, por exemplo, seria
-colar com o gabarito."
+### 99. O que guarda cada tabela do banco?
 
-**5. "Por que XGBoost e não uma rede neural profunda?"**
-"Comparei três famílias por medição. Para dados em tabela, com dezenas de
-milhares de linhas, métodos de árvores seguem competitivos com redes
-neurais (Grinsztajn et al., 2022), e foi o que aconteceu: a rede (MLP)
-empatou com o XGBoost, sem superar as árvores de forma distinguível. Uma
-rede profunda pediria muito mais dados e não teria o que explorar em cinco
-números por partida. O XGBoost também se integra com o SHAP de árvore,
-que dá explicações exatas."
+**Resposta:** players, raw_matches e raw_timelines, matches, teams, participants, bans, item_events e items, pro_games e pro_players (descritas na Seção 5.2; campos e chaves no Quadro 4, Apêndice A).
 
-**6. "O MLP ajustado ficou à frente. Por que não usaram ele?"**
-"Depois do ajuste, os quatro modelos (com a logística) ficam a 0,0015 de AUC uns dos outros. Mantive o XGBoost pela proximidade dos resultados e porque o SHAP de árvore, exato, já estava integrado à interface, não por ser melhor."
+**Onde achar no TCC:** Seção 5.2; Apêndice A (Quadro 4).
 
-**7. "Os hiperparâmetros estão bem ajustados?"**
-"Sim. Uma busca em grade com 27 combinações, refeita na base final,
-escolheu a própria configuração de produção. Repetida de forma aninhada,
-com a escolha só no treino de cada dobra, a AUC muda no máximo 0,0002."
+**Explicando fácil:** Pense em fichas ligadas por um número de partida (match_id): matches é a ficha da partida; teams, uma por time; participants, uma por jogador; bans, os campeões banidos; item_events, compras e vendas; items, o catálogo; pro_games e pro_players, o profissional. Os brutos (raw_) guardam o JSON original.
 
-**8. "O que é a validação cruzada que vocês usaram?"**
-"Cinco *folds* estratificados com semente fixa 42. Divido as partidas em
-cinco pilhas com a mesma proporção de vitórias, treino com quatro e testo
-na quinta, cinco vezes. Toda partida é testada sem ter sido vista no
-treino, e qualquer um reproduz os números." Se perguntarem por que não 10
-(o Kohavi recomenda 10): custo da busca em grade, e cada dobra de teste
-ainda tem cerca de 8.150 partidas (Parte 9.6).
+### 100. O que é chave primária e chave estrangeira?
 
-**9. "Por que o vermelho vence mais no *solo queue*?"**
-"O trabalho mede isso com firmeza, mas a causa é hipótese: o vermelho
-escolhe por último no *draft* e garante o *counter-pick*, e no *solo
-queue*, sem coordenação, isso pesa mais. No profissional, a primeira
-escolha é mais valorizada e o padrão inverte. Testar a causa exigiria a
-ordem do *draft*, que a API não expõe."
+**Resposta:** Primária identifica uma linha (ex.: match_id em matches); estrangeira aponta para a chave de outra tabela (ex.: teams.match_id → matches.match_id).
 
-**10. "Como vocês sabem que o viés não é sorte?"**
-"Mais de 41 mil partidas, intervalos de confiança de Wilson que excluem
-50% em três das quatro regiões, e quatro testes de robustez. Na Coreia o
-intervalo inclui 50%, e o texto diz isso explicitamente."
+**Onde achar no TCC:** Apêndice A.
 
-**11. "O texto dizia que o viés tinha um pico. Mudou?"**
-"Sim. Com a amostra ampliada, as taxas ficaram próximas nos quatro cortes
-e o teste, com a partida como unidade e correção de Holm, não detectou
-diferença. Não afirmo que o viés seja igual em toda a partida; afirmo que
-o pico não se sustentou."
+**Explicando fácil:** A primária é o ‘CPF’ da linha: não repete. A estrangeira é o ‘endereço’ que liga uma linha a outra tabela. Por exemplo, o time 100 (azul) de uma partida aponta para essa partida pelo match_id. Chave composta (match_id + team_id) identifica o time dentro da partida.
 
-**12. "Por que há dois números de partidas (41.063 e 40.778)?"**
-"Há uma base só, de 41.063 partidas. As 40.778 são as que ainda estão em andamento no minuto 15 e têm linha do tempo; as demais acabaram antes ou não têm timeline. O número varia por corte (40.919, 40.778, 34.505 e 25.098) e está no Quadro 4."
+### 101. Como o TCC evita linhas duplicadas na carga?
 
-**13. "O que é SHAP e por que não LIME?"**
-"SHAP vem do valor de Shapley, da teoria dos jogos: divide de forma justa
-quanto cada variável empurrou a previsão. Lundberg e Lee mostraram que é
-a única solução com consistência. O LIME depende de como se define a
-vizinhança, então dá explicações menos estáveis."
+**Resposta:** O coletor retoma de onde parou, pula partidas já salvas, e os INSERTs usam ON CONFLICT DO NOTHING.
 
-**14. "Como garantem que a IA não inventa dados?"**
-"Duas regras: tudo que é número vem de consulta ao banco, e o que é
-conhecimento geral da IA é rotulado como 'Leitura de jogo'. Nomes de
-itens são buscados num catálogo oficial no banco, nunca da memória da
-IA."
+**Onde achar no TCC:** Seção 4.3; Seção 5.1.
 
-**15. "A interface de linguagem natural é segura?"**
-"Tem quatro camadas de validação (só um SELECT, palavras de escrita
-bloqueadas, lista fechada de tabelas, tempo máximo de 10 segundos) e,
-desde 5 de novembro, o banco roda a consulta em transação somente
-leitura. A entrada do usuário nunca é colada direto na SQL. Segurança é
-diferente de acerto: a consulta pode ser segura e responder outra coisa."
-
-**16. "Por que 89,2% e não 88% ou 100%?"**
-"São medidas diferentes. O benchmark de 26 perguntas deu 88% e hoje dá 26 de
-26, mas as regras do esquema foram escritas conhecendo as falhas dele, então
-não é independente. A nota que vale é o gabarito automático: 203 perguntas com
-SQL de referência escrita antes da execução e comparação por código, sem
-avaliador humano. Deu 181 de 203, 89,2%, com intervalo de 84,1% a 92,7%."
-
-**16b. "O gabarito é independente do sistema?"**
-"A SQL de referência foi escrita antes de rodar o sistema e quem compara é um
-programa. Mas as perguntas são de template e eu conhecia as famílias de erro
-anteriores, então o resultado pode ser maior que com perguntas livres. Perguntas
-escritas à mão acertaram entre 54% e 60% em versões anteriores. Está declarado
-na Seção 6.1."
-
-**16c. "O que o sistema erra, e é grave?"**
-"As 22 falhas foram de nome de entidade, eliminações lidas como kills mais
-assistências e roteamento. O mais grave seria devolver um número plausível e
-errado quando o dado não existe; para isso há uma recusa determinística, e 15
-das 16 recusas esperadas saíram certas. Os controles (um SELECT, palavras
-bloqueadas, lista de tabelas, transação somente leitura, 10 segundos)
-impedem escrita, mas não verificam se a consulta responde à pergunta;
-verificar o resultado depois da execução é trabalho futuro."
-
-**16d. "Quem escreveu e quem conferiu as respostas?"**
-"A SQL de referência é minha; a comparação é por código, com regras no módulo
-`avaliar_gabarito.py` e testes. Não houve segunda leitura das SQLs de
-referência; está declarado como limitação."
-
-**16e. "O que foi corrigido depois da medida?"**
-"Três coisas: resolver no banco o nome exato de campeões, ligas, equipes e
-jogadores; mandar direto ao competitivo pergunta com liga, equipe ou
-jogador profissional; e refazer a consulta quando 'eliminações' vira kills
-mais assistências. Estão testadas por testes unitários, mas não foram
-medidas de ponta a ponta. A versão medida está na tag `gabarito-203`."
-
-**17. "Qual a contribuição científica?"**
-"Três: a integração completa numa plataforma, que nenhum trabalho
-relacionado entrega; a medição do viés de lado no *solo queue* de elo
-alto e sua inversão no profissional; e a quantificação de que a mesma
-vantagem de ouro vale mais no profissional."
-
-**18. "Os resultados valem para outros elos ou outros jogos?"**
-"Não. É validade externa limitada: só Desafiante e Grão-Mestre, fila
-ranqueada, quatro regiões. O recorte foi uma decisão de escopo. A
-arquitetura é reaproveitável, mas os números não se estendem."
-
-**19. "Por que só 5 *features*?"**
-"Porque são o estado agregado de cada time no minuto do corte, que é o
-que a *timeline* oferece com confiabilidade. Testei 10 acréscimos sobre a
-linha do tempo e nenhum passou de +0,0006; adicionar variáveis que não ajudam só deixa o modelo mais
-complicado."
-
-**20. "Por que referências tão antigas, como 1982 e 2001?"**
-"São as obras originais dos métodos, como Random Forest e AUC. Os
-estudos de domínio são todos de 2021 a 2026."
-
-**21. "Qual a diferença entre pesquisa bibliográfica e documental?"**
-"Bibliográfica usa artigos e livros já analisados por outros autores.
-Documental usa documentos técnicos ainda não analisados academicamente,
-como a documentação da API da Riot."
-
-**22. "Por que a predição não é em tempo real?"**
-"A arquitetura foi pensada para isso, porque o modelo aceita qualquer
-estado de jogo. A barreira é o acesso a dados ao vivo, não o modelo.
-Está em trabalhos futuros."
-
-**23. "O que acontece com uma partida que acabou antes do corte?"**
-"Ela não entra naquele corte. Por isso aos 25 minutos há 25.098
-partidas, contra 40.778 aos 15. E um cuidado: a linha do tempo termina com
-um quadro no fim do jogo; esse quadro nunca entra como estado do corte."
-
-**24. "Por que o EUN1 tem só 20 partidas?"**
-"Nunca foi região-alvo; o escopo sempre foi BR1, EUW1, KR e NA1. As 20
-apareceram de carona e o texto as exclui por amostra insuficiente."
-
-**25. "Quantas páginas tem a plataforma?"**
-"Seis páginas de visualização: Início, Dashboard, Campeões, Partidas,
-Competitivo e Simulador. A Consulta NL, a interface em linguagem natural,
-é o objetivo g e fica à parte." (Atenção: no menu lateral das capturas
-aparece "Consulta NL" e não aparece "Partidas", porque a análise de
-partida abre ao clicar numa partida. Se a banca contar o menu, explique
-isso.)
-
-**26. "Você usou IA para fazer o trabalho?"** Ver a Parte 20.
-
-**27. "Por que esses trabalhos relacionados e não outros?"**
-"Escolhi para cobrir cada camada da plataforma (predição,
-explicabilidade, linguagem natural e visualização), dentro da janela de
-cinco anos. O núcleo veio do levantamento do TCC I; no TCC II acrescentei
-quatro estudos de *League of Legends* para comparar a acurácia com
-trabalhos do mesmo jogo." (Parte 5.2.1)
-
-**28. "Por que três modelos?"**
-"Conversando com o orientador, decidimos comparar o XGBoost com *Random
-Forest* e uma rede neural para ver as diferenças de resultado entre
-famílias: *bagging*, *boosting* e rede neural. Os três ficaram próximos, e
-o XGBoost foi o mais estável." (Parte 9.1)
-
-**29. "Por que só Desafiante e Grão-Mestre?"**
-"Escopo. É uma população fechada, que a API entrega inteira e que cabia
-na coleta com a chave de desenvolvedor. O custo é a validade externa,
-declarado na 6.1." (Parte 6.1)
-
-**30. "Por que 5 dobras, se o Kohavi recomenda 10?"** Parte 9.6.
-
-**31. "Qual é o seu *baseline*?"**
-"A classe majoritária: sempre apostar no vermelho acerta 53,3% aos 15
-minutos. O XGBoost fica 23 pontos acima. Antes da busca em grade houve
-também um modelo de referência com parâmetros padrão
-(`train_baseline.py`)."
-
-**32. "Usaram conjunto de teste separado? Validação aninhada?"** Não;
-Parte 9.6 (a configuração veio da base de 10 mil e ficou a 0,0001 da
-melhor na base final).
-
-**33. "As partidas do mesmo jogador não vazam entre treino e teste?"**
-"Podem: o sorteio é por partida, e o mesmo jogador aparece em várias. O
-texto declara isso como ameaça à validade interna (6.1). As *features* são
-do estado da partida, não do jogador, o que reduz o efeito, mas uma divisão
-por jogador seria mais rigorosa."
-
-**34. "Qual a diferença de uma Random Forest para o XGBoost?"**
-"A Random Forest treina árvores independentes em amostras sorteadas e
-faz a média (*bagging*, reduz variância). O XGBoost treina em sequência,
-cada árvore corrigindo o erro das anteriores (*boosting*, reduz viés), com
-regularização."
-
-**35. "O que é a AUC, em uma frase?"**
-"A probabilidade de o modelo dar nota maior a uma partida que o azul
-venceu do que a uma que ele perdeu, sorteadas ao acaso."
-
-**36. "Por que o viés não entra como *feature*?"**
-"Entra implicitamente: todas as *features* são azul menos vermelho, então
-o modelo aprende a vantagem do lado pelo valor de base (a taxa média de
-vitória do azul, que ele recebe quando todas as diferenças são zero). O
-problema é que ele
-a subestima no empate (49-51% contra 46-48% nos dados); está na 6.1 e no
-Apêndice F."
-
-**37. "Se fosse começar de novo, o que faria diferente?"**
-"Dividiria as dobras por jogador. E tentaria desde o início uma
-fonte com a ordem do *draft*, que é o dado que falta para testar a
-hipótese do viés."
-
-**38. "Qual foi a maior dificuldade?"**
-Escolha uma história da Parte 19 e conte em 30 segundos: problema,
-como percebeu, como corrigiu, o que mudou no processo. A melhor é a das
-torres (o bug invertido e o reprocessamento a partir do JSON bruto) ou a
-do "pico" do viés refutado com mais dados.
-
-**39. "A plataforma tem usuários? Foi avaliada com pessoas?"**
-"Não houve avaliação com usuários; os dados são secundários e não houve
-participação de pessoas. O que foi medido é a acurácia do modelo e da
-interface em linguagem natural. Avaliação de usabilidade seria um trabalho
-futuro natural."
-
-**40. "Por que tanto texto nos apêndices?"** Comparação feita em
-2026-11-02 com os 10 TCC II aprovados da pasta de exemplos: 7 têm
-apêndice, e todos usam o apêndice para **material** (link do GitHub,
-figuras de teste, questionários, entrevistas, termos, fotos, circuitos).
-Nenhum tem notas em prosa como os nossos D, E e G. O modelo do professor
-permite ("texto ou documento elaborado pelo próprio autor, com a finalidade
-de complementar seu trabalho"), então não é erro, mas foge do costume.
-Resposta: "O corpo tem tudo o que sustenta as conclusões, dentro das 30
-páginas. Os apêndices guardam o detalhe para quem quiser conferir: a origem
-de cada número, os comandos que reproduzem cada resultado e as limitações
-com os números. Nada que a conclusão use está só no apêndice."
-
-**41. "Quanto custa rodar a interface em linguagem natural?"** Não há
-medição de custo no TCC; não invente número. Diga que usa um modelo
-pequeno da Anthropic (Haiku), com `max_tokens` 1.200 por consulta, e que o
-custo por pergunta não foi objeto do trabalho.
-
-**42. "Birant e Birant chegam a 95%. Por que o seu é 76%?"** (conferido no
-artigo, 2026-11-02)
-"Os atributos deles são resumos do fim da partida, como abates, assistências
-e ouro por jogador, que o próprio artigo chama de *post-game*. O meu modelo
-só vê o estado até o minuto do corte. Usar o resumo final seria o vazamento
-de dados que Kaufman et al. descrevem: o modelo veria o resultado antes de
-prever."
-
-**43. "García-Méndez e Arriba-Pérez passam de 90%. Por que o seu não?"**
-"O trabalho deles é de CS:GO profissional, com outra base e outras
-variáveis, e chega a 92,5%. Não é o mesmo jogo, nem o mesmo problema. O que
-eu tomo deles é a necessidade de explicar a previsão, e o meu SHAP faz
-isso."
-
-**44. "Hodge chega a 85% com 5 minutos. O seu fica em 76% aos 15."**
-"O 85% é de Dota 2 profissional, medido em 28 jogos ao vivo de um torneio, e
-é um teto ('até'). O meu é a média de validação cruzada em 39 mil partidas de
-elo alto de LoL, outro jogo e outra base. Não são comparáveis diretamente."
-
-**45. "O Maymin escreve que o mapa de calor não é possível com os dados da
-API. O seu sai da API?"** "Sai, mas é mais grosseiro: o dele vem de
-rastreamento óptico a cada segundo; o meu agrega as posições por minuto da
-*match-v5* (linha do tempo). O texto já admite que o meu é mais simples."
-
-**47. "O SiriusBI tem mais de 93% em SQL. Por que o seu é 88%?"** (conferido
-no artigo, 2026-11-02)
-"Os 93% a 97% do SiriusBI são de produção, em consultas reais e mais
-simples de três setores da Tencent, com um modelo ajustado nos dados do
-cliente. Nos conjuntos de teste dele, o resultado é menor: 79% a 83% em 182
-consultas industriais e 65% a 69% no BIRD. O meu benchmark tem 26 perguntas
-sobre o meu esquema, sem ajuste do modelo: é a mesma ordem de grandeza, mas
-não é o mesmo teste. O próprio artigo explica que a produção dá mais por
-causa de conhecimento mais completo e consultas mais uniformes."
-
-**48. "Uma regressão logística não faz o mesmo? Por que XGBoost?"** (medido em
-2026-11-03, `src/models/baseline_e_diferencas.py`, Apêndice C)
-"Porque o limite está nas cinco variáveis, não no modelo: a regressão logística chega a 0,7648 de acurácia e 0,8495 de AUC aos 15 minutos, 0,0008 acima do XGBoost, com intervalo que exclui zero aos 10, 15 e 20 minutos. É diferença de milésimos, e o texto diz que a logística fica à frente. Não digam que o XGBoost captura interações caso as variáveis cresçam: com as 59 variáveis novas a logística ganhou mais que ele (+0,0073 contra +0,0044, cada um contra si mesmo, Apêndice K). O que o XGBoost oferece é o SHAP exato de árvore e a integração já validada; trocar de modelo não mudaria o resultado prático."
-
-**46. "O que a literatura diz sobre os três modelos empatarem?"** "Do et al.
-(2021) testaram cinco algoritmos e ficaram entre 72,7% e 75,4%, com o
-*gradient boosting* acima da rede neural; Guan e Tung (2026) acharam as duas
-arquiteturas deles estatisticamente indistinguíveis. Com poucas variáveis
-agregadas, o limite está nos dados."
+**Explicando fácil:** É a mesma ideia de salvar o jogo: rodar de novo não repete o que já existe. Se a carga rodar duas vezes, a chave primária impede a segunda linha igual. Isso se chama idempotência.
 
 ---
 
-## 16. A plataforma (o sistema que foi entregue)
+## 5.3 Análise exploratória: resultados
 
-### 16.1 Arquitetura
+### 102. Qual o resultado do viés de lado no solo queue?
 
-```
-Riot API → coletor (com limite de pedidos) → JSON bruto no banco
-                                               │ ETL
-                                               ▼
-                      tabelas organizadas (PostgreSQL)
-Oracle's Elixir (CSV) → tabelas do profissional
-                                               │
-             ┌─────────────────────────────────┼───────────────┐
-             ▼                                 ▼               ▼
-   features por corte            modelos XGBoost por corte   API (FastAPI)
-                                                                │
-                                                                ▼
-                                                     site (React)
-```
+**Resposta:** O vermelho venceu mais que o azul: BR1 56,3%, EUW1 53,4%, NA1 52,2%, KR 50,4%. Em BR1, EUW1 e NA1 o intervalo de 95% exclui 50%; na KR o intervalo [49,5%, 51,4%] inclui 50%.
 
-### 16.2 Tecnologias (Seção 4.8)
+**Onde achar no TCC:** Seção 5.3 (Quadro 1).
 
-| Camada | Tecnologia | Para quê |
-|---|---|---|
-| Coleta, ETL, modelos | **Python** (pandas, NumPy, scikit-learn, XGBoost, SHAP) | Todo o processamento |
-| Banco | **PostgreSQL** | Guardar os dados |
-| Servidor | **FastAPI** | A "API própria" que o site consulta |
-| Site | **React + TypeScript** (Vite, Tailwind, TanStack Query, **Recharts** para gráficos) | O que o usuário vê |
-| IA (texto) | **API da Anthropic (Claude)** | Linguagem natural e orientação |
+**Explicando fácil:** Em todas as regiões o vermelho fica de 50% para cima, mas com força diferente. Na BR1 a diferença é grande e firme. Na KR não dá para distinguir de 50%. Portanto o padrão não se limita ao Brasil, mas as quatro regiões não o demonstram com a mesma força.
 
-**Regra (Seção 4.8, regra do modelo do professor):** na metodologia do
-TCC II, ferramentas e materiais são **descritos**, não referenciados com
-citação. Por isso a 4.8 não tem citações.
+### 103. Por que a KR tem 50,4% e a BR1 56,3%? O que explica?
 
-### 16.3 As 6 páginas (recortes na Seção 5, telas inteiras no Apêndice E)
+**Resposta:** O TCC não sabe: os dados não permitem dizer.
 
-**No corpo (Seção 5), cinco figuras recortadas:** Figura 1 Competitivo
-(viés de lado e conversão, 5.3); Figura 2 SHAP nos quatro cortes (5.4);
-Figura 3 análise de partida com mapa de calor (5.5); Figura 4 Simulador,
-aba Estado (5.5); Figura 5 consulta em linguagem natural (5.6).
+**Onde achar no TCC:** Seção 5.3; Seção 6.
 
-**No Apêndice E, as seis telas inteiras (Figuras 6 a 11):**
+**Explicando fácil:** O TCC mede a diferença, mas não explica. Qualquer explicação (metagame, composição dos jogadores, versão) seria hipótese. Na banca, responda ‘não sei, e os dados não permitem dizer’; é uma resposta honesta e forte.
 
-| Figura | Página | O que mostra |
-|---|---|---|
-| 6 | **Início** | Busca unificada e rankings |
-| 7 | **Dashboard** | Indicadores gerais e o **viés de lado por região** |
-| 8 | **Campeões** | Estatísticas por campeão, itens finalizados, presença no profissional |
-| 9 | **Partidas** | Análise de uma partida: probabilidade minuto a minuto, **mapa de calor**, modo "e se", leitura de *draft* |
-| 10 | **Competitivo** | Comparação *solo queue* × profissional, por ano |
-| 11 | **Simulador** | Aba Estado (modelo de ML e SHAP); as abas Composição (heurística) e Explicabilidade ficam na mesma página |
+### 104. O que são ‘taxas próximas nos quatro cortes’ e por que ‘nenhuma diferença detectada’ não é ‘iguais’?
 
-**Destaques para explicar:**
-- **Mapa de calor:** mostra onde os jogadores estavam em cada minuto, a
-  partir das posições da *timeline*. Inspirado em Wallner et al. (2023).
-- **Modo "e se":** o usuário muda o estado (ex.: "e se o azul tivesse 3
-  mil de ouro a mais aos 14 minutos?") e vê como a probabilidade muda.
-  Responde perguntas de **estado**, não de **ação** (ele não sabe dizer
-  "e se o jogador tivesse ido para o dragão").
-- **Composição no Simulador é heurística, não ML:** usa a taxa de vitória
-  histórica dos campeões, e a tela **avisa** isso, para não confundir
-  com a predição do modelo.
-- **Correção de amostra pequena (*shrinkage*):** um campeão com 3
-  vitórias em 3 jogos não tem "100% de vitória de verdade". O sistema
-  "puxa" esse número para a média até ter amostra suficiente.
+**Resposta:** Entre partidas com diferença absoluta de ouro menor que 500, o azul venceu 46,5% (10 min), 47,8% (15), 46,9% (20) e 47,4% (25). Nenhuma das seis diferenças entre pares foi detectada após Holm; isso não demonstra que o viés seja igual em toda a partida.
 
----
+**Onde achar no TCC:** Seção 5.3; Apêndice C (Quadro 10).
 
-## 17. Testes e verificações de qualidade
+**Explicando fácil:** ‘Não detectei diferença’ não é ‘provei que é igual’. Com 1.000 partidas, ±3 pontos já é erro de amostragem. O TCC só afirma que as taxas ficam próximas e que, depois da correção por múltiplas comparações, nada se distingue do acaso.
 
-| Verificação | O que faz | Resultado |
-|---|---|---|
-| `tests/smoke_test.py` | Roda o pipeline inteiro com dados sintéticos, sem tocar nos dados reais | funcional |
-| `tests/validate_predictions.py` | Bateria de comportamento do modelo: vantagem real aumenta a chance? casos extremos dão probabilidade alta? as taxas do viés ficam próximas entre os cortes? torres crescem aos 25? | **Aprovado com ressalvas** |
-| `docs/verifica_tcc.py` | **23 checagens** que comparam os números do texto do TCC com os artefatos reais (inclui: nenhuma figura mais velha que o que ela mostra) | **23/23, consistente** |
-| `docs/confere_docx.py` | Confere a formatação do `.docx` (títulos, referências, legendas) | conforme |
-| `docs/confere_paginas.ps1` | Mede pelo Word o corpo (25-30 páginas) e cada apêndice | 30 páginas, no teto |
-| `docs/confere_materiais.py` | Confere este guia, o pptx, o site e o README contra os números substituídos | sem resíduo |
-| Frontend | 38 testes automáticos + verificação de código | ok |
+### 105. Por que a faixa ‘diferença de ouro menor que 500’?
 
-**A checagem retrospectiva** (dentro da bateria): rodando o modelo
-minuto a minuto em 150 partidas reais, a previsão dos últimos minutos
-apontou o vencedor certo em **140 de 150 (93%)**. Isso **não é** a
-acurácia oficial do modelo (é no fim da partida, quando já está quase
-decidido); é um teste de sanidade do pipeline completo.
+**Resposta:** Para comparar partidas em estado equilibrado, em que o azul e o vermelho estão perto em ouro.
 
-**"Aprovado com ressalvas" quer dizer:** nenhuma checagem falhou; as
-ressalvas são casos em que uma *feature* tem peso quase nulo naquele
-corte (ex.: torres aos 10 minutos), então não dá para exigir direção
-dela.
+**Onde achar no TCC:** Seção 5.3; Apêndice C (Quadro 10, calibração nas partidas empatadas).
 
-**Por que o `verifica_tcc.py` existe:** número velho no texto é o erro
-mais comum de TCC. Esse script compara o texto com os arquivos de
-resultado e **reprova** se algo divergir.
+**Explicando fácil:** Se um time está +3.000 de ouro, a vitória dele é provável e esconde o efeito do lado. Escolhendo partidas empatadas em ouro, sobra o efeito do lado do mapa. É como comparar largar na pista A ou na B só entre pilotos de mesmo nível.
+
+### 106. O que mostra o teste (i), a replicação na BR1?
+
+**Resposta:** Reproduz a assimetria, o que mostra que o padrão não decorre apenas da mistura de regiões.
+
+**Onde achar no TCC:** Seção 5.3.
+
+**Explicando fácil:** Alguém pode dizer: ‘o viés aparece porque você misturou regiões diferentes’. Olhando só a BR1, ele continua. Logo não é só efeito de mistura, embora a composição de cada região ainda possa influenciar os outros resultados.
+
+### 107. Qual o resultado no profissional e como ele se compara?
+
+**Resposta:** O azul venceu 53,2% em 99.259 jogos, com série anual estável desde 2015 (entre 52,5% e 55,0%): sinal oposto ao do solo queue de elo alto.
+
+**Onde achar no TCC:** Seção 5.3; série anual: só no repositório (consulta em `pro_games`).
+
+**Explicando fácil:** A mesma pergunta (‘qual lado ganha mais?’) tem resposta oposta nos dois contextos. É um achado descritivo: no ranqueado o vermelho, no campeonato o azul. O TCC oferece uma hipótese (prioridade de escolha e counter-pick), não testada.
+
+### 108. Por que 53,1% na Figura 1 e 53,2% no texto?
+
+**Resposta:** A Figura 1 restringe o profissional a 2026 (53,1%); o texto usa o acervo completo (53,2%).
+
+**Onde achar no TCC:** Seção 5.3 (final do parágrafo da conversão de vantagem).
+
+**Explicando fácil:** São dois recortes diferentes. 53,2% é de todos os 99.259 jogos de 2014 a 2026; 53,1% é só de 2026 na tela. Não é erro, mas convém saber para não se atrapalhar se alguém notar.
+
+### 109. O que é a conversão de vantagem e quais os resultados?
+
+**Resposta:** Com vantagem de ouro de +2.000 a +4.000 aos 15 minutos o azul venceu 83,6% no profissional (n = 14.617) e 74,1% no solo queue (n = 5.366); de +4.000 a +6.000, 94,0% contra 86,3%.
+
+**Onde achar no TCC:** Seção 5.3 (conversão de vantagem); origem das taxas: só no repositório (`docs/confere_conversao_advantagem.py`).
+
+**Explicando fácil:** Conversão de vantagem é quanto de uma vantagem de ouro vira vitória. No profissional, estar +2.000 à frente aos 15 minutos vira vitória em 83,6% das vezes, e no ranqueado, em 74,1%. É como ter 2 níveis a mais: no campeonato quase sempre se converte, na ranqueada nem tanto.
+
+### 110. A diferença de 9,5 pontos é significativa? O que isso quer dizer?
+
+**Resposta:** Sim: teste z de duas proporções com grupos independentes, z = 15,2 e z = 12,7, p < 0,001. Mas é diferença observada, sem causa atribuída.
+
+**Onde achar no TCC:** Seção 5.3.
+
+**Explicando fácil:** z grande e p menor que 0,001 significam que a diferença é grande demais para ser sorte. Mas o TCC não afirma o porquê: os dois recortes diferem também em nível dos jogadores, versão do jogo e época. Atribuir à coordenação das equipes exigiria uma evidência que o trabalho não tem.
+
+### 111. Houve algum erro de cálculo na conversão de vantagem?
+
+**Resposta:** Sim, corrigido: o script lia a linha do jogador do topo em vez da linha do time; os valores corretos são os do texto atual (83,6%, n = 14.617).
+
+**Onde achar no TCC:** Seção 5.3; diário de execução (17/11/2026).
+
+**Explicando fácil:** O arquivo do Oracle’s Elixir tem 12 linhas por jogo (10 de jogador e 2 de time). O script antigo pegava a primeira linha do azul, que é a do jogador do topo, e não a do time. Foi achado ao comparar com uma consulta direta no banco e corrigido no script, no texto, nos slides e nos documentos. Se alguém citar os valores antigos (81,5% e 91,7%), eles estão superados.
+
+### 112. Quais os testes de robustez (ii), (iii) e (iv) mostraram?
+
+**Resposta:** (ii) taxa do azul próxima entre as faixas de duração (45,6% a 47,3%); (iii) Wilson do corte de 10 min [45,3%, 47,6%] exclui 50%; (iv) Holm: nenhuma diferença entre cortes detectada.
+
+**Onde achar no TCC:** Seção 5.3.
+
+**Explicando fácil:** (ii) não mostra diferença expressiva entre partidas curtas e longas. (iii) mostra que mesmo na maior amostra o azul fica abaixo de 50%. (iv) impede ler a variação entre os cortes como uma tendência. Juntos, sustentam que o viés é um padrão estável, mas não que seja igual em toda a partida.
 
 ---
 
-## 18. Limitações e trabalhos futuros
+## 5.4 Modelagem: resultados
 
-### 18.1 Limitações (Seção 6.1 e Apêndice F)
+### 113. O que mostra o Quadro 2?
 
-Saber as limitações **é ponto a favor**. A banca respeita quem conhece
-os limites do próprio trabalho.
+**Resposta:** A comparação dos modelos aos 15 minutos: a regressão logística (AUC 0,8495), o MLP ajustado (0,8491), o XGBoost ajustado (0,8487) e a Random Forest ajustada (0,8480); as referências sem ajuste dão 0,8459 e 0,8278.
 
-1. **Amostras pequenas em recortes finos** (combinações específicas de
-   campeões): amenizado com *shrinkage*, não eliminado.
-2. **O modelo subestima o viés de lado no empate** (Parte 10.7).
-4. **Desequilíbrio por região** (NA1 menor) e força desigual da
-   evidência (KR inclui 50%).
-5. **Um *patch* concentra a maioria das partidas** (16.13), o que limita
-   generalizar para outras versões do jogo.
-6. **Teto de desempenho das *features*** (10 experimentos negativos; o 11º à parte).
-7. **Sem dados de micro-posicionamento** (ondas de minion): nenhuma API
-   pública da Riot oferece. Alternativas (replays `.rofl`, visão
-   computacional no minimapa) foram consideradas, não implementadas.
-8. **Monotonicidade:** o XGBoost não garante que aumentar só os abates
-   nunca diminua a chance, por causa de interações entre variáveis.
+**Onde achar no TCC:** Seção 5.4 (Quadro 2).
 
-### 18.2 Os três tipos de validade (Seção 6.1) — vocabulário de banca
+**Explicando fácil:** É o ‘placar’ final. Depois do ajuste, os quatro modelos ficam a 0,0015 de AUC e 0,0020 de acurácia uns dos outros. O ajuste de hiperparâmetros importou principalmente para a Random Forest (0,8278 para 0,8480). O XGBoost de produção tem acurácia 0,7641.
 
-- **Validade de construto:** "estou medindo o que acho que estou
-  medindo?". Limite: o modelo não tem o estado das ondas, que um
-  analista consideraria importante.
-- **Validade externa:** "vale para outros contextos?". Limite: só elo
-  altíssimo, fila ranqueada, 4 regiões.
-- **Validade interna:** "a conclusão pode ter outra causa?". Limite: as
-  partidas foram coletadas em janelas de tempo, então algo sazonal
-  (*patch*, eventos) pode se misturar com o que os dados mostram.
+### 114. Por que a Random Forest de referência foi tão pior (0,8278)?
 
-### 18.3 Trabalhos futuros (Seção 6.2)
+**Resposta:** Era a configuração de referência (500 árvores, demais parâmetros padrão do scikit-learn), sem busca em grade; ajustada, subiu para 0,8480.
 
-1. **Predição ao vivo** (a arquitetura já aceita qualquer estado).
-2. **Ampliar a validade externa:** outras filas, outros elos, outro jogo.
-3. **Consulta em linguagem natural:** verificar o resultado depois da execução,
-   gabarito maior com perguntas escritas à mão e um modelo aberto local para
-   comparar com a API.
+**Onde achar no TCC:** Seção 5.4 (Quadro 2); Apêndice C (Quadro 7).
 
----
+**Explicando fácil:** Árvores sem limite de profundidade tendem a decorar os dados de treino. A busca em grade escolheu profundidade 6 e folha mínima de 5 partidas, que freiam a memorização. O TCC mostra os dois para ser transparente.
 
-## 19. Histórias reais de erros encontrados e corrigidos
+### 115. Como interpretar a AUC-ROC de 0,8487? Significa 84,87% de acerto?
 
-Contar uma história dessas mostra maturidade. Todas estão documentadas
-no código ou no diário.
+**Resposta:** Não. É a probabilidade de uma partida que o azul ganhou receber pontuação maior que uma que ele perdeu; a acurácia é outra medida (0,7641).
 
-**1. As torres estavam no time errado.** No evento de torre destruída
-da Riot, o campo `teamId` é o time que **perdeu** a torre, não o que
-destruiu. O código somava no time errado. O erro ficou **duas semanas**
-num *dashboard* até ser percebido. A correção (`300 - lost` no
-`build_features.py`) inverte explicitamente. Como o JSON bruto estava
-guardado, bastou reprocessar.
+**Onde achar no TCC:** Seção 2.3; Seção 5.4.
 
-**2. A AUC estava sendo calculada errado.** A primeira versão do script
-do Apêndice C calculava a AUC com a **classe prevista** (0 ou 1) em vez
-da **probabilidade**. Isso dava 0,7596 aos 15 minutos, quando o correto
-era **0,8473** (na base da época; hoje, 0,8487). A AUC precisa da probabilidade, porque mede a qualidade da
-ordenação.
+**Explicando fácil:** AUC e acurácia são medidas diferentes. A acurácia (76,41%) é a fração de acertos com limiar de 50%. A AUC (0,8487) é a capacidade de ordenar partidas. Confundir as duas é um erro comum na banca; vale deixar claro.
 
-**3. A IA inventava itens.** A orientação estratégica e a consulta em
-linguagem natural chegaram a citar nomes e estatísticas de itens "de
-memória", com erros. A solução foi criar a tabela `items` (catálogo
-oficial) e fazer o sistema buscar ali.
+### 116. Como o desempenho varia com o corte?
 
-**4. Respostas cortadas silenciosamente.** Com limite de 500 *tokens*, a
-SQL saía cortada no meio e dava erro de sintaxe. O limite foi para 1.200
-e o código passou a **detectar** o corte e avisar.
+**Resposta:** XGBoost: AUC 0,7752 (10 min), 0,8487 (15), 0,8690 (20), 0,8899 (25); acurácia 0,7020, 0,7641, 0,7856, 0,8068.
 
-**5. O "pico" do viés de lado.** Achado reportado com amostra menor e
-refutado com amostra maior + correção de Holm. Corrigido no texto, com
-registro.
+**Onde achar no TCC:** Seção 5.4 (Quadro 3).
 
-**6. O piloto enganoso do experimento 11.** +0,009 com 199 partidas,
--0,0031 com 2.987. Não foi publicado como descoberta.
+**Explicando fácil:** Mais tempo, mais informação: aos 25 minutos o placar já diz muito. Mas cuidado: cada corte avalia partidas diferentes, e as curtas só entram nos primeiros cortes. Nas mesmas 25.098 partidas, a AUC vai de 0,644 a 0,890: o efeito do tempo é claro e maior.
 
----
+### 117. Por que não comparar 0,775 com 0,890 como ‘melhora com o tempo’?
 
-## 20. Sobre o uso de IA no trabalho
+**Resposta:** Porque a população muda: as partidas curtas, mais fáceis de prever cedo, só entram nos primeiros cortes; nas mesmas 25.098 partidas os valores são 0,644, 0,713, 0,787 e 0,890.
 
-É bem possível a banca perguntar. A melhor resposta é **honesta e
-específica**. Antes da banca, **confirme com o orientador a política da
-UNISINOS** sobre uso e declaração de IA em TCC.
+**Onde achar no TCC:** Seção 5.4; Apêndice C (Quadro 9).
 
-Fatos para você ter claros:
+**Explicando fácil:** Aos 10 minutos entram muitas partidas que acabam cedo (massacres, fáceis de prever); aos 25 só ficam as que duraram. Comparar os dois números é comparar conjuntos de partidas diferentes. O jeito certo é olhar as mesmas partidas em todos os cortes.
 
-1. **A IA é parte do sistema** (isso é público e está no texto): a
-   consulta em linguagem natural e a orientação estratégica usam o Claude
-   (Anthropic). E o projeto tem regras explícitas para a IA não inventar
-   dados (Parte 14.5).
-2. **O levantamento bibliográfico inicial teve ajuda de IA:** o PDF
-   `Pesquisa artigos TCC.pdf` foi gerado com o ChatGPT. Os artigos foram
-   triados por título e resumo e os que entraram estão nas referências.
-   Se a banca perguntar algo específico de um artigo, você precisa ter
-   lido o artigo (vale revisar os 11 estudos de domínio).
-3. **O desenvolvimento e a redação tiveram apoio de um assistente de
-   programação com IA** (Claude Code), como mostra o histórico do projeto.
+### 118. O que mostra o SHAP por corte?
 
-Uma forma honesta de responder, se perguntarem: dizer que usou IA como
-ferramenta (como componente do sistema, para apoiar a busca de
-literatura e para apoiar desenvolvimento e escrita), e que as decisões,
-a validação dos resultados e a responsabilidade pelo conteúdo são suas.
-O que vai sustentar essa resposta é você **entender** cada decisão, que é
-para isso que este guia existe.
+**Resposta:** Ouro e experiência dominam em todos os cortes; torres quase não pesam até os 20 minutos (0,0038, 0,0076, 0,0023) e sobem aos 25 (0,0429), cerca de 6 vezes o valor dos 15.
 
----
+**Onde achar no TCC:** Seção 5.4 (Figura 2); valores por corte: só no repositório (`reports/shap_importance_phases.json`).
 
-## 21. Folha de cola: os números para decorar
+**Explicando fácil:** Em LoL, derrubar uma torre antes dos 14 minutos é raro (as placas de defesa caem por volta daí), então uma torre a mais não diz muito cedo. Aos 25 já pesa. É a justificativa concreta para treinar um modelo por fase. Lembre: é média do valor absoluto, em log-odds; mostra o tamanho do peso, não a direção.
 
-**Dados**
-- 41.063 partidas *solo queue* (BR1 11.936; EUW1 11.744; KR 10.204; NA1
-  7.159; EUN1 20), todas usadas; 40.919, 40.778, 34.505 e 25.098 estão em
-  andamento nos cortes de 10, 15, 20 e 25 min
-- 99.259 jogos profissionais (2014-2026)
-- Fila 420; elos Desafiante a Mestre
-- Base congelada: última partida em 4/10/2026; profissional de 4/7/2026
-- Limite da API: 20 pedidos/s e 100 a cada 2 min; chave expira em 24 h
+### 119. A calibração do modelo é boa?
 
-**Modelo (XGBoost, 15 min)**
-- Acurácia 0,7641 | Precisão 0,7576 | Recall 0,7278 | F1 0,7424 |
-  AUC 0,8487
-- Hiperparâmetros: 500 árvores, taxa 0,01, profundidade 3
-- Validação: 5 *folds* estratificados, semente 42
-- AUC por corte: 0,775 / 0,849 / 0,869 / 0,890; nas mesmas 25.098
-  partidas: 0,644 / 0,713 / 0,787 / 0,890
-- Taxa de vitória do azul na amostra: 46,7%
-- Busca em grade: 27 combinações, a produção foi a escolhida (1º lugar);
-  aninhada muda no máximo 0,0002
-- Ajustados (15 min): logística 0,7648 / 0,8495; MLP 0,7638 / 0,8491;
-  XGBoost 0,7641 / 0,8487; *Random Forest* 0,7628 / 0,8480
-- Calibração: nas empatadas, previsão a menos de 0,4 pp do observado;
-  maior desvio entre decis aos 15 min, 1,19 pp
+**Resposta:** Sim: o maior desvio entre decis é 1,19 ponto percentual aos 15 minutos; nas partidas empatadas a média prevista fica a menos de 0,5 ponto da observada. O modelo não exigiu correção.
 
-**Explicabilidade**
-- SHAP em log-odds; Figura 4: −0,132 + 1,038 = 0,906 → 71,2%
-- Ouro e XP dominam; torres sobem de 0,0076 (15 min) para 0,0429 aos
-  25 min (~6x)
+**Onde achar no TCC:** Seção 5.4; Apêndice C (Quadro 10 e Figura 5).
 
-**Experimentos**
-- 10 tentativas sobre a linha do tempo, máximo +0,0006; a 11ª à parte
-- Variáveis ricas no mesmo classificador: logística +0,0073, XGBoost
-  +0,0044 (15 min)
-- Volume com teste fixo: 0,8494 (2.500) → 0,8519 (10.000) → 0,8527
-  (32.622)
+**Explicando fácil:** Calibrado é quando ‘70%’ significa 70% de vitórias. Dividindo as previsões em 10 faixas, o pior desvio foi 1,19 ponto. Como a plataforma mostra a probabilidade ao usuário, ela precisa ser confiável. A sigmoide piorou a calibração e a isotônica não melhorou a AUC nem o Brier.
 
-**Viés de lado**
-- Vermelho vence: BR1 56,3%; EUW1 53,4%; NA1 52,2%; KR 50,4% (KR inclui
-  50%)
-- Empatadas: azul 46,5% / 47,8% / 46,9% / 47,4%; partida como unidade,
-  Holm p mín. 0,65; "taxas próximas, nenhuma diferença detectada"
-- Profissional: azul 53,2%
-- Conversão (+2k a +4k aos 15): pro 83,6% x *solo queue* 74,1%; 9,5 pp;
-  z = 15,2; diferença observada, sem causa atribuída
+### 120. Por que não aplicar calibração isotônica, que reduziu o desvio médio?
 
-**Linguagem natural**
-- 23/26 = 88%; 22 *solo queue* + 4 profissional; falhas: perguntas 5,
-  12 e 22
-- *temperature* 0; *max_tokens* 1.200; tempo máximo 10 s
+**Resposta:** Reduziu o desvio médio (0,36 pp) sem melhorar o escore de Brier nem a AUC-ROC; a calibração adicional não traz ganho, e a produção segue sem ela.
 
-**Documento**
-- 30 páginas do Resumo ao fim das Referências (no limite, sem folga); sem
-  Abstract (opcional no modelo)
-- 31 referências; 12 Figuras (5 no corpo, 6 telas inteiras no Apêndice E e
-  a curva de calibração no F); 32 Quadros (5 no corpo, 27 nos apêndices);
-  Apêndices A-K; sem Anexo (a documentação da Riot é citada na 4.3 e 5.1)
-- limitações: Seção 6.1, com o detalhe no Apêndice F
-- `verifica_tcc.py`: 22/22
+**Onde achar no TCC:** Calibração adicional (isotônica e sigmoide): só no repositório (`docs/experimento_calibracao.py`); a calibração do modelo de produção está no Apêndice C (Quadro 10, Figura 5).
+
+**Explicando fácil:** Mexer num modelo que já está bem calibrado só complica. A isotônica baixou um pouco o desvio médio, mas não melhorou as duas medidas principais. Custo sem benefício, então ficou fora.
+
+### 121. O que a curva de aprendizado mostra?
+
+**Resposta:** Com teste fixo de 8.156 partidas, a AUC-ROC passa de 0,8494 (2.500 partidas) para 0,8519 (10.000) e 0,8527 (32.622): acima de 10 mil, mais volume quase não muda o resultado.
+
+**Onde achar no TCC:** Curva de aprendizado: só no repositório (`src/models/curva_aprendizado.py`, `reports/curva_aprendizado.json`); a frase-resumo está na Seção 5.4 (acima de 10 mil partidas, mais volume quase não muda o resultado).
+
+**Explicando fácil:** Treinando com cada vez mais partidas e testando sempre no mesmo conjunto, a nota quase para de subir depois de 10 mil. Isso sugere que o limite está nas cinco variáveis, e não na quantidade de partidas. Coletar mais não valeria o esforço.
+
+### 122. Por que a sequência 0,8214, 0,8393 e 0,8487 não prova o efeito do volume?
+
+**Resposta:** Porque registra as rodadas de coleta, com conjuntos de teste diferentes (e composição regional e de versões diferentes); não isola o efeito do volume.
+
+**Onde achar no TCC:** Seção 5.4.
+
+**Explicando fácil:** Entre as rodadas mudaram juntos o tamanho do treino, as partidas avaliadas e a composição por região. Para atribuir o ganho só ao volume, o teste tem que ser fixo. Foi o que a curva de aprendizado fez.
+
+### 123. O que mostra o treino no passado e teste no futuro?
+
+**Resposta:** Divisões cronológica 80/20 e por patch (16.10 a 16.13 treinam e 16.14 a 16.19 testam) ficam iguais ou acima da aleatória, exceto 0,0026 abaixo aos 10 minutos (dentro do intervalo).
+
+**Onde achar no TCC:** Seção 6.1; Apêndice C (Quadro 8).
+
+**Explicando fácil:** É o teste do ‘viajante do tempo’: treinar com partidas antigas e testar nas novas, como o jogo muda de patch. Se o modelo só funcionasse no passado, a nota cairia; não caiu. Ressalva: a região se mistura ao tempo (o teste cronológico tem 44,3% de NA1 e nenhuma BR1).
+
+### 124. O que são os experimentos 12 a 19 e que ganho tiveram?
+
+**Resposta:** Oito conjuntos novos de variáveis (trajetória, por função, objetivos, campeões, jogadores, histórico); aos 15 minutos o ganho foi de até +0,0044 no XGBoost e +0,0073 na regressão logística.
+
+**Onde achar no TCC:** Seção 5.4; Seção 6.1; quadros dos experimentos: só no repositório (`reports/experimentos_precisao.json`).
+
+**Explicando fácil:** Foi a pergunta ‘e se eu der muito mais informação?’. O ganho foi menor que um centésimo de AUC. Cada conjunto foi medido contra o mesmo classificador com as cinco variáveis originais, para isolar o efeito das variáveis.
+
+### 125. Por que o ganho de +0,0081 (da regressão logística com todas as variáveis contra o XGBoost) não é só das variáveis?
+
+**Resposta:** Compara a regressão logística com 64 variáveis ao XGBoost com 5: muda variáveis e classificador ao mesmo tempo. O ganho só das variáveis é +0,0073 (logística) e +0,0044 (XGBoost).
+
+**Onde achar no TCC:** Seção 5.4 e Seção 6.1 (os dois ganhos); o quadro com as três comparações: só no repositório (`reports/ganho_variaveis_logit.json`).
+
+**Explicando fácil:** Se você troca o motor e o combustível ao mesmo tempo, não sabe qual melhorou o carro. O +0,0081 mistura as duas mudanças; os números limpos são +0,0073 e +0,0044.
 
 ---
 
-*Fontes deste guia: `docs/tcc2_texto.md` (texto final),
-`docs/handoff.md`, `docs/diario_execucao.md`, código em `src/`,
-artefatos em `reports/`, e `Downloads/TCC/Pesquisa artigos TCC.pdf`
-(levantamento bibliográfico do TCC I).*
+## 5.5, 5.6 e 5.7 Dashboards, linguagem natural e literatura
+
+### 126. O que a Figura 4 (simulador) mostra, passo a passo?
+
+**Resposta:** O usuário define as diferenças aos 15 minutos; o modelo devolve 71,2% para o azul e o SHAP decompõe: referência −0,132 (46,7%) + contribuições +1,038 = 0,906 log-odds, que a função logística leva a 71,2%.
+
+**Onde achar no TCC:** Seção 5.5 (Figura 4).
+
+**Explicando fácil:** A referência −0,132 é a previsão média do modelo (46,7%, perto da taxa de vitória do azul). Cada variável empurra para cima ou para baixo (ouro, XP...); a soma dá +0,906. Para virar probabilidade: 1 / (1 + e^−0,906) ≈ 71,2%. É a ‘conta’ da previsão, escrita barra a barra.
+
+### 127. A estimativa por composição de time é do modelo?
+
+**Resposta:** Não. O simulador separa a estimativa por composição (uma heurística de taxa de vitória histórica, sinalizada como tal na interface) da predição do modelo de produção a partir do estado de jogo.
+
+**Onde achar no TCC:** Seção 5.5.
+
+**Explicando fácil:** São duas coisas diferentes: (1) a heurística ‘esses campeões costumam ganhar’ (histórico) e (2) o modelo de ML, que usa o estado da partida. A interface avisa qual é qual, para ninguém tomar a heurística por previsão do modelo.
+
+### 128. O que é o mapa de calor e que limite ele tem?
+
+**Resposta:** Mostra o posicionamento dos jogadores no minuto escolhido; a timeline tem uma amostra por minuto, então é aproximação.
+
+**Onde achar no TCC:** Seção 5.5 (Figura 3); Seção 5.7.
+
+**Explicando fácil:** Cada jogador deixa uma ‘mancha’ de cor (azul ou vermelho) onde estava no minuto escolhido; as manchas se acumulam numa janela de poucos minutos. Mas só há uma foto por minuto, bem menos que um rastreamento segundo a segundo. Não é uma variável do modelo; é um recurso de exploração.
+
+### 129. O que é o benchmark de 26 perguntas e por que ele ‘não é independente’?
+
+**Resposta:** Eram 23 de 26 antes dos ajustes e 26 de 26 depois; os ajustes foram orientados pelas três falhas conhecidas, então o 26 de 26 não é medida independente.
+
+**Onde achar no TCC:** Seção 5.6 (não cita o 26: só o gabarito de 203); Apêndice B (o benchmark de 26 perguntas saiu do TCC: só no repositório, `src/nlq/evaluate_nlq.py`).
+
+**Explicando fácil:** É estudar para a prova depois de ver a prova: você acerta tudo, mas isso não prova que sabe a matéria. As três falhas eram conhecidas, e as regras do esquema foram escritas depois de conhecê-las. Por isso a medida principal é outra: o gabarito de 203.
+
+### 130. O que é o gabarito automático de 203 perguntas?
+
+**Resposta:** Perguntas geradas por moldes (templates) sobre entidades reais do banco, cada uma com a SQL de referência escrita antes de qualquer execução; um programa compara os resultados.
+
+**Onde achar no TCC:** Seção 5.6; Apêndice B.
+
+**Explicando fácil:** Um gerador monta perguntas (‘Qual a taxa de vitória do campeão X?’) já com a resposta calculada. Depois o sistema responde pelo caminho do produto e um comparador automático vê se bate. 203 foram sorteadas. Vantagem: não depende de avaliador humano. Limite: são perguntas de molde, e não livres.
+
+### 131. Qual o resultado e o intervalo de confiança?
+
+**Resposta:** 181 de 203 (89,2%), Wilson de 95% de 84,1% a 92,7%: 166 de 187 respondíveis e 15 de 16 recusas esperadas.
+
+**Onde achar no TCC:** Seção 5.6; Apêndice B (as famílias do gabarito saíram do TCC: só no repositório, `reports/nlq_gabarito_resultado_203.json`).
+
+**Explicando fácil:** Das 203, 187 tinham resposta no banco (166 acertos) e 16 deviam ser recusadas porque o banco não tem o dado (15 recusadas certo). O intervalo 84,1% a 92,7% mostra a incerteza. Entre as famílias mais fracas estão liga (66,7%), KDA (66,7%) e média por campeão (72,2%).
+
+### 132. Quais foram as 22 falhas e o que elas dizem?
+
+**Resposta:** Nomes de entidade escritos de outro modo pelo modelo (‘Monkey King’ no lugar de MonkeyKing), abates somados indevidamente às assistências e roteamento para a base errada.
+
+**Onde achar no TCC:** Seção 5.6; Apêndice B.
+
+**Explicando fácil:** As falhas não são de segurança, e sim de significado: o modelo ‘corrigia’ nomes pela memória, somava assistências onde a pergunta pedia só abates e às vezes perguntava na base errada. Foram identificadas por família de pergunta (o quadro por família saiu do TCC; está em `reports/nlq_gabarito_resultado_203.json`).
+
+### 133. As três correções feitas depois melhoraram o resultado?
+
+**Resposta:** Não foram medidas de ponta a ponta. O TCC não afirma melhoria; a versão medida é a marcada gabarito-203.
+
+**Onde achar no TCC:** Seção 5.6; Apêndice B.
+
+**Explicando fácil:** Corrigiu-se (1) nome exato resolvido no banco, (2) refazer a consulta quando abates são somados indevidamente às assistências, (3) enviar ao competitivo perguntas com liga, equipe ou jogador profissional. Mas o gabarito não foi rodado de novo com elas; então o 89,2% é da versão anterior. Dizer isso com clareza protege você.
+
+### 134. O que é a recusa determinística?
+
+**Resposta:** Uma regra em código, antes do modelo, que responde ‘não é possível responder’ para perguntas sobre o que o banco não registra (primeiro sangue, série, estado em minutos que não 15, dano a estruturas).
+
+**Onde achar no TCC:** Seção 4.7; Seção 5.6.
+
+**Explicando fácil:** O banco não tem certas informações. Dizer isso no prompt para o modelo é probabilístico: ele pode ignorar e inventar um substituto. Uma lista de padrões em código responde antes e sempre igual. No gabarito, 15 das 16 recusas esperadas saíram certas.
+
+### 135. Quais os controles de segurança da SQL?
+
+**Resposta:** Um único comando iniciado por SELECT ou WITH; bloqueio de palavras de escrita e administração; lista fechada de tabelas; execução em transação somente leitura com tempo limite de 10 segundos.
+
+**Onde achar no TCC:** Seção 5.6; Apêndice B.
+
+**Explicando fácil:** É um anti-cheat em camadas: (1) só uma instrução de leitura; (2) palavras como INSERT, DELETE, DROP bloqueadas; (3) só as tabelas permitidas; (4) transação somente leitura e tempo limite. Mas esses controles não verificam se a consulta responde à pergunta: segurança não é correção.
+
+### 136. Como os resultados se comparam com a literatura (Seção 5.7)?
+
+**Resposta:** As acurácias de 70,2% a 80,7% ficam na mesma ordem de grandeza de Jadowski e Cunningham (67%) e Do et al. (75,1%), mas a comparação é apenas indicativa: mudam o nível, o momento e a informação.
+
+**Onde achar no TCC:** Seção 5.7.
+
+**Explicando fácil:** É como comparar tempos de speedrun de jogos e categorias diferentes: serve de referência, não de ranking. O TCC não afirma superar nem ficar abaixo de ninguém; usa a literatura para situar a ordem de grandeza.
 
 ---
 
-## Achados da leitura integral dos artigos (2026-11-03), para a defesa
+## 6 Conclusão, limitações e trabalhos futuros
 
-Detalhes e páginas em `docs/conferencia_referencias.md`.
+### 137. O objetivo geral foi alcançado? Em que se baseia?
 
-- **"Por que os três modelos empataram?"** Hodge et al. também mediram
-  regressão logística, Random Forest e LightGBM e acharam 77,24% a 77,51%.
-  Guan e Tung acharam que um modelo simples empata com um modelo misto
-  construído como o rival mais forte, e que acrescentar variáveis piora. E
-  Grinsztajn remove bases "fáceis demais", em que a logística fica a menos de
-  5% do ResNet e do *boosting*: a nossa cairia nesse critério.
-- **"Quanto se acerta em partidas profissionais?"** Hodge: 85% é de 28 jogos
-  ao vivo; o número mais robusto é 70,81% a 74,59% em 186 jogos aos 20 min.
-  Jadowski: 67,3% em 306 jogos, antes da partida.
-- **"Por que validação cruzada de 5 dobras?"** Kohavi recomenda 10, e o
-  Apêndice C mostra que a diferença é de até 0,0025. Hodge dividiu por tempo
-  porque as variáveis deles dependem do histórico; as nossas só dependem da
-  própria partida no corte.
-- **"E o ouro?"** Maymin tira o ouro do modelo de vitória por considerá-lo
-  enganoso, e diz que mais variáveis não melhoram. O nosso modelo usa a
-  diferença de ouro como variável principal, e os experimentos com mais
-  variáveis foram negativos, o que é coerente.
-- **"Os 95% do Birant?"** Usam estatísticas de fim de partida; não é previsão
-  em jogo. **"Os 86% do Bahrololloomi?"** Mesma base de cálculo dos pesos, sem
-  teste separado. **"Os 92,51% do García-Méndez?"** Incluem o histórico de cada
-  jogador; só com o time e o placar são ~75%.
-- **"Redes neurais?"** Hornik prova que existe aproximação, mas atribui falhas
-  a aprendizado inadequado, poucas unidades ou relação estocástica entre
-  entrada e alvo. Hodge diz que as redes "não foram convincentes" nessa escala.
-- **"Quem usa elo alto?"** Do et al. cobrem Ferro a Diamante e dizem que não
-  representam o 1% do topo; a nossa base é Challenger/Grandmaster.
-- **"SiriusBI faz o mesmo que o NLQ?"** Não: a métrica deles (UEX) é mais
-  branda, eles têm diálogo em várias rodadas e ajuste fino, e nós temos
-  validação em quatro camadas e um *benchmark* de resultado exato.
-- **"A validação aleatória não infla o resultado, já que os dados mudam com o
-  tempo?"** Kaufman et al. (2012, seções 3.3 e 3.4) avisam exatamente isso.
-  Medido em `holdout_temporal.py` (Apêndice C): treinar nas 80% partidas mais
-  antigas e testar nas 20% mais recentes, ou treinar nos *patches* 16.10 a
-  16.13 e testar nos 16.14 a 16.19, **não reduz a AUC-ROC**. Aos 15 min:
-  0,8570 (cronológica) e 0,8567 (por *patch*) contra 0,8415 da divisão
-  aleatória de mesmo tamanho. A única queda é a cronológica aos 10 min,
-  0,0026 abaixo da aleatória, com os intervalos sobrepostos. **Ressalva:** o tempo se mistura com a região (o teste cronológico
-  aos 15 min tem 44,3% de NA1 e nenhuma BR1), então o teste não separa os dois
-  efeitos; ele só mostra que o modelo generaliza para uma época e uma mistura
-  regional diferentes das do treino.
-- **"O Kaufman: o que a sua regra de corte garante?"** O *no-time-machine
-  requirement* (eq. 3): só vale variável com informação de momento anterior ou
-  igual ao da previsão. O `frames[: corte + 1]` é exatamente isso. O que ele
-  **não** cobre sozinho é a escolha de hiperparâmetros nas mesmas dobras de
-  avaliação (seção 3.4), já documentada.
-- **"E o viés de seleção da coleta? (Kaufman 2012, seção 7)"** O artigo descreve
-  o viés de estratificar num colisor. A nossa coleta parte de jogadores que
-  estão hoje em Desafiante e Grão-Mestre, e eles chegaram lá em parte por
-  vitórias recentes, então a seleção das partidas depende um pouco de
-  resultados passados. O efeito não foi medido. O modelo, porém, só usa cinco
-  números calculados dentro de cada partida, e o SHAP mostra que nenhuma
-  variável suspeita domina (o artigo recomenda exatamente esse tipo de
-  verificação, com uma lista de variáveis mais importantes para um
-  especialista avaliar).
+**Resposta:** Sim, segundo o TCC, com evidência para cada objetivo específico (a a g) na Seção 5.
 
-## Correção de 2026-11-03: fontes de dados
+**Onde achar no TCC:** Seção 6; Seção 6 (itens a a g).
 
-- Jogos profissionais: **99.259** (o `load_pro.py` perdia 2.543; agora apaga por `game_id`). Taxa do azul 53,2% inalterada.
-- Elos: jogadores vão de Desafiante a Mestre (93% da tabela `players` é Mestre); 97,2% das partidas têm ao menos um Desafiante/Grão-Mestre, 2,8% só Mestre (769 na KR). Pergunta de defesa provável.
-- "timeline-v5" não é endpoint: é método do *match-v5*.
-- Arquivos do Oracle's Elixir datados de 4 jul. 2026.
+**Explicando fácil:** Cada letra de a a g tem seu resultado: a (endpoints mapeados), b (esquema relacional), c (coleta de 41.063 partidas e 99.259 jogos), d (viés de lado), e (comparação de modelos), f (seis telas) e g (181 de 203). A Seção 6 lista cada objetivo com a evidência.
 
-## Perguntas novas depois dos experimentos de precisão (2026-11-03)
+### 138. Qual o achado de destaque e por que?
 
-**"Vocês tentaram variáveis mais ricas para subir a acurácia?"**
-Sim (Apêndice K). Além dos dez experimentos do Quadro 5, testamos mais oito conjuntos: trajetória, diferença por função, objetivos, campeões de cada time e histórico do jogador. Com as 64 variáveis, a regressão logística ganha +0,0073 de AUC-ROC aos 15 minutos e +0,0090 aos 25 contra ela mesma com cinco variáveis; o XGBoost, +0,0044 e +0,0051. O "+0,0081" do quadro compara a logística rica com o XGBoost de cinco e mistura variáveis e classificador. O que mais ajudou foi a diferença por função (+0,0029).
+**Resposta:** O viés de lado, por não ter sido o objeto anunciado: assimetria estrutural, firme em três das quatro regiões, com sinal invertido no profissional.
 
-**"Por que não adotaram o modelo novo, se melhorou?"**
-Por duas razões, uma de produto e uma de custo. **Produto:** o Simulador, o modo "e se", a composição 5×5 e o coach recebem só as cinco diferenças (ouro, experiência, abates, torres e dragões), que qualquer pessoa pode digitar. As 59 variáveis novas (ouro, nível e dano por função, atributos do time, trajetória dos minutos anteriores) não existem nessas telas; só a análise de partida, que lê a linha do tempo real, teria todas. Adotar o modelo rico no produto inteiro quebraria o Simulador, e usá-lo só na análise de partida deixaria dois modelos para explicar. **Custo:** o ganho é real mas pequeno (menos de 0,01 de AUC-ROC aos 15 minutos), e trocar exigiria retreinar os quatro cortes, reexportar, trocar o SHAP de árvore pelo da logística e revalidar tudo. O que o resultado mostra é que o limite está na informação disponível, não no algoritmo: a regressão logística aproveita as variáveis novas mais que o XGBoost (+0,0073 contra +0,0044). Fica como trabalho futuro.
+**Onde achar no TCC:** Seção 6.
 
-**"O histórico dos jogadores não ajudaria?"**
-Testamos (experimento 19), só com partidas anteriores. Mesmo em partidas com 5 ou mais jogadores com 3 ou mais partidas prévias (92% da base), o ganho sobre o estado de jogo foi de +0,0004 aos 15 minutos. A habilidade já aparece no ouro e na experiência. Atenção: numa versão anterior desta análise eu citei cobertura de 31%; era medida errada (diferença de contagem entre os times).
+**Explicando fácil:** O trabalho não foi montado para estudar o lado do mapa, mas isso apareceu ao explorar os dados. Ele é um fator de confusão que qualquer modelo sobre solo queue precisa controlar, e a inversão no profissional sugere que a origem é diferente. O TCC delimita a hipótese sem comprová-la.
 
-**"Uma chave de produção da Riot traria dados novos?"**
-Não pela documentação: a chave de produção aumenta o limite de requisições (a partir de 500 por 10 segundos e 30.000 por 10 minutos) e libera a API de torneios; as APIs padrão são as mesmas. O que a API pública não expõe (ondas de *minions*, ordem de escolha de campeões) continua fora. A aprovação depende da Riot, que avalia se o produto ajuda jogadores de forma mensurável.
+### 139. Quais as limitações do trabalho (validade de construto, externa, interna)?
 
-**"Por que 0,90 de acurácia aos 15 minutos não é viável?"**
-A literatura que consultei reporta 73% a 82% em partida em andamento, e resultados muito acima disso sem discussão de vazamento são suspeitos. Aos 25 minutos temos AUC-ROC de 0,890 (era 0,909 antes de corrigir o vazamento do quadro final, Parte 22).
+**Resposta:** Construto: a API não registra ondas de minions nem draft. Externa: só elo alto, cinco regiões e patch 16.13 com 40,4% da coleta. Interna: coleta em janelas de tempo e dobras menos independentes por jogadores repetidos.
 
-**"E os 2.543 jogos profissionais que faltavam?"**
-Erro do carregador (apagava por ano do arquivo, não por jogo), corrigido. O total passou de 96.716 para 99.259; a taxa do azul no total continua 53,2% (Apêndice H).
+**Onde achar no TCC:** Seção 6.1; Seção 6.1.
+
+**Explicando fácil:** Construto é ‘estou medindo o que acho que meço?’ (faltam dados importantes). Externa é ‘vale para outros casos?’ (só para este recorte). Interna é ‘o desenho do estudo sustenta o resultado?’ (coleta em janelas, jogadores repetidos). O TCC diz que nenhuma delas invalida os achados, mas delimita até onde valem.
+
+### 140. Por que ‘que parte do erro do modelo venha da informação ausente é hipótese’?
+
+**Resposta:** Porque o TCC mediu que variáveis novas dão ganho pequeno, mas não mediu o efeito do draft e das ondas de minions, que a fonte não tem.
+
+**Onde achar no TCC:** Seção 6.1.
+
+**Explicando fácil:** O TCC suspeita que o erro restante vem do que a API não dá (ordem do draft, ondas), mas não pode provar sem esses dados. Por isso diz ‘hipótese, não resultado medido’.
+
+### 141. O XGBoost não garante monotonicidade. O que isso significa?
+
+**Resposta:** Aumentar apenas a diferença de abates ou de torres pode, por interações e redundâncias entre variáveis, não aumentar sempre a probabilidade prevista; não há restrição formal (monotone_constraints).
+
+**Onde achar no TCC:** Seção 6.1; Seção 6.1.
+
+**Explicando fácil:** Esperamos que mais abates sempre aumente a chance do azul. O modelo não garante isso em cada ponto, porque as variáveis andam juntas (quem tem mais abates costuma ter mais ouro). É um comportamento documentado e compreendido, sem regra imposta.
+
+### 142. As dobras da validação cruzada são independentes?
+
+**Resposta:** Menos do que a técnica supõe, porque jogadores se repetem entre partidas; treinar no passado e testar no futuro só reduziu a AUC em um caso (−0,0026, dentro do intervalo).
+
+**Onde achar no TCC:** Seção 6.1; Apêndice C.
+
+**Explicando fácil:** A validação cruzada sorteia partidas ao acaso; se o mesmo jogador aparece em treino e teste, as partidas deixam de ser totalmente independentes entre treino e teste (dependência amostral), o que não é o mesmo que vazamento de dados. O TCC mediu a consequência com o treino no passado e o teste no futuro, e a queda foi mínima.
+
+### 143. Recortes finos (um jogador num campeão) são confiáveis?
+
+**Resposta:** Não: seguem frágeis mesmo com 41.063 partidas, apesar do encolhimento estatístico (shrinkage) em direção à média.
+
+**Onde achar no TCC:** Seção 6.1.
+
+**Explicando fácil:** Um jogador com 3 partidas de um campeão não tem taxa de 100% de verdade: com poucos casos o acaso pesa muito. Shrinkage puxa a taxa dele para a média conforme o número de partidas. Mesmo assim, recortes muito finos continuam frágeis.
+
+### 144. Qual a validade da consulta em linguagem natural?
+
+**Resposta:** A medida principal pode superestimar o resultado em perguntas livres: em versões anteriores, dois conjuntos de 50 perguntas escritas à mão acertaram 27 e 30 (54% e 60%); as correções posteriores não foram medidas e o benchmark de 26 não é independente.
+
+**Onde achar no TCC:** Seção 6.1.
+
+**Explicando fácil:** É o ponto mais sensível da banca. Os 89,2% são de perguntas de molde; perguntas livres, em versões antigas, acertaram bem menos. O TCC declara isso, e seu trabalho futuro propõe um gabarito maior com perguntas escritas à mão.
+
+### 145. Quais são os trabalhos futuros?
+
+**Resposta:** (1) Previsão ao vivo, prevista na arquitetura mas não implementada (a barreira é de dados em tempo real); (2) validade externa (outras filas e outro jogo); (3) melhoria da consulta em linguagem natural (verificação pós-execução, gabarito maior, vários bancos de teste, modelo aberto local).
+
+**Onde achar no TCC:** Seção 6.2.
+
+**Explicando fácil:** Três caminhos: prever durante a partida, estender a outras filas e jogos, e melhorar o text-to-SQL. A previsão ao vivo exigiria um feed de dados em tempo real que a API pública não oferece com a mesma riqueza. Dizer que a barreira é de dados, e não de modelo, é uma frase importante do TCC.
+
+### 146. Se você pudesse refazer algo, o que seria?
+
+**Resposta:** O TCC não responde diretamente; os trabalhos futuros e as limitações apontam o gabarito escrito à mão, a previsão ao vivo e outras filas.
+
+**Onde achar no TCC:** Seção 6.1 e 6.2.
+
+**Explicando fácil:** Pergunta de opinião: monte sua resposta com o que já está no TCC. Por exemplo: ‘eu faria um gabarito maior com perguntas escritas à mão, porque é o ponto em que o resultado pode estar superestimado’. Escolher uma limitação real e propor o próximo passo mostra maturidade.
+
+### 147. Qual a contribuição do trabalho em três minutos?
+
+**Resposta:** Integração completa numa plataforma, medição com número e limite, achado do viés de lado (solo queue × profissional) e interface em linguagem natural mensurável.
+
+**Onde achar no TCC:** Seções 3.6, 5 e 6.
+
+**Explicando fácil:** Roteiro: (1) problema: ferramentas fragmentadas; (2) solução: plataforma que coleta, prevê, explica, visualiza e responde em português; (3) resultado: AUC por volta de 0,85 aos 15 minutos, modelos empatados, limite nas variáveis, e 89,2% na consulta em perguntas de molde; (4) achado: viés de lado se inverte; (5) limites: dado ausente, perguntas livres, recorte de elo alto.
 
 ---
 
-## 22. O que mudou em 8 de novembro de 2026 (parecer e revisão final)
+## Apêndices e itens cortados
 
-**Parecer do orientador, aplicado:** introdução sem subseções e sem
-Abstract; viés de lado com "taxas próximas, nenhuma diferença detectada"
-(teste com a partida como unidade); Quadro 3 com a comparação após o ajuste
-e a logística; XGBoost justificado pela proximidade e pelo SHAP; calibração
-medida nas empatadas reais (a limitação de taxa-base caiu); SHAP em
-log-odds na tela e no coach; experimento 11 à parte; ganho das variáveis no
-mesmo classificador; versão do Claude, base congelada e regra do comparador
-documentadas; controles da SQL no lugar de "garante a segurança"; hífen nos
-títulos, chamadas dos quadros, siglas.
+> Em 23/11/2026 o TCC foi simplificado: de 11 apêndices (cerca de 32 páginas) para 4 (cerca de 9 páginas). Estas perguntas cobrem o que ficou e o que saiu. O texto da versão anterior continua no repositório (histórico do git, commit `f2ecb39`) e em `bellestraiko_v2/03_tcc_texto_v2.md` está o texto novo.
 
-**Vazamento encontrado na revisão final (e corrigido).** A linha do tempo
-termina com um quadro no instante do fim do jogo. A regra antiga deixava
-uma partida de 24:16 entrar no corte de 25 minutos com esse quadro final
-(o fim do jogo). Eram 2.642 partidas aos 25 minutos e 1.120 aos 20; nelas
-a AUC era 1,0. Corrigido com `corte_disponivel` e um teste automatizado;
-todo o pipeline foi refeito. Aos 15 minutos quase nada mudou (0,8490 →
-0,8487); aos 25, 0,9092 → 0,8899.
+### 148. O que o Apêndice A traz?
 
-**Resposta pronta se a banca perguntar sobre isso:** "Na revisão final
-encontrei que partidas encerradas antes do corte entravam com o quadro
-final da linha do tempo. Corrigi a regra, criei um teste que impede a
-volta do erro e refiz todo o pipeline. O resultado principal, aos 15
-minutos, praticamente não mudou; os cortes tardios ficaram menores e
-corretos. Está no diário de execução."
+**Resposta:** O esquema relacional do banco (Quadro 4): tabelas, campos e chaves.
+
+**Onde achar no TCC:** Apêndice A.
+
+**Explicando fácil:** É o ‘mapa do banco’: lista cada tabela, seus campos e as chaves primárias e estrangeiras. Serve para explicar como os dados se ligam. As tabelas raw_ guardam o JSON original; as demais são a versão relacional usada nas análises. O arquivo que cria essas tabelas é `db/schema.sql`.
+
+### 149. O que o Apêndice B traz?
+
+**Resposta:** A medida principal da consulta em linguagem natural (gabarito de 203 perguntas: 181 certas, 166 de 187 respondíveis e 15 de 16 recusas), as versões do modelo de linguagem e o congelamento dos dados, e a auditoria do coach (36 respostas, Quadro 5).
+
+**Onde achar no TCC:** Apêndice B (Quadro 5).
+
+**Explicando fácil:** É o ‘boletim’ da parte de IA. Saíram do TCC o benchmark de 26 perguntas, a tabela de execuções e o acerto por família de pergunta, porque o benchmark de 26 não é independente (chegou a 26 de 26 depois de ajustes feitos conhecendo as três falhas). O resultado que vale é o do gabarito de 203.
+
+### 150. O que o Apêndice C traz?
+
+**Resposta:** Métricas completas dos três modelos nos quatro cortes (Quadro 6), configuração dos modelos (Quadro 7), treino no passado e teste no futuro (Quadro 8), AUC-ROC por corte nas mesmas partidas (Quadro 9) e a calibração do modelo de produção (Quadro 10 e Figura 5).
+
+**Onde achar no TCC:** Apêndice C (Quadros 6 a 10; Figura 5).
+
+**Explicando fácil:** É a ‘casa de máquinas’ da modelagem. Se a banca duvidar de um número da Seção 5.4, a evidência principal está aqui. Saíram a tabela da regressão logística contra o XGBoost, a de 5 contra 10 dobras e a curva de aprendizado; os números principais delas continuam em frases da Seção 5.4 e os arquivos estão no repositório.
+
+### 151. O que o Apêndice D traz?
+
+**Resposta:** A origem das imagens (Data Dragon e Community Dragon) e o aviso exigido pela política da Riot Games: o Bellestraiko não é endossado pela Riot.
+
+**Onde achar no TCC:** Apêndice D.
+
+**Explicando fácil:** É o crédito legal das imagens do jogo que aparecem na Figura 3. Os ícones, o mapa e as ilustrações são propriedade da Riot.
+
+### 152. Por que os experimentos de precisão não estão detalhados no TCC?
+
+**Resposta:** O TCC cita que foram feitos 19 experimentos, lista os tipos de variável testados e dá o maior ganho (+0,0044 de AUC-ROC no XGBoost e +0,0073 na regressão logística aos 15 minutos); os quadros completos saíram para não alongar o trabalho. Os resultados estão em `reports/experimentos_precisao.json` e `reports/experimentos_antigos.json`.
+
+**Onde achar no TCC:** Seção 5.4 (parágrafo ‘Experimentos de enriquecimento’); Seção 6.1.
+
+**Explicando fácil:** Foi uma decisão de enxugar: nenhum experimento mudou o modelo de produção, então o TCC dá o resultado em uma frase. Se a banca perguntar por um experimento específico, a resposta honesta é o número do repositório. Não diga que ‘não ajudaram’: ajudaram pouco (+0,0044 contra uma AUC de 0,8487), e isso é o que o TCC afirma.
+
+### 153. Por que o benchmark de 26 perguntas saiu do TCC?
+
+**Resposta:** Porque não é independente: foi ajustado depois de conhecer as três falhas (23 de 26 antes, 26 de 26 depois). A medida principal é o gabarito de 203, escrito com a SQL de referência antes de executar.
+
+**Onde achar no TCC:** Seção 5.6; Seção 6.1 (validade da consulta em linguagem natural); Apêndice B.
+
+**Explicando fácil:** É como mostrar a nota de uma prova que você refez depois de ver o gabarito. Ela não prova nada. Por isso o TCC só usa a prova nova, de 203 questões.
+
+### 154. Por que não há mais um apêndice com as telas completas?
+
+**Resposta:** As Figuras 1, 3 e 4 do corpo já mostram a plataforma (Competitivo, análise de partida e simulador). As seis capturas de página inteira estão em `reports/anexo_a/` e podem ser mostradas na defesa.
+
+**Onde achar no TCC:** Seção 5.5 (Figuras 3 e 4); Seção 5.3 (Figura 1).
+
+**Explicando fácil:** Seis páginas de captura de tela pesavam mais que todo o resto do apêndice e não acrescentavam resultado. A demonstração ao vivo (ou as capturas) cobre isso.
+
+### 155. Onde estão agora os números e quadros que saíram do TCC?
+
+**Resposta:** Todos continuam em `reports/*.json` (artefatos que geraram cada número), nos scripts de `src/models/` e `docs/`, e no texto anterior do TCC (histórico do git).
+
+**Onde achar no TCC:** Não estão no TCC; ver `bellestraiko_v2/02_o_que_foi_cortado_e_onde_esta.md`.
+
+**Explicando fácil:** Nada foi apagado do projeto; só deixou de ocupar página. O TCC diz onde está o código no repositório.
+
+### 156. Por que o TCC tem só 4 apêndices e a comparação com os colegas?
+
+**Resposta:** Nos TCCs aprovados lidos (medido nos PDFs de exemplo, não é norma) o total é de 32 a 41 páginas; quatro não têm apêndice e o máximo é 5 páginas de apêndice. O corpo do TCC tem 28 páginas (faixa de 25 a 30) e os 4 apêndices somam cerca de 9; o documento todo tem 39.
+
+**Onde achar no TCC:** Estrutura do documento; diário de execução (outubro de 2026).
+
+**Explicando fácil:** O foco ficou no que responde à questão de pesquisa. O modelo da UNISINOS não obriga apêndices, e os do TCC servem à rastreabilidade das medidas principais.
+
+### 157. Se a banca perguntar por algo que saiu (benchmark de 26, experimento específico, série anual, composição das ligas), como responder?
+
+**Resposta:** Reconhecer que saiu do texto para enxugar, dar o número principal (está neste guia e nos artefatos) e dizer onde está no repositório.
+
+**Onde achar no TCC:** Ver `02_o_que_foi_cortado_e_onde_esta.md`, que lista cada item cortado com o arquivo de origem.
+
+**Explicando fácil:** Exemplo de resposta: ‘essa medição foi feita (resultado: X); ela saiu do texto por não alterar a conclusão, e o arquivo está em reports/. Posso abrir agora.’ Evita dizer que não foi feito.
+
+---
+
+## Perguntas transversais (cruzam várias seções)
+
+### 158. Os resultados são generalizáveis?
+
+**Resposta:** Não além do recorte: solo queue ranqueado de Desafiante a Mestre, cinco regiões (quatro com amostra suficiente) e patches 16.10 a 16.19; o profissional serve só para comparar.
+
+**Onde achar no TCC:** Seção 6.1 (validade externa).
+
+**Explicando fácil:** Generalizar é ‘vale para outros casos?’. Aqui vale para o recorte estudado. Não há base para estender as taxas por lado nem a acurácia a outras filas, elos, versões ou outros jogos, ainda que a arquitetura seja reaproveitável.
+
+### 159. Por que não usar deep learning ou modelos mais modernos?
+
+**Resposta:** O TCC compara uma rede MLP e mostra que, com 5 variáveis tabulares, os modelos empatam; isso sugere que o limite está na informação das variáveis, e não que nenhuma outra arquitetura possa ganhar.
+
+**Onde achar no TCC:** Seção 2.2; Seção 5.4.
+
+**Explicando fácil:** Com poucas variáveis e dezenas de milhares de partidas, árvores e redes pequenas já extraem quase tudo (Grinsztajn et al.). Modelos maiores não criam informação que não está nos dados. Leitura minha: o TCC não testou redes profundas; testou uma MLP simples.
+
+### 160. Por que o limiar de 50% para a acurácia?
+
+**Resposta:** A acurácia usa o limiar padrão de 0,5 sobre a probabilidade; por depender dele, ela é reportada junto da AUC-ROC, que cobre todos os limiares.
+
+**Onde achar no TCC:** Seção 2.3.
+
+**Explicando fácil:** Decidir ‘azul vence’ quando a probabilidade passa de 50% é uma escolha; outro limiar mudaria a acurácia. A AUC-ROC não depende disso, e por isso as duas medidas andam juntas.
+
+### 161. O que é overfitting e como o trabalho se protege dele?
+
+**Resposta:** É ir bem no treino e mal em dados novos; o TCC usa validação cruzada, seleção aninhada, treino no passado e teste no futuro e profundidade baixa no XGBoost de produção.
+
+**Onde achar no TCC:** Seção 4.6; Apêndice C (Quadro 8).
+
+**Explicando fácil:** Overfitting é decorar o gabarito. As proteções: (1) sempre medir em partidas que o modelo não viu no treino, (2) escolher os parâmetros só dentro do treino (aninhada), (3) testar em partidas mais novas, (4) usar árvores curtas (profundidade 3).
+
+### 162. O que acontece se a Riot mudar a API ou o jogo mudar de patch?
+
+**Resposta:** O TCC não testa mudança de API. Sobre patches: treinar nos patches 16.10 a 16.13 e testar nos 16.14 a 16.19 não reduz a AUC-ROC; a generalização para versões com balanceamento muito diferente segue sem medida.
+
+**Onde achar no TCC:** Seção 6.1; Apêndice C (Quadro 8, treino no passado e teste no futuro).
+
+**Explicando fácil:** Se a API mudar, o coletor e o ETL precisam de ajuste (não foi medido). Se o jogo mudar de patch, o modelo pode envelhecer; nos patches testados, não houve queda. Para um balanceamento muito diferente, o TCC não afirma nada.
+
+### 163. Há dados pessoais ou questões de privacidade?
+
+**Resposta:** Os dados são secundários e públicos, sem sujeitos humanos como fonte; a tabela players guarda identificadores da própria API pública.
+
+**Onde achar no TCC:** Seção 4.3.
+
+**Explicando fácil:** O TCC trata de dados públicos obtidos da API oficial. Os identificadores (puuid, nome e tag) vêm da API. O TCC declara apenas que são públicos e secundários. Em caso de pergunta sobre LGPD, a resposta segura é essa; evite afirmar algo além disso.
+
+### 164. Como o trabalho lida com a Riot (direitos, termos de uso)?
+
+**Resposta:** As imagens de itens vêm do Data Dragon (da Riot); ícones e arte dos campeões e o mapa vêm do Community Dragon; as imagens são propriedade da Riot Games, e o TCC credita a origem.
+
+**Onde achar no TCC:** Apêndice D (origem das imagens e aviso da Riot).
+
+**Explicando fácil:** O TCC declara que as telas mostram ícones e ilustrações do jogo, que são propriedade da Riot, e informa de onde vêm. Os dados vêm da API oficial, dentro do limite da chave de desenvolvedor.
+
+### 165. Onde entra a inteligência artificial no seu trabalho, e é diferente do uso de IA para escrever o TCC?
+
+**Resposta:** Na plataforma, o Claude (Anthropic) faz a tradução da pergunta em SQL, o roteamento no resíduo, a explicação do resultado e o coach. O uso de IA como apoio ao desenvolvimento é um assunto à parte.
+
+**Onde achar no TCC:** Seção 4.7; Seção 4.8; Apêndice B.
+
+**Explicando fácil:** Duas coisas diferentes: (1) a IA que é parte do produto e está descrita e medida no TCC (Claude Haiku 4.5, com temperatura e limite de tokens por etapa); (2) a IA usada como ferramenta de apoio na elaboração. A segunda tem registro próprio e você precisa respondê-la com suas palavras: o que escreveu, o que a IA escreveu e como validou.
+
+### 166. Por que as respostas do coach não são determinísticas e isso é um problema?
+
+**Resposta:** O coach usa temperatura 0,4 (0,2 na releitura dos itens); a saída varia entre execuções, e a auditoria de 36 respostas confere só números, e não afirmações qualitativas.
+
+**Onde achar no TCC:** Seção 4.7; Apêndice B.
+
+**Explicando fácil:** Temperatura é o grau de ‘criatividade’ do modelo de linguagem: 0 é sempre igual, valores maiores variam. O coach precisa escrever texto natural, então tem alguma variação. O controle de qualidade é a auditoria de números e a separação entre dado real e conhecimento geral. A correção qualitativa não foi avaliada, e o TCC diz isso.
+
+### 167. O que mais contribui para a previsão, e isso é causal?
+
+**Resposta:** Ouro e experiência dominam em todos os cortes; o SHAP explica o modelo e não o jogo.
+
+**Onde achar no TCC:** Seção 5.4 (Figura 2); valores por corte: só no repositório (`reports/shap_importance_phases.json`).
+
+**Explicando fácil:** Ouro e XP pesam muito porque, num momento dado, quem está à frente nelas costuma ganhar. Mas o SHAP diz o que pesou na conta do modelo, e não que ouro ‘cause’ vitória. Pode ser que um time melhor ganhe mais ouro e também mais partidas.
+
+### 168. Por que o limite do TCC é 25 a 30 páginas e o seu tem apêndices extensos?
+
+**Resposta:** O limite de 25 a 30 páginas vale para o corpo, sem contar apêndices e anexos, por acordo com o orientador (os modelos da UNISINOS lidos não trazem esse número).
+
+**Onde achar no TCC:** Diário de execução (outubro de 2026).
+
+**Explicando fácil:** Os apêndices guardam a prova detalhada sem pesar no corpo. O corpo tem 28 páginas e os apêndices, cerca de 9. Se a banca perguntar, a resposta é que o limite se aplica ao corpo, e os apêndices cumprem o papel de rastreabilidade dos números.
+
+### 169. Qual foi a maior dificuldade do trabalho?
+
+**Resposta:** O TCC não responde diretamente; os registros mostram, por exemplo, o vazamento do quadro final (achado e corrigido em 8/11) e a conferência dos próprios números (a conversão de vantagem do profissional, corrigida em 17/11).
+
+**Onde achar no TCC:** Seção 4.6 (vazamento); diário de execução.
+
+**Explicando fácil:** Esta é pergunta pessoal: conte a que você viveu. Duas opções sustentadas pelo repositório: (a) impedir que o modelo visse o futuro da partida; (b) conferir cada número contra o banco e achar um erro de definição. Diga o que tentou, o que errou e o que aprendeu.
+
+### 170. Se o modelo erra, em que tipos de partida ele erra mais?
+
+**Resposta:** O TCC não mede isso por tipo de partida; mede por corte e mostra que aos 10 minutos a AUC é 0,775 e aos 25 é 0,890.
+
+**Onde achar no TCC:** Seção 5.4.
+
+**Explicando fácil:** Esta pergunta vai além do que foi medido. O que se sabe: mais cedo, menos informação, menos acerto. Quanto a tipos de partida (por exemplo, viradas tardias), o TCC não tem análise. Responda isso com franqueza e cite como possível extensão.
+
+### 171. O que você faria com mais tempo?
+
+**Resposta:** Os trabalhos futuros: previsão ao vivo, outras filas e outro jogo, e melhoria da consulta em linguagem natural (gabarito escrito à mão, verificação pós-execução, vários bancos de teste, modelo aberto local).
+
+**Onde achar no TCC:** Seção 6.2.
+
+**Explicando fácil:** A resposta está pronta no TCC. Escolha a que mais lhe interessa e explique por quê. Por exemplo: ‘um gabarito escrito à mão, porque é onde meu resultado pode estar superestimado’.

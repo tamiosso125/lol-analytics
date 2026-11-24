@@ -156,7 +156,7 @@ XGBoost por corte: 0,7752 / 0,8487 / 0,8690 / 0,8899 (antes 0,8772 e 0,9092
 aos 20 e 25). Torres aos 25 min ~6× o valor dos 15 (não mais 11×). Toda
 variável de corte passa por `corte_disponivel`.
 
-Desde o parecer de 2026-11-08 o Quadro 3 do TCC mostra a comparação APÓS o
+Desde o parecer de 2026-11-08 o Quadro 2 do TCC final mostra a comparação APÓS o
 ajuste e a logística; o XGBoost é mantido pela proximidade e pela integração
 com o SHAP, **nunca** por superioridade de desempenho.
 
@@ -226,7 +226,7 @@ transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
   A série **não é monôtona** (20 min é menor que 10 e 15): é
   concentração tardia, não crescimento contínuo. As placas caem
   aos 14 min, razão de existir um modelo por fase.
-- **Parecer de 2026-11-08:** o experimento 11 ficou À PARTE no Apêndice K
+- **Parecer de 2026-11-08:** o experimento 11 ficou À PARTE no antigo Apêndice K (fora do TCC final desde 2026-11-23)
   (atributo consultado 0 a 16 dias depois das partidas; não prova
   disponibilidade). No corpo, são dez. A curva de aprendizado com teste fixo é
   plana acima de 10 mil partidas (0,8519 aos 10 mil, 0,8527 com 32.622):
@@ -249,7 +249,7 @@ transação somente leitura. Ver `docs/plano_analise_nlq_e_tcc.md`.
   (`plate_diff`) e percentis comportamentais entraram na série por
   último; e não é 8 porque o experimento de dragões por tipo
   (`monsterSubType`, diário 2026-07-05) entrou antes deles e ficou de
-  fora do Apêndice K do TCC até 2026-10-03; o "7º"/"8º" nos títulos das
+  fora do antigo Apêndice K do TCC até 2026-10-03; o "7º"/"8º" nos títulos das
   entradas de 2026-07-06 do diário é renumeração local que ignora esses
   três experimentos.
 - Validação externa: o próprio Oracle's Elixir publica uma calculadora
@@ -300,19 +300,18 @@ de escopo, não uma lista de pendências ativas.
 
 **O TCC II está escrito e fechado (2026-10-04), revisado ponta a ponta
 em 2026-10-05 (Blocos A-E, ver diário).** `docs/tcc2_texto.md`
-→ `docs/build_tcc_docx.py` → `docs/tcc2_final.docx`. **29 páginas** do
-Resumo (página 1) ao fim das Referências, limite 30 (régua corrigida em
-2026-10-23; a antiga parava no início das Referências e dizia "30" quando
-eram 37). Reduzido em 2026-10-28 conforme `docs/plano_reducao_corpo.md`,
-com 6 quadros e 5 figuras recortadas no corpo a pedido do orientador
-(`docs/capturar_figuras_texto.py`). 31 referências, Apêndices A-K (G a K novos em 2026-11-03; em 2026-11-04 o antigo I saiu e o antigo D
-foi fundido no de precisão; E = telas inteiras, F = limitações em detalhe), Anexo A (documentação da Riot).
-O Apêndice D recebeu as notas de proveniência da Seção 5.3, movidas do
-corpo em 2026-10-20 para abrir espaço às citações novas). Suíte completa verde:
+→ `docs/build_tcc_docx.py` → `docs/tcc2_final.docx`. **39 páginas no total, corpo de 28** (Resumo ao fim das Referências; faixa 25-30,
+confirmada pelo orientador em 2026-11-23). Simplificado em 2026-11-23 (antes 64 páginas):
+10 quadros, 5 figuras, 30 referências (Hornik saiu), Resumo de 238 palavras e só 4 apêndices:
+A = banco (Quadro 4), B = gabarito do NLQ e auditoria do coach (Quadro 5),
+C = métricas, configuração, treino no passado/futuro e calibração (Quadros 6 a 10, Figura 5),
+D = origem das imagens e aviso da Riot. Os antigos apêndices E a K (telas inteiras, limitações,
+fundamentos, experimentos etc.) e o benchmark de 26 perguntas saíram do texto e ficam só no
+repositório (`reports/`, `src/models/`, diário). Numeração antiga→nova de quadros: 1→4, 2→1, 3→2,
+4→3, 6→4, 10→5, 11→6, 12→7, 15→8, 17→9, 23→10; Figura 12→5. Texto antigo em `f2ecb39`. Suíte completa verde:
 `tests/smoke_test.py`, `tests/validate_predictions.py` (aprovado com
 ressalvas), `docs/verifica_tcc.py` (23 checagens, consistente),
-`docs/confere_docx.py` (conforme), `docs/confere_paginas.ps1` (corpo 30/30,
-no teto), `docs/confere_materiais.py` (guia, pptx, README sem resíduo), `frontend` lint + 38/38 testes.
+`docs/confere_docx.py` (conforme), `docs/confere_paginas.ps1` (corpo 28, faixa 25-30), `docs/confere_materiais.py` (guia, pptx, README sem resíduo), `frontend` lint + 38/38 testes.
 Nenhuma pendência de texto em aberto — ver a seção "Pendências finais
 antes da entrega" no fim de `docs/tcc2_texto.md` para o histórico
 completo das decisões (título acadêmico, posição de "Trabalhos
