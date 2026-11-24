@@ -20,3 +20,6 @@ docs/tcc2_latex/template_src/
 
 # PDFs dos artigos citados, baixados para leitura (material de terceiros)
 docs/artigos/
+
+# Cache incremental do compilador TypeScript (artefato de build, regenerado)
+frontend/*.tsbuildinfo
